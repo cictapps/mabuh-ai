@@ -1,18 +1,37 @@
-export const MaskOverlay = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) => {
+export const MaskOverlay = ({
+  isOpen,
+  onToggle,
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+}) => {
   if (!isOpen) return null;
+
   return (
-    <div className="absolute inset-0 bg-twilight-dark/40 backdrop-blur-md z-20 flex items-center justify-center p-6">
-      <div className="text-center p-8 bg-white dark:bg-twilight-dark rounded-[2.5rem] shadow-2xl border-2 border-accent/50 animate-in zoom-in duration-300">
-        <div className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="material-symbols-rounded text-5xl text-accent">mask_off</span>
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md text-white">
+      
+      <div className="text-center space-y-6 px-6">
+
+        {/* icon */}
+        <div className="w-16 h-16 mx-auto rounded-full bg-white/10 flex items-center justify-center">
+          <span className="text-3xl opacity-70">◐</span>
         </div>
-        <h3 className="text-xl font-bold mb-2">Mask-off Mode</h3>
-        <p className="text-sm text-slate-500 mb-8">Messages disappear after the session. Express yourself freely.</p>
-        <button 
+
+        {/* text */}
+        <div>
+          <h2 className="text-lg font-semibold">Mask Mode</h2>
+          <p className="text-sm text-white/50 mt-2 max-w-xs mx-auto">
+            Private session. Nothing is stored.  
+            You can speak freely here.
+          </p>
+        </div>
+
+        {/* button */}
+        <button
           onClick={onToggle}
-          className="w-full py-4 bg-,linear-to-r from-accent to-orange-400 text-twilight-dark font-bold rounded-2xl shadow-lg"
+          className="px-6 py-3 bg-white text-black rounded-full text-sm font-medium hover:scale-105 transition"
         >
-          Enter the Glow
+          Continue
         </button>
       </div>
     </div>

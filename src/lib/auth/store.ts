@@ -52,6 +52,15 @@ export const useAuthStore = create<AuthState>((set) => ({
         const session = data.session;
         const user = session?.user ?? null;
         const profile = user ? await fetchProfile(user.id) : null;
+
+        // If a session exists but the profile is gone (e.g. user deleted in Supabase),
+        // sign out locally so the stale JWT doesn't keep the user locked in.
+        if (user && !profile) {
+          await supabase.auth.signOut().catch(() => {});
+          set({ session: null, user: null, profile: null, loading: false });
+          return;
+        }
+
         set({ session, user, profile, loading: false });
 
         if (!authListenerBound) {
@@ -88,8 +97,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signOut: async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    // Always clear local state — even if the server call fails (e.g. deleted user, expired token).
+    await supabase.auth.signOut().catch(() => {});
     set({ session: null, user: null, profile: null });
   },
 }));

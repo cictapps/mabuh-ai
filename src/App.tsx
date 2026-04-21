@@ -2,8 +2,7 @@ import { Component, Suspense, lazy, type ErrorInfo, type ReactNode } from "react
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "@/lib/auth";
 
-const Login = lazy(async () => import("@/pages/auth/Login"));
-const Signup = lazy(async () => import("@/pages/auth/Signup"));
+const AuthPage = lazy(async () => import("@/pages/auth/AuthPage"));
 const Home = lazy(async () => import("@/pages/Home"));
 
 type AppErrorBoundaryState = {
@@ -58,8 +57,8 @@ function App() {
       <AppErrorBoundary>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<AuthPage initialTab="sign-in" />} />
+            <Route path="/signup" element={<AuthPage initialTab="sign-up" />} />
             <Route
               path="/"
               element={

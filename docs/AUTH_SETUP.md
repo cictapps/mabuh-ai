@@ -1,85 +1,160 @@
-# Authentication & User Access — Setup Log
+# Authentication & User Access - Setup Log
 
-**Date added:** 2026-04-17
-**Scope:** Initial authentication and user access layer using Supabase Auth.
+**Date added:** 2026-04-17  
+**Last updated:** 2026-04-22  
+**Scope:** Authentication and basic user access using Supabase Auth.
 
-This document records everything introduced for auth so other developers can
-get oriented quickly. If you change the auth system, update this file.
+This document records the authentication/user-access work so other developers
+can understand the current setup quickly. If the auth system changes, update
+this file.
 
 ---
 
-## 1. Dependencies added
+## 1. Current status
+
+The app currently implements:
+
+- Email/password sign-up
+- Email/password sign-in
+- Logout
+- Supabase session persistence
+- Protected routing for the home page
+- User profile fetching from `public.profiles`
+- Display of the signed-in user's name/email and profile role
+- Forgot-password request modal
+
+The app does not currently implement:
+
+- A full reset-password page after the user clicks the email link
+- Active admin/moderator-only pages
+- OAuth login providers such as Google
+- A hard email-verification gate before accessing the protected home page
+
+## 2. Dependencies added
 
 Installed via `npm install`:
 
-| Package                   | Purpose                                    |
-| ------------------------- | ------------------------------------------ |
-| `@supabase/supabase-js`   | Supabase client (auth + DB)                |
-| `react-router-dom`        | Client-side routing and route guards       |
-| `zustand`                 | Lightweight global store for auth state    |
+| Package | Purpose |
+| --- | --- |
+| `@supabase/supabase-js` | Supabase client for auth and database access |
+| `react-router-dom` | Client-side routing and route guards |
+| `zustand` | Lightweight global store for auth state |
 
-## 2. Files created
+## 3. Important files
 
 ### Frontend
 
-| Path                                                      | Purpose                                                      |
-| --------------------------------------------------------- | ------------------------------------------------------------ |
-| [`src/lib/supabase.ts`](../src/lib/supabase.ts)           | Supabase client singleton. Reads `VITE_SUPABASE_*` env vars. |
-| [`src/lib/auth/store.ts`](../src/lib/auth/store.ts)       | Zustand store with `initialize`, `signIn`, `signUp`, `signOut`, profile fetch. Exposes `useAuth`, `useAuthActions`. |
-| [`src/lib/auth/ProtectedRoute.tsx`](../src/lib/auth/ProtectedRoute.tsx) | Route guard. Redirects unauthenticated users to `/login`. Supports optional `allowedRoles` prop. |
-| [`src/lib/auth/index.ts`](../src/lib/auth/index.ts)       | Barrel export for the auth module.                           |
-| [`src/pages/auth/Login.tsx`](../src/pages/auth/Login.tsx) | Email + password sign-in form.                               |
-| [`src/pages/auth/Signup.tsx`](../src/pages/auth/Signup.tsx) | Email + password sign-up form, captures `display_name`.    |
-| [`src/pages/Home.tsx`](../src/pages/Home.tsx)             | Placeholder protected home page with sign-out.               |
+| Path | Purpose |
+| --- | --- |
+| [`src/lib/supabase.ts`](../src/lib/supabase.ts) | Supabase client singleton. Reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. |
+| [`src/lib/auth/store.ts`](../src/lib/auth/store.ts) | Zustand auth store with `initialize`, `signIn`, `signUp`, `signOut`, profile fetch, `useAuth`, and `useAuthActions`. |
+| [`src/lib/auth/ProtectedRoute.tsx`](../src/lib/auth/ProtectedRoute.tsx) | Route guard. Initializes auth, redirects unauthenticated users to `/login`, and supports optional `allowedRoles`. |
+| [`src/lib/auth/index.ts`](../src/lib/auth/index.ts) | Barrel export for the auth module. |
+| [`src/pages/auth/AuthPage.tsx`](../src/pages/auth/AuthPage.tsx) | Current combined sign-in/sign-up screen. Includes forgot-password request modal. |
+| [`src/pages/auth/Login.tsx`](../src/pages/auth/Login.tsx) | Legacy standalone sign-in screen. Not currently used by routes. |
+| [`src/pages/auth/Signup.tsx`](../src/pages/auth/Signup.tsx) | Legacy standalone sign-up screen. Not currently used by routes. |
+| [`src/pages/Home.tsx`](../src/pages/Home.tsx) | Protected home page with signed-in user information and sign-out button. |
 
 ### Backend / database
 
-| Path                                                     | Purpose                                                       |
-| -------------------------------------------------------- | ------------------------------------------------------------- |
-| [`supabase/schema.sql`](../supabase/schema.sql)          | SQL to provision `profiles`, signup trigger, RLS policies, and example `journal_entries` / `mood_logs` tables. |
-| [`supabase/README.md`](../supabase/README.md)            | Step-by-step Supabase project setup guide.                    |
+| Path | Purpose |
+| --- | --- |
+| [`supabase/schema.sql`](../supabase/schema.sql) | SQL for `profiles`, signup trigger, RLS policies, and example future feature tables. |
+| [`supabase/README.md`](../supabase/README.md) | Step-by-step Supabase project setup guide. |
 
 ### Config
 
-| Path                                                     | Purpose                                                       |
-| -------------------------------------------------------- | ------------------------------------------------------------- |
-| [`.env.example`](../.env.example)                        | Template for `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. |
+| Path | Purpose |
+| --- | --- |
+| [`.env.example`](../.env.example) | Template for `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. |
 
-## 3. Files modified
+## 4. Current route flow
 
-| Path                                  | Change                                                        |
-| ------------------------------------- | ------------------------------------------------------------- |
-| [`src/App.tsx`](../src/App.tsx)       | Replaced the Tauri greet demo with `BrowserRouter` + routes (`/login`, `/signup`, `/` protected). Calls `useAuthStore.initialize()` on mount. |
-| [`.gitignore`](../.gitignore)         | Added `.env`, `.env.local`, `.env.*.local` to ignore list.    |
+Routes are defined in [`src/App.tsx`](../src/App.tsx):
 
-## 4. Architecture at a glance
+| Route | Behavior |
+| --- | --- |
+| `/login` | Shows `AuthPage` with the sign-in tab selected. |
+| `/signup` | Shows `AuthPage` with the sign-up tab selected. |
+| `/` | Protected route. Shows `Home` only when authenticated. |
+| `*` | Redirects unknown routes to `/`. |
 
+Authentication initialization currently happens inside
+[`ProtectedRoute`](../src/lib/auth/ProtectedRoute.tsx). When a user opens `/`,
+the route guard calls `useAuthStore.initialize()`, reads the existing Supabase
+session, fetches the matching profile, and subscribes to auth-state changes.
+
+## 5. Redirect behavior
+
+Current redirect behavior:
+
+- Unauthenticated user visits `/` -> redirected to `/login`
+- Successful sign-in -> redirected to the originally requested page, or `/` by default
+- Successful sign-up -> shows a success message, then switches back to the sign-in tab
+- Sign-out from `Home` -> clears local auth state; the protected route sends the user to `/login`
+- Unknown route -> redirected to `/`; then protected route decides whether to show `Home` or redirect to `/login`
+
+## 6. Auth architecture
+
+```txt
+App
+  BrowserRouter
+    /login  -> AuthPage initialTab="sign-in"
+    /signup -> AuthPage initialTab="sign-up"
+    /       -> ProtectedRoute -> Home
+    *       -> Navigate to /
+
+ProtectedRoute
+  calls useAuthStore.initialize()
+  loading?        -> shows loading message
+  no session?     -> redirects to /login with original location in state
+  role mismatch?  -> redirects to /
+  authenticated?  -> renders protected page
+
+Auth store
+  getSession()
+  fetch profile from public.profiles
+  subscribe to onAuthStateChange()
+  expose signIn, signUp, signOut
 ```
-App (src/App.tsx)
- ├── calls useAuthStore.initialize() on mount
- │     └── reads existing Supabase session + subscribes to auth changes
- ├── BrowserRouter
- │    ├── /login    → Login page
- │    ├── /signup   → Signup page
- │    └── /         → ProtectedRoute → Home
- └── ProtectedRoute
-      ├── loading?  → spinner
-      ├── no session? → redirect to /login
-      └── role mismatch? → redirect to /
-```
 
-Session persistence, auto-refresh, and sign-out broadcasting are all handled
-by `supabase-js`. We only wrap it for UI convenience.
+Supabase handles session persistence, refresh tokens, and auth-state events.
+The app wraps those features in a Zustand store for easier UI access.
 
-## 5. User roles
+## 7. Database profile and role field
 
-`profiles.role` is a text column with a CHECK constraint. Allowed values:
+The auth-related database table is `public.profiles`.
 
-- `user` (default, assigned on signup)
+Current profile fields:
+
+- `id`
+- `display_name`
+- `role`
+- `created_at`
+- `updated_at`
+
+`profiles.role` currently supports these values:
+
+- `user` - default role assigned on signup
 - `moderator`
 - `admin`
 
-Use `ProtectedRoute`'s `allowedRoles` prop to gate routes. Promote a user with:
+The frontend has support for role checks through `ProtectedRoute`'s
+`allowedRoles` prop, but the current app routes do not actively use it yet.
+At the moment, the actual enforced access rule is:
+
+- Not logged in -> cannot access `/`
+- Logged in with any role -> can access `/`
+
+To gate a future admin page, use:
+
+```tsx
+<ProtectedRoute allowedRoles={["admin"]}>
+  <AdminPage />
+</ProtectedRoute>
+```
+
+To manually promote a user in Supabase SQL Editor:
 
 ```sql
 update public.profiles
@@ -87,11 +162,34 @@ set role = 'admin'
 where id = (select id from auth.users where email = 'someone@example.com');
 ```
 
-## 6. Row Level Security (RLS)
+Important security note: normal users should not be able to update their own
+`role`. If role-based access becomes part of the app, make sure the database
+only lets normal authenticated users update safe fields such as `display_name`.
 
-**Every table that holds user data must enable RLS.** The schema sets this up
-for `profiles`, `journal_entries`, and `mood_logs`. When adding new tables,
-follow the owner-only pattern:
+Recommended hardening:
+
+```sql
+drop policy if exists "profiles_update_own" on public.profiles;
+drop policy if exists "profiles_update_own_display_name" on public.profiles;
+
+create policy "profiles_update_own"
+  on public.profiles
+  for update
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
+
+revoke update on public.profiles from authenticated;
+grant update (display_name) on public.profiles to authenticated;
+```
+
+## 8. Row Level Security (RLS)
+
+RLS is enabled for `profiles`. The schema also includes example future-feature
+tables for `journal_entries` and `mood_logs` with owner-only policies. Those
+tables are outside the Authentication & User Access task, but they show the
+same pattern other feature groups should follow for user-owned data.
+
+Owner-only pattern:
 
 ```sql
 alter table public.<new_table> enable row level security;
@@ -102,42 +200,54 @@ create policy "<table>_owner_all"
   with check (auth.uid() = user_id);
 ```
 
-This matters especially because MabuhAi stores journaling, mood, and
-"Mask-Off" entries — highly sensitive data. RLS enforces isolation at the
-database, so a frontend bug cannot leak other users' data.
+This matters because future MabuhAi features may store sensitive user data.
+RLS enforces access at the database level, not only in the frontend.
 
-## 7. Environment setup for new developers
+## 9. Environment setup for new developers
 
-1. Ask the team for the Supabase project URL and anon key (or create your own
-   dev project — see [`supabase/README.md`](../supabase/README.md)).
-2. Copy `.env.example` to `.env` and fill in the values.
-3. If using your own dev project, run [`supabase/schema.sql`](../supabase/schema.sql)
+1. Ask the team for the Supabase project URL and anon key, or create a personal
+   dev project.
+2. Copy `.env.example` to `.env`.
+3. Fill in:
+
+   ```env
+   VITE_SUPABASE_URL=...
+   VITE_SUPABASE_ANON_KEY=...
+   ```
+
+4. If using a new Supabase project, run [`supabase/schema.sql`](../supabase/schema.sql)
    in the Supabase SQL Editor.
-4. In Supabase → Authentication → URL Configuration, add redirect URLs:
-   - `http://localhost:1420` (Tauri dev)
-   - `http://localhost:5173` (Vite dev)
-   - `tauri://localhost` (Tauri production)
-5. `npm run tauri dev` to run the app.
+5. In Supabase Authentication URL Configuration, add redirect URLs:
+   - `http://localhost:1420` for Tauri dev
+   - `http://localhost:5173` for Vite dev
+   - `tauri://localhost` for Tauri production
+6. Run the app:
 
-## 8. Known gaps / not yet implemented
+   ```bash
+   npm run tauri dev
+   ```
 
-- **OAuth providers** (Google, etc.) — not wired yet. Add via Supabase dashboard
-  and call `supabase.auth.signInWithOAuth({ provider: 'google' })`.
-- **Password reset** — Supabase supports it out of the box, but no UI page yet.
-- **Email verification gate** — users can sign in without confirming email. If
-  required, check `user.email_confirmed_at` in `ProtectedRoute`.
-- **Tauri deep-link handling** for OAuth callbacks — will need the
-  `@tauri-apps/plugin-deep-link` plugin when OAuth is added.
-- **Rate limiting / abuse protection** — rely on Supabase defaults for now.
-- **Secure session storage on Tauri** — currently uses `localStorage` via
-  `supabase-js`. For a hardened build, migrate to Tauri secure storage.
+## 10. Known gaps / not yet implemented
 
-## 9. Security checklist for future changes
+- **Password reset completion:** The forgot-password modal sends a reset email,
+  but the app does not yet have a `/auth/reset` route where the user can enter
+  a new password and call `supabase.auth.updateUser({ password })`.
+- **OAuth providers:** Google and other providers are not wired yet.
+- **Email verification gate:** The app does not currently block access based on
+  `user.email_confirmed_at`.
+- **Active role-based pages:** Role support exists in the schema and route guard,
+  but no current route uses `allowedRoles`.
+- **Tauri deep-link handling:** Needed later for OAuth or production reset flows.
+- **Secure session storage on Tauri:** Current Supabase sessions use browser
+  storage through `supabase-js`. A hardened app can migrate to secure storage.
 
-- [ ] Never ship the Supabase **service role** key to the client. Only the
-      `anon` key belongs in `VITE_*` env vars.
-- [ ] Enable RLS on every new table before inserting real data.
-- [ ] Prefer database-level checks (RLS, CHECK constraints, triggers) over
-      frontend-only validation for anything security-sensitive.
-- [ ] Treat community/group features as explicit opt-in sharing — default to
+## 11. Security checklist for future changes
+
+- [ ] Never ship the Supabase service-role key to the client. Only the anon key
+      belongs in `VITE_*` environment variables.
+- [ ] Enable RLS on every new table before inserting real user data.
+- [ ] Keep role changes controlled by trusted admin/database actions.
+- [ ] Prefer database-level checks, constraints, triggers, and RLS for sensitive
+      authorization decisions.
+- [ ] Treat community/group features as explicit opt-in sharing. Default to
       owner-only visibility.

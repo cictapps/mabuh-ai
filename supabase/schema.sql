@@ -5,10 +5,11 @@
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text,
-  role text not null default 'user' check (role in ('user', 'moderator', 'admin')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles drop column if exists role;
 
 alter table public.profiles enable row level security;
 

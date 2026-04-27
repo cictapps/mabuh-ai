@@ -1,6 +1,6 @@
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth, useAuthActions } from "@/lib/auth";
 
 export function Home() {
@@ -30,9 +30,6 @@ export function Home() {
               Auth is wired up. Build your first protected feature next - mood check-in or journal.
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-sm leading-7 text-muted-foreground">
-            Role: <span className="text-foreground">{profile?.role ?? "user"}</span>
-          </CardContent>
         </Card>
       </div>
     </main>

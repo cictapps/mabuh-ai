@@ -5,7 +5,6 @@ import { supabase } from "@/lib/supabase";
 export type Profile = {
   id: string;
   display_name: string | null;
-  role: "user" | "moderator" | "admin";
 };
 
 type AuthState = {
@@ -25,7 +24,7 @@ let authListenerBound = false;
 async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, role")
+    .select("id, display_name")
     .eq("id", userId)
     .maybeSingle();
   if (error) {

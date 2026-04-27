@@ -30,17 +30,7 @@ URLs for local dev and Tauri:
 For OAuth providers (Google, etc.), configure them in Authentication → Providers
 and add the same redirect URLs.
 
-## 4. Promoting a user to admin / moderator
-
-Run in the SQL Editor:
-
-```sql
-update public.profiles
-set role = 'admin'
-where id = (select id from auth.users where email = 'you@example.com');
-```
-
-## Why RLS matters here
+## 4. Why RLS matters here
 
 MabuhAi stores journaling, mood, and "Mask-Off" entries — highly sensitive data.
 RLS enforces owner-only access **at the database**, so even if the frontend has

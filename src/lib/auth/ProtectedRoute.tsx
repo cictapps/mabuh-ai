@@ -4,12 +4,11 @@ import { useAuth, useAuthStore } from "./store";
 
 type Props = {
   children: ReactNode;
-  allowedRoles?: Array<"user" | "moderator" | "admin">;
 };
 
-export function ProtectedRoute({ children, allowedRoles }: Props) {
+export function ProtectedRoute({ children }: Props) {
   const initialize = useAuthStore((s) => s.initialize);
-  const { isAuthenticated, profile, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -26,10 +25,6 @@ export function ProtectedRoute({ children, allowedRoles }: Props) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;
-  }
-
-  if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
-    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

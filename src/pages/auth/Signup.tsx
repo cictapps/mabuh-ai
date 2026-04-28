@@ -28,6 +28,14 @@ export function Signup() {
     setError(null);
     setInfo(null);
 
+    const trimmedDisplayName = displayName.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedDisplayName) {
+      setError("Display name is required.");
+      return;
+    }
+
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
       return;
@@ -35,8 +43,18 @@ export function Signup() {
 
     setSubmitting(true);
     try {
-      await signUp(email.trim(), password, displayName.trim());
-      setInfo("Check your email to confirm your account, then sign in.");
+      const result = await signUp(trimmedEmail, password, trimmedDisplayName);
+
+      if (result.session) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      setInfo(
+        result.needsEmailConfirmation
+          ? "Check your email to confirm your account, then sign in."
+          : "Account created. You can sign in now.",
+      );
       setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create account.");

@@ -1,12 +1,14 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { useAuthActions } from "@/lib/auth";
+import { useAuth, useAuthActions, useAuthStore } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 type Tab = "sign-in" | "sign-up";
+
+const googleAuthEnabled = import.meta.env.VITE_AUTH_GOOGLE_ENABLED === "true";
 
 export interface AuthPageProps {
   initialTab?: Tab;
@@ -118,6 +120,39 @@ function SubmitButton({
   );
 }
 
+function GoogleButton({
+  loading,
+  onClick,
+}: {
+  loading?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={loading}
+      className={cn(
+        "flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 py-3 text-sm font-semibold text-foreground",
+        "transition-all duration-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60",
+      )}
+    >
+      {loading ? <Loader2 className="size-4 animate-spin" /> : <span className="text-base">G</span>}
+      {loading ? "Opening Google..." : "Continue with Google"}
+    </button>
+  );
+}
+
+function EmailDivider() {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="h-px flex-1 bg-border" />
+      <span className="text-xs text-muted-foreground">or</span>
+      <div className="h-px flex-1 bg-border" />
+    </div>
+  );
+}
+
 // ---------- Stagger wrapper ----------
 
 function Stagger({ delay, children }: { delay: string; children: React.ReactNode }) {
@@ -134,7 +169,7 @@ function Stagger({ delay, children }: { delay: string; children: React.ReactNode
 // ---------- Sign-in form ----------
 
 function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
-  const { signIn } = useAuthActions();
+  const { signIn, signInWithGoogle } = useAuthActions();
   const navigate = useNavigate();
   const location = useLocation();
   const from =
@@ -144,6 +179,18 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [oauthSubmitting, setOauthSubmitting] = useState(false);
+
+  async function handleGoogleSignIn() {
+    setError(null);
+    setOauthSubmitting(true);
+    try {
+      await signInWithGoogle(from);
+    } catch (err) {
+      setOauthSubmitting(false);
+      setError(err instanceof Error ? err.message : "Could not open Google sign-in.");
+    }
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -161,7 +208,19 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Stagger delay="60ms">
+      {googleAuthEnabled && (
+        <>
+          <Stagger delay="40ms">
+            <GoogleButton loading={oauthSubmitting} onClick={() => void handleGoogleSignIn()} />
+          </Stagger>
+
+          <Stagger delay="100ms">
+            <EmailDivider />
+          </Stagger>
+        </>
+      )}
+
+      <Stagger delay="140ms">
         <div className="space-y-1.5">
           <label htmlFor="si-email" className="text-sm font-medium text-muted-foreground">
             Email
@@ -177,7 +236,7 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
         </div>
       </Stagger>
 
-      <Stagger delay="130ms">
+      <Stagger delay="200ms">
         <PasswordField
           id="si-password"
           label="Password"
@@ -187,7 +246,7 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
         />
       </Stagger>
 
-      <Stagger delay="190ms">
+      <Stagger delay="260ms">
         <div className="flex justify-end">
           <button
             type="button"
@@ -201,7 +260,7 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
 
       {error && <ErrorBanner message={error} />}
 
-      <Stagger delay="250ms">
+      <Stagger delay="320ms">
         <SubmitButton loading={submitting} className="w-full">
           {submitting ? "Signing in…" : "Sign in"}
         </SubmitButton>
@@ -213,7 +272,8 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
 // ---------- Sign-up form ----------
 
 function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
-  const { signUp } = useAuthActions();
+  const { signUp, signInWithGoogle } = useAuthActions();
+  const navigate = useNavigate();
 
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -221,10 +281,30 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [oauthSubmitting, setOauthSubmitting] = useState(false);
+
+  async function handleGoogleSignIn() {
+    setError(null);
+    setOauthSubmitting(true);
+    try {
+      await signInWithGoogle("/");
+    } catch (err) {
+      setOauthSubmitting(false);
+      setError(err instanceof Error ? err.message : "Could not open Google sign-in.");
+    }
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    const trimmedDisplayName = displayName.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedDisplayName) {
+      setError("Display name is required.");
+      return;
+    }
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
@@ -233,8 +313,18 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
 
     setSubmitting(true);
     try {
-      await signUp(email.trim(), password, displayName.trim());
-      setSuccess("Check your email to confirm your account, then sign in.");
+      const result = await signUp(trimmedEmail, password, trimmedDisplayName);
+
+      if (result.session) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      setSuccess(
+        result.needsEmailConfirmation
+          ? "Check your email to confirm your account, then sign in."
+          : "Account created. You can sign in now.",
+      );
       setTimeout(onSuccess, 1800);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create account.");
@@ -245,7 +335,19 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Stagger delay="60ms">
+      {googleAuthEnabled && (
+        <>
+          <Stagger delay="40ms">
+            <GoogleButton loading={oauthSubmitting} onClick={() => void handleGoogleSignIn()} />
+          </Stagger>
+
+          <Stagger delay="100ms">
+            <EmailDivider />
+          </Stagger>
+        </>
+      )}
+
+      <Stagger delay="140ms">
         <div className="space-y-1.5">
           <label htmlFor="su-name" className="text-sm font-medium text-muted-foreground">
             Display name
@@ -260,7 +362,7 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
       </Stagger>
 
-      <Stagger delay="130ms">
+      <Stagger delay="200ms">
         <div className="space-y-1.5">
           <label htmlFor="su-email" className="text-sm font-medium text-muted-foreground">
             Email
@@ -276,7 +378,7 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
       </Stagger>
 
-      <Stagger delay="200ms">
+      <Stagger delay="260ms">
         <div>
           <PasswordField
             id="su-password"
@@ -293,7 +395,7 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
       {error && <ErrorBanner message={error} />}
       {success && <SuccessBanner message={success} />}
 
-      <Stagger delay="270ms">
+      <Stagger delay="330ms">
         <SubmitButton loading={submitting} disabled={!!success} className="w-full">
           {submitting ? "Creating account…" : "Create account"}
         </SubmitButton>
@@ -404,9 +506,28 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
 // ---------- Page ----------
 
 export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
+  const initialize = useAuthStore((s) => s.initialize);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
   const [tab, setTab] = useState<Tab>(initialTab);
   const [slideDir, setSlideDir] = useState<"left" | "right">("right");
   const [showForgot, setShowForgot] = useState(false);
+
+  useEffect(() => {
+    void initialize();
+  }, [initialize]);
+
+  useEffect(() => {
+    setTab(initialTab);
+    setSlideDir(initialTab === "sign-up" ? "right" : "left");
+  }, [initialTab]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   function switchTab(t: Tab) {
     setSlideDir(t === "sign-up" ? "right" : "left");

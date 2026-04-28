@@ -1,7 +1,8 @@
 # Authentication & User Access - Setup Log
 
 **Date added:** 2026-04-17  
-**Last updated:** 2026-04-27  
+**Last updated:** 2026-04-28
+
 **Scope:** Authentication and basic user access using Supabase Auth.
 
 This document records the authentication/user-access work so other developers
@@ -19,15 +20,14 @@ The app currently implements:
 - Logout
 - Supabase session persistence
 - Protected routing for the home page
+- Hard email-verification gate before protected access
+- Resend-verification action for signed-in but unverified users
 - User profile fetching from `public.profiles`
 - Display of the signed-in user's name/email
 - Forgot-password request modal
-
-The app does not currently implement:
-
-- A full reset-password page after the user clicks the email link
-- OAuth login providers such as Google
-- A hard email-verification gate before accessing the protected home page
+- Reset-password completion page at `/auth/reset`
+- Optional Google OAuth login behind `VITE_AUTH_GOOGLE_ENABLED=true`
+- OAuth/email-confirmation callback route at `/auth/callback`
 
 ## 2. Dependencies added
 
@@ -50,6 +50,8 @@ Installed via `npm install`:
 | [`src/lib/auth/ProtectedRoute.tsx`](../src/lib/auth/ProtectedRoute.tsx) | Route guard. Initializes auth and redirects unauthenticated users to `/login`. |
 | [`src/lib/auth/index.ts`](../src/lib/auth/index.ts) | Barrel export for the auth module. |
 | [`src/pages/auth/AuthPage.tsx`](../src/pages/auth/AuthPage.tsx) | Current combined sign-in/sign-up screen. Includes forgot-password request modal. |
+| [`src/pages/auth/AuthCallback.tsx`](../src/pages/auth/AuthCallback.tsx) | OAuth and email-confirmation callback page. Safely redirects back into the app. |
+| [`src/pages/auth/ResetPassword.tsx`](../src/pages/auth/ResetPassword.tsx) | Password reset completion page. Lets a user save a new password after opening the recovery email link. |
 | [`src/pages/auth/Login.tsx`](../src/pages/auth/Login.tsx) | Legacy standalone sign-in screen. Not currently used by routes. |
 | [`src/pages/auth/Signup.tsx`](../src/pages/auth/Signup.tsx) | Legacy standalone sign-up screen. Not currently used by routes. |
 | [`src/pages/Home.tsx`](../src/pages/Home.tsx) | Protected home page with signed-in user information and sign-out button. |
@@ -75,13 +77,15 @@ Routes are defined in [`src/App.tsx`](../src/App.tsx):
 | --- | --- |
 | `/login` | Shows `AuthPage` with the sign-in tab selected. |
 | `/signup` | Shows `AuthPage` with the sign-up tab selected. |
+| `/auth/callback` | Handles OAuth and email-confirmation callbacks. |
+| `/auth/reset` | Shows the reset-password completion page for recovery email links. |
 | `/` | Protected route. Shows `Home` only when authenticated. |
 | `*` | Redirects unknown routes to `/`. |
 
-Authentication initialization currently happens inside
-[`ProtectedRoute`](../src/lib/auth/ProtectedRoute.tsx). When a user opens `/`,
-the route guard calls `useAuthStore.initialize()`, reads the existing Supabase
-session, fetches the matching profile, and subscribes to auth-state changes.
+Authentication initialization happens from the auth store whenever a protected,
+auth, or callback page needs it. The store reads the existing Supabase session,
+fetches the matching profile, subscribes to auth-state changes, and exposes
+verified-email state to the route guard.
 
 ## 5. Redirect behavior
 
@@ -90,6 +94,11 @@ Current redirect behavior:
 - Unauthenticated user visits `/` -> redirected to `/login`
 - Successful sign-in -> redirected to the originally requested page, or `/` by default
 - Successful sign-up -> shows a success message, then switches back to the sign-in tab
+- Successful sign-up with an immediate Supabase session -> redirected to `/`
+- Signed-in but unverified user visits `/` -> sees a verification gate with resend/sign-out actions
+- Email confirmation callback -> returns to `/`; then the protected route checks verified state
+- Google OAuth callback -> returns to the originally requested route, or `/` by default
+- Forgot password -> sends a recovery email to `/auth/reset`; successful update signs out and returns to `/login`
 - Sign-out from `Home` -> clears local auth state; the protected route sends the user to `/login`
 - Unknown route -> redirected to `/`; then protected route decides whether to show `Home` or redirect to `/login`
 
@@ -100,20 +109,23 @@ App
   BrowserRouter
     /login  -> AuthPage initialTab="sign-in"
     /signup -> AuthPage initialTab="sign-up"
+    /auth/callback -> AuthCallback
+    /auth/reset -> ResetPassword
     /       -> ProtectedRoute -> Home
     *       -> Navigate to /
 
 ProtectedRoute
   calls useAuthStore.initialize()
-  loading?        -> shows loading message
-  no session?     -> redirects to /login with original location in state
-  authenticated?  -> renders protected page
+  loading?             -> shows loading message
+  no session?          -> redirects to /login with original location in state
+  unverified email?    -> shows resend/sign-out gate
+  verified session?    -> renders protected page
 
 Auth store
   getSession()
   fetch profile from public.profiles
   subscribe to onAuthStateChange()
-  expose signIn, signUp, signOut
+  expose signIn, signUp, signInWithGoogle, resendConfirmation, signOut
 ```
 
 Supabase handles session persistence, refresh tokens, and auth-state events.
@@ -131,10 +143,11 @@ Current profile fields:
 - `updated_at`
 
 Profiles store only user-specific display metadata. The app treats every
-signed-in person as a normal user. The enforced access rule is:
+verified signed-in person as a normal user. The enforced access rule is:
 
 - Not logged in -> cannot access `/`
-- Logged in -> can access `/`
+- Logged in but email unverified -> cannot access `/`
+- Logged in with verified email -> can access `/`
 
 ## 8. Row Level Security (RLS)
 
@@ -167,31 +180,42 @@ RLS enforces access at the database level, not only in the frontend.
    ```env
    VITE_SUPABASE_URL=...
    VITE_SUPABASE_ANON_KEY=...
+   VITE_AUTH_GOOGLE_ENABLED=false
    ```
 
 4. If using a new Supabase project, run [`supabase/schema.sql`](../supabase/schema.sql)
    in the Supabase SQL Editor.
 5. In Supabase Authentication URL Configuration, add redirect URLs:
    - `http://localhost:1420` for Tauri dev
+   - `http://localhost:1420/auth/callback` for Tauri dev auth callbacks
+   - `http://localhost:1420/auth/reset` for Tauri dev password reset
    - `http://localhost:5173` for Vite dev
+   - `http://localhost:5173/auth/callback` for Vite dev auth callbacks
+   - `http://localhost:5173/auth/reset` for Vite dev password reset
    - `tauri://localhost` for Tauri production
-6. Run the app:
+   - `tauri://localhost/auth/callback` for Tauri production auth callbacks
+   - `tauri://localhost/auth/reset` for Tauri production password reset
+6. In Supabase Authentication settings, keep email confirmations enabled for
+   production-like testing.
+7. To enable Google OAuth, configure the Google provider in Supabase and set
+   `VITE_AUTH_GOOGLE_ENABLED=true`.
+8. Run the app:
 
    ```bash
    npm run tauri dev
    ```
 
-## 10. Known gaps / not yet implemented
+## 10. Production notes
 
-- **Password reset completion:** The forgot-password modal sends a reset email,
-  but the app does not yet have a `/auth/reset` route where the user can enter
-  a new password and call `supabase.auth.updateUser({ password })`.
-- **OAuth providers:** Google and other providers are not wired yet.
-- **Email verification gate:** The app does not currently block access based on
-  `user.email_confirmed_at`.
-- **Tauri deep-link handling:** Needed later for OAuth or production reset flows.
+- **Google OAuth dashboard dependency:** The code path is implemented, but the
+  Google provider must be enabled in Supabase before turning on
+  `VITE_AUTH_GOOGLE_ENABLED`.
+- **Tauri production deep links:** OAuth and reset callbacks use normal web
+  redirects in browser/Vite dev. Production Tauri packaging should verify the
+  custom scheme and platform deep-link behavior before release.
 - **Secure session storage on Tauri:** Current Supabase sessions use browser
-  storage through `supabase-js`. A hardened app can migrate to secure storage.
+  storage through `supabase-js`. A hardened desktop release can migrate to a
+  Tauri secure-storage strategy.
 
 ## 11. Security checklist for future changes
 

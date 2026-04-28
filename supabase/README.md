@@ -24,13 +24,26 @@ In Supabase dashboard → Authentication → URL Configuration, add the redirect
 URLs for local dev and Tauri:
 
 - `http://localhost:1420` (Tauri dev)
+- `http://localhost:1420/auth/callback` (Tauri dev auth callbacks)
+- `http://localhost:1420/auth/reset` (Tauri dev password reset)
 - `http://localhost:5173` (Vite dev)
+- `http://localhost:5173/auth/callback` (Vite dev auth callbacks)
+- `http://localhost:5173/auth/reset` (Vite dev password reset)
 - `tauri://localhost` (Tauri production)
+- `tauri://localhost/auth/callback` (Tauri production auth callbacks)
+- `tauri://localhost/auth/reset` (Tauri production password reset)
 
-For OAuth providers (Google, etc.), configure them in Authentication → Providers
-and add the same redirect URLs.
+Keep email confirmations enabled for production-like testing. For Google OAuth,
+configure the Google provider in Authentication → Providers, add the same
+redirect URLs, then set `VITE_AUTH_GOOGLE_ENABLED=true` in the app environment.
 
-## 4. Why RLS matters here
+## 4. Email templates
+
+Paste [`email-templates/confirm-signup.html`](./email-templates/confirm-signup.html)
+into Supabase Dashboard -> Authentication -> Email Templates -> Confirm signup.
+Keep the `{{ .ConfirmationURL }}` variable intact.
+
+## 5. Why RLS matters here
 
 MabuhAi stores journaling, mood, and "Mask-Off" entries — highly sensitive data.
 RLS enforces owner-only access **at the database**, so even if the frontend has

@@ -3,7 +3,9 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "@/lib/auth";
 
 const AuthPage = lazy(async () => import("@/pages/auth/AuthPage"));
+const AuthCallback = lazy(async () => import("@/pages/auth/AuthCallback"));
 const Home = lazy(async () => import("@/pages/Home"));
+const ResetPassword = lazy(async () => import("@/pages/auth/ResetPassword"));
 
 type AppErrorBoundaryState = {
   error: Error | null;
@@ -59,6 +61,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<AuthPage initialTab="sign-in" />} />
             <Route path="/signup" element={<AuthPage initialTab="sign-up" />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/auth/reset" element={<ResetPassword />} />
             <Route
               path="/"
               element={

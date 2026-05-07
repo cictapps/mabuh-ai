@@ -565,7 +565,7 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
         {/* Header */}
         <div className="mb-7 space-y-1">
           <h1 className="font-serif text-[2.25rem] leading-tight tracking-[-0.03em] text-foreground">
-            Mabuhay
+            Mabuh-ai
           </h1>
           <p className="font-sans text-sm text-muted-foreground">
             A quiet space to breathe and reflect.

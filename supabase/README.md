@@ -33,9 +33,32 @@ URLs for local dev and Tauri:
 - `tauri://localhost/auth/callback` (Tauri production auth callbacks)
 - `tauri://localhost/auth/reset` (Tauri production password reset)
 
-Keep email confirmations enabled for production-like testing. For Google OAuth,
-configure the Google provider in Authentication → Providers, add the same
-redirect URLs, then set `VITE_AUTH_GOOGLE_ENABLED=true` in the app environment.
+Keep email confirmations enabled for production-like testing.
+
+### Google OAuth
+
+The app already has a Google sign-in button and callback route. It is hidden
+until `VITE_AUTH_GOOGLE_ENABLED=true`.
+
+1. In Google Cloud / Google Auth Platform, create a Web application OAuth
+   client.
+2. Add app origins under Authorized JavaScript origins:
+   - `http://localhost:5173` for Vite dev
+   - `http://localhost:1420` for Tauri dev
+   - Your production web origin, if you deploy a web build
+3. Add the Supabase Auth callback URL under Authorized redirect URIs:
+   - `https://<project-ref>.supabase.co/auth/v1/callback`
+   - Copy the exact URL from Supabase Dashboard -> Authentication -> Providers -> Google.
+4. In Supabase Dashboard -> Authentication -> Providers -> Google:
+   - Enable Google.
+   - Paste the Google Client ID and Client Secret.
+5. In Supabase Dashboard -> Authentication -> URL Configuration, keep the app
+   redirect URLs listed above, especially `/auth/callback`.
+6. In `.env`, set:
+   ```env
+   VITE_AUTH_GOOGLE_ENABLED=true
+   ```
+7. Restart the dev server.
 
 ## 4. Email templates
 

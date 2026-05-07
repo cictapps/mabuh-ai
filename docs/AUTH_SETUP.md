@@ -1,7 +1,7 @@
 # Authentication & User Access - Setup Log
 
 **Date added:** 2026-04-17  
-**Last updated:** 2026-04-28
+**Last updated:** 2026-05-07
 
 **Scope:** Authentication and basic user access using Supabase Auth.
 
@@ -197,8 +197,18 @@ RLS enforces access at the database level, not only in the frontend.
    - `tauri://localhost/auth/reset` for Tauri production password reset
 6. In Supabase Authentication settings, keep email confirmations enabled for
    production-like testing.
-7. To enable Google OAuth, configure the Google provider in Supabase and set
-   `VITE_AUTH_GOOGLE_ENABLED=true`.
+7. To enable Google OAuth:
+   - In Google Cloud / Google Auth Platform, create a Web application OAuth
+     client.
+   - Add app origins under Authorized JavaScript origins, for example
+     `http://localhost:5173` for Vite dev and `http://localhost:1420` for
+     Tauri dev.
+   - Add the Supabase Auth callback URL under Authorized redirect URIs:
+     `https://<project-ref>.supabase.co/auth/v1/callback`. Copy the exact URL
+     from Supabase Dashboard -> Authentication -> Providers -> Google.
+   - In Supabase Dashboard -> Authentication -> Providers -> Google, enable
+     Google and paste the Google Client ID and Client Secret.
+   - In `.env`, set `VITE_AUTH_GOOGLE_ENABLED=true` and restart the dev server.
 8. Run the app:
 
    ```bash

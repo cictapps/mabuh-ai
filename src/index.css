@@ -97,6 +97,26 @@
   color: #0f121a;
 }
 
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+@keyframes aurora-shift {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) translate(0, 0);
+  }
+  33% {
+    opacity: 0.82;
+    transform: scale(1.05) translate(2%, 1.5%);
+  }
+  66% {
+    opacity: 0.9;
+    transform: scale(0.97) translate(-1.5%, 2.5%);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

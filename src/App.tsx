@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { Flame, MoonStar, Sparkles, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { invoke } from "@tauri-apps/api/core";
 import {
   Card,
   CardContent,
@@ -10,8 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-
-// navigating to chatbot
 import { useNavigate } from "react-router-dom";
 
 function App() {
@@ -19,6 +17,17 @@ function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function greet() {
+    if (!name.trim()) return;
+    
+    setIsSubmitting(true);
+    try {
+      setGreetMsg(await invoke<string>("greet", { name: name.trim() }));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   const themeNotes = [
     "Twilight indigos replace the default starter palette.",
@@ -42,21 +51,9 @@ function App() {
     },
   ];
 
-  async function greet() {
-    if (!name.trim()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      setGreetMsg(await invoke<string>("greet", { name: name.trim() }));
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
   return (
     <main className="relative min-h-screen bg-background text-foreground">
+      {/* ... rest of your JSX remains the same ... */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-20 -top-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -right-16 top-24 h-64 w-64 rounded-full bg-secondary/15 blur-3xl" />
@@ -79,13 +76,13 @@ function App() {
               </div>
 
               <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => navigate("/chatbot")}
-                  className="rounded-full text-secondary hover:text-secondary hover:bg-secondary/10"
-                >
-                  Open Chat
-                </Button>
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate("/chatbot")}
+                className="rounded-full text-secondary hover:text-secondary hover:bg-secondary/10"
+              >
+                Open Chat
+              </Button>
 
               <div className="space-y-3">
                 <CardTitle className="max-w-3xl text-4xl leading-[1.05] tracking-[-0.04em] sm:text-5xl">

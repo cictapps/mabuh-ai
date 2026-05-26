@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ChevronLeft, Send, Smile, Paperclip, 
-  Leaf, Wind, Heart, Sparkles 
+  Leaf, Wind, Heart, Sparkles
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 
 import { ChatBubble } from "../components/chatbot-components/ChatBubble";
 import { MaskOverlay } from "../components/chatbot-components/MaskOverlay";
+import { PrivacyPolicy } from "./PrivacyPolicy";
+
+const SERVER_URL = "https://mabuh-ai-server.onrender.com";
 
 interface Message {
   id: string;
@@ -17,6 +20,8 @@ interface Message {
   hasActions?: boolean;
   status?: "typing" | "done";
 }
+
+type ModelState = "checking" | "downloading" | "loading" | "ready";
 
 const Typewriter = ({ text, speed = 18 }: { text: string; speed?: number }) => {
   const [displayed, setDisplayed] = useState("");
@@ -55,6 +60,24 @@ const TypingDots = ({ isMaskMode }: { isMaskMode: boolean }) => (
   </div>
 );
 
+const ModelLoadingOverlay = () => (
+  <div className="absolute inset-0 z-50 bg-[#0d1117]/95 backdrop-blur-sm flex items-center justify-center p-6">
+    <div className="w-full max-w-xs flex flex-col items-center gap-6">
+      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+        <Leaf className="size-7 text-white" />
+      </div>
+      <div className="text-center">
+        <h2 className="text-white font-bold text-lg">MabuhAi</h2>
+        <p className="text-white/40 text-xs mt-1">Getting things ready...</p>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <div className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-white/50 text-sm">Connecting...</p>
+      </div>
+    </div>
+  </div>
+);
+
 export default function Chatbot() {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -64,6 +87,26 @@ export default function Chatbot() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [hasAcceptedPrivacy, setHasAcceptedPrivacy] = useState(false);
+
+  useEffect(() => {
+    const accepted = localStorage.getItem('privacy_policy_accepted');
+    const acceptedVersion = localStorage.getItem('privacy_policy_version');
+    
+    if (accepted === 'true' && acceptedVersion === '2.0.0') {
+      setHasAcceptedPrivacy(true);
+    } else {
+      // Show privacy policy after 1 second
+      setTimeout(() => {
+        setShowPrivacyPolicy(true);
+      }, 1000);
+    }
+  }, []);
+
+  // Model state
+  const [modelState, setModelState] = useState<ModelState>("checking");
 
   const getInitialMessage = (mask: boolean): Message => ({
     id: "init",
@@ -103,8 +146,24 @@ export default function Chatbot() {
     }
   }, [messages]);
 
+  // Check and initialize model on mount
+  useEffect(() => {
+    initModel();
+  }, []);
+
+  const initModel = async () => {
+    try {
+      setModelState("checking");
+      await invoke<boolean>("check_model");
+      setModelState("ready");
+    } catch (error) {
+      console.error("Init failed:", error);
+      setModelState("ready");
+    }
+  };
+
   const sendMessage = async (text: string, intent: string = "general") => {
-    if (!text.trim() || isLoading) return;
+    if (!text.trim() || isLoading || modelState !== "ready") return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -115,7 +174,6 @@ export default function Chatbot() {
 
     const aiMessageId = (Date.now() + 1).toString();
 
-    // Show user message + typing dots immediately
     setMessages((prev) => [
       ...prev,
       userMessage,
@@ -130,10 +188,21 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      // Wait for full reply from Rust
-      const reply = await invoke<string>("chat", { message: text, intent });
+      const response = await fetch(`${SERVER_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          intent,
+          history: [], 
+        }),
+      });
 
-      // Replace typing dots with typewriter animation of full reply
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+      const data = await response.json();
+      const reply = data.reply;
+
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === aiMessageId
@@ -142,9 +211,7 @@ export default function Chatbot() {
         )
       );
 
-      // After typewriter finishes, mark as done
-      // speed=18ms per char, so wait that long before marking done
-      const duration = reply.length * 18 + 200;
+      const duration = reply.length * 8 + 200;
       setTimeout(() => {
         setMessages((prev) =>
           prev.map((msg) =>
@@ -184,12 +251,27 @@ export default function Chatbot() {
 
   return (
     <div
-      className={`flex flex-col h-screen transition-all duration-500 overflow-hidden ${
+      className={`relative flex flex-col h-screen transition-all duration-500 overflow-hidden ${
         isMaskMode
           ? "bg-[#0b0f14] text-white"
           : "bg-white dark:bg-twilight-dark text-slate-900 dark:text-white"
       }`}
     >
+      {/* Model loading overlay — sits on top of everything */}
+      <AnimatePresence>
+        {modelState !== "ready" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 z-50"
+          >
+            <ModelLoadingOverlay />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <header className="px-6 py-4 flex items-center justify-between border-b border-indigo-100 dark:border-indigo-900/50 bg-white/80 dark:bg-twilight-dark/80 backdrop-blur-md sticky top-0 z-10 text-slate-900 dark:text-white">
         <div className="flex items-center gap-2">
           <button
@@ -203,7 +285,9 @@ export default function Chatbot() {
             <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary via-secondary to-accent flex items-center justify-center text-white shadow-md">
               <Leaf className="size-5" />
             </div>
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-twilight-dark rounded-full" />
+            <div className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white dark:border-twilight-dark rounded-full ${
+              modelState === "ready" ? "bg-green-500" : "bg-yellow-500 animate-pulse"
+            }`} />
           </div>
 
           <div className="ml-2 text-left">
@@ -256,11 +340,9 @@ export default function Chatbot() {
                 isAi={msg.isAi}
                 isMaskMode={isMaskMode}
                 message={
-                  // Show typing dots while waiting for reply
                   msg.isAi && msg.status === "typing" && typeof msg.content === "string" && msg.content === "" ? (
                     <TypingDots isMaskMode={isMaskMode} />
-                  ) : // Typewriter once reply arrives
-                  msg.isAi && msg.status === "typing" && typeof msg.content === "string" ? (
+                  ) : msg.isAi && msg.status === "typing" && typeof msg.content === "string" ? (
                     <Typewriter text={msg.content} speed={18} />
                   ) : (
                     msg.content
@@ -352,9 +434,9 @@ export default function Chatbot() {
                 }
               }}
               className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-1.5 placeholder:text-slate-400 resize-none max-h-32 text-slate-900 dark:text-white"
-              placeholder="Type a message..."
+              placeholder={modelState !== "ready" ? "Waiting for model..." : "Type a message..."}
               rows={1}
-              disabled={isLoading}
+              disabled={isLoading || modelState !== "ready"}
             />
             <button className="text-slate-400 hover:text-secondary">
               <Paperclip className="size-5" />
@@ -365,7 +447,7 @@ export default function Chatbot() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleSendMessage}
-            disabled={!inputText.trim() || isLoading}
+            disabled={!inputText.trim() || isLoading || modelState !== "ready"}
             className="w-12 h-12 bg-linear-to-br from-primary to-secondary text-white rounded-xl flex items-center justify-center shadow-lg disabled:opacity-50 disabled:grayscale transition-all"
           >
             <Send className="size-5" />
@@ -382,6 +464,11 @@ export default function Chatbot() {
         onToggle={() => {
           setShowOverlay(false);
         }}
+      />
+      <PrivacyPolicy 
+        isOpen={showPrivacyPolicy}
+        onClose={() => setShowPrivacyPolicy(false)}
+        onAccept={() => setHasAcceptedPrivacy(true)}
       />
     </div>
   );

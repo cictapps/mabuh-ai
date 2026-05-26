@@ -31,5 +31,16 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "http": {
+      "dangerousRemoteDomainIpcAccess": [
+        {
+          "domain": "huggingface.co",
+          "windows": ["main"],
+          "enableTauriAPI": true
+        }
+      ]
+    }
   }
 }

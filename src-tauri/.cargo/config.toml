@@ -1,0 +1,26 @@
+[target.aarch64-linux-android]
+linker = "aarch64-linux-android33-clang"
+ar = "llvm-ar"
+
+[target.armv7-linux-androideabi]
+linker = "armv7a-linux-androideabi33-clang"
+ar = "llvm-ar"
+
+[target.i686-linux-android]
+linker = "i686-linux-android33-clang"
+ar = "llvm-ar"
+
+[target.x86_64-linux-android]
+linker = "x86_64-linux-android33-clang"
+ar = "llvm-ar"
+
+[env]
+ANDROID_NDK_HOME = "C:/Users/Axel John Nuqui/AppData/Local/Android/Sdk/ndk/28.2.13676358"
+ANDROID_NDK = "C:/Users/Axel John Nuqui/AppData/Local/Android/Sdk/ndk/28.2.13676358"
+NDK_ROOT = "C:/Users/Axel John Nuqui/AppData/Local/Android/Sdk/ndk/28.2.13676358"
+ANDROID_NDK_ROOT = "C:/Users/Axel John Nuqui/AppData/Local/Android/Sdk/ndk/28.2.13676358"
+ANDROID_HOME = "C:/Users/Axel John Nuqui/AppData/Local/Android/Sdk"
+CMAKE_TOOLCHAIN_FILE = "C:/Users/Axel John Nuqui/AppData/Local/Android/Sdk/ndk/28.2.13676358/build/cmake/android.toolchain.cmake"
+CMAKE_GENERATOR = "Ninja"
+ANDROID_ABI = "arm64-v8a"
+ANDROID_PLATFORM = "android-33"

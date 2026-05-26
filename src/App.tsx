@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { useState } from "react";
 import { Flame, MoonStar, Sparkles, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { appDataDir, join } from "@tauri-apps/api/path";
+import { invoke } from "@tauri-apps/api/core";
 import {
   Card,
   CardContent,
@@ -18,27 +17,6 @@ function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const initializeModel = async () => {
-      try {
-        const dataDir = await appDataDir();
-        const modelPath = await join(dataDir, "model.gguf");
-        console.log("Loading model from:", modelPath);
-        const result = await invoke<string>("load_model", { path: modelPath });
-        console.log("✅", result);
-      } catch (error) {
-        const errStr = String(error);
-        if (errStr.includes("AlreadyInitialized") || errStr.includes("already")) {
-          console.log("✅ Model already loaded, skipping...");
-          return;
-        }
-        console.error("❌ Failed to load model:", error);
-      }
-    };
-
-    initializeModel();
-  }, []);
 
   async function greet() {
     if (!name.trim()) return;

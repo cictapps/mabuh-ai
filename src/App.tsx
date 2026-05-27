@@ -1,81 +1,76 @@
-import { Component, Suspense, lazy, type ErrorInfo, type ReactNode } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { ProtectedRoute } from "@/lib/auth";
-
-const AuthPage = lazy(async () => import("@/pages/auth/AuthPage"));
-const AuthCallback = lazy(async () => import("@/pages/auth/AuthCallback"));
-const Home = lazy(async () => import("@/pages/Home"));
-const ResetPassword = lazy(async () => import("@/pages/auth/ResetPassword"));
-
-type AppErrorBoundaryState = {
-  error: Error | null;
-};
-
-class AppErrorBoundary extends Component<{ children: ReactNode }, AppErrorBoundaryState> {
-  state: AppErrorBoundaryState = {
-    error: null,
-  };
-
-  static getDerivedStateFromError(error: Error): AppErrorBoundaryState {
-    return { error };
-  }
-
-  componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("App render failed", error, info);
-  }
-
-  render() {
-    if (this.state.error) {
-      return (
-        <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12 text-foreground">
-          <div className="w-full max-w-md rounded-[1.5rem] border border-white/10 bg-card/90 p-6 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)]">
-            <h1 className="font-serif text-3xl tracking-[-0.03em]">Something blocked the page</h1>
-            <p className="mt-3 text-sm text-muted-foreground">
-              The app hit a render error before the screen could finish loading.
-            </p>
-            <p className="mt-4 rounded-2xl bg-surface-high p-4 text-sm text-red-400">
-              {this.state.error.message}
-            </p>
-          </div>
-        </main>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
-function RouteFallback() {
-  return (
-    <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
-      Loading page...
-    </div>
-  );
-}
+import { AnimatePresence, motion } from 'framer-motion';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BottomNav } from './components/BottomNav';
+import { Layout } from './components/Layout';
+import { HomePage } from './features/journal/pages/HomePage';
+import { MoodCalendarPage } from './features/journal/pages/MoodCalendarPage';
+import { NewEntryPage } from './features/journal/pages/NewEntryPage';
+import { EntryDetailPage } from './features/journal/pages/EntryDetailPage';
+import { MaskOffPage } from './features/maskoff/pages/MaskOffPage';
+import { MaskOffDetailPage } from './features/maskoff/pages/MaskOffDetailPage';
+import { NewMaskOffPage } from './features/maskoff/pages/NewMaskOffPage';
 
 function App() {
   return (
     <BrowserRouter>
-      <AppErrorBoundary>
-        <Suspense fallback={<RouteFallback />}>
-          <Routes>
-            <Route path="/login" element={<AuthPage initialTab="sign-in" />} />
-            <Route path="/signup" element={<AuthPage initialTab="sign-up" />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/auth/reset" element={<ResetPassword />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-      </AppErrorBoundary>
+      <AnimatedRoutes />
+      <BottomNav />
     </BrowserRouter>
+  );
+}
+
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        exit={{ opacity: 0, y: -8, filter: 'blur(4px)' }}
+        transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+        className="min-h-screen"
+      >
+        <Routes location={location}>
+          <Route path="/" element={
+            <Layout>
+              <HomePage />
+            </Layout>
+          } />
+          <Route path="/new" element={
+            <Layout>
+              <NewEntryPage />
+            </Layout>
+          } />
+          <Route path="/mood-calendar" element={
+            <Layout>
+              <MoodCalendarPage />
+            </Layout>
+          } />
+          <Route path="/entry/:id" element={
+            <Layout>
+              <EntryDetailPage />
+            </Layout>
+          } />
+          <Route path="/maskoff" element={
+            <Layout>
+              <MaskOffPage />
+            </Layout>
+          } />
+          <Route path="/maskoff-detail/:id" element={
+            <Layout>
+              <MaskOffDetailPage />
+            </Layout>
+          } />
+          <Route path="/new-maskoff" element={
+            <Layout>
+              <NewMaskOffPage />
+            </Layout>
+          } />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

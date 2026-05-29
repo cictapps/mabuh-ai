@@ -1,0 +1,226 @@
+import { create } from "zustand";
+import type { Provider, Session, User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
+
+export type Profile = {
+  id: string;
+  display_name: string | null;
+};
+
+type AuthState = {
+  session: Session | null;
+  user: User | null;
+  profile: Profile | null;
+  loading: boolean;
+  initialize: () => Promise<void>;
+  refresh: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName: string) => Promise<SignUpResult>;
+  signInWithGoogle: (nextPath?: string) => Promise<void>;
+  resendConfirmation: (email: string) => Promise<void>;
+  signOut: () => Promise<void>;
+};
+
+export type SignUpResult = {
+  session: Session | null;
+  needsEmailConfirmation: boolean;
+};
+
+type AuthSnapshot = {
+  session: Session | null;
+  user: User | null;
+  profile: Profile | null;
+};
+
+let authInitializationPromise: Promise<void> | null = null;
+let authListenerBound = false;
+
+function getAuthRedirectUrl(path = "/auth/callback") {
+  return `${window.location.origin}${path}`;
+}
+
+export function isUserEmailVerified(user: User | null) {
+  if (!user?.email) return false;
+  return Boolean(user.email_confirmed_at || user.confirmed_at);
+}
+
+async function fetchProfile(userId: string): Promise<Profile | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, display_name")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) {
+    console.error("fetchProfile failed", error);
+    return null;
+  }
+  return (data as Profile) ?? null;
+}
+
+async function getAuthSnapshot(session: Session | null): Promise<AuthSnapshot> {
+  const user = session?.user ?? null;
+  const profile = user ? await fetchProfile(user.id) : null;
+  return { session, user, profile };
+}
+
+async function ensureProfile(snapshot: AuthSnapshot): Promise<AuthSnapshot> {
+  if (snapshot.user && !snapshot.profile) {
+    await supabase.auth.signOut().catch(() => {});
+    throw new Error(
+      "Your account is missing its profile record. Please ask an administrator to rerun the Supabase schema setup.",
+    );
+  }
+
+  return snapshot;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
+  session: null,
+  user: null,
+  profile: null,
+  loading: true,
+
+  refresh: async () => {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
+
+    const snapshot = await getAuthSnapshot(data.session);
+
+    if (snapshot.user && !snapshot.profile) {
+      await supabase.auth.signOut().catch(() => {});
+      set({ session: null, user: null, profile: null, loading: false });
+      return;
+    }
+
+    set({ ...snapshot, loading: false });
+  },
+
+  initialize: async () => {
+    if (authInitializationPromise) {
+      return authInitializationPromise;
+    }
+
+    authInitializationPromise = (async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const snapshot = await getAuthSnapshot(data.session);
+
+        // If a session exists but the profile is gone (e.g. user deleted in Supabase),
+        // sign out locally so the stale JWT doesn't keep the user locked in.
+        if (snapshot.user && !snapshot.profile) {
+          await supabase.auth.signOut().catch(() => {});
+          set({ session: null, user: null, profile: null, loading: false });
+          return;
+        }
+
+        set({ ...snapshot, loading: false });
+
+        if (!authListenerBound) {
+          authListenerBound = true;
+          supabase.auth.onAuthStateChange(async (_event, newSession) => {
+            const snapshot = await getAuthSnapshot(newSession);
+
+            if (snapshot.user && !snapshot.profile) {
+              await supabase.auth.signOut().catch(() => {});
+              set({ session: null, user: null, profile: null, loading: false });
+              return;
+            }
+
+            set({ ...snapshot, loading: false });
+          });
+        }
+      } catch (error) {
+        authInitializationPromise = null;
+        set({ session: null, user: null, profile: null, loading: false });
+        console.error("auth initialize failed", error);
+        throw error;
+      }
+    })();
+
+    return authInitializationPromise;
+  },
+
+  signIn: async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+
+    const snapshot = await ensureProfile(await getAuthSnapshot(data.session));
+    set({ ...snapshot, loading: false });
+  },
+
+  signUp: async (email, password, displayName) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { display_name: displayName },
+        emailRedirectTo: getAuthRedirectUrl(),
+      },
+    });
+    if (error) throw error;
+
+    if (data.session) {
+      const snapshot = await ensureProfile(await getAuthSnapshot(data.session));
+      set({ ...snapshot, loading: false });
+    }
+
+    return {
+      session: data.session,
+      needsEmailConfirmation: !data.session,
+    };
+  },
+
+  signInWithGoogle: async (nextPath = "/") => {
+    const provider: Provider = "google";
+    const next = encodeURIComponent(nextPath.startsWith("/") ? nextPath : "/");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: getAuthRedirectUrl(`/auth/callback?next=${next}`),
+        queryParams: {
+          prompt: "select_account",
+        },
+      },
+    });
+    if (error) throw error;
+  },
+
+  resendConfirmation: async (email) => {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: getAuthRedirectUrl(),
+      },
+    });
+    if (error) throw error;
+  },
+
+  signOut: async () => {
+    // Always clear local state, even if the server call fails.
+    await supabase.auth.signOut().catch(() => {});
+    set({ session: null, user: null, profile: null, loading: false });
+  },
+}));
+
+export const useAuth = () => {
+  const { session, user, profile, loading } = useAuthStore();
+  return {
+    session,
+    user,
+    profile,
+    loading,
+    isAuthenticated: !!session,
+    isEmailVerified: isUserEmailVerified(user),
+  };
+};
+
+export const useAuthActions = () => {
+  const signIn = useAuthStore((s) => s.signIn);
+  const signUp = useAuthStore((s) => s.signUp);
+  const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
+  const resendConfirmation = useAuthStore((s) => s.resendConfirmation);
+  const signOut = useAuthStore((s) => s.signOut);
+
+  return { signIn, signUp, signInWithGoogle, resendConfirmation, signOut };
+};

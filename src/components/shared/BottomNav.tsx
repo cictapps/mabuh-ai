@@ -1,5 +1,5 @@
 import React from "react";
-import { ScreenId, NavItem } from "../types";
+import { ScreenId, NavItem } from "../../types";
 
 interface BottomNavProps {
   items: NavItem[];

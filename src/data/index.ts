@@ -38,8 +38,15 @@ export const MOODS: MoodMeta[] = [
   },
 ];
 
-export const getMoodMeta = (id: MoodType): MoodMeta =>
-  MOODS.find((m) => m.id === id)!;
+export const getMoodMeta = (id: MoodType): MoodMeta => {
+  const mood = MOODS.find((m) => m.id === id);
+
+  if (!mood) {
+    throw new Error(`Invalid mood ID: ${id}`);
+  }
+
+  return mood;
+};
 
 export const INSIGHTS: InsightCard[] = [
   {

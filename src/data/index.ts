@@ -135,9 +135,10 @@ export const SEED_HISTORY: MoodEntry[] = moodSeq.map((mood, i) => ({
 }));
 
 export const NAV_ITEMS: NavItem[] = [
-  { id: "checkin",     label: "Check in",   icon: "✦" },
-  { id: "history",     label: "History",    icon: "◎" },
-  { id: "analytics",   label: "Analytics",  icon: "∿" },
-  { id: "insights",    label: "Insights",   icon: "◈" },
-  { id: "journal",     label: "Journal",    icon: "✎" },
+  { id: "checkin",   label: "Check in",  icon: "✦" },
+  { id: "history",   label: "History",   icon: "◎" },
+  { id: "analytics", label: "Analytics", icon: "∿" },
+  { id: "insights",  label: "Insights",  icon: "◈" },
+  { id: "journal",   label: "Journal",   icon: "✎" },
+  { id: "gis",       label: "Find Help", icon: "⊕" },
 ];

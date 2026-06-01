@@ -89,7 +89,7 @@ export default function Chatbot() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
-  const [hasAcceptedPrivacy, setHasAcceptedPrivacy] = useState(false);
+  const [, setHasAcceptedPrivacy] = useState(false);
 
   useEffect(() => {
     const accepted = localStorage.getItem('privacy_policy_accepted');

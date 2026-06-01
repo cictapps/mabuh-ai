@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Shield, Database, Cpu, Lock, Trash2,
   ShieldCheck, Heart, UserCheck, FileText,
-  X, ChevronRight, CheckCircle2, Mail, Phone
+  X, ChevronRight, CheckCircle2
 } from 'lucide-react';
 
 interface PrivacyPolicyProps {

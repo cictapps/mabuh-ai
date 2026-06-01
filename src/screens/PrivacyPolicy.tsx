@@ -255,7 +255,6 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, o
             })}
           </div>
 
-          // Contact Info section in PrivacyPolicy.tsx
           <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mt-4">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
               🇵🇭 Questions or Concerns?

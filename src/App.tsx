@@ -9,6 +9,7 @@ import { HistoryScreen }    from "./screens/HistoryScreen";
 import { AnalyticsScreen }  from "./screens/AnalyticsScreen";
 import { InsightsScreen }   from "./screens/InsightsScreen";
 import { JournalScreen }    from "./screens/JournalScreen";
+import { GISFeature } from "./screens/GISFeature";
 
 export default function App() {
   const [activeScreen, setActiveScreen] = useState<ScreenId>("checkin");
@@ -126,6 +127,10 @@ export default function App() {
             onAddEntry={addManualJournalEntry}
           />
         )}
+
+        {activeScreen === "gis" && (
+  <GISFeature key={screenKey} />
+)}
       </main>
 
       {/* Bottom navigation */}

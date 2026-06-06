@@ -91,7 +91,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         display: "flex",
         flexDirection: "column",
         gap: 20,
-        padding: "26px 20px 92px",
+        padding: "calc(env(safe-area-inset-top, 0px) + 26px) 20px 92px",
         position: "relative",
       }}
     >

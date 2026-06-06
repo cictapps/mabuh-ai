@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Leaf, Ghost } from "lucide-react";
 
 // ─── Rich Text Parser ────────────────────────────────────────────────────────
 
@@ -182,16 +182,22 @@ export const ChatBubble = ({
     >
       {/* AI avatar */}
       {isAi && (
-        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-white/10 bg-white/5">
-          <Sparkles
-            className={`size-4 ${
-              isTyping
-                ? "text-white/40 animate-pulse"
-                : isMaskMode
-                ? "text-white/70"
-                : "text-secondary"
-            }`}
-          />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border ${
+          isMaskMode
+            ? "border-white/10 bg-white/5"
+            : "border-border bg-surface-high/80 backdrop-blur-sm"
+        }`}>
+          {isMaskMode ? (
+            <Ghost
+              size={18}
+              className={`text-white/70 ${isTyping ? "animate-pulse" : ""}`}
+            />
+          ) : (
+            <Leaf
+              size={18}
+              className={`text-primary ${isTyping ? "animate-pulse" : ""}`}
+            />
+          )}
         </div>
       )}
 
@@ -203,10 +209,10 @@ export const ChatBubble = ({
             : isAi
               ? isMaskMode
                 ? "bg-[#0b0f14] border border-white/10 text-white rounded-tl-none shadow-none"
-                : "bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-tl-none"
+                : "bg-card border border-border text-card-foreground rounded-tl-none shadow-[0_18px_48px_-34px_rgba(8,10,18,0.9)]"
               : isMaskMode
                 ? "bg-white/10 text-white rounded-tr-none border border-white/10"
-                : "bg-linear-to-br from-primary to-secondary text-white rounded-tr-none"
+                : "bg-gradient-to-br from-primary via-secondary to-tertiary text-primary-foreground rounded-tr-none shadow-[0_18px_48px_-28px_rgba(188,194,255,0.6)]"
         }`}
       >
         {isTyping ? <TypingDots isMaskMode={isMaskMode} /> : rendered}

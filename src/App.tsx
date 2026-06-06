@@ -1,19 +1,27 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { ScreenId } from "./types";
 import { NAV_ITEMS } from "./data";
 import { useMoodStore } from "./hooks/useMoodStore";
 
 import { BottomNav } from "./components/shared/BottomNav";
 import { CheckInScreen }    from "./screens/CheckInScreen";
-import { HistoryScreen }    from "./screens/HistoryScreen";
-import { AnalyticsScreen }  from "./screens/AnalyticsScreen";
-import { InsightsScreen }   from "./screens/InsightsScreen";
-import { JournalScreen }    from "./screens/JournalScreen";
-import { GISFeature } from "./screens/GISFeature";
+import { ReviewHub } from "./screens/ReviewHub";
+import { SupportHub } from "./screens/SupportHub";
 
-export default function App() {
-  const [activeScreen, setActiveScreen] = useState<ScreenId>("checkin");
-  const [screenKey, setScreenKey] = useState(0);
+type SupportView = "hub" | "chat";
+
+interface AppProps {
+  initialHub?: ScreenId;
+  initialSupportView?: SupportView;
+}
+
+export default function App({
+  initialHub = "checkin",
+  initialSupportView = "hub",
+}: AppProps) {
+  const [activeHub, setActiveHub] = useState<ScreenId>(initialHub);
+  const [supportView, setSupportView] = useState<SupportView>(initialSupportView);
+  const mainRef = useRef<HTMLElement | null>(null);
 
   const {
     history,
@@ -48,9 +56,12 @@ export default function App() {
   } = useMoodStore();
 
   const handleNavSelect = useCallback((id: ScreenId) => {
-    setActiveScreen(id);
-    setScreenKey((k) => k + 1);
+    setActiveHub(id);
   }, []);
+
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, behavior: "auto" });
+  }, [activeHub, supportView]);
 
   return (
     <div
@@ -67,16 +78,19 @@ export default function App() {
     >
       {/* Scrollable content area */}
       <main
+        ref={mainRef}
         style={{
           flex: 1,
-          overflowY: "auto",
+          minHeight: 0,
+          display: activeHub === "support" && supportView === "chat" ? "flex" : "block",
+          flexDirection: "column",
+          overflowY: activeHub === "support" && supportView === "chat" ? "hidden" : "auto",
           overflowX: "hidden",
           WebkitOverflowScrolling: "touch",
         }}
       >
-        {activeScreen === "checkin" && (
+        <div style={{ display: activeHub === "checkin" ? "block" : "none" }}>
           <CheckInScreen
-            key={screenKey}
             selectedMood={selectedMood}
             selectedTags={selectedTags}
             journal={journal}
@@ -98,47 +112,45 @@ export default function App() {
             onAddCustomActivity={addCustomActivity}
             onSave={saveEntry}
           />
-        )}
-        {activeScreen === "history" && (
-          <HistoryScreen key={screenKey} history={history} />
-        )}
-        {activeScreen === "analytics" && (
-          <AnalyticsScreen
-            key={screenKey}
+        </div>
+        <div style={{ display: activeHub === "review" ? "block" : "none" }}>
+          <ReviewHub
             history={history}
             trendData={trendData}
             distribution={distribution}
             dominantMood={dominantMood}
             socialStats={socialStats}
             analyticsStats={analyticsStats}
-          />
-        )}
-        {activeScreen === "insights" && (
-          <InsightsScreen
-            key={screenKey}
             refreshToken={lastSavedAt}
-            history={history}
+            journalEntries={journalEntries}
+            onAddJournalEntry={addManualJournalEntry}
           />
-        )}
-        {activeScreen === "journal" && (
-          <JournalScreen
-            key={screenKey}
-            entries={journalEntries}
-            onAddEntry={addManualJournalEntry}
+        </div>
+        <div
+          style={{
+            display: activeHub === "support" ? "flex" : "none",
+            flexDirection: "column",
+            flex: supportView === "chat" ? 1 : "initial",
+            height: supportView === "chat" ? "100%" : "auto",
+            minHeight: 0,
+          }}
+        >
+          <SupportHub
+            view={supportView}
+            onOpenChat={() => setSupportView("chat")}
+            onCloseChat={() => setSupportView("hub")}
           />
-        )}
-
-        {activeScreen === "gis" && (
-  <GISFeature key={screenKey} />
-)}
+        </div>
       </main>
 
       {/* Bottom navigation */}
-      <BottomNav
-        items={NAV_ITEMS}
-        active={activeScreen}
-        onSelect={handleNavSelect}
-      />
+      {!(activeHub === "support" && supportView === "chat") && (
+        <BottomNav
+          items={NAV_ITEMS}
+          active={activeHub}
+          onSelect={handleNavSelect}
+        />
+      )}
     </div>
   );
 }

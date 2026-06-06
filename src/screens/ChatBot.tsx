@@ -1,14 +1,21 @@
-import { useState, useRef, useEffect, ReactNode } from "react";
+import { useEffect, useRef, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ChevronLeft, Send, Smile, Paperclip, 
-  Leaf, Wind, Heart, Sparkles
+import {
+  ChevronLeft,
+  Send,
+  Smile,
+  Paperclip,
+  Leaf,
+  Wind,
+  Heart,
+  Sparkles,
+  Ghost,
+  MessageCircle,
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 
 import { ChatBubble } from "../components/chatbot-components/ChatBubble";
-import { MaskOverlay } from "../components/chatbot-components/MaskOverlay";
 import { PrivacyPolicy } from "./PrivacyPolicy";
 
 const SERVER_URL = "https://mabuh-ai-server.onrender.com";
@@ -23,6 +30,11 @@ interface Message {
 
 type ModelState = "checking" | "downloading" | "loading" | "ready";
 
+interface ChatbotShellProps {
+  embedded?: boolean;
+  onBack?: () => void;
+}
+
 const Typewriter = ({ text, speed = 18 }: { text: string; speed?: number }) => {
   const [displayed, setDisplayed] = useState("");
 
@@ -34,6 +46,7 @@ const Typewriter = ({ text, speed = 18 }: { text: string; speed?: number }) => {
       setDisplayed(text.slice(0, i));
       if (i >= text.length) clearInterval(interval);
     }, speed);
+
     return () => clearInterval(interval);
   }, [text, speed]);
 
@@ -60,53 +73,53 @@ const TypingDots = ({ isMaskMode }: { isMaskMode: boolean }) => (
   </div>
 );
 
-const ModelLoadingOverlay = () => (
-  <div className="absolute inset-0 z-50 bg-[#0d1117]/95 backdrop-blur-sm flex items-center justify-center p-6">
+const ModelLoadingOverlay = ({ embedded }: { embedded: boolean }) => (
+  <div
+    className={`absolute inset-0 z-50 flex items-center justify-center p-6 ${
+      embedded ? "rounded-[1.75rem] bg-background/90 backdrop-blur-sm" : "bg-background/95 backdrop-blur-sm"
+    }`}
+  >
     <div className="w-full max-w-xs flex flex-col items-center gap-6">
-      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-        <Leaf className="size-7 text-white" />
+      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary via-secondary to-tertiary flex items-center justify-center shadow-lg shadow-primary/20">
+        <Leaf className="size-7 text-primary-foreground" />
       </div>
       <div className="text-center">
-        <h2 className="text-white font-bold text-lg">MabuhAi</h2>
-        <p className="text-white/40 text-xs mt-1">Getting things ready...</p>
+        <h2 className="text-foreground font-bold text-lg">MabuhAi</h2>
+        <p className="text-muted-foreground text-xs mt-1">Getting things ready...</p>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <div className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-white/50 text-sm">Connecting...</p>
+        <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-muted-foreground text-sm">Connecting...</p>
       </div>
     </div>
   </div>
 );
 
-export default function Chatbot() {
+export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [isMaskMode, setIsMaskMode] = useState(false);
   const [inputText, setInputText] = useState("");
-  const [showOverlay, setShowOverlay] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
-  const [, setHasAcceptedPrivacy] = useState(false);
+  const [modelState, setModelState] = useState<ModelState>("checking");
 
   useEffect(() => {
-    const accepted = localStorage.getItem('privacy_policy_accepted');
-    const acceptedVersion = localStorage.getItem('privacy_policy_version');
-    
-    if (accepted === 'true' && acceptedVersion === '2.0.0') {
-      setHasAcceptedPrivacy(true);
-    } else {
-      // Show privacy policy after 1 second
-      setTimeout(() => {
-        setShowPrivacyPolicy(true);
-      }, 1000);
-    }
-  }, []);
+    const accepted = localStorage.getItem("privacy_policy_accepted");
+    const acceptedVersion = localStorage.getItem("privacy_policy_version");
 
-  // Model state
-  const [modelState, setModelState] = useState<ModelState>("checking");
+    if (accepted === "true" && acceptedVersion === "2.0.0") {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setShowPrivacyPolicy(true);
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const getInitialMessage = (mask: boolean): Message => ({
     id: "init",
@@ -119,13 +132,11 @@ export default function Chatbot() {
     ) : (
       <>
         <p>
-          Kamusta! I'm{" "}
-          <span className="font-bold text-primary dark:text-secondary">
-            MabuhAi
-          </span>, your mental health companion. 🌿
+          Kamusta! I&apos;m{" "}
+          <span className="font-bold text-primary">MabuhAi</span>, your mental health companion. 🌿
         </p>
         <p className="mt-2">
-          I'm here to listen, support, and help you navigate your feelings. How are you feeling today?
+          I&apos;m here to listen, support, and help you navigate your feelings. How are you feeling today?
         </p>
       </>
     ),
@@ -138,29 +149,27 @@ export default function Chatbot() {
   }, [isMaskMode]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages]);
 
-  // Check and initialize model on mount
   useEffect(() => {
+    const initModel = async () => {
+      try {
+        setModelState("checking");
+        await invoke<boolean>("check_model");
+        setModelState("ready");
+      } catch (error) {
+        console.error("Init failed:", error);
+        setModelState("ready");
+      }
+    };
+
     initModel();
   }, []);
-
-  const initModel = async () => {
-    try {
-      setModelState("checking");
-      await invoke<boolean>("check_model");
-      setModelState("ready");
-    } catch (error) {
-      console.error("Init failed:", error);
-      setModelState("ready");
-    }
-  };
 
   const sendMessage = async (text: string, intent: string = "general") => {
     if (!text.trim() || isLoading || modelState !== "ready") return;
@@ -194,34 +203,29 @@ export default function Chatbot() {
         body: JSON.stringify({
           message: text,
           intent,
-          history: [], 
+          history: [],
         }),
       });
 
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
 
       const data = await response.json();
-      const reply = data.reply;
+      const reply = data.reply as string;
 
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === aiMessageId
-            ? { ...msg, content: reply, status: "typing" }
-            : msg
-        )
+          msg.id === aiMessageId ? { ...msg, content: reply, status: "typing" } : msg,
+        ),
       );
 
       const duration = reply.length * 8 + 200;
-      setTimeout(() => {
+      window.setTimeout(() => {
         setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === aiMessageId
-              ? { ...msg, status: "done" }
-              : msg
-          )
+          prev.map((msg) => (msg.id === aiMessageId ? { ...msg, status: "done" } : msg)),
         );
       }, duration);
-
     } catch (error) {
       console.error("Chat error:", error);
       setMessages((prev) =>
@@ -232,8 +236,8 @@ export default function Chatbot() {
                 content: "Sorry, something went wrong. Please try again.",
                 status: "done",
               }
-            : msg
-        )
+            : msg,
+        ),
       );
     } finally {
       setIsLoading(false);
@@ -249,15 +253,21 @@ export default function Chatbot() {
     sendMessage(text, intent);
   };
 
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+
+    navigate(-1);
+  };
+
+  const shellClasses = embedded
+    ? "relative flex flex-1 h-full flex-col overflow-hidden bg-card/90 text-card-foreground backdrop-blur-xl"
+    : "relative flex h-full min-h-screen flex-col overflow-hidden bg-background text-foreground";
+
   return (
-    <div
-      className={`relative flex flex-col h-screen transition-all duration-500 overflow-hidden ${
-        isMaskMode
-          ? "bg-[#0b0f14] text-white"
-          : "bg-white dark:bg-twilight-dark text-slate-900 dark:text-white"
-      }`}
-    >
-      {/* Model loading overlay — sits on top of everything */}
+    <div className={shellClasses}>
       <AnimatePresence>
         {modelState !== "ready" && (
           <motion.div
@@ -267,42 +277,77 @@ export default function Chatbot() {
             transition={{ duration: 0.3 }}
             className="absolute inset-0 z-50"
           >
-            <ModelLoadingOverlay />
+            <ModelLoadingOverlay embedded={embedded} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      <header className="px-6 py-4 flex items-center justify-between border-b border-indigo-100 dark:border-indigo-900/50 bg-white/80 dark:bg-twilight-dark/80 backdrop-blur-md sticky top-0 z-10 text-slate-900 dark:text-white">
+      <header
+        className={`sticky top-0 z-10 flex items-center justify-between px-5 py-4 backdrop-blur-md sm:px-6 transition-all duration-500 ${
+          isMaskMode
+            ? "bg-black/40 backdrop-blur-xl"
+            : embedded
+            ? "bg-card/80"
+            : "bg-background/80"
+        }`}
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
+        }}
+      >
         <div className="flex items-center gap-2">
           <button
-            onClick={() => navigate(-1)}
-            className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors"
+            onClick={handleBack}
+            className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+            aria-label="Back"
+            type="button"
           >
-            <ChevronLeft className="size-6" />
+            <ChevronLeft size={24} />
           </button>
 
           <div className="relative ml-1">
-            <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary via-secondary to-accent flex items-center justify-center text-white shadow-md">
-              <Leaf className="size-5" />
+            <div className={`flex h-10 w-10 items-center justify-center rounded-full text-primary-foreground shadow-md transition-all duration-500 ${
+              isMaskMode
+                ? "bg-white/10 shadow-white/5 border border-white/10"
+                : "bg-gradient-to-br from-primary via-secondary to-tertiary shadow-primary/20"
+            }`}>
+              {isMaskMode ? (
+                <Ghost size={20} className="text-white/80" />
+              ) : (
+                <Leaf size={20} />
+              )}
             </div>
-            <div className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white dark:border-twilight-dark rounded-full ${
-              modelState === "ready" ? "bg-green-500" : "bg-yellow-500 animate-pulse"
-            }`} />
+            <div
+              className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${
+                modelState === "ready" ? "bg-emerald-500" : "bg-amber-500 animate-pulse"
+              } ${isMaskMode ? "border-black" : embedded ? "border-card" : "border-background"}`}
+            />
           </div>
 
           <div className="ml-2 text-left">
-            <h1 className="font-bold text-lg tracking-tight leading-none">MabuhAi</h1>
-            <p className="text-[10px] text-pink-500 uppercase tracking-widest font-bold mt-1">Twilight Glow</p>
+            <h1 className="text-lg font-bold tracking-tight leading-none">MabuhAi</h1>
+            <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-tertiary">
+              Twilight Glow
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-indigo-50/50 dark:bg-indigo-950/30 px-4 py-2 rounded-full border border-indigo-100/50 dark:border-indigo-900/50">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Mask-Off</span>
+        <div className={`flex items-center gap-3 rounded-full border px-4 py-2 transition-all duration-500 ${
+          isMaskMode
+            ? "border-white/20 bg-white/5"
+            : "border-border bg-surface-low"
+        }`}>
+          <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors duration-500 ${
+            isMaskMode ? "text-white" : "text-muted-foreground"
+          }`}>
+            Mask-Off
+          </span>
           <button
             onClick={() => setIsMaskMode((prev) => !prev)}
             className={`relative inline-flex h-6 w-11 rounded-full transition ${
               isMaskMode ? "bg-white" : "bg-slate-600"
             }`}
+            type="button"
+            aria-pressed={isMaskMode}
           >
             <motion.span
               animate={{ x: isMaskMode ? 20 : 0 }}
@@ -314,14 +359,14 @@ export default function Chatbot() {
 
       <main
         ref={scrollRef}
-        className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-6 transition-all duration-500 ${
+        className={`flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-6 transition-all duration-500 ${
           isMaskMode
             ? "bg-transparent"
-            : "bg-linear-to-b from-indigo-50/20 to-white dark:from-twilight-dark/20 dark:to-slate-950"
+            : "bg-gradient-to-b from-primary/5 via-transparent to-tertiary/10"
         }`}
       >
-        <div className="flex justify-center mb-4">
-          <span className="px-3 py-1 rounded-full bg-white/50 dark:bg-indigo-950/50 text-[10px] font-bold text-indigo-400 uppercase tracking-widest border border-indigo-100 dark:border-indigo-900">
+        <div className="flex justify-center">
+          <span className="rounded-full border border-border bg-card/70 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Today
           </span>
         </div>
@@ -355,9 +400,9 @@ export default function Chatbot() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="flex flex-col gap-2 ml-14"
+                  className="ml-14 flex flex-col gap-2"
                 >
-                  <p className="text-[10px] font-bold uppercase ml-1 tracking-wider text-left text-slate-400">
+                  <p className="ml-1 text-left text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                     {isMaskMode ? "Safe Actions" : "Nurturing Steps"}
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -365,42 +410,48 @@ export default function Chatbot() {
                       <>
                         <button
                           onClick={() => sendWithIntent("I just need to talk", "vent")}
-                          className="px-4 py-2 bg-white/10 border border-white/10 rounded-full text-xs text-white hover:bg-white/20 transition"
+                          className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs text-white transition hover:bg-white/20"
+                          type="button"
                         >
-                          Speak freely
+                          <MessageCircle size={16} /> Speak freely
                         </button>
                         <button
                           onClick={() => sendWithIntent("Help me calm down", "calm")}
-                          className="px-4 py-2 bg-white/10 border border-white/10 rounded-full text-xs text-white hover:bg-white/20 transition"
+                          className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs text-white transition hover:bg-white/20"
+                          type="button"
                         >
-                          Calm me down
+                          <Wind size={16} /> Calm me down
                         </button>
                         <button
                           onClick={() => sendWithIntent("I feel overwhelmed", "support")}
-                          className="px-4 py-2 bg-white/10 border border-white/10 rounded-full text-xs text-white hover:bg-white/20 transition"
+                          className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs text-white transition hover:bg-white/20"
+                          type="button"
                         >
-                          I need support
+                          <Heart size={16} /> I need support
                         </button>
                       </>
                     ) : (
                       <>
                         <button
                           onClick={() => sendWithIntent("I need to vent", "vent")}
-                          className="px-4 py-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-secondary/20 rounded-full text-xs font-semibold text-secondary hover:bg-secondary hover:text-white transition-all shadow-sm flex items-center gap-2"
+                          className="flex items-center gap-2 rounded-full border border-secondary/20 bg-surface-high px-4 py-2 text-xs font-semibold text-secondary shadow-sm transition-all hover:bg-secondary hover:text-secondary-foreground"
+                          type="button"
                         >
-                          <Wind className="size-4" /> I need to vent
+                          <Wind size={16} /> I need to vent
                         </button>
                         <button
                           onClick={() => sendWithIntent("Give me a daily affirmation", "affirmation")}
-                          className="px-4 py-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-accent/30 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-accent/10 transition-all shadow-sm flex items-center gap-2"
+                          className="flex items-center gap-2 rounded-full border border-border bg-surface-high px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition-all hover:bg-accent"
+                          type="button"
                         >
-                          <Heart className="size-4 text-amber-500" /> Daily Affirmation
+                          <Heart size={16} className="text-tertiary" /> Daily Affirmation
                         </button>
                         <button
                           onClick={() => sendWithIntent("Give me self-care tips", "self-care")}
-                          className="px-4 py-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-indigo-200 dark:border-indigo-800 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-indigo-50 transition-all shadow-sm flex items-center gap-2"
+                          className="flex items-center gap-2 rounded-full border border-primary/20 bg-surface-high px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition-all hover:bg-primary/10"
+                          type="button"
                         >
-                          <Sparkles className="size-4 text-indigo-500" /> Self-care tips
+                          <Sparkles size={16} className="text-primary" /> Self-care tips
                         </button>
                       </>
                     )}
@@ -413,34 +464,39 @@ export default function Chatbot() {
       </main>
 
       <footer
-        className={`p-4 md:p-6 border-t transition-all duration-500 ${
+        className={`p-4 transition-all duration-500 sm:p-6 ${
           isMaskMode
-            ? "bg-black/40 border-white/10 backdrop-blur-xl"
-            : "bg-white dark:bg-twilight-dark border-indigo-50 dark:border-indigo-900/50"
+            ? "bg-black/40 backdrop-blur-xl"
+            : "bg-card/80"
         }`}
+        style={{
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
+        }}
       >
-        <div className="max-w-4xl mx-auto flex items-end gap-3">
-          <div className="flex-1 bg-slate-50 dark:bg-slate-900 rounded-2xl px-4 py-2 flex items-center gap-3 border border-slate-200 dark:border-slate-800 focus-within:border-secondary focus-within:ring-1 focus-within:ring-secondary/20 transition-all">
-            <button className="text-slate-400 hover:text-secondary">
-              <Smile className="size-5" />
-            </button>
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-              className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-1.5 placeholder:text-slate-400 resize-none max-h-32 text-slate-900 dark:text-white"
-              placeholder={modelState !== "ready" ? "Waiting for model..." : "Type a message..."}
-              rows={1}
-              disabled={isLoading || modelState !== "ready"}
-            />
-            <button className="text-slate-400 hover:text-secondary">
-              <Paperclip className="size-5" />
-            </button>
+        <div className="mx-auto flex max-w-4xl items-end gap-3">
+          <div className="flex-1 rounded-2xl border border-border bg-surface-low px-4 py-2 transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
+            <div className="flex items-center gap-3">
+              <button className="text-muted-foreground transition-colors hover:text-primary" type="button">
+                <Smile size={20} />
+              </button>
+              <textarea
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                className="max-h-32 flex-1 resize-none border-none bg-transparent py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-0"
+                placeholder={modelState !== "ready" ? "Waiting for model..." : "Type a message..."}
+                rows={1}
+                disabled={isLoading || modelState !== "ready"}
+              />
+              <button className="text-muted-foreground transition-colors hover:text-primary" type="button">
+                <Paperclip size={20} />
+              </button>
+            </div>
           </div>
 
           <motion.button
@@ -448,28 +504,27 @@ export default function Chatbot() {
             whileTap={{ scale: 0.95 }}
             onClick={handleSendMessage}
             disabled={!inputText.trim() || isLoading || modelState !== "ready"}
-            className="w-12 h-12 bg-linear-to-br from-primary to-secondary text-white rounded-xl flex items-center justify-center shadow-lg disabled:opacity-50 disabled:grayscale transition-all"
+            className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-secondary to-tertiary text-primary-foreground shadow-lg shadow-primary/20 transition-all disabled:opacity-50 disabled:grayscale"
+            type="button"
           >
-            <Send className="size-5" />
+            <Send size={20} />
           </motion.button>
         </div>
 
         <div className="mt-4 flex justify-center opacity-20">
-          <div className="w-32 h-1 bg-slate-400 rounded-full" />
+          <div className="h-1 w-32 rounded-full bg-slate-400" />
         </div>
       </footer>
 
-      <MaskOverlay
-        isOpen={showOverlay}
-        onToggle={() => {
-          setShowOverlay(false);
-        }}
-      />
-      <PrivacyPolicy 
+      <PrivacyPolicy
         isOpen={showPrivacyPolicy}
         onClose={() => setShowPrivacyPolicy(false)}
-        onAccept={() => setHasAcceptedPrivacy(true)}
+        onAccept={() => undefined}
       />
     </div>
   );
+}
+
+export default function ChatbotRoute() {
+  return <ChatbotShell />;
 }

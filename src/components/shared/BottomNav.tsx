@@ -1,5 +1,6 @@
 import React from "react";
 import { ScreenId, NavItem } from "../../types";
+import { Heart, BarChart3, MessageCircle } from "lucide-react";
 
 interface BottomNavProps {
   items: NavItem[];
@@ -7,15 +8,33 @@ interface BottomNavProps {
   onSelect: (id: ScreenId) => void;
 }
 
+const renderIcon = (iconName: string, isActive: boolean) => {
+  const size = 20;
+  const className = isActive ? "text-[#f5f1ff]" : "text-[rgba(188,194,255,0.34)]";
+
+  switch (iconName) {
+    case "checkin":
+      return <Heart size={size} className={className} />;
+    case "review":
+      return <BarChart3 size={size} className={className} />;
+    case "support":
+      return <MessageCircle size={size} className={className} />;
+    default:
+      return null;
+  }
+};
+
 export const BottomNav: React.FC<BottomNavProps> = ({ items, active, onSelect }) => {
   return (
-    <nav
+      <nav
       style={{
         display: "flex",
-        background: "#161820",
+        gap: 8,
+        background: "rgba(16,18,24,0.96)",
         borderTop: "1px solid rgba(188,194,255,0.06)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        padding: "10px 12px calc(env(safe-area-inset-bottom, 0px) + 10px)",
         flexShrink: 0,
+        backdropFilter: "blur(18px)",
       }}
     >
       {items.map((item) => {
@@ -23,61 +42,53 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, active, onSelect })
         return (
           <button
             key={item.id}
+            type="button"
             onClick={() => onSelect(item.id)}
+            aria-pressed={isActive}
             style={{
               flex: 1,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              gap: 4,
-              padding: "10px 4px 12px",
-              minHeight: 56,
-              border: "none",
+              gap: 3,
+              padding: "10px 8px 11px",
+              minHeight: 62,
+              border: isActive ? "1px solid rgba(188,194,255,0.22)" : "1px solid rgba(188,194,255,0.06)",
+              borderRadius: 18,
               outline: "none",
-              background: "transparent",
+              background: isActive
+                ? "linear-gradient(180deg, rgba(188,194,255,0.12), rgba(188,194,255,0.05))"
+                : "rgba(255,255,255,0.015)",
               cursor: "pointer",
-              transition: "opacity 0.2s ease",
+              transition: "transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+              boxShadow: isActive ? "0 16px 34px -24px rgba(188,194,255,0.55)" : "none",
+              transform: isActive ? "translateY(-1px)" : "translateY(0)",
             }}
           >
-            {/* Icon glyph */}
             <span
               style={{
-                fontSize: 16,
-                lineHeight: 1,
-                color: isActive ? "#bcc2ff" : "rgba(188,194,255,0.25)",
-                transition: "color 0.2s ease, transform 0.2s ease",
-                transform: isActive ? "scale(1.15)" : "scale(1)",
-                display: "block",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "transform 0.2s ease",
+                transform: isActive ? "scale(1.08)" : "scale(1)",
               }}
             >
-              {item.icon}
+              {renderIcon(item.icon, isActive)}
             </span>
-            {/* Label */}
             <span
               style={{
-                fontSize: 10,
-                fontWeight: 500,
-                letterSpacing: "0.3px",
-                color: isActive ? "#bcc2ff" : "rgba(188,194,255,0.25)",
+                fontSize: 11,
+                fontWeight: isActive ? 700 : 600,
+                letterSpacing: "0.2px",
+                color: isActive ? "#f5f1ff" : "rgba(188,194,255,0.3)",
                 transition: "color 0.2s ease",
                 fontFamily: "Plus Jakarta Sans, sans-serif",
               }}
             >
               {item.label}
             </span>
-            {/* Active indicator dot */}
-            <div
-              style={{
-                width: 4,
-                height: 4,
-                borderRadius: "50%",
-                background: "#bcc2ff",
-                opacity: isActive ? 1 : 0,
-                transition: "opacity 0.2s ease",
-                marginTop: 1,
-              }}
-            />
           </button>
         );
       })}

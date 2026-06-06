@@ -31,6 +31,8 @@ export default defineConfig(async () => ({
         }
       : undefined,
     watch: {
+      // Polling avoids ENOSPC on environments with a low native watcher limit.
+      usePolling: true,
       // 3. tell Vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
     },

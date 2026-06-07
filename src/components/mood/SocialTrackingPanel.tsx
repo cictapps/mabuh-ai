@@ -195,7 +195,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
               placeholder="Name"
             />
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
               <select
                 value={interaction.relationship}
                 onChange={(event) =>
@@ -262,17 +262,19 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
               ))}
             </div>
 
-            <div style={{ display: "flex", gap: 8 }}>
-              <Input
-                placeholder="Add a custom feeling"
-                value={customFeelings[interaction.id] ?? ""}
-                onChange={(event) =>
-                  setCustomFeelings((prev) => ({
-                    ...prev,
-                    [interaction.id]: event.target.value,
-                  }))
-                }
-              />
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div style={{ flex: "1 1 140px", minWidth: 0 }}>
+                <Input
+                  placeholder="Add a custom feeling"
+                  value={customFeelings[interaction.id] ?? ""}
+                  onChange={(event) =>
+                    setCustomFeelings((prev) => ({
+                      ...prev,
+                      [interaction.id]: event.target.value,
+                    }))
+                  }
+                />
+              </div>
               <Button
                 type="button"
                 variant="outline"

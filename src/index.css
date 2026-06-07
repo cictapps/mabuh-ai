@@ -153,6 +153,73 @@ input[type="password"]::-ms-clear {
   }
 }
 
+@keyframes screenEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.screen-enter {
+  animation: screenEnter 0.4s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-enter {
+    animation: none;
+  }
+  .interaction-card,
+  .journal-card {
+    animation: none;
+  }
+}
+
+/* CheckIn responsive primitives */
+.checkin-root {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 4vw, 22px);
+  padding:
+    calc(env(safe-area-inset-top, 0px) + clamp(20px, 6vw, 32px))
+    clamp(16px, 5vw, 24px)
+    calc(env(safe-area-inset-bottom, 0px) + 120px);
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.checkin-glow {
+  position: absolute;
+  top: -120px;
+  left: -15%;
+  right: -15%;
+  height: 260px;
+  background: radial-gradient(circle at 50% 30%, var(--checkin-glow, rgba(255, 204, 102, 0.18)), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(20px);
+  will-change: opacity, transform;
+}
+
+@media (max-width: 380px) {
+  .checkin-root {
+    gap: 14px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .activity-add-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 .interaction-card {
   animation: floatUp 0.35s ease-out;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;

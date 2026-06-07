@@ -142,14 +142,16 @@ export const ActivitySectionsPanel: React.FC<ActivitySectionsPanelProps> = ({
               ))}
             </div>
 
-            <div style={{ display: "flex", gap: 8 }}>
-              <Input
-                placeholder={`Add custom ${section.label.toLowerCase()} activity`}
-                value={drafts[draftKey] ?? ""}
-                onChange={(event) =>
-                  setDrafts((prev) => ({ ...prev, [draftKey]: event.target.value }))
-                }
-              />
+            <div className="activity-add-row" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div style={{ flex: "1 1 160px", minWidth: 0 }}>
+                <Input
+                  placeholder={`Add custom ${section.label.toLowerCase()} activity`}
+                  value={drafts[draftKey] ?? ""}
+                  onChange={(event) =>
+                    setDrafts((prev) => ({ ...prev, [draftKey]: event.target.value }))
+                  }
+                />
+              </div>
               <Button
                 type="button"
                 variant="outline"

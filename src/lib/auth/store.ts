@@ -45,16 +45,22 @@ export function isUserEmailVerified(user: User | null) {
 }
 
 async function fetchProfile(userId: string): Promise<Profile | null> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, display_name")
-    .eq("id", userId)
-    .maybeSingle();
-  if (error) {
-    console.error("fetchProfile failed", error);
-    return null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, display_name")
+      .eq("id", userId)
+      .maybeSingle();
+    if (error) {
+      console.error("fetchProfile failed", error);
+      return null;
+    }
+    if (data) return data as Profile;
+    if (attempt < 2) {
+      await new Promise((r) => setTimeout(r, 200));
+    }
   }
-  return (data as Profile) ?? null;
+  return null;
 }
 
 async function getAuthSnapshot(session: Session | null): Promise<AuthSnapshot> {
@@ -65,9 +71,10 @@ async function getAuthSnapshot(session: Session | null): Promise<AuthSnapshot> {
 
 async function ensureProfile(snapshot: AuthSnapshot): Promise<AuthSnapshot> {
   if (snapshot.user && !snapshot.profile) {
-    await supabase.auth.signOut().catch(() => {});
-    throw new Error(
-      "Your account is missing its profile record. Please ask an administrator to rerun the Supabase schema setup.",
+    console.warn(
+      "Profile record not found for the authenticated user. " +
+        "The session is still valid, so sign-in will continue. " +
+        "If this persists, run supabase/schema.sql to install the on_auth_user_created trigger.",
     );
   }
 
@@ -87,9 +94,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     const snapshot = await getAuthSnapshot(data.session);
 
     if (snapshot.user && !snapshot.profile) {
-      await supabase.auth.signOut().catch(() => {});
-      set({ session: null, user: null, profile: null, loading: false });
-      return;
+      console.warn(
+        "Profile record not found while refreshing the session. " +
+          "Keeping the user signed in. Run supabase/schema.sql if this persists.",
+      );
     }
 
     set({ ...snapshot, loading: false });
@@ -105,12 +113,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         const { data } = await supabase.auth.getSession();
         const snapshot = await getAuthSnapshot(data.session);
 
-        // If a session exists but the profile is gone (e.g. user deleted in Supabase),
-        // sign out locally so the stale JWT doesn't keep the user locked in.
         if (snapshot.user && !snapshot.profile) {
-          await supabase.auth.signOut().catch(() => {});
-          set({ session: null, user: null, profile: null, loading: false });
-          return;
+          console.warn(
+            "Profile record not found during auth init. " +
+              "Keeping the user signed in. Run supabase/schema.sql if this persists.",
+          );
         }
 
         set({ ...snapshot, loading: false });
@@ -121,9 +128,10 @@ export const useAuthStore = create<AuthState>((set) => ({
             const snapshot = await getAuthSnapshot(newSession);
 
             if (snapshot.user && !snapshot.profile) {
-              await supabase.auth.signOut().catch(() => {});
-              set({ session: null, user: null, profile: null, loading: false });
-              return;
+              console.warn(
+                "Profile record not found after auth state change. " +
+                  "Keeping the user signed in.",
+              );
             }
 
             set({ ...snapshot, loading: false });

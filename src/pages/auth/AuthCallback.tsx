@@ -35,6 +35,15 @@ export function AuthCallback() {
       try {
         await initialize();
         await refresh();
+
+        const settled = useAuthStore.getState();
+        if (settled.session) {
+          if (!cancelled) {
+            navigate(getSafeNextPath(params.get("next")), { replace: true });
+          }
+          return;
+        }
+
         const { data, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) throw sessionError;
 

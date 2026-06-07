@@ -1,19 +1,17 @@
-import { useEffect, useRef, useState, ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft,
   Send,
   Smile,
-  Paperclip,
-  Leaf,
   Wind,
   Heart,
   Sparkles,
   Ghost,
   MessageCircle,
+  X,
 } from "lucide-react";
-import { invoke } from "@tauri-apps/api/core";
 
 import { ChatBubble } from "../components/chatbot-components/ChatBubble";
 import { PrivacyPolicy } from "./PrivacyPolicy";
@@ -27,8 +25,6 @@ interface Message {
   hasActions?: boolean;
   status?: "typing" | "done";
 }
-
-type ModelState = "checking" | "downloading" | "loading" | "ready";
 
 interface ChatbotShellProps {
   embedded?: boolean;
@@ -73,38 +69,154 @@ const TypingDots = ({ isMaskMode }: { isMaskMode: boolean }) => (
   </div>
 );
 
-const ModelLoadingOverlay = ({ embedded }: { embedded: boolean }) => (
-  <div
-    className={`absolute inset-0 z-50 flex items-center justify-center p-6 ${
-      embedded ? "rounded-[1.75rem] bg-background/90 backdrop-blur-sm" : "bg-background/95 backdrop-blur-sm"
-    }`}
-  >
-    <div className="w-full max-w-xs flex flex-col items-center gap-6">
-      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary via-secondary to-tertiary flex items-center justify-center shadow-lg shadow-primary/20">
-        <Leaf className="size-7 text-primary-foreground" />
+const EMOJI_CATEGORIES: Array<{ id: string; label: string; emojis: string[] }> = [
+  {
+    id: "smileys",
+    label: "Smileys",
+    emojis: [
+      "😀", "😃", "😄", "😁", "😆", "😅", "🤣", "😂", "🙂", "🙃",
+      "😉", "😊", "😇", "🥰", "😍", "🤩", "😘", "😗", "😚", "😙",
+      "😋", "😛", "🤔", "🤗", "🤭", "🫣", "🤫", "🤐", "😶", "😐",
+    ],
+  },
+  {
+    id: "gestures",
+    label: "Gestures",
+    emojis: [
+      "👍", "👎", "👌", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉",
+      "👆", "👇", "☝️", "✋", "🤚", "🖐️", "🖖", "👋", "🤝", "🙏",
+      "✍️", "💪", "🤲", "🫶", "🤜", "🤛", "👏", "🙌", "👐",
+    ],
+  },
+  {
+    id: "hearts",
+    label: "Hearts",
+    emojis: [
+      "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎",
+      "💖", "💝", "💔", "💕", "💞", "💓", "💗", "💘", "💟", "❤️‍🔥", "❤️‍🩹",
+    ],
+  },
+  {
+    id: "nature",
+    label: "Nature",
+    emojis: [
+      "🌿", "🌱", "🌳", "🌲", "🌴", "🌵", "🌾", "🌷", "🌸", "🌹",
+      "🌺", "🌻", "🌼", "💐", "🍀", "🌎", "🌟", "✨", "⭐", "🌙",
+      "☀️", "⛅", "🌧️", "⛈️", "🌈", "❄️", "🔥", "💧", "🌊",
+    ],
+  },
+  {
+    id: "food",
+    label: "Food",
+    emojis: [
+      "🍎", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🫐", "🍒", "🍑",
+      "🥭", "🍍", "🥥", "🥝", "🍅", "🥑", "🥦", "🥕", "🌽", "🍞",
+      "🥐", "🧀", "🍕", "🍔", "🍟", "🍿", "🍩", "🍪", "🎂", "🍫",
+    ],
+  },
+];
+
+function EmojiPicker({
+  onSelect,
+  onClose,
+}: {
+  onSelect: (emoji: string) => void;
+  onClose: () => void;
+}) {
+  const [activeCategory, setActiveCategory] = useState(EMOJI_CATEGORIES[0].id);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [onClose]);
+
+  const active = useMemo(
+    () => EMOJI_CATEGORIES.find((c) => c.id === activeCategory) ?? EMOJI_CATEGORIES[0],
+    [activeCategory],
+  );
+
+  return (
+    <motion.div
+      ref={panelRef}
+      role="dialog"
+      aria-label="Emoji picker"
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 12, scale: 0.98 }}
+      transition={{ duration: 0.16, ease: "easeOut" }}
+      className="absolute bottom-full left-0 right-0 mb-2 mx-4 sm:mx-auto sm:max-w-2xl rounded-2xl border border-border bg-card/95 shadow-[0_24px_60px_-28px_rgba(0,0,0,0.6)] backdrop-blur-xl overflow-hidden"
+    >
+      <div className="flex items-center justify-between px-3 pt-2 pb-1">
+        <div className="flex gap-1 overflow-x-auto">
+          {EMOJI_CATEGORIES.map((cat) => {
+            const isActive = cat.id === active.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setActiveCategory(cat.id)}
+                className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors ${
+                  isActive
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close emoji picker"
+          className="ml-2 shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+        >
+          <X size={14} />
+        </button>
       </div>
-      <div className="text-center">
-        <h2 className="text-foreground font-bold text-lg">MabuhAi</h2>
-        <p className="text-muted-foreground text-xs mt-1">Getting things ready...</p>
+
+      <div className="grid grid-cols-8 sm:grid-cols-10 gap-1 p-2 max-h-56 overflow-y-auto">
+        {active.emojis.map((emoji, i) => (
+          <button
+            key={`${active.id}-${i}`}
+            type="button"
+            onClick={() => onSelect(emoji)}
+            className="aspect-square rounded-lg text-xl leading-none flex items-center justify-center transition-transform hover:bg-white/5 active:scale-90"
+            aria-label={`Insert ${emoji}`}
+          >
+            {emoji}
+          </button>
+        ))}
       </div>
-      <div className="flex flex-col items-center gap-2">
-        <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-muted-foreground text-sm">Connecting...</p>
-      </div>
-    </div>
-  </div>
-);
+    </motion.div>
+  );
+}
 
 export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [isMaskMode, setIsMaskMode] = useState(false);
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
-  const [modelState, setModelState] = useState<ModelState>("checking");
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
 
   useEffect(() => {
     const accepted = localStorage.getItem("privacy_policy_accepted");
@@ -156,23 +268,8 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     });
   }, [messages]);
 
-  useEffect(() => {
-    const initModel = async () => {
-      try {
-        setModelState("checking");
-        await invoke<boolean>("check_model");
-        setModelState("ready");
-      } catch (error) {
-        console.error("Init failed:", error);
-        setModelState("ready");
-      }
-    };
-
-    initModel();
-  }, []);
-
   const sendMessage = async (text: string, intent: string = "general") => {
-    if (!text.trim() || isLoading || modelState !== "ready") return;
+    if (!text.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -247,6 +344,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   const handleSendMessage = () => {
     sendMessage(inputText, "general");
     setInputText("");
+    setEmojiPickerOpen(false);
   };
 
   const sendWithIntent = (text: string, intent: string) => {
@@ -262,99 +360,99 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     navigate(-1);
   };
 
+  const insertEmoji = (emoji: string) => {
+    const el = textareaRef.current;
+    if (!el) {
+      setInputText((prev) => prev + emoji);
+      return;
+    }
+    const start = el.selectionStart ?? inputText.length;
+    const end = el.selectionEnd ?? inputText.length;
+    const next = inputText.slice(0, start) + emoji + inputText.slice(end);
+    setInputText(next);
+    const caret = start + emoji.length;
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(caret, caret);
+    });
+  };
+
+  const handleToggleEmojiPicker = () => {
+    setEmojiPickerOpen((prev) => !prev);
+  };
+
   const shellClasses = embedded
     ? "relative flex flex-1 h-full flex-col overflow-hidden bg-card/90 text-card-foreground backdrop-blur-xl"
     : "relative flex h-full min-h-screen flex-col overflow-hidden bg-background text-foreground";
 
   return (
     <div className={shellClasses}>
-      <AnimatePresence>
-        {modelState !== "ready" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 z-50"
-          >
-            <ModelLoadingOverlay embedded={embedded} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <header
-        className={`sticky top-0 z-10 flex items-center justify-between px-5 py-4 backdrop-blur-md sm:px-6 transition-all duration-500 ${
+        className={`sticky top-0 z-10 flex items-center justify-between gap-3 border-b px-4 py-3 backdrop-blur-md sm:px-6 transition-all duration-300 ${
           isMaskMode
-            ? "bg-black/40 backdrop-blur-xl"
-            : embedded
-            ? "bg-card/80"
-            : "bg-background/80"
+            ? "border-white/10 bg-black/70"
+            : "border-border/60 bg-background/80"
         }`}
         style={{
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 10px)",
         }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <button
             onClick={handleBack}
-            className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+            className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
             aria-label="Back"
             type="button"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={22} />
           </button>
-
-          <div className="relative ml-1">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-full text-primary-foreground shadow-md transition-all duration-500 ${
-              isMaskMode
-                ? "bg-white/10 shadow-white/5 border border-white/10"
-                : "bg-gradient-to-br from-primary via-secondary to-tertiary shadow-primary/20"
+          <div className="min-w-0">
+            <h1 className="truncate text-base font-semibold tracking-tight leading-none text-foreground">
+              Chat
+            </h1>
+            <p className={`mt-0.5 text-[11px] leading-none transition-colors ${
+              isMaskMode ? "text-white/50" : "text-muted-foreground"
             }`}>
-              {isMaskMode ? (
-                <Ghost size={20} className="text-white/80" />
-              ) : (
-                <Leaf size={20} />
-              )}
-            </div>
-            <div
-              className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${
-                modelState === "ready" ? "bg-emerald-500" : "bg-amber-500 animate-pulse"
-              } ${isMaskMode ? "border-black" : embedded ? "border-card" : "border-background"}`}
-            />
-          </div>
-
-          <div className="ml-2 text-left">
-            <h1 className="text-lg font-bold tracking-tight leading-none">MabuhAi</h1>
-            <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-tertiary">
-              Twilight Glow
+              {isMaskMode ? "Anonymous session" : "Companion chat"}
             </p>
           </div>
         </div>
 
-        <div className={`flex items-center gap-3 rounded-full border px-4 py-2 transition-all duration-500 ${
-          isMaskMode
-            ? "border-white/20 bg-white/5"
-            : "border-border bg-surface-low"
-        }`}>
-          <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors duration-500 ${
-            isMaskMode ? "text-white" : "text-muted-foreground"
-          }`}>
-            Mask-Off
-          </span>
-          <button
-            onClick={() => setIsMaskMode((prev) => !prev)}
-            className={`relative inline-flex h-6 w-11 rounded-full transition ${
-              isMaskMode ? "bg-white" : "bg-slate-600"
+        <button
+          type="button"
+          onClick={() => setIsMaskMode((prev) => !prev)}
+          aria-pressed={isMaskMode}
+          aria-label="Toggle mask mode"
+          className={`group inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 transition-all duration-300 ${
+            isMaskMode
+              ? "border-white/15 bg-white/5 text-white"
+              : "border-border bg-surface-low text-foreground hover:border-primary/40"
+          }`}
+        >
+          <span
+            className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
+              isMaskMode ? "bg-white/10 text-white" : "bg-primary/10 text-primary"
             }`}
-            type="button"
-            aria-pressed={isMaskMode}
+          >
+            {isMaskMode ? <Ghost size={14} /> : <Smile size={14} />}
+          </span>
+          <span className="pr-1 text-xs font-semibold tracking-wide">
+            {isMaskMode ? "Mask on" : "Mask off"}
+          </span>
+          <span
+            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
+              isMaskMode ? "bg-white/40" : "bg-muted-foreground/30"
+            }`}
           >
             <motion.span
-              animate={{ x: isMaskMode ? 20 : 0 }}
-              className="w-5 h-5 bg-black rounded-full"
+              animate={{ x: isMaskMode ? 12 : 2 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              className={`h-3 w-3 rounded-full shadow ${
+                isMaskMode ? "bg-white" : "bg-foreground"
+              }`}
             />
-          </button>
-        </div>
+          </span>
+        </button>
       </header>
 
       <main
@@ -465,21 +563,39 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
 
       <footer
         className={`p-4 transition-all duration-500 sm:p-6 ${
-          isMaskMode
-            ? "bg-black/40 backdrop-blur-xl"
-            : "bg-card/80"
+          isMaskMode ? "bg-black/40 backdrop-blur-xl" : "bg-card/80"
         }`}
         style={{
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
         }}
       >
-        <div className="mx-auto flex max-w-4xl items-end gap-3">
-          <div className="flex-1 rounded-2xl border border-border bg-surface-low px-4 py-2 transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
-            <div className="flex items-center gap-3">
-              <button className="text-muted-foreground transition-colors hover:text-primary" type="button">
+        <div className="relative mx-auto flex max-w-4xl items-end gap-3">
+          <AnimatePresence>
+            {emojiPickerOpen && (
+              <EmojiPicker
+                onSelect={insertEmoji}
+                onClose={() => setEmojiPickerOpen(false)}
+              />
+            )}
+          </AnimatePresence>
+
+          <div className="flex-1 rounded-2xl border border-border bg-surface-low px-3 py-2 transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
+            <div className="flex items-end gap-2">
+              <button
+                type="button"
+                onClick={handleToggleEmojiPicker}
+                aria-label={emojiPickerOpen ? "Close emoji picker" : "Open emoji picker"}
+                aria-expanded={emojiPickerOpen}
+                className={`shrink-0 rounded-full p-1.5 transition-colors ${
+                  emojiPickerOpen
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:bg-white/5 hover:text-primary"
+                }`}
+              >
                 <Smile size={20} />
               </button>
               <textarea
+                ref={textareaRef}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={(e) => {
@@ -487,15 +603,15 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
                     e.preventDefault();
                     handleSendMessage();
                   }
+                  if (e.key === "Escape" && emojiPickerOpen) {
+                    setEmojiPickerOpen(false);
+                  }
                 }}
                 className="max-h-32 flex-1 resize-none border-none bg-transparent py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-0"
-                placeholder={modelState !== "ready" ? "Waiting for model..." : "Type a message..."}
+                placeholder="Type a message..."
                 rows={1}
-                disabled={isLoading || modelState !== "ready"}
+                disabled={isLoading}
               />
-              <button className="text-muted-foreground transition-colors hover:text-primary" type="button">
-                <Paperclip size={20} />
-              </button>
             </div>
           </div>
 
@@ -503,7 +619,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleSendMessage}
-            disabled={!inputText.trim() || isLoading || modelState !== "ready"}
+            disabled={!inputText.trim() || isLoading}
             className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-secondary to-tertiary text-primary-foreground shadow-lg shadow-primary/20 transition-all disabled:opacity-50 disabled:grayscale"
             type="button"
           >

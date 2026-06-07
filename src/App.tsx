@@ -7,6 +7,7 @@ import { BottomNav } from "./components/shared/BottomNav";
 import { CheckInScreen }    from "./screens/CheckInScreen";
 import { ReviewHub } from "./screens/ReviewHub";
 import { SupportHub } from "./screens/SupportHub";
+import { SettingsScreen } from "./screens/SettingsScreen";
 
 type SupportView = "hub" | "chat";
 
@@ -34,6 +35,7 @@ export default function App({
     socialInteractions,
     activitiesBySection,
     lastSavedAt,
+    reminder,
     selectMood,
     toggleTag,
     setJournal,
@@ -47,6 +49,9 @@ export default function App({
     addCustomActivity,
     addManualJournalEntry,
     saveEntry,
+    setReminder,
+    exportData,
+    clearAllLocalData,
     dominantMood,
     trendData,
     distribution,
@@ -139,6 +144,18 @@ export default function App({
             view={supportView}
             onOpenChat={() => setSupportView("chat")}
             onCloseChat={() => setSupportView("hub")}
+          />
+        </div>
+        <div
+          style={{
+            display: activeHub === "settings" ? "block" : "none",
+          }}
+        >
+          <SettingsScreen
+            reminder={reminder}
+            onSetReminder={setReminder}
+            onExportData={exportData}
+            onClearAllLocalData={clearAllLocalData}
           />
         </div>
       </main>

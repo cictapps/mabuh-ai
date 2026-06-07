@@ -62,7 +62,7 @@ export interface Suggestion {
   mood: MoodType;
 }
 
-export type ScreenId = "checkin" | "review" | "support";
+export type ScreenId = "checkin" | "review" | "support" | "settings";
 
 export type ReviewTabId = "history" | "analytics" | "insights" | "journal";
 

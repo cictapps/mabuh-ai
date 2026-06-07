@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 
 import { Button } from "../components/ui/button";
+import { useAuth } from "../lib/auth";
 import { ChatbotShell } from "./ChatBot";
 
 type SupportView = "hub" | "chat";
@@ -15,6 +16,7 @@ interface SupportHubProps {
 
 export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onCloseChat }) => {
   const navigate = useNavigate();
+  const { profile, user } = useAuth();
 
   return (
     <div
@@ -166,6 +168,58 @@ export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onClos
             <Button type="button" variant="outline" size="sm" onClick={onOpenChat}>
               Open chat
             </Button>
+          </div>
+
+          <div
+            style={{
+              marginTop: "auto",
+              paddingTop: 24,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 12,
+                background: "linear-gradient(135deg, rgba(255,185,84,0.22), rgba(188,194,255,0.14))",
+                display: "grid",
+                placeItems: "center",
+                color: "#f5e5b1",
+                fontSize: 14,
+                flexShrink: 0,
+              }}
+              aria-hidden
+            >
+              ✶
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  letterSpacing: "1.2px",
+                  textTransform: "uppercase",
+                  color: "rgba(188,194,255,0.32)",
+                  marginBottom: 2,
+                }}
+              >
+                Signed in as
+              </p>
+              <p
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "#e8eaf0",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {profile?.display_name ?? user?.email ?? "friend"}
+              </p>
+            </div>
           </div>
         </>
       ) : (

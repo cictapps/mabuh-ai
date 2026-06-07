@@ -18,6 +18,10 @@ type AuthState = {
   signUp: (email: string, password: string, displayName: string) => Promise<SignUpResult>;
   signInWithGoogle: (nextPath?: string) => Promise<void>;
   resendConfirmation: (email: string) => Promise<void>;
+  updateProfile: (patch: Partial<Profile>) => Promise<Profile>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  changePassword: (newPassword: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -204,6 +208,48 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) throw error;
   },
 
+  updateProfile: async (patch): Promise<Profile> => {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
+    const userId = userData.user?.id;
+    if (!userId) throw new Error("Not signed in.");
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update(patch)
+      .eq("id", userId)
+      .select("id, display_name")
+      .single();
+    if (error) throw error;
+
+    const profile = (data as Profile) ?? null;
+    if (!profile) throw new Error("Profile update returned no row.");
+    set({ profile });
+    return profile;
+  },
+
+  requestPasswordReset: async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset`,
+    });
+    if (error) throw error;
+  },
+
+  changePassword: async (newPassword) => {
+    if (newPassword.length < 8) {
+      throw new Error("Password must be at least 8 characters.");
+    }
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+  },
+
+  deleteAccount: async () => {
+    const { error } = await supabase.rpc("delete_user");
+    if (error) throw error;
+    await supabase.auth.signOut().catch(() => {});
+    set({ session: null, user: null, profile: null, loading: false });
+  },
+
   signOut: async () => {
     // Always clear local state, even if the server call fails.
     await supabase.auth.signOut().catch(() => {});
@@ -228,7 +274,21 @@ export const useAuthActions = () => {
   const signUp = useAuthStore((s) => s.signUp);
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const resendConfirmation = useAuthStore((s) => s.resendConfirmation);
+  const updateProfile = useAuthStore((s) => s.updateProfile);
+  const requestPasswordReset = useAuthStore((s) => s.requestPasswordReset);
+  const changePassword = useAuthStore((s) => s.changePassword);
+  const deleteAccount = useAuthStore((s) => s.deleteAccount);
   const signOut = useAuthStore((s) => s.signOut);
 
-  return { signIn, signUp, signInWithGoogle, resendConfirmation, signOut };
+  return {
+    signIn,
+    signUp,
+    signInWithGoogle,
+    resendConfirmation,
+    updateProfile,
+    requestPasswordReset,
+    changePassword,
+    deleteAccount,
+    signOut,
+  };
 };

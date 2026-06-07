@@ -1,6 +1,6 @@
 import React from "react";
 import { ScreenId, NavItem } from "../../types";
-import { Heart, BarChart3, MessageCircle } from "lucide-react";
+import { Heart, BarChart3, MessageCircle, Settings as SettingsIcon } from "lucide-react";
 
 interface BottomNavProps {
   items: NavItem[];
@@ -19,6 +19,8 @@ const renderIcon = (iconName: string, isActive: boolean) => {
       return <BarChart3 size={size} className={className} />;
     case "support":
       return <MessageCircle size={size} className={className} />;
+    case "settings":
+      return <SettingsIcon size={size} className={className} />;
     default:
       return null;
   }

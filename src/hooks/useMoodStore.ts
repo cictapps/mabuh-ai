@@ -25,6 +25,42 @@ interface BackendMoodEntry {
 
 const LOCAL_HISTORY_KEY = "mabuh_mood_history";
 const LOCAL_JOURNAL_KEY = "mabuh_journal_entries";
+const REMINDER_KEY = "mabuh_reminder_prefs";
+
+export interface ReminderPreferences {
+  enabled: boolean;
+  hour: number;
+  minute: number;
+}
+
+const DEFAULT_REMINDER: ReminderPreferences = {
+  enabled: false,
+  hour: 20,
+  minute: 0,
+};
+
+function loadReminder(): ReminderPreferences {
+  try {
+    const raw = localStorage.getItem(REMINDER_KEY);
+    if (!raw) return DEFAULT_REMINDER;
+    const parsed = JSON.parse(raw) as Partial<ReminderPreferences>;
+    return {
+      enabled: Boolean(parsed.enabled),
+      hour: typeof parsed.hour === "number" ? parsed.hour : DEFAULT_REMINDER.hour,
+      minute: typeof parsed.minute === "number" ? parsed.minute : DEFAULT_REMINDER.minute,
+    };
+  } catch {
+    return DEFAULT_REMINDER;
+  }
+}
+
+function saveReminder(prefs: ReminderPreferences) {
+  try {
+    localStorage.setItem(REMINDER_KEY, JSON.stringify(prefs));
+  } catch {
+    // Ignore local storage failures.
+  }
+}
 
 function loadLocalHistory(): MoodEntry[] {
   try {
@@ -124,6 +160,7 @@ export function useMoodStore() {
     loadLocalJournalEntries()
   );
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [reminder, setReminderState] = useState<ReminderPreferences>(loadReminder);
 
   useEffect(() => {
     let active = true;
@@ -313,6 +350,48 @@ export function useMoodStore() {
     });
   }, []);
 
+  const setReminder = useCallback((next: Partial<ReminderPreferences>) => {
+    setReminderState((prev) => {
+      const merged = { ...prev, ...next };
+      saveReminder(merged);
+      return merged;
+    });
+  }, []);
+
+  const exportData = useCallback(() => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      schemaVersion: 1,
+      history: history.filter((e) => !e.id.endsWith("-local")),
+      journalEntries: manualJournalEntries,
+      reminder,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `mabuh-export-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [history, manualJournalEntries, reminder]);
+
+  const clearAllLocalData = useCallback(() => {
+    try {
+      localStorage.removeItem(LOCAL_HISTORY_KEY);
+      localStorage.removeItem(LOCAL_JOURNAL_KEY);
+      localStorage.removeItem(REMINDER_KEY);
+    } catch {
+      // Ignore.
+    }
+    setHistory([]);
+    setManualJournalEntries([]);
+    setReminderState(DEFAULT_REMINDER);
+  }, []);
+
   const dominantMood = useMemo((): MoodType | null => {
     const recent = history.slice(-7);
     if (!recent.length) return null;
@@ -489,6 +568,7 @@ export function useMoodStore() {
     socialInteractions,
     activitiesBySection,
     lastSavedAt,
+    reminder,
     selectMood,
     toggleTag,
     setJournal,
@@ -502,6 +582,9 @@ export function useMoodStore() {
     addCustomActivity,
     addManualJournalEntry,
     saveEntry,
+    setReminder,
+    exportData,
+    clearAllLocalData,
     dominantMood,
     trendData,
     distribution,

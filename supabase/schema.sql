@@ -68,6 +68,26 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- 2b. Self-service account deletion. The client can call this via
+-- supabase.rpc("delete_user") and the auth.users row (plus all rows that
+-- cascade from it) will be removed. The session is then invalidated locally.
+create or replace function public.delete_user()
+returns void
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated';
+  end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+revoke all on function public.delete_user() from public;
+grant execute on function public.delete_user() to authenticated;
+
 -- 3. Example: journal entries (owner-only)
 create table if not exists public.journal_entries (
   id uuid primary key default gen_random_uuid(),

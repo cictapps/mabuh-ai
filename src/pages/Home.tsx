@@ -1,26 +1,17 @@
-import { LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth, useAuthActions } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 
 export function Home() {
   const { profile, user } = useAuth();
-  const { signOut } = useAuthActions();
 
   return (
     <main className="relative min-h-screen bg-background px-4 py-10 text-foreground">
       <div className="mx-auto w-full max-w-4xl space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">Signed in as</p>
-            <p className="text-lg font-medium">
-              {profile?.display_name ?? user?.email ?? "friend"}
-            </p>
-          </div>
-          <Button variant="outline" onClick={() => void signOut()}>
-            <LogOut className="size-4" />
-            Sign out
-          </Button>
+        <div>
+          <p className="text-sm text-muted-foreground">Signed in as</p>
+          <p className="text-lg font-medium">
+            {profile?.display_name ?? user?.email ?? "friend"}
+          </p>
         </div>
 
         <Card className="bg-card/80">

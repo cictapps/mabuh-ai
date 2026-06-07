@@ -21,19 +21,26 @@ export const MoodTagChip: React.FC<MoodTagChipProps> = ({
     <button
       onClick={onToggle}
       className="tag-chip"
+      aria-pressed={selected}
       style={{
-        padding: isCompact ? "5px 12px" : "7px 15px",
+        padding: isCompact ? "6px 13px" : "9px 17px",
         borderRadius: 999,
-        fontSize: isCompact ? 12 : 13,
+        fontSize: isCompact ? 12 : 13.5,
         fontWeight: 500,
         fontFamily: "Plus Jakarta Sans, sans-serif",
         border: "none",
         outline: "none",
         background: selected
-          ? `${accentColor}22`
-          : "rgba(188,194,255,0.06)",
-        color: selected ? accentColor : "rgba(188,194,255,0.45)",
-        boxShadow: selected ? `0 0 0 1px ${accentColor}55` : "none",
+          ? `${accentColor}26`
+          : "rgba(188,194,255,0.05)",
+        color: selected ? accentColor : "rgba(188,194,255,0.55)",
+        boxShadow: selected
+          ? `inset 0 0 0 1px ${accentColor}66, 0 6px 18px -10px ${accentColor}55`
+          : "inset 0 0 0 1px rgba(188,194,255,0.04)",
+        minHeight: isCompact ? 30 : 38,
+        cursor: "pointer",
+        transition:
+          "background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease",
       }}
     >
       {label}

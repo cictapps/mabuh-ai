@@ -4,6 +4,7 @@ interface SaveMoodButtonProps {
   disabled: boolean;
   onSave: () => Promise<boolean>;
   label?: string;
+  savingLabel?: string;
   savedLabel?: string;
 }
 
@@ -11,44 +12,65 @@ export const SaveMoodButton: React.FC<SaveMoodButtonProps> = ({
   disabled,
   onSave,
   label = "Save mood",
-  savedLabel = "✓  Mood saved",
+  savingLabel = "Saving…",
+  savedLabel = "Saved",
 }) => {
-  const [saved, setSaved] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "saving" | "saved">("idle");
 
   const handleClick = async () => {
-    const ok = await onSave();
-    if (ok) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2200);
+    setPhase("saving");
+    try {
+      const ok = await onSave();
+      if (ok) {
+        setPhase("saved");
+        setTimeout(() => setPhase("idle"), 2200);
+      } else {
+        setPhase("idle");
+      }
+    } catch {
+      setPhase("idle");
     }
   };
+
+  const isSaved = phase === "saved";
+  const isSaving = phase === "saving";
+  const inactive = disabled && !isSaved;
 
   return (
     <button
       onClick={handleClick}
-      disabled={disabled && !saved}
-      className={saved ? "save-pulse" : ""}
+      disabled={inactive}
+      aria-busy={isSaving}
       style={{
         width: "100%",
-        minHeight: 52,
-        borderRadius: 16,
+        minHeight: 54,
+        borderRadius: 18,
         border: "none",
         outline: "none",
-        background: saved
-          ? "rgba(109,186,132,0.85)"
-          : disabled
-          ? "rgba(188,194,255,0.1)"
-          : "#bcc2ff",
-        color: saved ? "#121416" : disabled ? "rgba(188,194,255,0.3)" : "#121416",
+        background: isSaved
+          ? "linear-gradient(135deg, rgba(109,186,132,0.95), rgba(132,200,150,0.85))"
+          : isSaving
+            ? "rgba(188,194,255,0.35)"
+            : inactive
+              ? "rgba(188,194,255,0.08)"
+              : "linear-gradient(135deg, #bcc2ff 0%, #d4bbff 100%)",
+        color: isSaved || isSaving || inactive
+          ? isSaved ? "#0f121a" : "rgba(15,18,26,0.65)"
+          : "#171a27",
         fontSize: 15,
-        fontWeight: 500,
+        fontWeight: 600,
         fontFamily: "Plus Jakarta Sans, sans-serif",
-        cursor: disabled && !saved ? "not-allowed" : "pointer",
-        letterSpacing: "0.2px",
-        transition: "background 0.3s ease, color 0.3s ease",
+        cursor: inactive ? "not-allowed" : "pointer",
+        letterSpacing: "0.1px",
+        transition: "background 0.35s ease, color 0.35s ease, transform 0.2s ease",
+        boxShadow: isSaved
+          ? "0 18px 40px -22px rgba(109,186,132,0.55)"
+          : inactive
+            ? "none"
+            : "0 18px 44px -22px rgba(188,194,255,0.6)",
       }}
     >
-      {saved ? savedLabel : label}
+      {isSaved ? savedLabel : isSaving ? savingLabel : label}
     </button>
   );
 };

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import { MoodType, Suggestion } from "../types";
+import React from "react";
+import { MoodType } from "../types";
 import { SUGGESTIONS, getMoodMeta } from "../data";
 import { SuggestionCard } from "../components/suggestions/SuggestionCard";
 
@@ -9,54 +8,14 @@ interface SuggestionsScreenProps {
   refreshToken?: number | null;
 }
 
-interface GuidancePayload {
-  dominant_mood: string | null;
-  suggestions: Suggestion[];
-  insights: { id: string; title: string; body: string; color: string }[];
-}
-
-interface BackendMoodEntry {
-  id: string;
-  mood: string;
-  tags: string[];
-  journal: string;
-  timestamp_ms: number;
-}
-
-const isMoodType = (value: string | null): value is MoodType =>
-  value === "stressed" || value === "worried" || value === "okay" || value === "calm" || value === "happy";
-
-export const SuggestionsScreen: React.FC<SuggestionsScreenProps> = ({ dominantMood, refreshToken }) => {
-  const [backendMood, setBackendMood] = useState<MoodType | null>(dominantMood);
-  const [backendSuggestions, setBackendSuggestions] = useState<Suggestion[] | null>(null);
-  const [debugInfo, setDebugInfo] = useState<{ count: number; latest: number | null } | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    const loadGuidance = async () => {
-      try {
-        const payload = await invoke<GuidancePayload>("get_guidance");
-        if (!active) return;
-        setBackendMood(isMoodType(payload.dominant_mood) ? payload.dominant_mood : null);
-        setBackendSuggestions(payload.suggestions ?? []);
-        const entries = await invoke<BackendMoodEntry[]>("list_mood_entries");
-        const latest = entries.length
-          ? Math.max(...entries.map((e) => e.timestamp_ms))
-          : null;
-        setDebugInfo({ count: entries.length, latest });
-      } catch {
-        // Keep frontend fallback when backend is unavailable.
-      }
-    };
-    loadGuidance();
-    return () => {
-      active = false;
-    };
-  }, [dominantMood, refreshToken]);
-
-  const mood = backendMood ?? dominantMood ?? "calm";
+export const SuggestionsScreen: React.FC<SuggestionsScreenProps> = ({
+  dominantMood,
+  refreshToken,
+}) => {
+  void refreshToken;
+  const mood = dominantMood ?? "okay";
   const meta = getMoodMeta(mood);
-  const suggestions = backendSuggestions ?? SUGGESTIONS[mood] ?? [];
+  const suggestions = SUGGESTIONS[mood] ?? [];
 
   return (
     <div
@@ -86,23 +45,6 @@ export const SuggestionsScreen: React.FC<SuggestionsScreenProps> = ({ dominantMo
           Based on your recent emotional pattern
         </p>
       </div>
-
-      {debugInfo && (
-        <div
-          style={{
-            padding: "10px 12px",
-            borderRadius: 10,
-            background: "rgba(188,194,255,0.06)",
-            fontSize: 11,
-            color: "rgba(188,194,255,0.55)",
-          }}
-        >
-          Backend debug: entries={debugInfo.count} | latest=
-          {debugInfo.latest
-            ? new Date(debugInfo.latest).toLocaleString()
-            : "none"}
-        </div>
-      )}
 
       {/* Dominant mood banner */}
       <div
@@ -137,9 +79,13 @@ export const SuggestionsScreen: React.FC<SuggestionsScreenProps> = ({ dominantMo
 
       {/* Suggestions */}
       <div>
-        {suggestions.map((s) => (
-          <SuggestionCard key={s.id} suggestion={s} />
-        ))}
+        {suggestions.length === 0 ? (
+          <p style={{ fontSize: 12, color: "rgba(188,194,255,0.4)" }}>
+            Log a few check-ins to see suggestions tailored to your mood.
+          </p>
+        ) : (
+          suggestions.map((s) => <SuggestionCard key={s.id} suggestion={s} />)
+        )}
       </div>
     </div>
   );

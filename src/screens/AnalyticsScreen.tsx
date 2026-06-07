@@ -38,6 +38,7 @@ interface AnalyticsScreenProps {
     activityCount: number;
     activityHighlights: Array<{ section: string; label: string | null; count: number }>;
   };
+  loading?: boolean;
 }
 
 export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
@@ -47,9 +48,12 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   dominantMood,
   socialStats,
   analyticsStats,
+  loading,
 }) => {
   const domMeta = dominantMood ? getMoodMeta(dominantMood) : null;
   const latestEntries = [...history].sort((a, b) => b.timestamp - a.timestamp).slice(0, 4);
+
+  const isEmpty = !loading && history.length === 0;
 
   // Weekly insight text
   const weeklyInsight = domMeta
@@ -61,6 +65,38 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       className="screen-enter"
       style={{ padding: "30px 22px 52px", display: "flex", flexDirection: "column" }}
     >
+      {loading ? (
+        <div
+          style={{
+            marginBottom: 24,
+            padding: "14px 18px",
+            borderRadius: 14,
+            background: "rgba(188,194,255,0.04)",
+            color: "rgba(188,194,255,0.4)",
+            fontSize: 12,
+            textAlign: "center",
+          }}
+        >
+          Loading your analytics…
+        </div>
+      ) : isEmpty ? (
+        <div
+          style={{
+            marginBottom: 24,
+            padding: "22px 20px",
+            borderRadius: 16,
+            background: "rgba(188,194,255,0.04)",
+            border: "1px dashed rgba(188,194,255,0.16)",
+            color: "rgba(188,194,255,0.6)",
+            fontSize: 13,
+            lineHeight: 1.6,
+            textAlign: "center",
+          }}
+        >
+          Analytics will appear here once you log your first check-in.
+        </div>
+      ) : null}
+
       <div style={{ marginBottom: 28 }}>
         <p
           style={{

@@ -49,6 +49,8 @@ interface ReviewHubProps {
     tags?: string[];
   }>;
   onAddJournalEntry: (content: string) => void;
+  loading?: boolean;
+  error?: string | null;
 }
 
 const tabs: Array<{ id: ReviewTabId; label: string; icon: string }> = [
@@ -86,6 +88,8 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
   refreshToken,
   journalEntries,
   onAddJournalEntry,
+  loading,
+  error,
 }) => {
   const [activeTab, setActiveTab] = useState<ReviewTabId>("history");
 
@@ -185,8 +189,26 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
       </div>
 
       <div style={{ paddingBottom: 12 }}>
+        {error && (
+          <div
+            style={{
+              margin: "0 22px 14px",
+              padding: "12px 14px",
+              borderRadius: 14,
+              background: "rgba(255,123,123,0.08)",
+              border: "1px solid rgba(255,123,123,0.18)",
+              color: "rgba(255,123,123,0.95)",
+              fontSize: 12,
+              lineHeight: 1.55,
+            }}
+            role="alert"
+          >
+            {error}
+          </div>
+        )}
+
         <div style={{ display: activeTab === "history" ? "block" : "none" }}>
-          <HistoryScreen history={history} />
+          <HistoryScreen history={history} loading={loading} />
         </div>
 
         <div style={{ display: activeTab === "analytics" ? "block" : "none" }}>
@@ -197,15 +219,23 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
             dominantMood={dominantMood}
             socialStats={socialStats}
             analyticsStats={analyticsStats}
+            loading={loading}
           />
         </div>
 
         <div style={{ display: activeTab === "insights" ? "block" : "none" }}>
-          <InsightsScreen refreshToken={refreshToken} history={history} />
+          <InsightsScreen
+            refreshToken={refreshToken}
+            history={history}
+            loading={loading}
+          />
         </div>
 
         <div style={{ display: activeTab === "journal" ? "block" : "none" }}>
-          <JournalScreen entries={journalEntries} onAddEntry={onAddJournalEntry} />
+          <JournalScreen
+            entries={journalEntries}
+            onAddEntry={onAddJournalEntry}
+          />
         </div>
       </div>
     </div>

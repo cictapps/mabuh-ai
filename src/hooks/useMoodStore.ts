@@ -1,37 +1,27 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  MoodType,
-  MoodEntry,
-  SocialInteraction,
-  JournalEntry,
-  ActivitySelections,
   ActivitySectionId,
+  ActivitySelections,
+  JournalEntry,
+  MoodEntry,
+  MoodType,
+  SocialInteraction,
 } from "../types";
-import { SEED_HISTORY } from "../data";
-
-interface BackendMoodEntry {
-  id: string;
-  mood: string;
-  tags: string[];
-  journal: string;
-  school_load?: number | null;
-  activity_minutes?: number | null;
-  day_note?: string | null;
-  social_interactions?: SocialInteraction[] | null;
-  activities?: ActivitySelections | null;
-  timestamp_ms: number;
-}
-
-const LOCAL_HISTORY_KEY = "mabuh_mood_history";
-const LOCAL_JOURNAL_KEY = "mabuh_journal_entries";
-const REMINDER_KEY = "mabuh_reminder_prefs";
+import {
+  insertJournalEntry,
+  listJournalEntries,
+  listMoodEntries,
+  upsertMoodEntry,
+} from "../lib/db/moodRepository";
+import { useAuth } from "../lib/auth";
 
 export interface ReminderPreferences {
   enabled: boolean;
   hour: number;
   minute: number;
 }
+
+const REMINDER_KEY = "mabuh_reminder_prefs";
 
 const DEFAULT_REMINDER: ReminderPreferences = {
   enabled: false,
@@ -58,60 +48,8 @@ function saveReminder(prefs: ReminderPreferences) {
   try {
     localStorage.setItem(REMINDER_KEY, JSON.stringify(prefs));
   } catch {
-    // Ignore local storage failures.
+    // Ignore.
   }
-}
-
-function loadLocalHistory(): MoodEntry[] {
-  try {
-    const raw = localStorage.getItem(LOCAL_HISTORY_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as MoodEntry[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveLocalHistory(entries: MoodEntry[]) {
-  try {
-    localStorage.setItem(LOCAL_HISTORY_KEY, JSON.stringify(entries));
-  } catch {
-    // Ignore local storage failures.
-  }
-}
-
-function loadLocalJournalEntries(): JournalEntry[] {
-  try {
-    const raw = localStorage.getItem(LOCAL_JOURNAL_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as JournalEntry[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveLocalJournalEntries(entries: JournalEntry[]) {
-  try {
-    localStorage.setItem(LOCAL_JOURNAL_KEY, JSON.stringify(entries));
-  } catch {
-    // Ignore local storage failures.
-  }
-}
-
-function mergeHistory(primary: MoodEntry[], secondary: MoodEntry[]): MoodEntry[] {
-  const byId = new Map<string, MoodEntry>();
-  const byDate = new Map<string, MoodEntry>();
-  [...secondary, ...primary].forEach((entry) => {
-    byId.set(entry.id, entry);
-    const existing = byDate.get(entry.date);
-    if (!existing || entry.timestamp >= existing.timestamp) {
-      byDate.set(entry.date, entry);
-    }
-  });
-  const merged = Array.from(new Map([...byId, ...byDate]).values());
-  return merged.sort((a, b) => a.timestamp - b.timestamp);
 }
 
 function emptyActivities(): ActivitySelections {
@@ -126,26 +64,19 @@ function emptyActivities(): ActivitySelections {
   };
 }
 
-const toMoodEntry = (entry: BackendMoodEntry): MoodEntry => ({
-  id: entry.id,
-  date: new Date(entry.timestamp_ms).toISOString().split("T")[0],
-  mood: entry.mood as MoodType,
-  tags: entry.tags,
-  journal: entry.journal,
-  schoolLoad: entry.school_load ?? undefined,
-  activityMinutes: entry.activity_minutes ?? undefined,
-  dayNote: entry.day_note ?? undefined,
-  socialInteractions: entry.social_interactions ?? [],
-  activities: entry.activities ?? emptyActivities(),
-  timestamp: entry.timestamp_ms,
-});
-
 function buildInteractionId() {
   return `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 }
 
 export function useMoodStore() {
-  const [history, setHistory] = useState<MoodEntry[]>(SEED_HISTORY);
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+
+  const [history, setHistory] = useState<MoodEntry[]>([]);
+  const [manualJournalEntries, setManualJournalEntries] = useState<JournalEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [journal, setJournal] = useState("");
@@ -154,39 +85,52 @@ export function useMoodStore() {
   const [dayNote, setDayNote] = useState("");
   const [socialInteractions, setSocialInteractions] = useState<SocialInteraction[]>([]);
   const [activitiesBySection, setActivitiesBySection] = useState<ActivitySelections>(
-    emptyActivities()
+    emptyActivities,
   );
-  const [manualJournalEntries, setManualJournalEntries] = useState<JournalEntry[]>(
-    loadLocalJournalEntries()
-  );
+
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [reminder, setReminderState] = useState<ReminderPreferences>(loadReminder);
 
+  // Load (or reload) when the signed-in user changes.
   useEffect(() => {
     let active = true;
-    const loadHistory = async () => {
+
+    if (!userId) {
+      setHistory([]);
+      setManualJournalEntries([]);
+      setError(null);
+      setLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    setLoading(true);
+    setError(null);
+
+    (async () => {
       try {
-        const result = await invoke<BackendMoodEntry[]>("list_mood_entries");
+        const [moods, journals] = await Promise.all([
+          listMoodEntries(),
+          listJournalEntries(),
+        ]);
         if (!active) return;
-        const mapped = result.map(toMoodEntry);
-        const local = loadLocalHistory();
-        const merged = mergeHistory(mapped, local.length ? local : SEED_HISTORY);
-        setHistory(merged);
-        saveLocalHistory(merged);
-      } catch {
-        const local = loadLocalHistory();
-        if (local.length) {
-          setHistory(local);
-          return;
-        }
-        // Keep seeded data if backend is unavailable.
+        setHistory(moods);
+        setManualJournalEntries(journals);
+      } catch (err) {
+        if (!active) return;
+        setError(
+          err instanceof Error ? err.message : "Could not load your entries.",
+        );
+      } finally {
+        if (active) setLoading(false);
       }
-    };
-    loadHistory();
+    })();
+
     return () => {
       active = false;
     };
-  }, []);
+  }, [userId]);
 
   const selectMood = useCallback((mood: MoodType) => {
     setSelectedMood(mood);
@@ -195,56 +139,19 @@ export function useMoodStore() {
 
   const toggleTag = useCallback((tag: string) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   }, []);
 
-  const saveEntry = useCallback(async () => {
+  const saveEntry = useCallback(async (): Promise<boolean> => {
     if (!selectedMood) return false;
+    if (!userId) {
+      setError("You need to be signed in to save a check-in.");
+      return false;
+    }
+    setError(null);
     try {
-      const saved = await invoke<BackendMoodEntry>("save_mood_entry", {
-        input: {
-          mood: selectedMood,
-          tags: selectedTags,
-          journal,
-          school_load: schoolLoad,
-          activity_minutes: activityMinutes,
-          day_note: dayNote,
-          social_interactions: socialInteractions,
-          activities: activitiesBySection,
-        },
-      });
-      const entry = toMoodEntry(saved);
-      try {
-        const list = await invoke<BackendMoodEntry[]>("list_mood_entries");
-        const mapped = list.map(toMoodEntry);
-        const local = loadLocalHistory();
-        const merged = mergeHistory(mapped, local.length ? local : [entry]);
-        setHistory(merged);
-        saveLocalHistory(merged);
-      } catch {
-        setHistory((prev) => {
-          const filtered = prev.filter((e) => e.date !== entry.date);
-          const next = [...filtered, entry].sort((a, b) => a.timestamp - b.timestamp);
-          saveLocalHistory(next);
-          return next;
-        });
-      }
-      setSelectedMood(null);
-      setSelectedTags([]);
-      setJournal("");
-      setSchoolLoad(3);
-      setActivityMinutes(0);
-      setDayNote("");
-      setSocialInteractions([]);
-      setActivitiesBySection(emptyActivities());
-      setLastSavedAt(Date.now());
-      return true;
-    } catch {
-      const timestamp = Date.now();
-      const entry: MoodEntry = {
-        id: `${timestamp}-local`,
-        date: new Date(timestamp).toISOString().split("T")[0],
+      const saved = await upsertMoodEntry({
         mood: selectedMood,
         tags: selectedTags,
         journal,
@@ -253,13 +160,10 @@ export function useMoodStore() {
         dayNote,
         socialInteractions,
         activities: activitiesBySection,
-        timestamp,
-      };
+      });
       setHistory((prev) => {
-        const filtered = prev.filter((e) => e.date !== entry.date);
-        const next = [...filtered, entry].sort((a, b) => a.timestamp - b.timestamp);
-        saveLocalHistory(next);
-        return next;
+        const filtered = prev.filter((e) => e.id !== saved.id && e.date !== saved.date);
+        return [...filtered, saved].sort((a, b) => a.timestamp - b.timestamp);
       });
       setSelectedMood(null);
       setSelectedTags([]);
@@ -271,6 +175,11 @@ export function useMoodStore() {
       setActivitiesBySection(emptyActivities());
       setLastSavedAt(Date.now());
       return true;
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Could not save your check-in.",
+      );
+      return false;
     }
   }, [
     selectedMood,
@@ -281,6 +190,7 @@ export function useMoodStore() {
     dayNote,
     socialInteractions,
     activitiesBySection,
+    userId,
   ]);
 
   const addSocialInteraction = useCallback(() => {
@@ -304,10 +214,10 @@ export function useMoodStore() {
   const updateSocialInteraction = useCallback(
     (id: string, update: Partial<SocialInteraction>) => {
       setSocialInteractions((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, ...update } : item))
+        prev.map((item) => (item.id === id ? { ...item, ...update } : item)),
       );
     },
-    []
+    [],
   );
 
   const removeSocialInteraction = useCallback((id: string) => {
@@ -334,21 +244,26 @@ export function useMoodStore() {
     });
   }, []);
 
-  const addManualJournalEntry = useCallback((content: string) => {
-    const timestamp = Date.now();
-    const entry: JournalEntry = {
-      id: `manual-${timestamp}`,
-      date: new Date(timestamp).toISOString().split("T")[0],
-      timestamp,
-      content,
-      source: "manual",
-    };
-    setManualJournalEntries((prev) => {
-      const next = [entry, ...prev];
-      saveLocalJournalEntries(next);
-      return next;
-    });
-  }, []);
+  const addManualJournalEntry = useCallback(
+    async (content: string) => {
+      const trimmed = content.trim();
+      if (!trimmed) return;
+      if (!userId) {
+        setError("You need to be signed in to save a journal entry.");
+        return;
+      }
+      setError(null);
+      try {
+        const saved = await insertJournalEntry(trimmed);
+        setManualJournalEntries((prev) => [...prev, saved]);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Could not save your journal entry.",
+        );
+      }
+    },
+    [userId],
+  );
 
   const setReminder = useCallback((next: Partial<ReminderPreferences>) => {
     setReminderState((prev) => {
@@ -361,8 +276,8 @@ export function useMoodStore() {
   const exportData = useCallback(() => {
     const payload = {
       exportedAt: new Date().toISOString(),
-      schemaVersion: 1,
-      history: history.filter((e) => !e.id.endsWith("-local")),
+      schemaVersion: 2,
+      history,
       journalEntries: manualJournalEntries,
       reminder,
     };
@@ -381,8 +296,6 @@ export function useMoodStore() {
 
   const clearAllLocalData = useCallback(() => {
     try {
-      localStorage.removeItem(LOCAL_HISTORY_KEY);
-      localStorage.removeItem(LOCAL_JOURNAL_KEY);
       localStorage.removeItem(REMINDER_KEY);
     } catch {
       // Ignore.
@@ -392,21 +305,27 @@ export function useMoodStore() {
     setReminderState(DEFAULT_REMINDER);
   }, []);
 
+  const moodScoreMap: Record<MoodType, number> = useMemo(
+    () => ({
+      stressed: 1,
+      worried: 2,
+      okay: 3,
+      calm: 4,
+      happy: 5,
+    }),
+    [],
+  );
+
   const dominantMood = useMemo((): MoodType | null => {
     const recent = history.slice(-7);
     if (!recent.length) return null;
     const counts: Record<string, number> = {};
-    recent.forEach((e) => { counts[e.mood] = (counts[e.mood] ?? 0) + 1; });
-    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0] as MoodType;
+    recent.forEach((e) => {
+      counts[e.mood] = (counts[e.mood] ?? 0) + 1;
+    });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+    return (top?.[0] as MoodType | undefined) ?? null;
   }, [history]);
-
-  const moodScoreMap: Record<MoodType, number> = {
-    stressed: 1,
-    worried: 2,
-    okay: 3,
-    calm: 4,
-    happy: 5,
-  };
 
   const trendData = useMemo(() => {
     return history.slice(-14).map((e) => ({
@@ -414,30 +333,42 @@ export function useMoodStore() {
       score: moodScoreMap[e.mood],
       mood: e.mood,
     }));
-  }, [history]);
+  }, [history, moodScoreMap]);
 
   const distribution = useMemo(() => {
-    const counts: Record<MoodType, number> = { stressed: 0, worried: 0, okay: 0, calm: 0, happy: 0 };
-    history.forEach((e) => { counts[e.mood]++; });
+    const counts: Record<MoodType, number> = {
+      stressed: 0,
+      worried: 0,
+      okay: 0,
+      calm: 0,
+      happy: 0,
+    };
+    history.forEach((e) => {
+      counts[e.mood]++;
+    });
     const total = history.length || 1;
-    return Object.entries(counts).map(([mood, count]) => ({
-      mood: mood as MoodType,
-      count,
-      pct: Math.round((count / total) * 100),
+    return (Object.keys(counts) as MoodType[]).map((mood) => ({
+      mood,
+      count: counts[mood],
+      pct: Math.round((counts[mood] / total) * 100),
     }));
   }, [history]);
 
   const journalEntries = useMemo(() => {
-    const checkinEntries: JournalEntry[] = history.map((entry) => ({
-      id: `checkin-${entry.id}`,
-      date: entry.date,
-      timestamp: entry.timestamp,
-      content: entry.journal || entry.dayNote || "",
-      source: "checkin",
-      mood: entry.mood,
-      tags: entry.tags,
-    }));
-    return [...manualJournalEntries, ...checkinEntries];
+    const checkinEntries: JournalEntry[] = history
+      .filter((entry) => Boolean(entry.journal?.trim() || entry.dayNote?.trim()))
+      .map((entry) => ({
+        id: `checkin-${entry.id}`,
+        date: entry.date,
+        timestamp: entry.timestamp,
+        content: entry.journal?.trim() || entry.dayNote?.trim() || "",
+        source: "checkin",
+        mood: entry.mood,
+        tags: entry.tags,
+      }));
+    return [...manualJournalEntries, ...checkinEntries].sort(
+      (a, b) => b.timestamp - a.timestamp,
+    );
   }, [history, manualJournalEntries]);
 
   const socialStats = useMemo(() => {
@@ -494,11 +425,11 @@ export function useMoodStore() {
 
     const bestEntry = scoredRecent.reduce(
       (best, current) => (current.score > best.score ? current : best),
-      scoredRecent[0]
+      scoredRecent[0] ?? null,
     )?.entry;
     const worstEntry = scoredRecent.reduce(
       (worst, current) => (current.score < worst.score ? current : worst),
-      scoredRecent[0]
+      scoredRecent[0] ?? null,
     )?.entry;
 
     const stabilityWindow = history.slice(-14).map((entry) => moodScoreMap[entry.mood]);
@@ -506,10 +437,14 @@ export function useMoodStore() {
       ? stabilityWindow.reduce((sum, val) => sum + val, 0) / stabilityWindow.length
       : 0;
     const variance = stabilityWindow.length
-      ? stabilityWindow.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / stabilityWindow.length
+      ? stabilityWindow.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+        stabilityWindow.length
       : 0;
     const stdDev = Math.sqrt(variance);
-    const stabilityScore = Math.max(0, Math.min(100, Math.round(100 - (stdDev / 2) * 100)));
+    const stabilityScore = Math.max(
+      0,
+      Math.min(100, Math.round(100 - (stdDev / 2) * 100)),
+    );
 
     const activityCounts: Record<ActivitySectionId, Record<string, number>> = {
       work: {},
@@ -542,7 +477,7 @@ export function useMoodStore() {
           label: top ? top[0] : null,
           count: top ? top[1] : 0,
         };
-      }
+      },
     );
 
     return {
@@ -555,7 +490,7 @@ export function useMoodStore() {
       activityCount: totalActivitySelections,
       activityHighlights,
     };
-  }, [history]);
+  }, [history, moodScoreMap]);
 
   return {
     history,
@@ -569,6 +504,8 @@ export function useMoodStore() {
     activitiesBySection,
     lastSavedAt,
     reminder,
+    loading,
+    error,
     selectMood,
     toggleTag,
     setJournal,

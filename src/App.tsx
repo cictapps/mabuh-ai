@@ -36,6 +36,8 @@ export default function App({
     activitiesBySection,
     lastSavedAt,
     reminder,
+    loading,
+    error,
     selectMood,
     toggleTag,
     setJournal,
@@ -129,6 +131,8 @@ export default function App({
             refreshToken={lastSavedAt}
             journalEntries={journalEntries}
             onAddJournalEntry={addManualJournalEntry}
+            loading={loading}
+            error={error}
           />
         </div>
         <div

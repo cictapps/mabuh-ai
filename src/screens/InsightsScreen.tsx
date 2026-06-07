@@ -1,21 +1,29 @@
 import React, { useMemo } from "react";
-import { INSIGHTS } from "../data";
-import { InsightCard } from "../components/insights/InsightCard";
 import { SuggestionCard } from "../components/suggestions/SuggestionCard";
 import { SectionLabel } from "../components/shared/SectionLabel";
 import { getTrendSuggestions } from "../data/insightSuggestions";
-import { InsightCard as InsightCardType, MoodEntry } from "../types";
+import { deriveInsights } from "../lib/insights";
+import { MoodEntry } from "../types";
 
 interface InsightsScreenProps {
   refreshToken?: number | null;
   history: MoodEntry[];
+  loading?: boolean;
 }
 
-export const InsightsScreen: React.FC<InsightsScreenProps> = ({ refreshToken, history }) => {
-  const insights = (INSIGHTS as InsightCardType[]).slice(0, 3);
+export const InsightsScreen: React.FC<InsightsScreenProps> = ({
+  refreshToken,
+  history,
+  loading,
+}) => {
+  const insights = useMemo(
+    () => deriveInsights(history).slice(0, 3),
+    [history, refreshToken],
+  );
+
   const suggestions = useMemo(
     () => getTrendSuggestions(history).slice(0, 3),
-    [history, refreshToken]
+    [history, refreshToken],
   );
 
   return (
@@ -49,17 +57,62 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({ refreshToken, hi
 
       <div>
         {insights.map((insight) => (
-          <InsightCard key={insight.id} insight={insight} offset={false} />
+          <InsightRow key={insight.id} insight={insight} />
         ))}
       </div>
 
       {/* Suggestions based on recent mood trend. */}
       <div>
         <SectionLabel>Suggestions for you</SectionLabel>
-        {suggestions.map((suggestion) => (
-          <SuggestionCard key={suggestion.id} suggestion={suggestion} />
-        ))}
+        {loading && history.length === 0 ? (
+          <p style={{ fontSize: 12, color: "rgba(188,194,255,0.4)" }}>
+            Loading your trends…
+          </p>
+        ) : suggestions.length === 0 ? (
+          <p style={{ fontSize: 12, color: "rgba(188,194,255,0.4)" }}>
+            Log a few more check-ins to see suggestions.
+          </p>
+        ) : (
+          suggestions.map((suggestion) => (
+            <SuggestionCard key={suggestion.id} suggestion={suggestion} />
+          ))
+        )}
       </div>
     </div>
   );
 };
+
+function InsightRow({ insight }: { insight: { id: string; title: string; body: string; color: string } }) {
+  return (
+    <div
+      style={{
+        borderRadius: 16,
+        padding: "18px 20px",
+        background: `${insight.color}0d`,
+        marginBottom: 10,
+      }}
+    >
+      <p
+        className="font-serif"
+        style={{
+          fontSize: 16,
+          fontWeight: 400,
+          color: insight.color,
+          marginBottom: 6,
+          lineHeight: 1.3,
+        }}
+      >
+        {insight.title}
+      </p>
+      <p
+        style={{
+          fontSize: 13,
+          color: "rgba(188,194,255,0.45)",
+          lineHeight: 1.65,
+        }}
+      >
+        {insight.body}
+      </p>
+    </div>
+  );
+}

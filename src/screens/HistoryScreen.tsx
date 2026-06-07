@@ -5,13 +5,16 @@ import { getMoodMeta } from "../data";
 
 interface HistoryScreenProps {
   history: MoodEntry[];
+  loading?: boolean;
 }
 
-export const HistoryScreen: React.FC<HistoryScreenProps> = ({ history }) => {
+export const HistoryScreen: React.FC<HistoryScreenProps> = ({ history, loading }) => {
   const latestThree = useMemo(
     () => [...history].sort((a, b) => b.timestamp - a.timestamp).slice(0, 3),
     [history]
   );
+
+  const isEmpty = !loading && history.length === 0;
 
   return (
     <div
@@ -43,6 +46,39 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ history }) => {
       </div>
 
       <MoodHistoryCalendar history={history} showDetail={false} />
+
+      {loading ? (
+        <div
+          style={{
+            padding: "14px 16px",
+            borderRadius: 14,
+            background: "rgba(188,194,255,0.04)",
+            color: "rgba(188,194,255,0.4)",
+            fontSize: 12,
+            textAlign: "center",
+          }}
+        >
+          Loading your history…
+        </div>
+      ) : isEmpty ? (
+        <div
+          style={{
+            padding: "20px 18px",
+            borderRadius: 16,
+            background: "rgba(188,194,255,0.04)",
+            border: "1px dashed rgba(188,194,255,0.16)",
+            color: "rgba(188,194,255,0.55)",
+            fontSize: 13,
+            lineHeight: 1.6,
+            textAlign: "center",
+          }}
+        >
+          Your story starts with your first check-in.
+          <br />
+          Head to the <strong style={{ color: "rgba(216,220,230,0.85)" }}>Check in</strong> tab
+          to add one.
+        </div>
+      ) : null}
 
       {/* History list: shows latest 3 entries only. */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

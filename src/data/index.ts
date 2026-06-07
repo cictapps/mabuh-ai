@@ -1,4 +1,4 @@
-import { MoodMeta, MoodType, InsightCard, Suggestion, MoodEntry, NavItem } from "../types";
+import { MoodMeta, MoodType, Suggestion, NavItem } from "../types";
 
 export const MOODS: MoodMeta[] = [
   {
@@ -48,33 +48,6 @@ export const getMoodMeta = (id: MoodType): MoodMeta => {
   return mood;
 };
 
-export const INSIGHTS: InsightCard[] = [
-  {
-    id: "1",
-    title: "You feel calmer on weekends",
-    body: "Saturday and Sunday check-ins consistently show Calm — a reset that carries into Monday.",
-    color: "#6dba84",
-  },
-  {
-    id: "2",
-    title: "Stress rises during busy periods",
-    body: "On high-workload days, emotional pressure tends to peak. Short breaks may shift this pattern.",
-    color: "#e05c6e",
-  },
-  {
-    id: "3",
-    title: "Journaling lifts your mood",
-    body: "Check-ins with journal entries correlate with higher Calm and Happy moods the next morning.",
-    color: "#ffb954",
-  },
-  {
-    id: "4",
-    title: "Okay moods are transitional",
-    body: "Your Okay states rarely persist beyond two days — they often lead into your most Calm check-ins.",
-    color: "#d4b84e",
-  },
-];
-
 export const SUGGESTIONS: Record<MoodType, Suggestion[]> = {
   stressed: [
     { id: "s1", icon: "💨", title: "Breathing exercise", description: "4-7-8 breathing to release tension and calm your nervous system.", mood: "stressed" },
@@ -100,39 +73,6 @@ export const SUGGESTIONS: Record<MoodType, Suggestion[]> = {
     { id: "h2", icon: "🎯", title: "Set a meaningful goal", description: "Channel your clarity into something you've been putting off.", mood: "happy" },
   ],
 };
-
-// Seed history for demo — past 30 days
-function seedDate(daysAgo: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - daysAgo);
-  return d.toISOString().split("T")[0];
-}
-
-const moodSeq: MoodType[] = [
-  "calm","happy","happy","calm","okay","worried","stressed",
-  "okay","calm","calm","happy","calm","okay","stressed","worried",
-  "okay","calm","happy","calm","calm","okay","worried","calm",
-  "happy","happy","calm","okay","calm","stressed","calm",
-];
-
-export const SEED_HISTORY: MoodEntry[] = moodSeq.map((mood, i) => ({
-  id: `entry-${i}`,
-  date: seedDate(29 - i),
-  mood,
-  tags: getMoodMeta(mood).tags.slice(0, 2),
-  journal: i % 4 === 0 ? "Had a reflective day. Taking it one step at a time." : "",
-  socialInteractions: [],
-  activities: {
-    work: [],
-    health: [],
-    sleep: [],
-    food: [],
-    hobbies: [],
-    weather: [],
-    sports: [],
-  },
-  timestamp: Date.now() - (29 - i) * 86400000,
-}));
 
 export const NAV_ITEMS: NavItem[] = [
   { id: "checkin", label: "Check in", icon: "checkin" },

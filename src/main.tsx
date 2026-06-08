@@ -49,7 +49,11 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
           path="/chatbot"
           element={
             <ProtectedRoute>
-              <App initialHub="support" initialSupportView="chat" />
+              <App
+                initialHub="support"
+                initialSupportView="chat"
+                showOnboarding={false}
+              />
             </ProtectedRoute>
           }
         />

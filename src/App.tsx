@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ScreenId } from "./types";
 import { NAV_ITEMS } from "./data";
 import { useMoodStore } from "./hooks/useMoodStore";
+import { useOnboarding } from "./hooks/useOnboarding";
 
 import { BottomNav } from "./components/shared/BottomNav";
 import { CheckInScreen }    from "./screens/CheckInScreen";
@@ -10,12 +11,14 @@ import { ReviewHub } from "./screens/ReviewHub";
 import { JourneyScreen } from "./screens/JourneyScreen";
 import { SupportHub } from "./screens/SupportHub";
 import { SettingsScreen } from "./screens/SettingsScreen";
+import { OnboardingScreen } from "./screens/OnboardingScreen";
 
 type SupportView = "hub" | "chat";
 
 interface AppProps {
   initialHub?: ScreenId;
   initialSupportView?: SupportView;
+  showOnboarding?: boolean;
 }
 
 const NAV_STATE_KEY = "mabuh-nav-state";
@@ -49,6 +52,7 @@ function readPersistedNav(
 export default function App({
   initialHub = "checkin",
   initialSupportView = "hub",
+  showOnboarding = true,
 }: AppProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -59,6 +63,7 @@ export default function App({
   const [activeHub, setActiveHub] = useState<ScreenId>(initialState.activeHub);
   const [supportView, setSupportView] = useState<SupportView>(initialState.supportView);
   const mainRef = useRef<HTMLElement | null>(null);
+  const { hasCompleted, complete: completeOnboarding, reset: resetOnboarding } = useOnboarding();
 
   // Persist nav state so the back button from /help or /chatbot returns
   // the user to the same tab they were on before leaving /.
@@ -133,97 +138,104 @@ export default function App({
         overflow: "hidden",
       }}
     >
-      {/* Scrollable content area */}
-      <main
-        ref={mainRef}
-        style={{
-          flex: 1,
-          minHeight: 0,
-          display: activeHub === "support" && supportView === "chat" ? "flex" : "block",
-          flexDirection: "column",
-          overflowY: activeHub === "support" && supportView === "chat" ? "hidden" : "auto",
-          overflowX: "hidden",
-          WebkitOverflowScrolling: "touch",
-        }}
-      >
-        <div style={{ display: activeHub === "checkin" ? "block" : "none" }}>
-          <CheckInScreen
-            selectedMood={selectedMood}
-            selectedTags={selectedTags}
-            journal={journal}
-            schoolLoad={schoolLoad}
-            activityMinutes={activityMinutes}
-            dayNote={dayNote}
-            socialInteractions={socialInteractions}
-            activitiesBySection={activitiesBySection}
-            onSelectMood={selectMood}
-            onToggleTag={toggleTag}
-            onJournalChange={setJournal}
-            onSchoolLoadChange={setSchoolLoad}
-            onActivityMinutesChange={setActivityMinutes}
-            onDayNoteChange={setDayNote}
-            onAddSocialInteraction={addSocialInteraction}
-            onRemoveSocialInteraction={removeSocialInteraction}
-            onUpdateSocialInteraction={updateSocialInteraction}
-            onToggleActivity={toggleActivity}
-            onAddCustomActivity={addCustomActivity}
-            onSave={saveEntry}
-          />
-        </div>
-        <div style={{ display: activeHub === "review" ? "block" : "none" }}>
-          <ReviewHub
-            history={history}
-            trendData={trendData}
-            distribution={distribution}
-            dominantMood={dominantMood}
-            socialStats={socialStats}
-            analyticsStats={analyticsStats}
-            refreshToken={lastSavedAt}
-            journalEntries={journalEntries}
-            onAddJournalEntry={addManualJournalEntry}
-            loading={loading}
-            error={error}
-          />
-        </div>
-        <div style={{ display: activeHub === "journey" ? "block" : "none" }}>
-          <JourneyScreen onOpenSupport={() => navigate("/help")} />
-        </div>
-        <div
-          style={{
-            display: activeHub === "support" ? "flex" : "none",
-            flexDirection: "column",
-            flex: supportView === "chat" ? 1 : "initial",
-            height: supportView === "chat" ? "100%" : "auto",
-            minHeight: 0,
-          }}
-        >
-          <SupportHub
-            view={supportView}
-            onOpenChat={() => setSupportView("chat")}
-            onCloseChat={() => setSupportView("hub")}
-          />
-        </div>
-        <div
-          style={{
-            display: activeHub === "settings" ? "block" : "none",
-          }}
-        >
-          <SettingsScreen
-            reminder={reminder}
-            onSetReminder={setReminder}
-            onExportData={exportData}
-            onClearAllLocalData={clearAllLocalData}
-          />
-        </div>
-      </main>
+      {showOnboarding && !hasCompleted ? (
+        <OnboardingScreen onComplete={completeOnboarding} />
+      ) : (
+        <>
+          {/* Scrollable content area */}
+          <main
+            ref={mainRef}
+            style={{
+              flex: 1,
+              minHeight: 0,
+              display: activeHub === "support" && supportView === "chat" ? "flex" : "block",
+              flexDirection: "column",
+              overflowY: activeHub === "support" && supportView === "chat" ? "hidden" : "auto",
+              overflowX: "hidden",
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
+            <div style={{ display: activeHub === "checkin" ? "block" : "none" }}>
+              <CheckInScreen
+                selectedMood={selectedMood}
+                selectedTags={selectedTags}
+                journal={journal}
+                schoolLoad={schoolLoad}
+                activityMinutes={activityMinutes}
+                dayNote={dayNote}
+                socialInteractions={socialInteractions}
+                activitiesBySection={activitiesBySection}
+                onSelectMood={selectMood}
+                onToggleTag={toggleTag}
+                onJournalChange={setJournal}
+                onSchoolLoadChange={setSchoolLoad}
+                onActivityMinutesChange={setActivityMinutes}
+                onDayNoteChange={setDayNote}
+                onAddSocialInteraction={addSocialInteraction}
+                onRemoveSocialInteraction={removeSocialInteraction}
+                onUpdateSocialInteraction={updateSocialInteraction}
+                onToggleActivity={toggleActivity}
+                onAddCustomActivity={addCustomActivity}
+                onSave={saveEntry}
+              />
+            </div>
+            <div style={{ display: activeHub === "review" ? "block" : "none" }}>
+              <ReviewHub
+                history={history}
+                trendData={trendData}
+                distribution={distribution}
+                dominantMood={dominantMood}
+                socialStats={socialStats}
+                analyticsStats={analyticsStats}
+                refreshToken={lastSavedAt}
+                journalEntries={journalEntries}
+                onAddJournalEntry={addManualJournalEntry}
+                loading={loading}
+                error={error}
+              />
+            </div>
+            <div style={{ display: activeHub === "journey" ? "block" : "none" }}>
+              <JourneyScreen onOpenSupport={() => navigate("/help")} />
+            </div>
+            <div
+              style={{
+                display: activeHub === "support" ? "flex" : "none",
+                flexDirection: "column",
+                flex: supportView === "chat" ? 1 : "initial",
+                height: supportView === "chat" ? "100%" : "auto",
+                minHeight: 0,
+              }}
+            >
+              <SupportHub
+                view={supportView}
+                onOpenChat={() => setSupportView("chat")}
+                onCloseChat={() => setSupportView("hub")}
+              />
+            </div>
+            <div
+              style={{
+                display: activeHub === "settings" ? "block" : "none",
+              }}
+            >
+              <SettingsScreen
+                reminder={reminder}
+                onSetReminder={setReminder}
+                onExportData={exportData}
+                onClearAllLocalData={clearAllLocalData}
+                onReplayOnboarding={resetOnboarding}
+              />
+            </div>
+          </main>
 
-      {/* Bottom navigation */}
-      {!(activeHub === "support" && supportView === "chat") && (
-        <BottomNav
-          items={NAV_ITEMS}
-          active={activeHub}
-          onSelect={handleNavSelect}
-        />
+          {/* Bottom navigation */}
+          {!(activeHub === "support" && supportView === "chat") && (
+            <BottomNav
+              items={NAV_ITEMS}
+              active={activeHub}
+              onSelect={handleNavSelect}
+            />
+          )}
+        </>
       )}
     </div>
   );

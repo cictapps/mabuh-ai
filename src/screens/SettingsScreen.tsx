@@ -10,6 +10,7 @@ import {
   KeyRound,
   LogOut,
   Mail,
+  PlayCircle,
   Save,
   Trash2,
   User as UserIcon,
@@ -25,6 +26,7 @@ interface SettingsScreenProps {
   onSetReminder: (next: Partial<ReminderPreferences>) => void;
   onExportData: () => void;
   onClearAllLocalData: () => void;
+  onReplayOnboarding?: () => void;
 }
 
 const APP_VERSION = "0.1.0";
@@ -348,6 +350,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onSetReminder,
   onExportData,
   onClearAllLocalData,
+  onReplayOnboarding,
 }) => {
   const { user, profile } = useAuth();
   const {
@@ -748,6 +751,32 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <StatusLine kind="success" message="Password updated." />
           )}
           {pwStatus === "error" && pwError && <StatusLine kind="error" message={pwError} />}
+        </div>
+      </Section>
+
+      <Section title="Welcome tour" icon={<PlayCircle size={16} />}>
+        <p
+          style={{
+            fontSize: 13,
+            color: "rgba(188,194,255,0.55)",
+            lineHeight: 1.55,
+            margin: 0,
+          }}
+        >
+          Reopen the first-time introduction whenever you'd like a refresher on
+          what MabuhAi can do. Your data and settings stay exactly as they are.
+        </p>
+        <div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onReplayOnboarding?.()}
+            disabled={!onReplayOnboarding}
+          >
+            <PlayCircle size={14} />
+            Replay welcome tour
+          </Button>
         </div>
       </Section>
 

@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { MoodType } from "../../types";
 import { MOODS } from "../../data";
 
@@ -45,7 +46,19 @@ function nodePos(index: number) {
 }
 
 export const MoodArc: React.FC<MoodArcProps> = ({ selectedMood, onSelect }) => {
+  const shouldReduceMotion = useReducedMotion();
   const selectedIdx = selectedMood ? MOODS.findIndex((m) => m.id === selectedMood) : -1;
+  const transition = shouldReduceMotion
+    ? { duration: 0 }
+    : {
+        type: "spring" as const,
+        stiffness: 260,
+        damping: 28,
+        mass: 0.7,
+      };
+  const fadeTransition = shouldReduceMotion
+    ? { duration: 0 }
+    : { duration: 0.24, ease: "easeOut" as const };
 
   const handleClick = useCallback(
     (id: MoodType) => { onSelect(id); },
@@ -54,6 +67,7 @@ export const MoodArc: React.FC<MoodArcProps> = ({ selectedMood, onSelect }) => {
 
   const selectedNode = selectedIdx >= 0 ? nodePos(selectedIdx) : null;
   const selectedColor = selectedIdx >= 0 ? MOODS[selectedIdx].color : "#bcc2ff";
+  const gradientCenter = selectedNode ?? { x: CX, y: CY };
 
   return (
     <svg
@@ -62,6 +76,41 @@ export const MoodArc: React.FC<MoodArcProps> = ({ selectedMood, onSelect }) => {
       style={{ height: 210, overflow: "visible" }}
       aria-label="Mood selector arc"
     >
+      <defs>
+        <motion.radialGradient
+          id="mood-arc-active-gradient"
+          gradientUnits="userSpaceOnUse"
+          animate={{
+            cx: gradientCenter.x,
+            cy: gradientCenter.y,
+            fx: gradientCenter.x,
+            fy: gradientCenter.y,
+            r: selectedNode ? 58 : 38,
+          }}
+          initial={false}
+          transition={transition}
+        >
+          <motion.stop
+            offset="0%"
+            animate={{ stopColor: selectedColor, stopOpacity: 1 }}
+            initial={false}
+            transition={fadeTransition}
+          />
+          <motion.stop
+            offset="62%"
+            animate={{ stopColor: selectedColor, stopOpacity: 0.55 }}
+            initial={false}
+            transition={fadeTransition}
+          />
+          <motion.stop
+            offset="100%"
+            animate={{ stopColor: selectedColor, stopOpacity: 0 }}
+            initial={false}
+            transition={fadeTransition}
+          />
+        </motion.radialGradient>
+      </defs>
+
       {/* Arc segments */}
       {MOODS.slice(0, -1).map((mood, i) => {
         const hasSelection = selectedIdx >= 0;
@@ -70,30 +119,36 @@ export const MoodArc: React.FC<MoodArcProps> = ({ selectedMood, onSelect }) => {
 
         return (
           <g key={`${mood.id}-seg`}>
-            <path
+            <motion.path
               d={segmentPath(i)}
               fill="none"
               stroke={mood.color}
               strokeWidth={STROKE_W + 10}
               strokeLinecap="round"
-              opacity={baseOpacity * 0.35}
+              animate={{ opacity: baseOpacity * 0.35 }}
+              initial={false}
+              transition={fadeTransition}
               style={{ filter: "blur(3px)" }}
             />
-            <path
+            <motion.path
               d={segmentPath(i)}
               fill="none"
               stroke={mood.color}
               strokeWidth={STROKE_W + 4}
               strokeLinecap="round"
-              opacity={baseOpacity * 0.45}
+              animate={{ opacity: baseOpacity * 0.45 }}
+              initial={false}
+              transition={fadeTransition}
             />
-            <path
+            <motion.path
               d={segmentPath(i)}
               fill="none"
               stroke={mood.color}
               strokeWidth={STROKE_W}
               strokeLinecap="round"
-              opacity={baseOpacity}
+              animate={{ opacity: baseOpacity }}
+              initial={false}
+              transition={fadeTransition}
             />
           </g>
         );
@@ -108,31 +163,43 @@ export const MoodArc: React.FC<MoodArcProps> = ({ selectedMood, onSelect }) => {
 
         return (
           <g key={mood.id} onClick={() => handleClick(mood.id)} style={{ cursor: "pointer" }}>
-            <circle
+            <motion.circle
               cx={pos.x}
               cy={pos.y}
-              r={14}
+              animate={{
+                opacity: hasSelection ? (isSelected ? 0.6 : 0.18) : 0.35,
+                r: isSelected ? 16 : 14,
+              }}
+              initial={false}
+              transition={fadeTransition}
               fill={mood.color}
-              opacity={hasSelection ? (isSelected ? 0.6 : 0.18) : 0.35}
               style={{ filter: "blur(2px)" }}
             />
-            <circle
+            <motion.circle
               cx={pos.x}
               cy={pos.y}
-              r={11}
+              animate={{
+                opacity: hasSelection ? (isSelected ? 0.95 : 0.35) : 0.6,
+                r: isSelected ? 12 : 11,
+              }}
+              initial={false}
+              transition={fadeTransition}
               fill="none"
               stroke={mood.color}
               strokeWidth={2}
-              opacity={hasSelection ? (isSelected ? 0.95 : 0.35) : 0.6}
             />
-            <circle
+            <motion.circle
               cx={pos.x}
               cy={pos.y}
-              r={7}
+              animate={{
+                opacity: hasSelection ? (isSelected ? 1 : 0.65) : 0.8,
+                r: isSelected ? 8 : 7,
+              }}
+              initial={false}
+              transition={fadeTransition}
               fill={mood.color}
-              opacity={hasSelection ? (isSelected ? 1 : 0.65) : 0.8}
             />
-            <text
+            <motion.text
               x={lbl.x}
               y={lbl.y + 4}
               textAnchor="middle"
@@ -140,46 +207,65 @@ export const MoodArc: React.FC<MoodArcProps> = ({ selectedMood, onSelect }) => {
               fontFamily="Plus Jakarta Sans, sans-serif"
               fontWeight="500"
               fill={mood.color}
-              opacity={hasSelection ? (isSelected ? 0.95 : 0.45) : 0.6}
+              animate={{ opacity: hasSelection ? (isSelected ? 0.95 : 0.45) : 0.6 }}
+              initial={false}
+              transition={fadeTransition}
             >
               {mood.label}
-            </text>
+            </motion.text>
           </g>
         );
       })}
 
       {/* Cursor dot */}
       {selectedNode && (
-        <g style={{ transition: "all 0.32s cubic-bezier(0.34,1.4,0.64,1)" }}>
-          {/* Selected node halo rings */}
+        <motion.g
+          animate={{ x: selectedNode.x, y: selectedNode.y }}
+          initial={false}
+          transition={transition}
+        >
           <circle
-            cx={selectedNode.x}
-            cy={selectedNode.y}
+            cx={0}
+            cy={0}
+            r={42}
+            fill="url(#mood-arc-active-gradient)"
+            opacity={0.5}
+          />
+          {/* Selected node halo rings */}
+          <motion.circle
+            cx={0}
+            cy={0}
             r={26}
             fill="none"
-            stroke={selectedColor}
+            animate={{ stroke: selectedColor }}
+            initial={false}
+            transition={fadeTransition}
             strokeWidth={2}
             opacity={0.22}
           />
-          <circle
-            cx={selectedNode.x}
-            cy={selectedNode.y}
+          <motion.circle
+            cx={0}
+            cy={0}
             r={20}
             fill="none"
-            stroke={selectedColor}
+            animate={{ stroke: selectedColor }}
+            initial={false}
+            transition={fadeTransition}
             strokeWidth={2}
             opacity={0.32}
           />
-          <circle
-            cx={selectedNode.x}
-            cy={selectedNode.y}
+          <motion.circle
+            cx={0}
+            cy={0}
             r={14}
-            fill={selectedColor}
+            animate={{ fill: "url(#mood-arc-active-gradient)" }}
+            initial={false}
+            transition={fadeTransition}
             opacity={0.95}
-            style={{ filter: `drop-shadow(0 0 8px ${selectedColor}60)` }}
+            style={{ filter: "drop-shadow(0 0 8px rgb(188 194 255 / 35%))" }}
           />
-          <circle cx={selectedNode.x} cy={selectedNode.y} r={6} fill="#121416" />
-        </g>
+          <circle cx={0} cy={0} r={6} fill="#121416" />
+        </motion.g>
       )}
     </svg>
   );

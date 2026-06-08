@@ -62,7 +62,30 @@ export interface Suggestion {
   mood: MoodType;
 }
 
-export type ScreenId = "checkin" | "review" | "support" | "settings";
+export type ScreenId = "checkin" | "review" | "journey" | "support" | "settings";
+
+export type JourneyPhase =
+  | "preflight"
+  | "airborne"
+  | "checkpoint"
+  | "pause"
+  | "final"
+  | "rest";
+
+export type JourneyTheme = "dusk" | "dawn" | "meadow";
+export type JourneyPlane = "trainer" | "cruiser" | "glider";
+
+export interface JourneyCheckpoint {
+  id: string;
+  label: string;
+  time: string;
+}
+
+export interface JourneyEmergencyContact {
+  id: string;
+  name: string;
+  phone: string;
+}
 
 export type ReviewTabId = "history" | "analytics" | "insights" | "journal";
 

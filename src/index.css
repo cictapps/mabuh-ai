@@ -57,6 +57,9 @@
   --accent-foreground: #f5f1ff;
   --destructive: #ff7b7b;
   --destructive-foreground: #22090b;
+  --success: #6dba84;
+  --success-foreground: #0f121a;
+  --success-soft: rgba(109, 186, 132, 0.18);
   --border: rgb(245 241 255 / 8%);
   --input: rgb(245 241 255 / 14%);
   --ring: rgb(255 185 84 / 45%);
@@ -84,6 +87,9 @@
   --accent-foreground: #f5f1ff;
   --destructive: #ff7b7b;
   --destructive-foreground: #22090b;
+  --success: #6dba84;
+  --success-foreground: #0f121a;
+  --success-soft: rgba(109, 186, 132, 0.18);
   --border: rgb(245 241 255 / 8%);
   --input: rgb(245 241 255 / 14%);
   --ring: rgb(255 185 84 / 45%);
@@ -161,6 +167,42 @@ input[type="password"]::-ms-clear {
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes save-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes journey-breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+}
+
+.journey-breathe {
+  animation: journey-breathe 5.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-breathe {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes save-spin {
+    to {
+      transform: none;
+    }
   }
 }
 

@@ -1,0 +1,81 @@
+import { Flame, Sparkles, Star } from "lucide-react";
+import { Pill } from "./Pill";
+import { ProgressBar } from "./ProgressBar";
+import { levelFromXp, levelProgressPercent, xpIntoLevel, XP_PER_LEVEL } from "@/lib/journey/xp";
+
+type JourneyHeaderProps = {
+  totalXp: number;
+  streak: number;
+  flightsCompleted: number;
+};
+
+export function JourneyHeader({ totalXp, streak, flightsCompleted }: JourneyHeaderProps) {
+  const level = levelFromXp(totalXp);
+  const intoLevel = xpIntoLevel(totalXp);
+
+  return (
+    <div className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.10)] bg-card p-5 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.18),transparent_60%)] blur-2xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-20 -left-12 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.18),transparent_60%)] blur-2xl"
+      />
+      <Star
+        aria-hidden
+        className="pointer-events-none absolute right-6 top-5 size-3 text-tertiary/60"
+        fill="currentColor"
+      />
+      <Star
+        aria-hidden
+        className="pointer-events-none absolute right-14 top-12 size-2 text-primary/50"
+        fill="currentColor"
+      />
+      <Star
+        aria-hidden
+        className="pointer-events-none absolute right-24 top-3 size-1.5 text-secondary/60"
+        fill="currentColor"
+      />
+
+      <div className="relative flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            <Sparkles className="size-3 text-tertiary" />
+            Your journey
+          </p>
+          <h1 className="mt-1 font-serif text-3xl leading-tight tracking-[-0.03em] text-foreground">
+            Level {level}
+          </h1>
+          <p className="mt-1 text-xs text-muted-foreground">
+            <span className="font-mono text-foreground/90">{intoLevel}</span>
+            <span className="opacity-60"> / {XP_PER_LEVEL} XP</span>
+            <span className="opacity-60"> toward level {level + 1}</span>
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <Pill
+            label="Streak"
+            value={
+              <span className="flex items-center gap-1">
+                {streak}
+                <Flame className="size-3 text-tertiary" fill="currentColor" />
+              </span>
+            }
+            tone="warm"
+          />
+          <Pill label="Flights" value={flightsCompleted} tone="calm" />
+        </div>
+      </div>
+
+      <div className="relative mt-5">
+        <ProgressBar
+          progress={levelProgressPercent(totalXp)}
+          label={`${totalXp} XP earned`}
+          tone="amber"
+        />
+      </div>
+    </div>
+  );
+}

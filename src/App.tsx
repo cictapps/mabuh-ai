@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ScreenId } from "./types";
 import { NAV_ITEMS } from "./data";
 import { useMoodStore } from "./hooks/useMoodStore";
@@ -6,6 +7,7 @@ import { useMoodStore } from "./hooks/useMoodStore";
 import { BottomNav } from "./components/shared/BottomNav";
 import { CheckInScreen }    from "./screens/CheckInScreen";
 import { ReviewHub } from "./screens/ReviewHub";
+import { JourneyScreen } from "./screens/JourneyScreen";
 import { SupportHub } from "./screens/SupportHub";
 import { SettingsScreen } from "./screens/SettingsScreen";
 
@@ -16,13 +18,61 @@ interface AppProps {
   initialSupportView?: SupportView;
 }
 
+const NAV_STATE_KEY = "mabuh-nav-state";
+
+interface PersistedNavState {
+  activeHub: ScreenId;
+  supportView: SupportView;
+}
+
+function readPersistedNav(
+  pathname: string,
+  fallback: PersistedNavState,
+): PersistedNavState {
+  if (typeof window === "undefined") return fallback;
+  // Only restore on the main / route. Standalone routes like /chatbot
+  // should always honour their initial props.
+  if (pathname !== "/") return fallback;
+  try {
+    const raw = window.sessionStorage.getItem(NAV_STATE_KEY);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw) as Partial<PersistedNavState>;
+    return {
+      activeHub: parsed.activeHub ?? fallback.activeHub,
+      supportView: parsed.supportView ?? fallback.supportView,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
 export default function App({
   initialHub = "checkin",
   initialSupportView = "hub",
 }: AppProps) {
-  const [activeHub, setActiveHub] = useState<ScreenId>(initialHub);
-  const [supportView, setSupportView] = useState<SupportView>(initialSupportView);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const initialState = readPersistedNav(
+    typeof window !== "undefined" ? window.location.pathname : "/",
+    { activeHub: initialHub, supportView: initialSupportView },
+  );
+  const [activeHub, setActiveHub] = useState<ScreenId>(initialState.activeHub);
+  const [supportView, setSupportView] = useState<SupportView>(initialState.supportView);
   const mainRef = useRef<HTMLElement | null>(null);
+
+  // Persist nav state so the back button from /help or /chatbot returns
+  // the user to the same tab they were on before leaving /.
+  useEffect(() => {
+    if (location.pathname !== "/") return;
+    try {
+      window.sessionStorage.setItem(
+        NAV_STATE_KEY,
+        JSON.stringify({ activeHub, supportView } satisfies PersistedNavState),
+      );
+    } catch {
+      // sessionStorage may be unavailable (private mode, quota); fail silently.
+    }
+  }, [activeHub, supportView, location.pathname]);
 
   const {
     history,
@@ -134,6 +184,9 @@ export default function App({
             loading={loading}
             error={error}
           />
+        </div>
+        <div style={{ display: activeHub === "journey" ? "block" : "none" }}>
+          <JourneyScreen onOpenSupport={() => navigate("/help")} />
         </div>
         <div
           style={{

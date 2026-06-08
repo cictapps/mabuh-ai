@@ -31,7 +31,7 @@ export function FinalPanel({
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <SectionTitle icon={<Flag className="size-4" />} title="Final approach" />
-          <span className="rounded-full border border-[rgba(255,185,84,0.32)] bg-[rgba(255,185,84,0.10)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-tertiary-foreground">
+          <span className="rounded-full border border-[rgba(255,185,84,0.32)] bg-[rgba(255,185,84,0.10)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ffd99a]">
             +5 XP
           </span>
         </div>
@@ -46,7 +46,7 @@ export function FinalPanel({
         ) : null}
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Wind down
           </p>
           <div className="space-y-2">
@@ -66,7 +66,7 @@ export function FinalPanel({
         </div>
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Closing mood
           </p>
           <MoodPicker value={finalMood} onChange={onSelectMood} />

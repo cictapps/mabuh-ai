@@ -38,7 +38,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
           <span className="grid size-9 place-items-center rounded-2xl border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.10)] text-tertiary">
             <Award className="size-4" />
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Achievements
           </span>
         </div>
@@ -63,7 +63,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
         </div>
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Progress to level {level + 1}
           </p>
           <ProgressBar
@@ -74,7 +74,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
         </div>
 
         <div>
-          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             <Sparkles className="size-3" />
             How XP grows
           </p>
@@ -84,7 +84,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
                 key={rule.label}
                 className="flex items-center justify-between rounded-xl border border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] px-3 py-2 text-xs"
               >
-                <span className="text-muted-foreground">{rule.label}</span>
+                <span className="text-[#d8d4eb]">{rule.label}</span>
                 <span className="font-mono text-foreground">{rule.value}</span>
               </li>
             ))}
@@ -92,7 +92,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
         </div>
 
         <div>
-          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             <MapPin className="size-3" />
             Flight milestones
           </p>
@@ -106,7 +106,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
                     "flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-xs " +
                     (reached
                       ? "border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.08)] text-foreground"
-                      : "border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] text-muted-foreground")
+                      : "border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] text-[#d8d4eb]")
                   }
                 >
                   <span className="min-w-0 flex-1">

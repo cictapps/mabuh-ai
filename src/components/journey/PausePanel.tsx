@@ -29,7 +29,7 @@ export function PausePanel({ onClose, onOpenSupport }: PausePanelProps) {
           <span className="grid size-9 place-items-center rounded-2xl border border-[rgba(255,185,84,0.32)] bg-[rgba(255,185,84,0.12)] text-tertiary">
             <Heart className="size-4" />
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Pause
           </span>
         </div>
@@ -41,7 +41,7 @@ export function PausePanel({ onClose, onOpenSupport }: PausePanelProps) {
 
       <CardContent className="relative space-y-5">
         <div className="rounded-2xl border border-[rgba(255,185,84,0.20)] bg-[rgba(255,185,84,0.06)] p-5 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-tertiary-foreground/80">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#ffd99a]">
             Grounding breath
           </p>
           <div className="relative my-4 grid place-items-center">
@@ -49,12 +49,12 @@ export function PausePanel({ onClose, onOpenSupport }: PausePanelProps) {
               className="journey-breathe grid size-24 place-items-center rounded-full border border-[rgba(255,185,84,0.30)] bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.30),rgba(255,185,84,0.05))] shadow-[0_24px_60px_-30px_rgba(255,185,84,0.5)]"
               aria-hidden
             >
-              <span className="font-mono text-2xl font-semibold text-tertiary-foreground">
+              <span className="font-mono text-2xl font-semibold text-[#ffd99a]">
                 {deepBreaths}
               </span>
             </div>
           </div>
-          <p className="text-xs leading-relaxed text-muted-foreground">
+          <p className="text-xs leading-relaxed text-[#d8d4eb]">
             Inhale slowly, then let it go. Tap each time you take an intentional breath.
           </p>
           <Button
@@ -68,11 +68,11 @@ export function PausePanel({ onClose, onOpenSupport }: PausePanelProps) {
         </div>
 
         <div className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Reach out
           </p>
           {namedContacts.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-[rgba(188,194,255,0.12)] bg-[rgba(188,194,255,0.02)] p-3 text-xs leading-relaxed text-muted-foreground">
+            <p className="rounded-2xl border border-dashed border-[rgba(188,194,255,0.12)] bg-[rgba(188,194,255,0.02)] p-3 text-xs leading-relaxed text-[#d8d4eb]">
               You can save a trusted person's number in the Hangar. They'll show up here for one-tap calling whenever you need them.
             </p>
           ) : (
@@ -89,7 +89,7 @@ export function PausePanel({ onClose, onOpenSupport }: PausePanelProps) {
                   <span className="block truncate text-sm font-semibold text-foreground">
                     {contact.name}
                   </span>
-                  <span className="block truncate text-xs text-muted-foreground">
+                  <span className="block truncate text-xs text-[#d8d4eb]">
                     {contact.phone}
                   </span>
                 </span>
@@ -109,7 +109,7 @@ export function PausePanel({ onClose, onOpenSupport }: PausePanelProps) {
 
         <Button
           variant="ghost"
-          className="w-full text-muted-foreground hover:text-foreground"
+          className="w-full text-[#d8d4eb] hover:text-foreground"
           onClick={onClose}
         >
           <X className="size-4" />

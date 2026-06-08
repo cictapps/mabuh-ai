@@ -257,7 +257,7 @@ function ViewTabs({ active, onChange }: ViewTabsProps) {
               "active:scale-[0.97]",
               isActive
                 ? "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_10px_28px_-18px_rgba(188,194,255,0.7)]"
-                : "text-muted-foreground",
+                : "text-[#d8d4eb]",
             )}
           >
             <Icon className="size-3.5" />

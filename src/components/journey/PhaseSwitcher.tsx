@@ -54,7 +54,7 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
                   : "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_10px_28px_-18px_rgba(188,194,255,0.7)]"
                 : isReached
                   ? "text-foreground"
-                  : "text-muted-foreground",
+                  : "text-[#d8d4eb]",
             )}
           >
             <Icon
@@ -64,7 +64,7 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
                   ? "text-current"
                   : isReached
                     ? "text-foreground"
-                    : "text-muted-foreground",
+                    : "text-[#d8d4eb]",
               )}
             />
             {isActive ? (

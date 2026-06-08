@@ -31,7 +31,7 @@ export function MoodPicker({ value, onChange, size = "md", className }: MoodPick
               "flex flex-col items-center gap-1 rounded-2xl border px-2 py-2.5 text-[11px] font-semibold transition-all",
               selected
                 ? "border-transparent text-foreground shadow-[0_18px_44px_-28px_rgba(8,10,18,0.9)]"
-                : "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.04)] text-muted-foreground hover:bg-[rgba(188,194,255,0.07)] hover:text-foreground",
+                : "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.04)] text-[#d8d4eb] hover:bg-[rgba(188,194,255,0.07)] hover:text-foreground",
             )}
             style={
               selected

@@ -46,14 +46,14 @@ export function JourneyHeader({
       />
 
       <div className="relative">
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#d8d4eb]">
           <Sparkles className="size-3 text-tertiary" />
           Your journey
         </p>
         <h1 className="mt-1 font-serif text-3xl leading-tight tracking-[-0.03em] text-foreground">
           Level {level}
         </h1>
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-xs text-[#d8d4eb]">
           <span className="font-mono text-foreground">{intoLevel}</span>
           <span> / {XP_PER_LEVEL} XP</span>
           <span> toward level {level + 1}</span>

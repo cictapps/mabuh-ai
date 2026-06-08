@@ -36,7 +36,7 @@ export function ProgressBar({
         />
       </div>
       {label ? (
-        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#d8d4eb]">
           {label}
         </p>
       ) : null}

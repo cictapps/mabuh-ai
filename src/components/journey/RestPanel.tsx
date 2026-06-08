@@ -18,7 +18,7 @@ export function RestPanel({ onPrepareNext }: RestPanelProps) {
           <span className="grid size-9 place-items-center rounded-2xl border border-[rgba(188,194,255,0.18)] bg-[rgba(188,194,255,0.06)] text-foreground">
             <Moon className="size-4" />
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Rest
           </span>
         </div>

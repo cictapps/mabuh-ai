@@ -76,7 +76,7 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
             <Icon className="size-5" />
           </span>
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d8d4eb]">
               Welcome to your journey
             </p>
             <h2
@@ -85,7 +85,7 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
             >
               {current.title}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-2 text-sm leading-relaxed text-[#d8d4eb]">
               {current.body}
             </p>
           </div>
@@ -123,7 +123,7 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
           <button
             type="button"
             onClick={() => onChoose("start")}
-            className="block w-full pt-1 text-center text-xs font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            className="block w-full pt-1 text-center text-xs font-semibold text-[#d8d4eb] underline-offset-4 hover:text-foreground hover:underline"
           >
             {isLast ? "I'll explore on my own" : "Skip intro"}
           </button>

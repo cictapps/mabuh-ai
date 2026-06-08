@@ -66,7 +66,7 @@ export function CheckpointPanel({
         ) : null}
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Recenter
           </p>
           <div className="space-y-2">
@@ -86,7 +86,7 @@ export function CheckpointPanel({
         </div>
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             How does this moment feel?
           </p>
           <MoodPicker value={mood} onChange={onSelectMood} />
@@ -95,9 +95,9 @@ export function CheckpointPanel({
         <div>
           <label
             htmlFor="checkpoint-notes"
-            className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+            className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]"
           >
-            A line for yourself <span className="text-muted-foreground/80 normal-case">(optional)</span>
+            A line for yourself <span className="text-[#d8d4eb]/80 normal-case">(optional)</span>
           </label>
           <textarea
             id="checkpoint-notes"
@@ -105,12 +105,12 @@ export function CheckpointPanel({
             onChange={(event) => onNotesChange(event.target.value)}
             rows={3}
             placeholder="One thing you want to remember about this stretch…"
-            className="w-full resize-none rounded-2xl border border-[rgba(188,194,255,0.10)] bg-surface-highest px-4 py-3 text-sm leading-relaxed shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none placeholder:text-muted-foreground/70 focus-visible:border-tertiary/40 focus-visible:ring-4 focus-visible:ring-tertiary/20"
+            className="w-full resize-none rounded-2xl border border-[rgba(188,194,255,0.10)] bg-surface-highest px-4 py-3 text-sm leading-relaxed shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none placeholder:text-[#d8d4eb]/70 focus-visible:border-tertiary/40 focus-visible:ring-4 focus-visible:ring-tertiary/20"
           />
         </div>
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Where are you?
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -126,7 +126,7 @@ export function CheckpointPanel({
                     "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors " +
                     (selected
                       ? "border-[rgba(188,194,255,0.30)] bg-[rgba(188,194,255,0.10)] text-foreground"
-                      : "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.03)] text-muted-foreground hover:bg-[rgba(188,194,255,0.06)] hover:text-foreground")
+                      : "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.03)] text-[#d8d4eb] hover:bg-[rgba(188,194,255,0.06)] hover:text-foreground")
                   }
                 >
                   {option}

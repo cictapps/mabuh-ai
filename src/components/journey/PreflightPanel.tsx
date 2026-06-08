@@ -31,7 +31,7 @@ export function PreflightPanel({
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <SectionTitle icon={<Sunrise className="size-4" />} title="Preflight" />
-          <span className="rounded-full border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.08)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-tertiary-foreground">
+          <span className="rounded-full border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.08)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ffd99a]">
             +3 XP
           </span>
         </div>
@@ -46,7 +46,7 @@ export function PreflightPanel({
         ) : null}
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Soft start
           </p>
           <div className="space-y-2">
@@ -66,7 +66,7 @@ export function PreflightPanel({
         </div>
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             How are you arriving?
           </p>
           <MoodPicker value={preflightMood} onChange={onSelectMood} />

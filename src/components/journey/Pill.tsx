@@ -10,9 +10,9 @@ type PillProps = {
 
 const TONE_STYLES: Record<NonNullable<PillProps["tone"]>, string> = {
   default: "border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.04)] text-foreground",
-  warm: "border-[rgba(255,185,84,0.30)] bg-[rgba(255,185,84,0.10)] text-tertiary-foreground",
+  warm: "border-[rgba(255,185,84,0.30)] bg-[rgba(255,185,84,0.10)] text-[#ffd99a]",
   calm: "border-[rgba(188,194,255,0.22)] bg-[rgba(188,194,255,0.10)] text-foreground",
-  soft: "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.02)] text-muted-foreground",
+  soft: "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.02)] text-[#d8d4eb]",
 };
 
 export function Pill({ label, value, tone = "default", className }: PillProps) {
@@ -24,10 +24,10 @@ export function Pill({ label, value, tone = "default", className }: PillProps) {
         className,
       )}
     >
-      <span className="flex items-center gap-1 text-sm font-semibold tracking-tight">
+      <span className="flex items-center gap-1 text-sm font-semibold tracking-tight text-foreground">
         {value}
       </span>
-      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] opacity-90">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
         {label}
       </span>
     </div>

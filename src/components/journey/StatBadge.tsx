@@ -25,7 +25,7 @@ const ICON_TONE: Record<StatBadgeTone, string> = {
 };
 
 const VALUE_TONE: Record<StatBadgeTone, string> = {
-  warm: "text-tertiary-foreground",
+  warm: "text-[#ffd99a]",
   calm: "text-foreground",
   soft: "text-foreground",
 };
@@ -58,7 +58,7 @@ export function StatBadge({
         >
           {value}
         </span>
-        <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
           {label}
         </span>
       </span>

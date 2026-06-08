@@ -60,7 +60,7 @@ export function AirbornePanel({
           <span className="grid size-9 place-items-center rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.04)] text-foreground">
             <Plane className="size-4" />
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
             Airborne
           </span>
         </div>
@@ -78,7 +78,7 @@ export function AirbornePanel({
         <div className="rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] p-4">
           {hasCheckpoints ? (
             <>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
                 {status.currentCheckpoint ? "Where you are" : "Up next"}
               </p>
               <p className="mt-1 font-serif text-lg tracking-[-0.02em] text-foreground">
@@ -91,7 +91,7 @@ export function AirbornePanel({
 
               {status.nextCheckpoint ? (
                 <>
-                  <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
                     Next waypoint in
                   </p>
                   <p className="mt-1 font-mono text-2xl tracking-tight text-foreground">
@@ -112,7 +112,7 @@ export function AirbornePanel({
               <p className="text-sm text-foreground">
                 You don't have any waypoints yet.
               </p>
-              <p className="text-xs leading-relaxed text-muted-foreground">
+              <p className="text-xs leading-relaxed text-[#d8d4eb]">
                 Visit the Hangar to add a few gentle moments to your day — a morning pause, an evening reflection, anything that helps.
               </p>
             </div>
@@ -132,7 +132,7 @@ export function AirbornePanel({
             <Button
               variant="outline"
               onClick={onEnterPause}
-              className="border-[rgba(255,185,84,0.32)] bg-[rgba(255,185,84,0.06)] text-tertiary-foreground hover:bg-[rgba(255,185,84,0.12)]"
+              className="border-[rgba(255,185,84,0.32)] bg-[rgba(255,185,84,0.06)] text-[#ffd99a] hover:bg-[rgba(255,185,84,0.12)]"
             >
               <Heart className="size-4" />
               Need a pause

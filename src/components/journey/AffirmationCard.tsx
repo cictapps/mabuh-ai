@@ -20,7 +20,7 @@ export function AffirmationCard({ enabled = true }: AffirmationCardProps) {
           <Quote className="size-4" />
         </span>
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d8d4eb]">
             A kind thought
           </p>
           <p className="mt-1 font-serif text-base italic leading-snug tracking-[-0.01em] text-foreground">

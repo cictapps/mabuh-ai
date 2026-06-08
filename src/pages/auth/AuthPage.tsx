@@ -80,7 +80,7 @@ function PasswordField({
           tabIndex={-1}
           aria-label={visible ? "Hide password" : "Show password"}
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 transition-colors hover:text-muted-foreground"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
         >
           {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
@@ -388,7 +388,7 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
             autoComplete="new-password"
             minLength={8}
           />
-          <p className="mt-1.5 pl-0.5 text-xs text-muted-foreground/70">At least 8 characters.</p>
+          <p className="mt-1.5 pl-0.5 text-xs text-muted-foreground">At least 8 characters.</p>
         </div>
       </Stagger>
 

@@ -51,7 +51,7 @@ export function CheckpointPanel({
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <SectionTitle icon={<MapPin className="size-4" />} title="Checkpoint" />
-          <span className="rounded-full border border-[rgba(188,194,255,0.22)] bg-[rgba(188,194,255,0.06)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/80">
+          <span className="rounded-full border border-[rgba(188,194,255,0.28)] bg-[rgba(188,194,255,0.08)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground">
             +½ XP
           </span>
         </div>
@@ -97,7 +97,7 @@ export function CheckpointPanel({
             htmlFor="checkpoint-notes"
             className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
-            A line for yourself <span className="opacity-60 normal-case">(optional)</span>
+            A line for yourself <span className="text-muted-foreground/80 normal-case">(optional)</span>
           </label>
           <textarea
             id="checkpoint-notes"

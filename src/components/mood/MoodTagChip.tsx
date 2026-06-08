@@ -33,7 +33,7 @@ export const MoodTagChip: React.FC<MoodTagChipProps> = ({
         background: selected
           ? `${accentColor}26`
           : "rgba(188,194,255,0.05)",
-        color: selected ? accentColor : "rgba(188,194,255,0.55)",
+        color: selected ? accentColor : "rgba(220,224,255,0.75)",
         boxShadow: selected
           ? `inset 0 0 0 1px ${accentColor}66, 0 6px 18px -10px ${accentColor}55`
           : "inset 0 0 0 1px rgba(188,194,255,0.04)",

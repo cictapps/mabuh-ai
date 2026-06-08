@@ -1,4 +1,34 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Search,
+  User as UserIcon,
+  Users,
+  Hospital,
+  GraduationCap,
+  HeartHandshake,
+  Phone,
+  PhoneCall,
+  Map as MapIcon,
+  Bookmark,
+  BadgeCheck,
+  MapPin,
+  Siren,
+  Locate,
+  Satellite,
+  ChevronUp,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  X as XIcon,
+  Navigation2,
+  Ruler,
+  Mail,
+  ClipboardCopy,
+  Globe,
+  LayoutGrid,
+  type LucideIcon,
+} from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface ProviderLocation {
@@ -19,31 +49,31 @@ type MapLayer = "street" | "satellite";
 type SortType = "default" | "distance";
 interface UserLocation { lat: number; lng: number; }
 
-// ── Glyphs — matches the app's bottom nav style ────────────────────────────────
+// ── Icon map — lucide-react components, sized inline at the call site ─────────
 const G = {
-  search:     "⊹",
-  person:     "◉",
-  group:      "⊛",
-  hospital:   "✚",
-  campus:     "◈",
-  support:    "❋",
-  hotline:    "◎",
-  phone:      "⌂",
-  map:        "⊕",
-  bookmark:   "◆",
-  bookmarkOff:"◇",
-  verified:   "✦",
-  pin:        "⊙",
-  sos:        "⊗",
-  nearMe:     "⊜",
-  street:     "⊞",
-  satellite:  "⊟",
-  collapse:   "▲",
-  expand:     "▼",
-  close:      "×",
-  directions: "→",
-  distance:   "◌",
-  you:        "⊛",
+  search:     Search,
+  person:     UserIcon,
+  group:      Users,
+  hospital:   Hospital,
+  campus:     GraduationCap,
+  support:    HeartHandshake,
+  hotline:    PhoneCall,
+  phone:      Phone,
+  map:        MapIcon,
+  bookmark:   Bookmark,
+  bookmarkOff:Bookmark,
+  verified:   BadgeCheck,
+  pin:        MapPin,
+  sos:        Siren,
+  nearMe:     Locate,
+  street:     MapIcon,
+  satellite:  Satellite,
+  collapse:   ChevronUp,
+  expand:     ChevronDown,
+  close:      XIcon,
+  directions: Navigation2,
+  distance:   Ruler,
+  you:        MapPin,
 };
 
 // ── Colors ─────────────────────────────────────────────────────────────────────
@@ -155,10 +185,12 @@ function estimateTime(km: number): string {
 }
 
 // ── Live Map ───────────────────────────────────────────────────────────────────
-function LiveMap({ providers, focusProvider, userLocation, mapLayer, onLayerChange }: {
+function LiveMap({ providers, focusProvider, userLocation, mapLayer, onLayerChange, onCollapse, onResetFocus }: {
   providers: Provider[]; focusProvider: Provider | null;
   userLocation: UserLocation | null; mapLayer: MapLayer;
   onLayerChange: (l: MapLayer) => void;
+  onCollapse?: () => void;
+  onResetFocus?: (() => void) | null;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
@@ -246,8 +278,13 @@ function LiveMap({ providers, focusProvider, userLocation, mapLayer, onLayerChan
 
     list.filter(p => p.lat && p.lng).forEach(p => {
       const color = pinColor(p);
+      const letter = p.type === "Psychiatrist" ? "P"
+        : p.type.includes("Campus") ? "C"
+        : p.type === "Hospital" ? "H"
+        : p.type === "Hotline" ? "S"
+        : "•";
       const icon = L.divIcon({
-        html:`<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#121416;box-shadow:0 2px 10px rgba(0,0,0,0.6);">${typeGlyph(p.type)}</div>`,
+        html:`<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#121416;box-shadow:0 2px 10px rgba(0,0,0,0.6);font-family:'Plus Jakarta Sans', system-ui, sans-serif;">${letter}</div>`,
         className:"", iconSize:[28,28], iconAnchor:[14,14], popupAnchor:[0,-16],
       });
       const marker = L.marker([p.lat!, p.lng!], { icon }).addTo(map);
@@ -269,19 +306,60 @@ function LiveMap({ providers, focusProvider, userLocation, mapLayer, onLayerChan
     <div style={{ position:"relative" }}>
       <div ref={mapRef} style={{ width:"100%", height:230, background:"#1a1c22" }} />
       <div style={{ position:"absolute", top:10, left:10, zIndex:1000, display:"flex", borderRadius:8, overflow:"hidden", border:"1.5px solid rgba(255,255,255,0.2)", boxShadow:"0 2px 8px rgba(0,0,0,0.4)" }}>
-        {(["street","satellite"] as MapLayer[]).map(l => (
-          <button key={l} onClick={()=>onLayerChange(l)} style={{ padding:"6px 12px", border:"none", cursor:"pointer", fontFamily:"inherit", fontSize:11, fontWeight:600, background:mapLayer===l?"#bcc2ff":"rgba(18,20,22,0.85)", color:mapLayer===l?"#121416":"rgba(255,255,255,0.7)", transition:"all 0.15s" }}>
-            {l==="street"?`${G.street} Street`:`${G.satellite} Satellite`}
-          </button>
-        ))}
+        {(["street","satellite"] as MapLayer[]).map(l => {
+          const Icon = l === "street" ? G.street : G.satellite;
+          return (
+            <button key={l} onClick={()=>onLayerChange(l)} style={{ padding:"6px 12px", border:"none", cursor:"pointer", fontFamily:"inherit", fontSize:11, fontWeight:600, background:mapLayer===l?"#bcc2ff":"rgba(18,20,22,0.85)", color:mapLayer===l?"#121416":"rgba(255,255,255,0.7)", transition:"all 0.15s", display:"inline-flex", alignItems:"center", gap:5 }}>
+              <Icon size={12} />
+              {l === "street" ? "Street" : "Satellite"}
+            </button>
+          );
+        })}
       </div>
-      <div style={{ position:"absolute", bottom:30, left:10, zIndex:1000, background:"rgba(18,20,22,0.85)", borderRadius:8, padding:"6px 10px", display:"flex", flexDirection:"column", gap:3, border:"1px solid rgba(188,194,255,0.1)" }}>
-        {[{color:"#bcc2ff",label:"Psychiatrist"},{color:"#6dba84",label:"Community"},{color:"#e0853c",label:"Support"}].map(l=>(
-          <div key={l.label} style={{ display:"flex", alignItems:"center", gap:6 }}>
-            <div style={{ width:7, height:7, borderRadius:"50%", background:l.color }} />
-            <span style={{ fontSize:9, color:"rgba(188,194,255,0.55)", fontWeight:500 }}>{l.label}</span>
-          </div>
-        ))}
+      {(onCollapse || onResetFocus) && (
+        <div style={{ position:"absolute", bottom:12, right:12, zIndex:1000, display:"flex", gap:6 }}>
+          {onResetFocus && (
+            <button onClick={onResetFocus} aria-label="Reset focused provider"
+              style={{ height:30, padding:"0 10px", borderRadius:8, background:"rgba(18,20,22,0.85)", border:"1px solid rgba(188,194,255,0.18)", color:"rgba(188,194,255,0.7)", fontFamily:"inherit", fontSize:11, fontWeight:600, cursor:"pointer", display:"inline-flex", alignItems:"center", gap:4 }}>
+              <G.close size={12} /> Reset
+            </button>
+          )}
+          {onCollapse && (
+            <button onClick={onCollapse} aria-label="Collapse map"
+              style={{ height:30, padding:"0 10px", borderRadius:8, background:"rgba(18,20,22,0.85)", border:"1px solid rgba(188,194,255,0.18)", color:"#bcc2ff", fontFamily:"inherit", fontSize:11, fontWeight:600, cursor:"pointer", display:"inline-flex", alignItems:"center", gap:4 }}>
+              <G.collapse size={12} /> Collapse
+            </button>
+          )}
+        </div>
+      )}
+      <div
+        aria-label="Region 6, Western Visayas"
+        style={{
+          position: "absolute",
+          left: 10,
+          bottom: 12,
+          zIndex: 1000,
+          height: 30,
+          padding: "0 10px",
+          borderRadius: 8,
+          background: "rgba(18,20,22,0.85)",
+          border: "1px solid rgba(188,194,255,0.18)",
+          color: "rgba(188,194,255,0.7)",
+          fontSize: 11,
+          fontWeight: 600,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 5,
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          pointerEvents: "none",
+          maxWidth: "calc(100% - 20px)",
+        }}
+      >
+        <G.pin size={12} color="#bcc2ff" />
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          Region 6 · Western Visayas
+        </span>
       </div>
     </div>
   );
@@ -303,6 +381,8 @@ function ProviderCard({ e, saved, onSave, onFocus, onDetail, isFocused, distKm }
   const hasMap = !!(e.lat && e.lng);
   const tc = typeColor(e.type);
 
+  const TypeIcon = typeGlyph(e.type);
+
   return (
     <div style={{ background:isFocused?"rgba(188,194,255,0.06)":"#161820", margin:"0 0 1px", padding:"13px 16px", borderBottom:"1px solid rgba(188,194,255,0.06)", borderLeft:isFocused?"2px solid #bcc2ff":"2px solid transparent", cursor:"pointer", transition:"all 0.2s" }}
       onClick={()=>{ setExpanded(x=>!x); if(hasMap) onFocus(e); }}>
@@ -319,17 +399,17 @@ function ProviderCard({ e, saved, onSave, onFocus, onDetail, isFocused, distKm }
             : "rgba(188,194,255,0.08)",
           border: `1px solid ${tc}30`,
           display:"flex", alignItems:"center", justifyContent:"center",
-          fontSize:16, color:tc, fontWeight:700, transition:"all 0.2s",
+          color:tc, transition:"all 0.2s",
         }}>
-          {typeGlyph(e.type)}
+          <TypeIcon size={18} />
         </div>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:13, fontWeight:600, color:"#e8eaff", lineHeight:1.3, marginBottom:2 }}>{e.name}</div>
           <div style={{ fontSize:11, color:tc, fontWeight:500, marginBottom:4, display:"flex", alignItems:"center", gap:6 }}>
             <span>{e.type} · {e.city}</span>
             {distKm!==undefined && (
-              <span style={{ color:"rgba(188,194,255,0.35)", fontWeight:400, fontSize:10 }}>
-                {G.distance} {fmtDist(distKm)}
+              <span style={{ color:"rgba(220,224,255,0.6)", fontWeight:400, fontSize:10, display:"inline-flex", alignItems:"center", gap:3 }}>
+                <G.distance size={10} /> {fmtDist(distKm)}
               </span>
             )}
           </div>
@@ -338,13 +418,72 @@ function ProviderCard({ e, saved, onSave, onFocus, onDetail, isFocused, distKm }
           </div>
         </div>
         <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:5 }}>
-          <div style={{ display:"flex", gap:6, alignItems:"center" }}>
-            {hasMap && <span style={{ fontSize:12, color:isFocused?"#bcc2ff":"rgba(188,194,255,0.2)", fontWeight:700 }}>{G.pin}</span>}
-            <button onClick={ev=>{ev.stopPropagation();onSave(e.id);}} style={{ background:"none", border:"none", cursor:"pointer", fontSize:14, padding:0, color:saved?"#bcc2ff":"rgba(188,194,255,0.25)", fontWeight:700 }}>
-              {saved ? G.bookmark : G.bookmarkOff}
+          <div style={{ display:"flex", gap:4, alignItems:"center" }}>
+            {hasMap && (
+              <button
+                type="button"
+                onClick={(ev) => { ev.stopPropagation(); onFocus(e); }}
+                aria-label="Show on map"
+                title="Show on map"
+                style={{
+                  width: 36, height: 36,
+                  borderRadius: 10,
+                  background: isFocused ? "rgba(188,194,255,0.10)" : "transparent",
+                  border: "none",
+                  color: isFocused ? "#bcc2ff" : "rgba(188,194,255,0.35)",
+                  cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  transition: "background 0.15s ease, color 0.15s ease",
+                }}
+                onMouseEnter={(ev) => {
+                  if (!isFocused) {
+                    ev.currentTarget.style.background = "rgba(188,194,255,0.06)";
+                    ev.currentTarget.style.color = "rgba(188,194,255,0.7)";
+                  }
+                }}
+                onMouseLeave={(ev) => {
+                  if (!isFocused) {
+                    ev.currentTarget.style.background = "transparent";
+                    ev.currentTarget.style.color = "rgba(188,194,255,0.35)";
+                  }
+                }}
+              >
+                <G.pin size={16} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={(ev) => { ev.stopPropagation(); onSave(e.id); }}
+              aria-label={saved ? "Remove from saved" : "Save provider"}
+              aria-pressed={saved}
+              style={{
+                width: 36, height: 36,
+                borderRadius: 10,
+                background: "transparent",
+                border: "none",
+                color: saved ? "#bcc2ff" : "rgba(188,194,255,0.35)",
+                cursor: "pointer",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                position: "relative",
+                transition: "background 0.15s ease, color 0.15s ease",
+              }}
+              onMouseEnter={(ev) => {
+                if (!saved) {
+                  ev.currentTarget.style.background = "rgba(188,194,255,0.06)";
+                  ev.currentTarget.style.color = "rgba(188,194,255,0.7)";
+                }
+              }}
+              onMouseLeave={(ev) => {
+                if (!saved) {
+                  ev.currentTarget.style.background = "transparent";
+                  ev.currentTarget.style.color = "rgba(188,194,255,0.35)";
+                }
+              }}
+            >
+              <G.bookmark size={16} fill={saved ? "currentColor" : "none"} />
             </button>
           </div>
-          {e.verified && <span style={{ fontSize:9, color:"#6dba84", fontWeight:700, letterSpacing:"0.5px" }}>{G.verified} VERIFIED</span>}
+          {e.verified && <span style={{ display:"inline-flex", alignItems:"center", gap:3, fontSize:9, color:"#6dba84", fontWeight:700, letterSpacing:"0.5px" }}><G.verified size={10} /> VERIFIED</span>}
         </div>
       </div>
 
@@ -352,30 +491,30 @@ function ProviderCard({ e, saved, onSave, onFocus, onDetail, isFocused, distKm }
         <div style={{ marginTop:12, paddingTop:12, borderTop:"1px solid rgba(188,194,255,0.06)" }}>
           {/* Clinic info */}
           {e.clinic
-            ? <div style={{ fontSize:11, color:"rgba(188,194,255,0.4)", marginBottom:10, display:"flex", alignItems:"center", gap:5 }}><span>{G.hospital}</span> {e.clinic}</div>
-            : <div style={{ fontSize:11, color:"rgba(188,194,255,0.25)", marginBottom:10, fontStyle:"italic" }}>Contact via walk-in or referral</div>
+            ? <div style={{ fontSize:11, color:"rgba(220,224,255,0.7)", marginBottom:10, display:"flex", alignItems:"center", gap:5 }}><G.hospital size={12} /> {e.clinic}</div>
+            : <div style={{ fontSize:11, color:"rgba(220,224,255,0.6)", marginBottom:10, fontStyle:"italic" }}>Contact via walk-in or referral</div>
           }
           {/* Action buttons */}
           <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
             {e.phone && e.phone2 ? (
               <div style={{ flex:1, display:"flex", flexDirection:"column", gap:5 }}>
-                <div style={{ fontSize:9, color:"rgba(188,194,255,0.35)", fontWeight:700, letterSpacing:"0.8px", textTransform:"uppercase" }}>Select number to call:</div>
+                <div style={{ fontSize:9, color:"rgba(220,224,255,0.6)", fontWeight:700, letterSpacing:"0.8px", textTransform:"uppercase" }}>Select number to call:</div>
                 <a href={`tel:${e.phone}`} onClick={ev=>ev.stopPropagation()}
                   style={{ height:34, borderRadius:8, background:"rgba(188,194,255,0.08)", color:"#bcc2ff", border:"1px solid rgba(188,194,255,0.18)", display:"flex", alignItems:"center", justifyContent:"center", gap:6, textDecoration:"none", fontSize:11, fontWeight:600 }}>
-                  {G.phone} {e.phone}
+                  <G.phone size={12} /> {e.phone}
                 </a>
                 <a href={`tel:${e.phone2}`} onClick={ev=>ev.stopPropagation()}
                   style={{ height:34, borderRadius:8, background:"rgba(188,194,255,0.05)", color:"rgba(188,194,255,0.6)", border:"1px solid rgba(188,194,255,0.1)", display:"flex", alignItems:"center", justifyContent:"center", gap:6, textDecoration:"none", fontSize:11, fontWeight:600 }}>
-                  {G.phone} {e.phone2}
+                  <G.phone size={12} /> {e.phone2}
                 </a>
               </div>
             ) : e.phone ? (
               <a href={`tel:${e.phone}`} onClick={ev=>ev.stopPropagation()}
                 style={{ flex:1, minWidth:80, height:36, borderRadius:8, background:"rgba(188,194,255,0.08)", color:"#bcc2ff", border:"1px solid rgba(188,194,255,0.18)", display:"flex", alignItems:"center", justifyContent:"center", gap:6, textDecoration:"none", fontSize:12, fontWeight:600 }}>
-                <span style={{ fontSize:13 }}>{G.phone}</span> Call
+                <G.phone size={14} /> Call
               </a>
             ) : (
-              <div style={{ flex:1, minWidth:80, height:36, borderRadius:8, background:"rgba(188,194,255,0.03)", border:"1px solid rgba(188,194,255,0.08)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, color:"rgba(188,194,255,0.25)" }}>
+              <div style={{ flex:1, minWidth:80, height:36, borderRadius:8, background:"rgba(188,194,255,0.03)", border:"1px solid rgba(188,194,255,0.08)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, color:"rgba(220,224,255,0.6)" }}>
                 No number
               </div>
             )}
@@ -384,12 +523,13 @@ function ProviderCard({ e, saved, onSave, onFocus, onDetail, isFocused, distKm }
               const text = [e.name, e.type, e.clinic, e.city, e.phone].filter(Boolean).join(" · ");
               try { await navigator.clipboard.writeText(text); } catch {}
               const btn = ev.currentTarget as HTMLButtonElement;
-              const orig = btn.textContent;
-              btn.textContent = "Copied!";
-              setTimeout(() => { btn.textContent = orig; }, 1500);
+              const orig = btn.innerHTML;
+              btn.innerHTML = "Copied!";
+              setTimeout(() => { btn.innerHTML = orig; }, 1500);
             }}
-              style={{ width:36, height:36, borderRadius:8, background:"rgba(188,194,255,0.06)", color:"rgba(188,194,255,0.4)", border:"1px solid rgba(188,194,255,0.12)", cursor:"pointer", fontFamily:"inherit", fontSize:11, fontWeight:600, flexShrink:0 }}>
-              ⎘
+              aria-label="Copy provider info"
+              style={{ width:36, height:36, borderRadius:8, background:"rgba(188,194,255,0.06)", color:"rgba(220,224,255,0.7)", border:"1px solid rgba(188,194,255,0.12)", cursor:"pointer", flexShrink:0, display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
+              <ClipboardCopy size={14} />
             </button>
             <button onClick={ev=>{ ev.stopPropagation(); onDetail(e); }}
               style={{ flex:1, minWidth:80, height:36, borderRadius:8, background:"rgba(188,194,255,0.12)", color:"#bcc2ff", border:"1px solid rgba(188,194,255,0.25)", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:600 }}>
@@ -406,16 +546,16 @@ function ProviderCard({ e, saved, onSave, onFocus, onDetail, isFocused, distKm }
 function HotlineCard({ h }: { h: Provider }) {
   return (
     <div style={{ background:"rgba(224,92,110,0.05)", margin:"0 0 1px", padding:"12px 16px", borderBottom:"1px solid rgba(224,92,110,0.08)", display:"flex", alignItems:"center", gap:12 }}>
-      <div style={{ width:36, height:36, borderRadius:10, background:"rgba(224,92,110,0.1)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, color:"#e05c6e", fontWeight:700, flexShrink:0 }}>
-        {G.sos}
+      <div style={{ width:36, height:36, borderRadius:10, background:"rgba(224,92,110,0.1)", display:"flex", alignItems:"center", justifyContent:"center", color:"#e05c6e", flexShrink:0 }}>
+        <G.sos size={18} />
       </div>
       <div style={{ flex:1, minWidth:0 }}>
         <div style={{ fontSize:12, fontWeight:600, color:"#e8eaff", marginBottom:2 }}>{h.name}</div>
-        <div style={{ fontSize:10, color:"rgba(188,194,255,0.3)" }}>{h.phone} · {h.coverage} · {h.hours}</div>
+        <div style={{ fontSize:10, color:"rgba(220,224,255,0.65)" }}>{h.phone} · {h.coverage} · {h.hours}</div>
       </div>
       <div style={{ display:"flex", gap:6 }}>
-        {h.fb && <a href={h.fb} target="_blank" rel="noreferrer" style={{ width:32, height:32, borderRadius:8, background:"rgba(59,89,152,0.18)", display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none", fontSize:11, color:"#8b9dc3", fontWeight:700 }}>fb</a>}
-        {h.phone && <a href={`tel:${h.phone}`} style={{ width:32, height:32, borderRadius:8, background:"#e05c6e", display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none", fontSize:13, color:"#fff", fontWeight:700 }}>{G.phone}</a>}
+        {h.fb && <a href={h.fb} target="_blank" rel="noreferrer" aria-label="Facebook" style={{ width:32, height:32, borderRadius:8, background:"rgba(59,89,152,0.18)", display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none", fontSize:11, color:"#8b9dc3", fontWeight:700 }}>fb</a>}
+        {h.phone && <a href={`tel:${h.phone}`} aria-label="Call hotline" style={{ width:32, height:32, borderRadius:8, background:"#e05c6e", display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none", color:"#fff" }}><G.phone size={14} /></a>}
       </div>
     </div>
   );
@@ -428,7 +568,7 @@ function SOSModal({ onClose }: { onClose: () => void }) {
       <div style={{ width:"100%", background:"#1a0a0a", borderRadius:"20px 20px 0 0", padding:"24px 20px 44px", border:"1px solid rgba(224,92,110,0.25)" }} onClick={e=>e.stopPropagation()}>
         <div style={{ width:36, height:4, borderRadius:2, background:"rgba(255,255,255,0.15)", margin:"0 auto 20px" }} />
         <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
-          <div style={{ width:40, height:40, borderRadius:12, background:"rgba(224,92,110,0.15)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, color:"#e05c6e", fontWeight:700 }}>{G.sos}</div>
+          <div style={{ width:40, height:40, borderRadius:12, background:"rgba(224,92,110,0.15)", display:"flex", alignItems:"center", justifyContent:"center", color:"#e05c6e" }}><G.sos size={20} /></div>
           <div>
             <div style={{ fontSize:16, fontWeight:700, color:"#e05c6e" }}>Need immediate help?</div>
             <div style={{ fontSize:12, color:"rgba(255,255,255,0.35)", marginTop:2 }}>Call any crisis line now</div>
@@ -442,7 +582,7 @@ function SOSModal({ onClose }: { onClose: () => void }) {
                 <div style={{ fontSize:13, fontWeight:600, color:"#e8eaff" }}>{h.name}</div>
                 <div style={{ fontSize:11, color:"rgba(255,255,255,0.35)", marginTop:2 }}>{h.phone} · {h.coverage}</div>
               </div>
-              <div style={{ width:34, height:34, borderRadius:10, background:"#e05c6e", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, color:"#fff", fontWeight:700, flexShrink:0 }}>{G.phone}</div>
+              <div style={{ width:34, height:34, borderRadius:10, background:"#e05c6e", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", flexShrink:0 }}><G.phone size={16} /></div>
             </a>
           ))}
         </div>
@@ -466,18 +606,19 @@ function DetailScreen({ e, onClose, distKm, userLocation, onFlyTo }: {
   const selectedLoc = hasMultiLoc ? e.locations![selectedLocIdx] : null;
   const activeLat = selectedLoc?.lat ?? e.lat;
   const activeLng = selectedLoc?.lng ?? e.lng;
+  const TypeIcon = typeGlyph(e.type);
 
   return (
     <div style={{ position:"fixed", inset:0, zIndex:8000, background:C.bg, display:"flex", flexDirection:"column", fontFamily:"'Plus Jakarta Sans', system-ui, sans-serif" }}>
       {/* Header */}
       <div style={{ padding:"16px 16px 0", flexShrink:0 }}>
-        <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontFamily:"inherit", fontSize:13, fontWeight:600, display:"flex", alignItems:"center", gap:6, padding:0, marginBottom:16 }}>
-          ← Back to results
+        <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontFamily:"inherit", fontSize:13, fontWeight:600, display:"inline-flex", alignItems:"center", gap:6, padding:0, marginBottom:16 }}>
+          <ChevronLeft size={14} /> Back to results
         </button>
         {/* Avatar */}
         <div style={{ display:"flex", alignItems:"flex-start", gap:14, marginBottom:16 }}>
-          <div style={{ width:60, height:60, borderRadius:16, background:"rgba(188,194,255,0.08)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, color:tc, fontWeight:700, flexShrink:0, border:`1.5px solid rgba(188,194,255,0.1)` }}>
-            {typeGlyph(e.type)}
+          <div style={{ width:60, height:60, borderRadius:16, background:"rgba(188,194,255,0.08)", display:"flex", alignItems:"center", justifyContent:"center", color:tc, flexShrink:0, border:`1.5px solid rgba(188,194,255,0.1)` }}>
+            <TypeIcon size={26} />
           </div>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:17, fontWeight:700, color:C.text, lineHeight:1.3, marginBottom:4 }}>{e.name}</div>
@@ -495,7 +636,7 @@ function DetailScreen({ e, onClose, distKm, userLocation, onFlyTo }: {
         {/* Distance card — only when location known */}
         {distKm !== undefined && (
           <div style={{ background:"rgba(74,158,255,0.08)", border:"1px solid rgba(74,158,255,0.2)", borderRadius:12, padding:"12px 16px", marginBottom:12, display:"flex", alignItems:"center", gap:12 }}>
-            <div style={{ fontSize:20, color:"#4a9eff", fontWeight:700 }}>{G.pin}</div>
+            <G.pin size={20} color="#4a9eff" />
             <div>
               <div style={{ fontSize:14, fontWeight:700, color:"#4a9eff" }}>{fmtDist(distKm)} away</div>
               <div style={{ fontSize:11, color:"rgba(74,158,255,0.6)", marginTop:1 }}>{estimateTime(distKm)}</div>
@@ -507,7 +648,7 @@ function DetailScreen({ e, onClose, distKm, userLocation, onFlyTo }: {
         <div style={{ background:C.surface, borderRadius:14, border:`1px solid ${C.border}`, overflow:"hidden", marginBottom:12 }}>
           {e.clinic && (
             <div style={{ padding:"13px 16px", borderBottom:`1px solid ${C.border}`, display:"flex", gap:12, alignItems:"flex-start" }}>
-              <span style={{ fontSize:13, color:C.muted, width:20, flexShrink:0 }}>{G.hospital}</span>
+              <G.hospital size={14} color={C.muted} />
               <div>
                 <div style={{ fontSize:10, color:C.muted, fontWeight:600, letterSpacing:"0.8px", textTransform:"uppercase", marginBottom:2 }}>Clinic / Location</div>
                 <div style={{ fontSize:13, color:C.text }}>{e.clinic}</div>
@@ -515,7 +656,7 @@ function DetailScreen({ e, onClose, distKm, userLocation, onFlyTo }: {
             </div>
           )}
           <div style={{ padding:"13px 16px", borderBottom:`1px solid ${C.border}`, display:"flex", gap:12, alignItems:"flex-start" }}>
-            <span style={{ fontSize:13, color:C.muted, width:20, flexShrink:0 }}>{G.pin}</span>
+            <G.pin size={14} color={C.muted} />
             <div>
               <div style={{ fontSize:10, color:C.muted, fontWeight:600, letterSpacing:"0.8px", textTransform:"uppercase", marginBottom:2 }}>City</div>
               <div style={{ fontSize:13, color:C.text }}>{e.city}</div>
@@ -523,7 +664,7 @@ function DetailScreen({ e, onClose, distKm, userLocation, onFlyTo }: {
           </div>
           {e.phone && (
             <div style={{ padding:"13px 16px", borderBottom:`1px solid ${C.border}`, display:"flex", gap:12, alignItems:"flex-start" }}>
-              <span style={{ fontSize:13, color:C.muted, width:20, flexShrink:0 }}>{G.phone}</span>
+              <G.phone size={14} color={C.muted} />
               <div style={{ flex:1 }}>
                 <div style={{ fontSize:10, color:C.muted, fontWeight:600, letterSpacing:"0.8px", textTransform:"uppercase", marginBottom:2 }}>Phone</div>
                 <div style={{ fontSize:13, color:C.text }}>{e.phone}</div>
@@ -537,7 +678,7 @@ function DetailScreen({ e, onClose, distKm, userLocation, onFlyTo }: {
           )}
           {e.email && (
             <div style={{ padding:"13px 16px", borderBottom:`1px solid ${C.border}`, display:"flex", gap:12, alignItems:"flex-start" }}>
-              <span style={{ fontSize:13, color:C.muted, width:20, flexShrink:0 }}>✉</span>
+              <Mail size={14} color={C.muted} />
               <div>
                 <div style={{ fontSize:10, color:C.muted, fontWeight:600, letterSpacing:"0.8px", textTransform:"uppercase", marginBottom:2 }}>Email</div>
                 <div style={{ fontSize:12, color:C.text }}>{e.email}</div>
@@ -546,7 +687,7 @@ function DetailScreen({ e, onClose, distKm, userLocation, onFlyTo }: {
           )}
           {e.verified && (
             <div style={{ padding:"13px 16px", display:"flex", gap:12, alignItems:"center" }}>
-              <span style={{ fontSize:13, color:"#6dba84", width:20, flexShrink:0 }}>{G.verified}</span>
+              <G.verified size={14} color="#6dba84" />
               <div>
                 <div style={{ fontSize:10, color:C.muted, fontWeight:600, letterSpacing:"0.8px", textTransform:"uppercase", marginBottom:2 }}>Verification</div>
                 <div style={{ fontSize:13, color:"#6dba84", fontWeight:600 }}>Verified provider</div>
@@ -558,8 +699,8 @@ function DetailScreen({ e, onClose, distKm, userLocation, onFlyTo }: {
         {/* Location picker for multi-clinic providers */}
         {hasMultiLoc && (
           <div style={{ marginBottom:12 }}>
-            <div style={{ fontSize:10, color:C.muted, fontWeight:700, letterSpacing:"1px", textTransform:"uppercase", marginBottom:8 }}>
-              {G.pin} Select Clinic Location
+            <div style={{ fontSize:10, color:C.muted, fontWeight:700, letterSpacing:"1px", textTransform:"uppercase", marginBottom:8, display:"inline-flex", alignItems:"center", gap:5 }}>
+              <G.pin size={11} /> Select Clinic Location
             </div>
             <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
               {e.locations!.map((loc, idx) => (
@@ -593,7 +734,7 @@ function DetailScreen({ e, onClose, distKm, userLocation, onFlyTo }: {
                     )}
                   </div>
                   {selectedLocIdx === idx && (
-                    <span style={{ fontSize:11, color:"#bcc2ff", fontWeight:700 }}>{G.verified}</span>
+                    <G.verified size={13} color="#bcc2ff" />
                   )}
                 </button>
               ))}
@@ -609,49 +750,49 @@ function DetailScreen({ e, onClose, distKm, userLocation, onFlyTo }: {
             const text = parts.join(" · ");
             try { await navigator.clipboard.writeText(text); } catch {}
             const btn = document.activeElement as HTMLButtonElement;
-            if (btn) { const o = btn.textContent; btn.textContent = "✦ Copied to clipboard!"; setTimeout(()=>{ btn.textContent = o; }, 1800); }
-          }} style={{ height:40, borderRadius:10, background:"rgba(188,194,255,0.06)", color:"rgba(188,194,255,0.5)", border:"1px solid rgba(188,194,255,0.1)", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:600, display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
-            ⎘ Copy provider info
+            if (btn) { const o = btn.textContent; btn.textContent = "Copied to clipboard!"; setTimeout(()=>{ btn.textContent = o; }, 1800); }
+          }} style={{ height:40, borderRadius:10, background:"rgba(188,194,255,0.06)", color:"rgba(188,194,255,0.5)", border:"1px solid rgba(188,194,255,0.1)", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:600, display:"inline-flex", alignItems:"center", justifyContent:"center", gap:6 }}>
+            <ClipboardCopy size={13} /> Copy provider info
           </button>
           {e.phone && e.phone2 ? (
             <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
               <div style={{ fontSize:10, color:C.muted, fontWeight:700, letterSpacing:"0.8px", textTransform:"uppercase" }}>Select number to call:</div>
               <a href={`tel:${e.phone}`}
                 style={{ height:48, borderRadius:12, background:"rgba(188,194,255,0.1)", color:C.accent, border:"1px solid rgba(188,194,255,0.2)", display:"flex", alignItems:"center", justifyContent:"center", gap:8, textDecoration:"none", fontSize:14, fontWeight:600 }}>
-                <span style={{ fontSize:16 }}>{G.phone}</span> {e.phone}
+                <G.phone size={16} /> {e.phone}
               </a>
               <a href={`tel:${e.phone2}`}
                 style={{ height:48, borderRadius:12, background:"rgba(188,194,255,0.06)", color:"rgba(188,194,255,0.6)", border:"1px solid rgba(188,194,255,0.12)", display:"flex", alignItems:"center", justifyContent:"center", gap:8, textDecoration:"none", fontSize:14, fontWeight:600 }}>
-                <span style={{ fontSize:16 }}>{G.phone}</span> {e.phone2}
+                <G.phone size={16} /> {e.phone2}
               </a>
             </div>
           ) : e.phone ? (
             <a href={`tel:${e.phone}`}
               style={{ height:48, borderRadius:12, background:"rgba(188,194,255,0.1)", color:C.accent, border:"1px solid rgba(188,194,255,0.2)", display:"flex", alignItems:"center", justifyContent:"center", gap:8, textDecoration:"none", fontSize:14, fontWeight:600 }}>
-              <span style={{ fontSize:16 }}>{G.phone}</span> Call {e.name.split(" ").slice(0,2).join(" ")}
+              <G.phone size={16} /> Call {e.name.split(" ").slice(0,2).join(" ")}
             </a>
           ) : (
-            <div style={{ height:48, borderRadius:12, background:"rgba(188,194,255,0.03)", border:"1px solid rgba(188,194,255,0.08)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, color:"rgba(188,194,255,0.25)" }}>
+            <div style={{ height:48, borderRadius:12, background:"rgba(188,194,255,0.03)", border:"1px solid rgba(188,194,255,0.08)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, color:"rgba(220,224,255,0.6)" }}>
               No phone number — contact via walk-in or referral
             </div>
           )}
           {activeLat && activeLng && (
             <a href={`https://maps.google.com/?saddr=Current+Location&daddr=${activeLat},${activeLng}&dirflg=d`} target="_blank" rel="noreferrer"
               style={{ height:48, borderRadius:12, background:"rgba(26,115,232,0.12)", color:"#6aabff", border:"1px solid rgba(26,115,232,0.25)", display:"flex", alignItems:"center", justifyContent:"center", gap:8, textDecoration:"none", fontSize:14, fontWeight:600 }}>
-              <span style={{ fontSize:16 }}>{G.directions}</span> Get Directions
+              <G.directions size={16} /> Get Directions
               {selectedLoc && <span style={{ fontSize:11, opacity:0.6, marginLeft:2 }}>· {selectedLoc.label.split(",")[0]}</span>}
             </a>
           )}
           {e.fb && (
             <a href={e.fb} target="_blank" rel="noreferrer"
               style={{ height:48, borderRadius:12, background:"rgba(59,89,152,0.12)", color:"#8b9dc3", border:"1px solid rgba(59,89,152,0.25)", display:"flex", alignItems:"center", justifyContent:"center", gap:8, textDecoration:"none", fontSize:14, fontWeight:600 }}>
-              View Facebook Page
+              <Globe size={16} /> View Facebook Page
             </a>
           )}
           {e.email && (
             <a href={`mailto:${e.email}`}
               style={{ height:48, borderRadius:12, background:"rgba(188,194,255,0.06)", color:C.accent, border:"1px solid rgba(188,194,255,0.12)", display:"flex", alignItems:"center", justifyContent:"center", gap:8, textDecoration:"none", fontSize:14, fontWeight:600 }}>
-              Send Email
+              <Mail size={16} /> Send Email
             </a>
           )}
         </div>
@@ -675,14 +816,17 @@ function RecentlyViewed({ ids, allProviders, onSelect }: {
         <span style={{ fontSize:11, color:C.muted }}>{recent.length}</span>
       </div>
       <div style={{ display:"flex", gap:8, overflowX:"auto", padding:"0 16px 12px", scrollbarWidth:"none" }}>
-        {recent.map(p => (
-          <button key={p.id} onClick={() => onSelect(p)}
-            style={{ flexShrink:0, background:C.surface, border:`1px solid ${C.border}`, borderRadius:12, padding:"10px 12px", cursor:"pointer", fontFamily:"inherit", textAlign:"left", minWidth:140, maxWidth:160 }}>
-            <div style={{ fontSize:16, color:typeColor(p.type), fontWeight:700, marginBottom:4 }}>{typeGlyph(p.type)}</div>
-            <div style={{ fontSize:11, fontWeight:600, color:"#e8eaff", lineHeight:1.3, marginBottom:2 }}>{p.name.split(",")[0]}</div>
-            <div style={{ fontSize:10, color:C.muted }}>{p.city}</div>
-          </button>
-        ))}
+        {recent.map(p => {
+          const TypeIcon = typeGlyph(p.type);
+          return (
+            <button key={p.id} onClick={() => onSelect(p)}
+              style={{ flexShrink:0, background:C.surface, border:`1px solid ${C.border}`, borderRadius:12, padding:"10px 12px", cursor:"pointer", fontFamily:"inherit", textAlign:"left", minWidth:140, maxWidth:160 }}>
+              <div style={{ color:typeColor(p.type), marginBottom:4 }}><TypeIcon size={16} /></div>
+              <div style={{ fontSize:11, fontWeight:600, color:"#e8eaff", lineHeight:1.3, marginBottom:2 }}>{p.name.split(",")[0]}</div>
+              <div style={{ fontSize:10, color:C.muted }}>{p.city}</div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -701,29 +845,30 @@ function SavedScreen({ savedIds, allProviders, onClose, onDetail, onFocus, getDi
   return (
     <div style={{ position:"fixed", inset:0, zIndex:8000, background:C.bg, display:"flex", flexDirection:"column", fontFamily:"'Plus Jakarta Sans', system-ui, sans-serif" }}>
       <div style={{ padding:"16px 16px 12px", flexShrink:0, borderBottom:`1px solid ${C.border}` }}>
-        <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontFamily:"inherit", fontSize:13, fontWeight:600, display:"flex", alignItems:"center", gap:6, padding:0, marginBottom:14 }}>
-          ← Back
+        <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontFamily:"inherit", fontSize:13, fontWeight:600, display:"inline-flex", alignItems:"center", gap:6, padding:0, marginBottom:14 }}>
+          <ChevronLeft size={14} /> Back
         </button>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
           <div>
             <h2 style={{ fontSize:20, fontWeight:700, color:C.text, margin:0 }}>Saved Resources</h2>
             <p style={{ fontSize:12, color:C.muted, margin:"4px 0 0" }}>{saved.length} saved provider{saved.length !== 1 ? "s" : ""}</p>
           </div>
-          <span style={{ fontSize:20, color:C.accent, fontWeight:700 }}>{G.bookmark}</span>
+          <G.bookmark size={22} color={C.accent} fill="currentColor" />
         </div>
       </div>
 
       <div style={{ flex:1, overflowY:"auto" } as React.CSSProperties}>
         {saved.length === 0 ? (
           <div style={{ padding:48, textAlign:"center" }}>
-            <div style={{ fontSize:28, color:C.muted, fontWeight:700, marginBottom:12, opacity:0.3 }}>{G.bookmarkOff}</div>
+            <G.bookmark size={36} color={C.muted} style={{ marginBottom:12, opacity:0.3 }} />
             <div style={{ fontSize:14, color:C.muted, marginBottom:6 }}>No saved resources yet</div>
-            <div style={{ fontSize:12, color:"rgba(188,194,255,0.25)" }}>Tap {G.bookmarkOff} on any provider to save them here</div>
+            <div style={{ fontSize:12, color:"rgba(220,224,255,0.6)" }}>Tap the bookmark on any provider to save them here</div>
           </div>
         ) : (
           saved.map(p => {
             const tc = typeColor(p.type);
             const dist = getDistance(p);
+            const TypeIcon = typeGlyph(p.type);
             return (
               <div key={p.id}
                 style={{ padding:"14px 16px", borderBottom:`1px solid ${C.border}`, display:"flex", alignItems:"center", gap:12, cursor:"pointer" }}
@@ -732,21 +877,21 @@ function SavedScreen({ savedIds, allProviders, onClose, onDetail, onFocus, getDi
                   width:42, height:42, borderRadius:11, flexShrink:0,
                   background: p.type==="Psychiatrist" ? "rgba(188,194,255,0.1)" : p.type.includes("Campus")||p.type==="Hospital" ? "rgba(109,186,132,0.1)" : "rgba(224,133,60,0.1)",
                   border:`1px solid ${tc}30`,
-                  display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, color:tc, fontWeight:700,
+                  display:"flex", alignItems:"center", justifyContent:"center", color:tc,
                 }}>
-                  {typeGlyph(p.type)}
+                  <TypeIcon size={18} />
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:13, fontWeight:600, color:C.text, marginBottom:2, lineHeight:1.3 }}>{p.name}</div>
                   <div style={{ fontSize:11, color:tc, fontWeight:500, marginBottom:3 }}>
                     {p.type} · {p.city}
-                    {dist !== undefined && <span style={{ color:"rgba(188,194,255,0.3)", fontWeight:400 }}> · {fmtDist(dist)}</span>}
+                    {dist !== undefined && <span style={{ color:"rgba(220,224,255,0.65)", fontWeight:400 }}> · {fmtDist(dist)}</span>}
                   </div>
-                  {p.phone && <div style={{ fontSize:11, color:"rgba(188,194,255,0.35)" }}>{p.phone}</div>}
+                  {p.phone && <div style={{ fontSize:11, color:"rgba(220,224,255,0.6)" }}>{p.phone}</div>}
                 </div>
                 <div style={{ display:"flex", flexDirection:"column", gap:6, alignItems:"flex-end" }}>
-                  {p.verified && <span style={{ fontSize:9, color:"#6dba84", fontWeight:700 }}>{G.verified}</span>}
-                  <span style={{ fontSize:11, color:"rgba(188,194,255,0.25)" }}>→</span>
+                  {p.verified && <G.verified size={11} color="#6dba84" />}
+                  <ChevronRight size={14} color="rgba(188,194,255,0.25)" />
                 </div>
               </div>
             );
@@ -759,20 +904,18 @@ function SavedScreen({ savedIds, allProviders, onClose, onDetail, onFocus, getDi
 }
 
 // ── Section header ─────────────────────────────────────────────────────────────
-function SectionHeader({ label, count, color, sortActive }: { label:string; count:number; color:string; sortActive:boolean }) {
+function SectionHeader({ label, count, color }: { label:string; count:number; color:string }) {
   return (
     <div style={{ padding:"14px 16px 8px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-      <span style={{ fontSize:11, fontWeight:700, color:"rgba(188,194,255,0.4)", letterSpacing:"1px", textTransform:"uppercase" }}>{label}</span>
-      <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-        {sortActive && <span style={{ fontSize:9, color:"#4a9eff", fontWeight:600, letterSpacing:"0.5px" }}>NEAREST FIRST</span>}
-        <span style={{ fontSize:11, color, fontWeight:700 }}>{count}</span>
-      </div>
+      <span style={{ fontSize:11, fontWeight:700, color:"rgba(220,224,255,0.7)", letterSpacing:"1px", textTransform:"uppercase" }}>{label}</span>
+      <span style={{ fontSize:11, color, fontWeight:700 }}>{count}</span>
     </div>
   );
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export function GISFeature() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<TabType>("all");
   const [search, setSearch] = useState("");
   const [city, setCity] = useState("");
@@ -801,6 +944,12 @@ export function GISFeature() {
   }, []);
 
   const handleNearMe = useCallback(() => {
+    if (sortBy === "distance" && userLocation) {
+      setSortBy("default");
+      setUserLocation(null);
+      setFocusProvider(null);
+      return;
+    }
     if (!navigator.geolocation) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
@@ -813,7 +962,7 @@ export function GISFeature() {
       () => { setLocating(false); alert("Could not get your location. Please allow location access."); },
       { enableHighAccuracy:true, timeout:8000 }
     );
-  }, []);
+  }, [sortBy, userLocation]);
 
   const getDistance = useCallback((p: Provider): number | undefined => {
     if (!userLocation || !p.lat || !p.lng) return undefined;
@@ -847,8 +996,8 @@ export function GISFeature() {
     return [...filtered.psy, ...filtered.comm, ...filtered.sup];
   }, [tab, filtered]);
 
-  const tabs: { key: TabType; label: string; glyph: string }[] = [
-    { key:"all",          label:"All",           glyph:"⊞" },
+  const tabs: { key: TabType; label: string; glyph: LucideIcon }[] = [
+    { key:"all",          label:"All",           glyph:LayoutGrid },
     { key:"psychologist", label:"Psychologists",  glyph:G.person },
     { key:"community",    label:"Group",          glyph:G.group },
     { key:"support",      label:"Support",        glyph:G.support },
@@ -888,66 +1037,176 @@ export function GISFeature() {
 
       {/* ── Sticky top ── */}
       <div style={{ flexShrink:0, background:C.bg }}>
-        <div style={{ padding:"16px 16px 0" }}>
-
-          {/* Header row */}
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
-            <div>
-              <p style={{ fontSize:10, color:C.muted, letterSpacing:"1.5px", textTransform:"uppercase", marginBottom:2 }}>Region 6 · Western Visayas</p>
-              <h1 style={{ fontSize:22, fontWeight:700, color:C.text, margin:0, letterSpacing:"-0.3px" }}>Find Help</h1>
-            </div>
-            <div style={{ display:"flex", gap:8 }}>
-              {saved.size > 0 && (
-                <button onClick={() => setSavedOpen(true)}
-                  style={{ height:36, padding:"0 12px", borderRadius:10, background:"rgba(188,194,255,0.08)", border:"1px solid rgba(188,194,255,0.15)", color:"#bcc2ff", fontFamily:"inherit", fontSize:11, fontWeight:600, cursor:"pointer", display:"flex", alignItems:"center", gap:5 }}>
-                  {G.bookmark} {saved.size}
-                </button>
-              )}
-              <button onClick={handleNearMe} disabled={locating}
-                style={{ height:36, padding:"0 12px", borderRadius:10, background:isNearMode?"rgba(74,158,255,0.12)":"rgba(188,194,255,0.06)", border:`1px solid ${isNearMode?"rgba(74,158,255,0.35)":"rgba(188,194,255,0.12)"}`, color:isNearMode?"#4a9eff":C.muted, fontFamily:"inherit", fontSize:11, fontWeight:600, cursor:"pointer", display:"flex", alignItems:"center", gap:5, transition:"all 0.2s" }}>
-                <span style={{ fontSize:13 }}>{G.nearMe}</span>
-                {locating ? "Locating..." : isNearMode ? "Near Me" : "Near Me"}
-              </button>
-              <button onClick={()=>setSosOpen(true)}
-                style={{ height:36, width:36, borderRadius:10, background:"rgba(224,92,110,0.1)", border:"1px solid rgba(224,92,110,0.3)", color:"#e05c6e", fontFamily:"inherit", fontSize:15, fontWeight:700, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                {G.sos}
-              </button>
+        <header
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            padding: "calc(env(safe-area-inset-top, 0px) + 10px) 16px 12px",
+            background: "rgba(16,18,24,0.78)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            borderBottom: "1px solid rgba(188,194,255,0.06)",
+          }}
+        >
+          <div style={{ display: "flex", minWidth: 0, alignItems: "center", gap: 4 }}>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              aria-label="Back"
+              style={{
+                width: 34, height: 34, flexShrink: 0,
+                borderRadius: 999,
+                background: "transparent",
+                border: "none",
+                color: "rgba(188,194,255,0.6)",
+                cursor: "pointer",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                transition: "color 0.15s ease, background 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#eef1f6";
+                e.currentTarget.style.background = "rgba(188,194,255,0.06)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "rgba(188,194,255,0.6)";
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <div style={{ minWidth: 0, paddingLeft: 4 }}>
+              <h1
+                style={{
+                  fontSize: 16,
+                  fontWeight: 600,
+                  letterSpacing: "-0.01em",
+                  lineHeight: 1.1,
+                  color: "#eef1f6",
+                  margin: 0,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                Find Help
+              </h1>
+              <p
+                style={{
+                  fontSize: 11,
+                  lineHeight: 1.2,
+                  color: "rgba(188,194,255,0.45)",
+                  margin: "3px 0 0",
+                }}
+              >
+                Resources nearby
+              </p>
             </div>
           </div>
 
-          {/* Near me active banner */}
-          {isNearMode && (
-            <div style={{ background:"rgba(74,158,255,0.08)", border:"1px solid rgba(74,158,255,0.2)", borderRadius:8, padding:"8px 12px", marginBottom:10, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-              <span style={{ fontSize:11, color:"#4a9eff", fontWeight:600 }}>{G.nearMe} Sorted by nearest — all sections</span>
-              <button onClick={()=>{ setSortBy("default"); setUserLocation(null); }} style={{ background:"none", border:"none", cursor:"pointer", fontSize:11, color:"rgba(74,158,255,0.6)", fontFamily:"inherit" }}>
-                {G.close} Reset
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={handleNearMe}
+              disabled={locating}
+              aria-pressed={isNearMode}
+              aria-label={isNearMode ? "Showing nearest first — tap to clear" : "Sort by distance from you"}
+              title={isNearMode ? "Showing nearest first — tap to clear" : "Sort by distance from you"}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                height: 32,
+                padding: "0 12px",
+                borderRadius: 999,
+                background: isNearMode ? "rgba(74,158,255,0.12)" : "rgba(188,194,255,0.04)",
+                border: `1px solid ${isNearMode ? "rgba(74,158,255,0.35)" : "rgba(188,194,255,0.10)"}`,
+                color: isNearMode ? "#4a9eff" : "rgba(188,194,255,0.65)",
+                fontFamily: "inherit",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.2s",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <G.nearMe size={14} />
+              {locating ? "Locating…" : isNearMode ? "Nearest" : "Near"}
+            </button>
+            {saved.size > 0 && (
+              <button
+                type="button"
+                onClick={() => setSavedOpen(true)}
+                aria-label="Saved resources"
+                style={{
+                  width: 32, height: 32, flexShrink: 0,
+                  borderRadius: 999,
+                  background: "rgba(188,194,255,0.08)",
+                  border: "1px solid rgba(188,194,255,0.15)",
+                  color: "#bcc2ff",
+                  cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  position: "relative",
+                  transition: "all 0.15s",
+                }}
+              >
+                <G.bookmark size={14} fill="currentColor" />
+                <span style={{ position: "absolute", top: -3, right: -3, minWidth: 16, height: 16, padding: "0 4px", borderRadius: 999, background: "#bcc2ff", color: "#121416", fontSize: 9, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{saved.size}</span>
               </button>
-            </div>
-          )}
+            )}
+            <button
+              type="button"
+              onClick={() => setSosOpen(true)}
+              aria-label="Emergency hotlines"
+              title="Emergency hotlines"
+              style={{
+                width: 32, height: 32, flexShrink: 0,
+                borderRadius: 999,
+                background: "rgba(224,92,110,0.10)",
+                border: "1px solid rgba(224,92,110,0.30)",
+                color: "#e05c6e",
+                cursor: "pointer",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                transition: "all 0.15s",
+              }}
+            >
+              <G.sos size={14} />
+            </button>
+          </div>
+        </header>
+
+        <div style={{ padding: "12px 16px 0" }}>
 
           {/* Search + city */}
           <div style={{ display:"flex", gap:8, marginBottom:10 }}>
-            <div style={{ flex:1, background:C.surface, borderRadius:10, display:"flex", alignItems:"center", gap:8, padding:"0 12px", height:40, border:`1px solid ${C.border}` }}>
-              <span style={{ fontSize:14, color:C.muted, fontWeight:700 }}>{G.search}</span>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search resources..."
-                style={{ border:"none", outline:"none", fontFamily:"inherit", fontSize:13, color:C.text, background:"transparent", flex:1 }} />
-              {search && <button onClick={()=>setSearch("")} style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontSize:16, padding:0, fontWeight:700 }}>{G.close}</button>}
+            <div style={{ flex:1, background:C.surface, borderRadius:12, display:"flex", alignItems:"center", gap:8, padding:"0 12px", height:42, border:`1px solid ${C.border}` }}>
+              <G.search size={14} color={search ? C.accent : C.muted} style={{ transition:"color 0.2s" }} />
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search resources…"
+                style={{ border:"none", outline:"none", fontFamily:"inherit", fontSize:13, color:C.text, background:"transparent", flex:1, padding:"0", minWidth:0 }} />
+              {search && <button onClick={()=>setSearch("")} aria-label="Clear search" style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, padding:0, display:"inline-flex", alignItems:"center" }}><G.close size={14} /></button>}
             </div>
-            <select value={city} onChange={e=>setCity(e.target.value)}
-              style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:10, color:city?C.text:C.muted, fontFamily:"inherit", fontSize:12, padding:"0 10px", height:40, cursor:"pointer" }}>
+            <select value={city} onChange={e=>setCity(e.target.value)} aria-label="Filter by city"
+              style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:12, color:city?C.text:C.muted, fontFamily:"inherit", fontSize:12, padding:"0 28px 0 12px", height:42, cursor:"pointer", appearance:"none", backgroundImage:`url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' fill='none' stroke='%23bcc2ff' stroke-opacity='0.4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>")`, backgroundRepeat:"no-repeat", backgroundPosition:"right 10px center" }}>
               <option value="">All cities</option>
               {CITIES.map(c=><option key={c} value={c}>{c}</option>)}
             </select>
           </div>
 
           {/* Tabs */}
-          <div style={{ display:"flex", gap:6, overflowX:"auto", paddingBottom:12, scrollbarWidth:"none" }}>
-            {tabs.map(t => (
-              <button key={t.key} onClick={()=>{setTab(t.key);setFocusProvider(null);}}
-                style={{ padding:"6px 13px", borderRadius:20, border:"none", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:500, whiteSpace:"nowrap", display:"flex", alignItems:"center", gap:5, background:tab===t.key?C.accent:C.surface, color:tab===t.key?"#121416":C.muted, transition:"all 0.15s" }}>
-                <span style={{ fontSize:11 }}>{t.glyph}</span> {t.label}
-              </button>
-            ))}
+          <div style={{ display:"flex", gap:6, overflowX:"auto", paddingBottom:14, scrollbarWidth:"none" }}>
+            {tabs.map(t => {
+              const TabIcon = t.glyph;
+              return (
+                <button key={t.key} onClick={()=>{setTab(t.key);setFocusProvider(null);}}
+                  style={{ padding:"7px 13px", borderRadius:999, border:"none", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:600, whiteSpace:"nowrap", display:"inline-flex", alignItems:"center", gap:6, background:tab===t.key?C.accent:C.surface, color:tab===t.key?"#121416":C.muted, transition:"all 0.15s", boxShadow:tab===t.key?"0 10px 24px -16px rgba(188,194,255,0.6)":"none" }}>
+                  <TabIcon size={12} /> {t.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -955,29 +1214,22 @@ export function GISFeature() {
         {tab !== "hotline" && (
           mapCollapsed ? (
             <button onClick={()=>setMapCollapsed(false)} style={{ width:"100%", background:C.surface, border:"none", borderTop:`1px solid ${C.border}`, borderBottom:`1px solid ${C.border}`, padding:"10px 16px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"space-between", fontFamily:"inherit" }}>
-              <span style={{ fontSize:12, color:C.muted, fontWeight:500 }}>{G.map} Show map ({mapProviders.filter(p=>p.lat).length} pins)</span>
-              <span style={{ fontSize:11, color:C.accent, fontWeight:600 }}>{G.expand} Expand</span>
+              <span style={{ fontSize:12, color:C.muted, fontWeight:500, display:"inline-flex", alignItems:"center", gap:6 }}><G.map size={14} /> Show map ({mapProviders.filter(p=>p.lat).length} pins)</span>
+              <span style={{ fontSize:11, color:C.accent, fontWeight:600, display:"inline-flex", alignItems:"center", gap:4 }}><G.expand size={12} /> Expand</span>
             </button>
           ) : (
-            <>
-              <LiveMap providers={mapProviders} focusProvider={focusProvider} userLocation={userLocation} mapLayer={mapLayer} onLayerChange={setMapLayer} />
-              <div style={{ background:C.surface, borderBottom:`1px solid ${C.border}`, padding:"8px 16px", display:"flex", gap:10, alignItems:"center" }}>
-                <span style={{ fontSize:11, color:C.muted }}><span style={{ color:C.accent, fontWeight:700 }}>{filtered.psy.length}</span> Psych</span>
-                <span style={{ fontSize:11, color:C.muted }}><span style={{ color:"#6dba84", fontWeight:700 }}>{filtered.comm.length}</span> Community</span>
-                <span style={{ fontSize:11, color:C.muted }}><span style={{ color:"#e0853c", fontWeight:700 }}>{filtered.sup.length}</span> Support</span>
-                <div style={{ marginLeft:"auto", display:"flex", gap:10 }}>
-                  {focusProvider && <button onClick={()=>setFocusProvider(null)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:11, color:C.muted, fontFamily:"inherit" }}>Reset {G.close}</button>}
-                  <button onClick={()=>setMapCollapsed(true)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:11, color:C.accent, fontWeight:600, fontFamily:"inherit" }}>{G.collapse} Collapse</button>
-                </div>
-              </div>
-            </>
+            <LiveMap providers={mapProviders} focusProvider={focusProvider} userLocation={userLocation} mapLayer={mapLayer} onLayerChange={setMapLayer} onCollapse={()=>setMapCollapsed(true)} onResetFocus={focusProvider ? ()=>setFocusProvider(null) : null} />
           )
         )}
 
         {tab === "hotline" && (
-          <div style={{ margin:"8px 16px", padding:"11px 14px", background:"rgba(224,92,110,0.07)", borderRadius:10, border:"1px solid rgba(224,92,110,0.14)" }}>
-            <div style={{ fontSize:13, fontWeight:700, color:"#e05c6e", marginBottom:1 }}>{G.sos} Emergency Lines</div>
-            <div style={{ fontSize:11, color:"rgba(224,92,110,0.55)" }}>If you're in crisis, call any of these numbers immediately</div>
+          <div style={{ margin:"0 16px 10px", padding:"14px 16px", background:"linear-gradient(160deg, rgba(255,123,123,0.10), rgba(255,185,84,0.05))", borderRadius:16, border:"1px solid rgba(255,123,123,0.22)" }}>
+            <p style={{ fontSize:11, fontWeight:500, letterSpacing:"1.1px", textTransform:"uppercase", color:"rgba(255,170,170,0.78)", marginBottom:6, display:"inline-flex", alignItems:"center", gap:6 }}>
+              <G.sos size={12} /> In immediate danger?
+            </p>
+            <p className="font-serif" style={{ fontSize:14, color:"#f7e4e4", lineHeight:1.5, margin:0 }}>
+              If you're in crisis, tap any number below. These lines are free and confidential.
+            </p>
           </div>
         )}
       </div>
@@ -989,36 +1241,41 @@ export function GISFeature() {
 
         {(tab==="all"||tab==="hotline") && (
           <div>
-            {tab==="all" && <SectionHeader label="Emergency Hotlines" count={DB_HOT.length} color="#e05c6e" sortActive={false} />}
+            {tab==="all" && <SectionHeader label="Emergency Hotlines" count={DB_HOT.length} color="#e05c6e" />}
             {DB_HOT.map(h=><HotlineCard key={h.id} h={h}/>)}
           </div>
         )}
 
         {(tab==="all"||tab==="psychologist") && filtered.psy.length > 0 && (
           <div>
-            <SectionHeader label="Psychologists" count={filtered.psy.length} color={C.accent} sortActive={isNearMode} />
+            <SectionHeader label="Psychologists" count={filtered.psy.length} color={C.accent} />
             {filtered.psy.map(e=><ProviderCard key={e.id} e={e} saved={saved.has(e.id)} onSave={toggleSave} onFocus={setFocusProvider} onDetail={openDetail} isFocused={focusProvider?.id===e.id} distKm={getDistance(e)}/>)}
           </div>
         )}
 
         {(tab==="all"||tab==="community") && filtered.comm.length > 0 && (
           <div>
-            <SectionHeader label="Community & Group" count={filtered.comm.length} color="#6dba84" sortActive={isNearMode} />
+            <SectionHeader label="Community & Group" count={filtered.comm.length} color="#6dba84" />
             {filtered.comm.map(e=><ProviderCard key={e.id} e={e} saved={saved.has(e.id)} onSave={toggleSave} onFocus={setFocusProvider} onDetail={openDetail} isFocused={focusProvider?.id===e.id} distKm={getDistance(e)}/>)}
           </div>
         )}
 
         {(tab==="all"||tab==="support") && filtered.sup.length > 0 && (
           <div>
-            <SectionHeader label="Support Connections" count={filtered.sup.length} color="#e0853c" sortActive={isNearMode} />
+            <SectionHeader label="Support Connections" count={filtered.sup.length} color="#e0853c" />
             {filtered.sup.map(e=><ProviderCard key={e.id} e={e} saved={saved.has(e.id)} onSave={toggleSave} onFocus={setFocusProvider} onDetail={openDetail} isFocused={focusProvider?.id===e.id} distKm={getDistance(e)}/>)}
           </div>
         )}
 
         {filtered.psy.length===0 && filtered.comm.length===0 && filtered.sup.length===0 && tab!=="hotline" && (
-          <div style={{ padding:40, textAlign:"center", color:C.muted, fontSize:13 }}>
-            <div style={{ fontSize:28, marginBottom:8, opacity:0.3 }}>{G.search}</div>
-            No results found
+          <div style={{ margin:"16px", padding:"28px 20px", textAlign:"center", color:C.muted, fontSize:13, borderRadius:16, background:"rgba(188,194,255,0.03)", border:"1px dashed rgba(188,194,255,0.10)" }}>
+            <G.search size={26} color={C.muted} style={{ marginBottom:8, opacity:0.5 }} />
+            <p className="font-serif" style={{ fontSize:14, color:"rgba(188,194,255,0.65)", margin:0, lineHeight:1.5 }}>
+              No resources match your search.
+            </p>
+            <p style={{ fontSize:11, color:"rgba(220,224,255,0.7)", margin:"6px 0 0" }}>
+              Try a different keyword or city.
+            </p>
           </div>
         )}
         <div style={{ height:24 }} />

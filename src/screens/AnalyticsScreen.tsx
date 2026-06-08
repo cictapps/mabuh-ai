@@ -72,7 +72,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             padding: "14px 18px",
             borderRadius: 14,
             background: "rgba(188,194,255,0.04)",
-            color: "rgba(188,194,255,0.4)",
+            color: "rgba(220,224,255,0.7)",
             fontSize: 12,
             textAlign: "center",
           }}
@@ -104,7 +104,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             fontWeight: 500,
             letterSpacing: "1.3px",
             textTransform: "uppercase",
-            color: "rgba(188,194,255,0.3)",
+            color: "rgba(220,224,255,0.65)",
             marginBottom: 10,
           }}
         >
@@ -201,7 +201,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
                     day: "numeric",
                   })}
                 </span>
-                <span style={{ fontSize: 11, color: "rgba(188,194,255,0.4)" }}>
+                <span style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
                   {entry.tags.length} tags · {entry.socialInteractions?.length ?? 0} social
                 </span>
               </div>
@@ -335,7 +335,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               <p style={{ fontSize: 13, color: "#e8eaf0", marginTop: 4 }}>
                 {item.label ?? "--"}
               </p>
-              <p style={{ fontSize: 11, color: "rgba(188,194,255,0.4)" }}>
+              <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
                 {item.count} logged
               </p>
             </div>
@@ -391,7 +391,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             <p style={{ fontSize: 13, color: "#e8eaf0", marginBottom: 4 }}>
               {socialStats.totalInteractions}
             </p>
-            <p style={{ fontSize: 11, color: "rgba(188,194,255,0.4)" }}>
+            <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
               interactions logged
             </p>
           </div>
@@ -399,7 +399,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             <p style={{ fontSize: 13, color: "#e8eaf0", marginBottom: 4 }}>
               {socialStats.topPerson ?? "--"}
             </p>
-            <p style={{ fontSize: 11, color: "rgba(188,194,255,0.4)" }}>
+            <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
               most seen person
             </p>
           </div>
@@ -407,7 +407,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             <p style={{ fontSize: 13, color: "#e8eaf0", marginBottom: 4 }}>
               {socialStats.topFeeling ?? "--"}
             </p>
-            <p style={{ fontSize: 11, color: "rgba(188,194,255,0.4)" }}>
+            <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
               common feeling
             </p>
           </div>

@@ -6,7 +6,10 @@ interface JournalInputProps {
   label?: string;
   placeholder?: string;
   rows?: number;
+  maxLength?: number;
 }
+
+const MAX_RECOMMENDED = 600;
 
 export const JournalInput: React.FC<JournalInputProps> = ({
   value,
@@ -14,17 +17,21 @@ export const JournalInput: React.FC<JournalInputProps> = ({
   label,
   placeholder = "Write freely… this is your safe space.",
   rows = 3,
+  maxLength = 2000,
 }) => {
+  const trimmedLength = value.trim().length;
+  const showCount = trimmedLength > 60;
+  const isOverRecommended = trimmedLength > MAX_RECOMMENDED;
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {label && (
         <label
           style={{
             fontSize: 11,
-            fontWeight: 500,
+            fontWeight: 600,
             letterSpacing: "1.1px",
             textTransform: "uppercase",
-            color: "rgba(188,194,255,0.3)",
+            color: "rgba(216,220,230,0.65)",
           }}
         >
           {label}
@@ -32,7 +39,7 @@ export const JournalInput: React.FC<JournalInputProps> = ({
       )}
       <textarea
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         rows={rows}
         style={{
@@ -61,6 +68,24 @@ export const JournalInput: React.FC<JournalInputProps> = ({
           e.currentTarget.style.boxShadow = "inset 0 0 0 1px rgba(188,194,255,0.05)";
         }}
       />
+      {showCount && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            fontSize: 11,
+            fontVariantNumeric: "tabular-nums",
+            color: isOverRecommended
+              ? "rgba(255,185,84,0.95)"
+              : "rgba(216,220,230,0.6)",
+            transition: "color 0.2s ease",
+          }}
+          aria-live="polite"
+        >
+          {trimmedLength}
+          {isOverRecommended ? ` · long-form` : ""}
+        </div>
+      )}
     </div>
   );
 };

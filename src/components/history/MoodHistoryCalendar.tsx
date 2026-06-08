@@ -159,7 +159,7 @@ const DayDetail: React.FC<DayDetailProps> = ({ entry, date }) => {
                 </div>
               )}
               {interaction.notes && (
-                <div style={{ marginTop: 4, color: "rgba(188,194,255,0.4)" }}>
+                <div style={{ marginTop: 4, color: "rgba(220,224,255,0.7)" }}>
                   {interaction.notes}
                 </div>
               )}
@@ -236,7 +236,7 @@ const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ his
                     fontSize: 10,
                     textTransform: "uppercase",
                     letterSpacing: "0.4px",
-                    color: "rgba(188,194,255,0.4)",
+                    color: "rgba(220,224,255,0.7)",
                   }}
                 >
                   {DAYS_SHORT[d.getDay()]}

@@ -41,7 +41,16 @@ interface SocialTrackingPanelProps {
   onRemove: (id: string) => void;
   onUpdate: (id: string, update: Partial<SocialInteraction>) => void;
   limit?: number;
+  collapsed?: boolean;
 }
+
+const RELATIONSHIP_LABEL: Record<SocialInteraction["relationship"], string> = {
+  friend: "Friend",
+  family: "Family",
+  partner: "Partner",
+  colleague: "Colleague",
+  other: "Other",
+};
 
 export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
   interactions,
@@ -49,6 +58,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
   onRemove,
   onUpdate,
   limit = 6,
+  collapsed = false,
 }) => {
   const [customFeelings, setCustomFeelings] = useState<Record<string, string>>({});
 
@@ -58,6 +68,106 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
     if (remaining === 0) return "Limit reached (6 people).";
     return `Add up to ${remaining} more ${remaining === 1 ? "person" : "people"} today.`;
   }, [remaining]);
+
+  const totalVibes = useMemo(
+    () => interactions.reduce((sum, i) => sum + (i.feelings?.length ?? 0), 0),
+    [interactions],
+  );
+
+  if (collapsed) {
+    if (interactions.length === 0) {
+      return (
+        <div
+          style={{
+            padding: "12px 14px",
+            borderRadius: 14,
+            background: "rgba(188,194,255,0.04)",
+            color: "rgba(220,224,255,0.7)",
+            fontSize: 12,
+            lineHeight: 1.55,
+          }}
+        >
+          Nobody tracked yet. Open this card to add the people who lifted you up.
+        </div>
+      );
+    }
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {interactions.slice(0, 3).map((interaction) => {
+          const firstFeeling = interaction.feelings?.[0];
+          return (
+            <div
+              key={interaction.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                minWidth: 0,
+              }}
+            >
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "rgba(255,185,84,0.85)",
+                  flexShrink: 0,
+                }}
+                aria-hidden
+              />
+              <span
+                style={{
+                  fontSize: 12,
+                  color: "rgba(216,220,230,0.85)",
+                  fontWeight: 500,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  minWidth: 0,
+                }}
+              >
+                {interaction.name || "Unnamed"}
+              </span>
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "rgba(220,224,255,0.7)",
+                  flexShrink: 0,
+                }}
+              >
+                {RELATIONSHIP_LABEL[interaction.relationship]}
+                {firstFeeling ? ` · ${firstFeeling}` : ""}
+              </span>
+            </div>
+          );
+        })}
+        {interactions.length > 3 && (
+          <span
+            style={{
+              fontSize: 11,
+              color: "rgba(220,224,255,0.6)",
+              paddingLeft: 14,
+            }}
+          >
+            +{interactions.length - 3} more
+          </span>
+        )}
+        <span
+          style={{
+            fontSize: 11,
+            color: "rgba(220,224,255,0.6)",
+            marginTop: 2,
+          }}
+        >
+          {totalVibes > 0
+            ? `${totalVibes} ${totalVibes === 1 ? "vibe" : "vibes"} logged`
+            : `${interactions.length} ${
+                interactions.length === 1 ? "person" : "people"
+              } tracked`}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -330,7 +440,7 @@ const labelStyle: React.CSSProperties = {
   fontWeight: 500,
   letterSpacing: "1.1px",
   textTransform: "uppercase",
-  color: "rgba(188,194,255,0.3)",
+  color: "rgba(220,224,255,0.7)",
 };
 
 const selectStyle: React.CSSProperties = {

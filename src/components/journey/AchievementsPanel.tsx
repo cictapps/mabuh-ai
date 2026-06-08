@@ -85,7 +85,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
                 className="flex items-center justify-between rounded-xl border border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] px-3 py-2 text-xs"
               >
                 <span className="text-muted-foreground">{rule.label}</span>
-                <span className="font-mono text-foreground/90">{rule.value}</span>
+                <span className="font-mono text-foreground">{rule.value}</span>
               </li>
             ))}
           </ul>

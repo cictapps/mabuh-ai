@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -89,14 +90,14 @@ function ToggleRow({
         >
           {label}
         </span>
-        {description && (
-          <span
-            style={{
-              display: "block",
-              fontSize: 12,
-              color: "rgba(188,194,255,0.45)",
-              marginTop: 2,
-              lineHeight: 1.5,
+          {description && (
+            <span
+              style={{
+                display: "block",
+                fontSize: 12,
+                color: "rgba(220,224,255,0.7)",
+                marginTop: 2,
+                lineHeight: 1.5,
             }}
           >
             {description}
@@ -174,8 +175,8 @@ function Section({
             width: 32,
             height: 32,
             borderRadius: 12,
-            background: "rgba(255,185,84,0.14)",
-            color: "#f5e5b1",
+            background: "rgba(255,185,84,0.16)",
+            color: "#ffd99a",
           }}
         >
           {icon}
@@ -232,23 +233,60 @@ function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
-  if (!open) return null;
-  return (
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    const prevPosition = document.body.style.position;
+    const scrollY = window.scrollY;
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.position = prevPosition;
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, scrollY);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !busy) onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, busy, onCancel]);
+
+  if (!open || typeof document === "undefined") return null;
+
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onCancel();
+        if (e.target === e.currentTarget && !busy) onCancel();
       }}
       style={{
         position: "fixed",
-        inset: 0,
-        zIndex: 60,
-        display: "grid",
-        placeItems: "center",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100vw",
+        height: "100dvh",
+        minHeight: "100vh",
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         padding: 16,
-        background: "rgba(8,10,18,0.72)",
-        backdropFilter: "blur(10px)",
+        background: "rgba(8,10,18,0.78)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        overscrollBehavior: "contain",
       }}
     >
       <div
@@ -257,11 +295,13 @@ function ConfirmDialog({
           maxWidth: 360,
           padding: "22px 22px 18px",
           borderRadius: 20,
-          background: "rgba(27,30,39,0.96)",
-          border: "1px solid rgba(188,194,255,0.08)",
+          background: "rgba(27,30,39,0.98)",
+          border: "1px solid rgba(188,194,255,0.10)",
           display: "flex",
           flexDirection: "column",
           gap: 12,
+          boxShadow: "0 32px 80px -24px rgba(0,0,0,0.6)",
+          margin: "auto",
         }}
       >
         <h3
@@ -270,7 +310,7 @@ function ConfirmDialog({
         >
           {title}
         </h3>
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.6)", lineHeight: 1.55 }}>
+        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.6)", lineHeight: 1.55, margin: 0 }}>
           {description}
         </p>
         <div style={{ display: "flex", gap: 10, marginTop: 8, justifyContent: "flex-end" }}>
@@ -279,7 +319,6 @@ function ConfirmDialog({
           </Button>
           <Button
             type="button"
-            variant={destructive ? "default" : "default"}
             onClick={onConfirm}
             disabled={busy}
             style={
@@ -292,7 +331,8 @@ function ConfirmDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -498,7 +538,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               fontWeight: 500,
               letterSpacing: "1.1px",
               textTransform: "uppercase",
-              color: "rgba(188,194,255,0.4)",
+              color: "rgba(220,224,255,0.7)",
             }}
           >
             Display name
@@ -555,7 +595,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 fontWeight: 500,
                 letterSpacing: "1.1px",
                 textTransform: "uppercase",
-                color: "rgba(188,194,255,0.4)",
+                color: "rgba(220,224,255,0.7)",
               }}
             >
               Email
@@ -674,7 +714,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               fontWeight: 500,
               letterSpacing: "1.1px",
               textTransform: "uppercase",
-              color: "rgba(188,194,255,0.4)",
+              color: "rgba(220,224,255,0.7)",
             }}
           >
             Change password
@@ -915,7 +955,7 @@ function InfoTile({ label, value }: { label: string; value: string }) {
           fontSize: 10,
           letterSpacing: "1.1px",
           textTransform: "uppercase",
-          color: "rgba(188,194,255,0.4)",
+          color: "rgba(220,224,255,0.7)",
           marginBottom: 2,
         }}
       >

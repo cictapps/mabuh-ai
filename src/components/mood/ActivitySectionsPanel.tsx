@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { ActivitySectionId, ActivitySelections } from "../../types";
-import { SectionLabel } from "../shared/SectionLabel";
 import { MoodTagChip } from "./MoodTagChip";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -59,12 +58,14 @@ interface ActivitySectionsPanelProps {
   selections: ActivitySelections;
   onToggle: (section: ActivitySectionId, label: string) => void;
   onAddCustom: (section: ActivitySectionId, label: string) => void;
+  collapsed?: boolean;
 }
 
 export const ActivitySectionsPanel: React.FC<ActivitySectionsPanelProps> = ({
   selections,
   onToggle,
   onAddCustom,
+  collapsed = false,
 }) => {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
 
@@ -86,9 +87,89 @@ export const ActivitySectionsPanel: React.FC<ActivitySectionsPanelProps> = ({
     return map;
   }, [selections]);
 
+  const selectedBySection = useMemo(
+    () =>
+      SECTION_CONFIG.map((section) => ({
+        ...section,
+        items: selections[section.id] ?? [],
+      })).filter((s) => s.items.length > 0),
+    [selections],
+  );
+
+  if (collapsed) {
+    if (selectedBySection.length === 0) {
+      return (
+        <div
+          style={{
+            padding: "12px 14px",
+            borderRadius: 14,
+            background: "rgba(188,194,255,0.04)",
+            color: "rgba(220,224,255,0.7)",
+            fontSize: 12,
+            lineHeight: 1.55,
+          }}
+        >
+          Nothing logged yet. Open this card to add what filled your day.
+        </div>
+      );
+    }
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {selectedBySection.map((section) => (
+          <div
+            key={section.id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: "0.6px",
+                textTransform: "uppercase",
+                color: section.accent,
+                opacity: 0.8,
+                minWidth: 56,
+              }}
+            >
+              {section.label}
+            </span>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {section.items.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => onToggle(section.id, item)}
+                  aria-label={`Remove ${item}`}
+                  className="tag-chip"
+                  style={{
+                    fontSize: 11,
+                    padding: "3px 9px",
+                    borderRadius: 999,
+                    border: "none",
+                    cursor: "pointer",
+                    background: `${section.accent}1f`,
+                    color: "rgba(220,224,255,0.85)",
+                    fontFamily: "Plus Jakarta Sans, sans-serif",
+                    fontWeight: 500,
+                  }}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <SectionLabel>Daily activities</SectionLabel>
       {SECTION_CONFIG.map((section) => {
         const selected = selections[section.id] ?? [];
         const options = availableOptions[section.id];

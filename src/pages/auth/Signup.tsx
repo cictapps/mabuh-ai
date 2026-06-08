@@ -122,7 +122,7 @@ export function Signup() {
                 value={password}
                 onChange={(e) => setPassword(e.currentTarget.value)}
               />
-              <p className="text-xs text-muted-foreground/80">At least 8 characters.</p>
+              <p className="text-xs text-muted-foreground">At least 8 characters.</p>
             </div>
 
             {error && (

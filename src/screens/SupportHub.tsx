@@ -66,7 +66,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onClos
             fontWeight: 500,
             letterSpacing: "1.3px",
             textTransform: "uppercase",
-            color: "rgba(188,194,255,0.32)",
+            color: "rgba(220,224,255,0.7)",
             marginBottom: 10,
           }}
         >
@@ -78,113 +78,12 @@ export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onClos
         >
           Support
         </h2>
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
+        <p style={{ fontSize: 13, color: "rgba(220,224,255,0.72)" }}>
           Find help resources or open the companion chat without leaving the app
         </p>
       </header>
 
-      {/* Crisis safety card — high visibility, top of the action area. */}
-      <section
-        aria-label="Crisis safety"
-        style={{
-          padding: 16,
-          borderRadius: 20,
-          background:
-            "linear-gradient(160deg, rgba(255,123,123,0.10), rgba(255,185,84,0.06))",
-          border: "1px solid rgba(255,123,123,0.22)",
-          boxShadow: "0 18px 40px -28px rgba(255,123,123,0.45)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <span
-            style={{
-              display: "grid",
-              placeItems: "center",
-              width: 30,
-              height: 30,
-              borderRadius: 10,
-              background: "rgba(255,123,123,0.18)",
-              color: "rgba(255,170,170,0.95)",
-            }}
-            aria-hidden
-          >
-            <ShieldAlert size={16} />
-          </span>
-          <div style={{ minWidth: 0 }}>
-            <p
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: "rgba(255,210,210,0.98)",
-                lineHeight: 1.2,
-              }}
-            >
-              In immediate danger?
-            </p>
-            <p
-              style={{
-                fontSize: 12,
-                color: "rgba(255,200,200,0.7)",
-                lineHeight: 1.45,
-                marginTop: 2,
-              }}
-            >
-              Contact local emergency services right away.
-            </p>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {HOTLINES.map((h) => (
-            <a
-              key={h.number}
-              href={telHref(h.number)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "10px 12px",
-                borderRadius: 12,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.06)",
-                color: "#f5e5e5",
-                textDecoration: "none",
-                fontSize: 13,
-              }}
-            >
-              <Phone size={14} color="rgba(255,170,170,0.85)" />
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", fontWeight: 600, color: "#f7e4e4" }}>
-                  {h.label}
-                </span>
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: 11,
-                    color: "rgba(255,200,200,0.55)",
-                  }}
-                >
-                  {h.detail}
-                </span>
-              </span>
-              <span
-                style={{
-                  fontFamily: "Plus Jakarta Sans, sans-serif",
-                  fontVariantNumeric: "tabular-nums",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  letterSpacing: "0.4px",
-                  color: "rgba(255,210,210,0.98)",
-                }}
-              >
-                {h.number}
-              </span>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      {/* Quick actions card */}
+      {/* Quick actions card — primary entry points come first. */}
       <section
         aria-label="Quick actions"
         style={{
@@ -204,7 +103,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onClos
               fontSize: 11,
               letterSpacing: "1px",
               textTransform: "uppercase",
-              color: "rgba(188,194,255,0.45)",
+              color: "rgba(220,224,255,0.78)",
               marginBottom: 6,
             }}
           >
@@ -335,6 +234,107 @@ export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onClos
           </span>
           <ArrowUpRight size={16} color="rgba(255,207,134,0.7)" />
         </button>
+      </section>
+
+      {/* Crisis safety card — high visibility, comes after the primary actions. */}
+      <section
+        aria-label="Crisis safety"
+        style={{
+          padding: 16,
+          borderRadius: 20,
+          background:
+            "linear-gradient(160deg, rgba(255,123,123,0.10), rgba(255,185,84,0.06))",
+          border: "1px solid rgba(255,123,123,0.22)",
+          boxShadow: "0 18px 40px -28px rgba(255,123,123,0.45)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <span
+            style={{
+              display: "grid",
+              placeItems: "center",
+              width: 30,
+              height: 30,
+              borderRadius: 10,
+              background: "rgba(255,123,123,0.18)",
+              color: "rgba(255,170,170,0.95)",
+            }}
+            aria-hidden
+          >
+            <ShieldAlert size={16} />
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <p
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "rgba(255,210,210,0.98)",
+                lineHeight: 1.2,
+              }}
+            >
+              In immediate danger?
+            </p>
+            <p
+              style={{
+                fontSize: 12,
+                color: "rgba(255,200,200,0.7)",
+                lineHeight: 1.45,
+                marginTop: 2,
+              }}
+            >
+              Contact local emergency services right away.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {HOTLINES.map((h) => (
+            <a
+              key={h.number}
+              href={telHref(h.number)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 12px",
+                borderRadius: 12,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                color: "#f5e5e5",
+                textDecoration: "none",
+                fontSize: 13,
+              }}
+            >
+              <Phone size={14} color="rgba(255,170,170,0.85)" />
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: "block", fontWeight: 600, color: "#f7e4e4" }}>
+                  {h.label}
+                </span>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 11,
+                    color: "rgba(255,200,200,0.55)",
+                  }}
+                >
+                  {h.detail}
+                </span>
+              </span>
+              <span
+                style={{
+                  fontFamily: "Plus Jakarta Sans, sans-serif",
+                  fontVariantNumeric: "tabular-nums",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: "0.4px",
+                  color: "rgba(255,210,210,0.98)",
+                }}
+              >
+                {h.number}
+              </span>
+            </a>
+          ))}
+        </div>
       </section>
     </div>
   );

@@ -53,8 +53,8 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
                   ? "bg-tertiary text-tertiary-foreground shadow-[0_10px_28px_-18px_rgba(255,185,84,0.7)]"
                   : "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_10px_28px_-18px_rgba(188,194,255,0.7)]"
                 : isReached
-                  ? "text-foreground/80"
-                  : "text-muted-foreground/60",
+                  ? "text-foreground/95"
+                  : "text-muted-foreground",
             )}
           >
             <Icon
@@ -63,8 +63,8 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
                 isActive
                   ? "text-current"
                   : isReached
-                    ? "text-foreground/70"
-                    : "text-muted-foreground/60",
+                    ? "text-foreground/90"
+                    : "text-muted-foreground",
               )}
             />
             <span

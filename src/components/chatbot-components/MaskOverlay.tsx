@@ -20,7 +20,7 @@ export const MaskOverlay = ({
         {/* text */}
         <div>
           <h2 className="text-lg font-semibold">Mask Mode</h2>
-          <p className="text-sm text-white/50 mt-2 max-w-xs mx-auto">
+          <p className="text-sm text-white/80 mt-2 max-w-xs mx-auto">
             Private session. Nothing is stored.  
             You can speak freely here.
           </p>

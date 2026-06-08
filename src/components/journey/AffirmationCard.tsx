@@ -23,7 +23,7 @@ export function AffirmationCard({ enabled = true }: AffirmationCardProps) {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             A kind thought
           </p>
-          <p className="mt-1 font-serif text-base italic leading-snug tracking-[-0.01em] text-foreground/90">
+          <p className="mt-1 font-serif text-base italic leading-snug tracking-[-0.01em] text-foreground">
             {loading ? "Gathering a kind thought for you…" : `“${text}”`}
           </p>
         </div>

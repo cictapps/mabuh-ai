@@ -41,7 +41,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion }) =>
         <p
           style={{
             fontSize: 12,
-            color: "rgba(188,194,255,0.42)",
+            color: "rgba(220,224,255,0.72)",
             lineHeight: 1.55,
           }}
         >

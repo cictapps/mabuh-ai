@@ -109,7 +109,7 @@ export function AirbornePanel({
             </>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-foreground/90">
+              <p className="text-sm text-foreground">
                 You don't have any waypoints yet.
               </p>
               <p className="text-xs leading-relaxed text-muted-foreground">

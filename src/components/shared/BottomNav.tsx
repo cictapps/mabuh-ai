@@ -92,7 +92,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, active, onSelect })
                 fontSize: 11,
                 fontWeight: isActive ? 700 : 600,
                 letterSpacing: "0.2px",
-                color: isActive ? "#f5f1ff" : "rgba(188,194,255,0.3)",
+                color: isActive ? "#f5f1ff" : "rgba(220,224,255,0.55)",
                 transition: "color 0.2s ease",
                 fontFamily: "Plus Jakarta Sans, sans-serif",
               }}

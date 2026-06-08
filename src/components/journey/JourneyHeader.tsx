@@ -49,9 +49,9 @@ export function JourneyHeader({ totalXp, streak, flightsCompleted }: JourneyHead
             Level {level}
           </h1>
           <p className="mt-1 text-xs text-muted-foreground">
-            <span className="font-mono text-foreground/90">{intoLevel}</span>
-            <span className="opacity-60"> / {XP_PER_LEVEL} XP</span>
-            <span className="opacity-60"> toward level {level + 1}</span>
+            <span className="font-mono text-foreground">{intoLevel}</span>
+            <span className="text-muted-foreground"> / {XP_PER_LEVEL} XP</span>
+            <span className="text-muted-foreground"> toward level {level + 1}</span>
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">

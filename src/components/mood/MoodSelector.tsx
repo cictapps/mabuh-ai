@@ -51,7 +51,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood }) => {
           style={{
             fontSize: 22,
             fontWeight: 400,
-            color: "rgba(188,194,255,0.2)",
+            color: "rgba(220,224,255,0.7)",
             lineHeight: 1.3,
           }}
         >

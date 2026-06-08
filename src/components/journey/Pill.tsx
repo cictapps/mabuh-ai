@@ -27,7 +27,7 @@ export function Pill({ label, value, tone = "default", className }: PillProps) {
       <span className="flex items-center gap-1 text-sm font-semibold tracking-tight">
         {value}
       </span>
-      <span className="text-[10px] font-medium uppercase tracking-[0.18em] opacity-70">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] opacity-90">
         {label}
       </span>
     </div>

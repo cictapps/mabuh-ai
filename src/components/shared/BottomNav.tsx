@@ -1,4 +1,5 @@
 import React from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { ScreenId, NavItem } from "../../types";
 import {
   Heart,
@@ -14,94 +15,115 @@ interface BottomNavProps {
   onSelect: (id: ScreenId) => void;
 }
 
-const renderIcon = (iconName: string, isActive: boolean) => {
-  const size = 20;
-  const className = isActive ? "text-[#f5f1ff]" : "text-[rgba(188,194,255,0.34)]";
-
+const renderIcon = (iconName: string) => {
+  const size = 22;
+  const strokeWidth = 2;
   switch (iconName) {
     case "checkin":
-      return <Heart size={size} className={className} />;
+      return <Heart size={size} strokeWidth={strokeWidth} />;
     case "review":
-      return <BarChart3 size={size} className={className} />;
+      return <BarChart3 size={size} strokeWidth={strokeWidth} />;
     case "journey":
-      return <Compass size={size} className={className} />;
+      return <Compass size={size} strokeWidth={strokeWidth} />;
     case "support":
-      return <MessageCircle size={size} className={className} />;
+      return <MessageCircle size={size} strokeWidth={strokeWidth} />;
     case "settings":
-      return <SettingsIcon size={size} className={className} />;
+      return <SettingsIcon size={size} strokeWidth={strokeWidth} />;
     default:
       return null;
   }
 };
 
 export const BottomNav: React.FC<BottomNavProps> = ({ items, active, onSelect }) => {
+  const shouldReduceMotion = useReducedMotion();
+  const activeIndex = Math.max(
+    0,
+    items.findIndex((item) => item.id === active),
+  );
+  const viewBoxWidth = 430;
+  const height = 86;
+  const cornerRadius = 32;
+  const dipDepth = 56;
+  const dipControl = 58;
+  const dipWidth = 86;
+  const itemCount = Math.max(1, items.length);
+  const dipCenter = (viewBoxWidth / itemCount) * (activeIndex + 0.5);
+  const dipStart = Math.max(cornerRadius, dipCenter - dipWidth);
+  const dipEnd = Math.min(viewBoxWidth - cornerRadius, dipCenter + dipWidth);
+  const path = [
+    `M ${cornerRadius} 0`,
+    `H ${dipStart}`,
+    `C ${dipStart + 22} 0 ${dipCenter - dipControl} ${dipDepth} ${dipCenter} ${dipDepth}`,
+    `C ${dipCenter + dipControl} ${dipDepth} ${dipEnd - 22} 0 ${dipEnd} 0`,
+    `H ${viewBoxWidth - cornerRadius}`,
+    `Q ${viewBoxWidth} 0 ${viewBoxWidth} ${cornerRadius}`,
+    `V ${height}`,
+    `H 0`,
+    `V ${cornerRadius}`,
+    `Q 0 0 ${cornerRadius} 0`,
+    "Z",
+  ].join(" ");
+
   return (
+    <footer className="bottom-nav-shell">
       <nav
-      style={{
-        display: "flex",
-        gap: 8,
-        background: "rgba(16,18,24,0.96)",
-        borderTop: "1px solid rgba(188,194,255,0.06)",
-        padding: "10px 12px calc(env(safe-area-inset-bottom, 0px) + 10px)",
-        flexShrink: 0,
-        backdropFilter: "blur(18px)",
-      }}
-    >
-      {items.map((item) => {
-        const isActive = item.id === active;
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => onSelect(item.id)}
-            aria-pressed={isActive}
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 3,
-              padding: "10px 8px 11px",
-              minHeight: 62,
-              border: isActive ? "1px solid rgba(188,194,255,0.22)" : "1px solid rgba(188,194,255,0.06)",
-              borderRadius: 18,
-              outline: "none",
-              background: isActive
-                ? "linear-gradient(180deg, rgba(188,194,255,0.12), rgba(188,194,255,0.05))"
-                : "rgba(255,255,255,0.015)",
-              cursor: "pointer",
-              transition: "transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
-              boxShadow: isActive ? "0 16px 34px -24px rgba(188,194,255,0.55)" : "none",
-              transform: isActive ? "translateY(-1px)" : "translateY(0)",
-            }}
-          >
-            <span
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "transform 0.2s ease",
-                transform: isActive ? "scale(1.08)" : "scale(1)",
-              }}
-            >
-              {renderIcon(item.icon, isActive)}
-            </span>
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: isActive ? 700 : 600,
-                letterSpacing: "0.2px",
-                color: isActive ? "#f5f1ff" : "rgba(220,224,255,0.55)",
-                transition: "color 0.2s ease",
-                fontFamily: "Plus Jakarta Sans, sans-serif",
-              }}
-            >
-              {item.label}
-            </span>
-          </button>
-        );
-      })}
-    </nav>
+        className="bottom-nav"
+        aria-label="Primary"
+        style={
+          {
+            "--active-index": activeIndex,
+            "--item-count": items.length,
+          } as React.CSSProperties
+        }
+      >
+        <svg
+          className="bottom-nav__surface"
+          viewBox={`0 0 ${viewBoxWidth} ${height}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <motion.path
+            animate={{ d: path }}
+            initial={false}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : {
+                    type: "spring",
+                    stiffness: 280,
+                    damping: 30,
+                    mass: 0.8,
+                  }
+            }
+          />
+        </svg>
+        <div className="bottom-nav__items">
+          {items.map((item) => {
+            const isActive = item.id === active;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelect(item.id)}
+                aria-label={item.label}
+                aria-current={isActive ? "page" : undefined}
+                className={`bottom-nav__item${isActive ? " bottom-nav__item--active" : ""}`}
+              >
+                <span className="bottom-nav__dot" aria-hidden="true" />
+                <span className="bottom-nav__icon">
+                  {renderIcon(item.icon)}
+                </span>
+                <span
+                  className="bottom-nav__label"
+                  aria-hidden={isActive ? "true" : undefined}
+                >
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    </footer>
   );
 };

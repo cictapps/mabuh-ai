@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Award, Settings2, Sun } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { JourneyHeader } from "@/components/journey/JourneyHeader";
 import { PhaseSwitcher } from "@/components/journey/PhaseSwitcher";
+import { ViewTabs, type JourneyView } from "@/components/journey/ViewTabs";
 import { PreflightPanel } from "@/components/journey/PreflightPanel";
 import { AirbornePanel } from "@/components/journey/AirbornePanel";
 import { CheckpointPanel } from "@/components/journey/CheckpointPanel";
@@ -16,14 +15,6 @@ import { IntroOverlay } from "@/components/journey/IntroOverlay";
 import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 import { getJourneyStatus } from "@/lib/journey/schedule";
 import type { JourneyPhase } from "@/types";
-
-type JourneyView = "main" | "hangar" | "achievements";
-
-const VIEW_TABS: { key: JourneyView; label: string; icon: typeof Sun }[] = [
-  { key: "main", label: "Today", icon: Sun },
-  { key: "hangar", label: "Hangar", icon: Settings2 },
-  { key: "achievements", label: "Wins", icon: Award },
-];
 
 type JourneyScreenProps = {
   onOpenSupport: () => void;
@@ -226,45 +217,6 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
       </div>
 
       <IntroOverlay open={!hasSeenIntro} onChoose={handleIntroChoice} />
-    </div>
-  );
-}
-
-type ViewTabsProps = {
-  active: JourneyView;
-  onChange: (view: JourneyView) => void;
-};
-
-function ViewTabs({ active, onChange }: ViewTabsProps) {
-  return (
-    <div
-      className="flex items-stretch gap-1 rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] p-1"
-      role="tablist"
-      aria-label="Journey views"
-    >
-      {VIEW_TABS.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = tab.key === active;
-        return (
-          <button
-            key={tab.key}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onChange(tab.key)}
-            className={cn(
-              "flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-colors",
-              "active:scale-[0.97]",
-              isActive
-                ? "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_10px_28px_-18px_rgba(188,194,255,0.7)]"
-                : "text-[#d8d4eb]",
-            )}
-          >
-            <Icon className="size-3.5" />
-            <span>{tab.label}</span>
-          </button>
-        );
-      })}
     </div>
   );
 }

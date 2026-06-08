@@ -23,7 +23,7 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
   return (
     <div
       className={cn(
-        "flex items-stretch gap-1 rounded-2xl border p-1",
+        "relative flex items-stretch gap-1 rounded-2xl border p-1",
         isPause
           ? "border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.06)]"
           : "border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)]",
@@ -46,12 +46,15 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
             onClick={() => onSelect(phase.key)}
             aria-label={phase.label}
             className={cn(
-              "group relative flex min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-xl px-1.5 py-2 transition-colors",
+              "relative flex min-w-0 items-center justify-center rounded-xl py-2.5 transition-all duration-300 ease-out",
               "active:scale-[0.97]",
               isActive
+                ? "flex-[1.6] gap-1.5 px-3"
+                : "flex-1 gap-0 px-1.5",
+              isActive
                 ? isPausePhase
-                  ? "bg-tertiary text-tertiary-foreground shadow-[0_10px_28px_-18px_rgba(255,185,84,0.7)]"
-                  : "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_10px_28px_-18px_rgba(188,194,255,0.7)]"
+                  ? "bg-tertiary text-tertiary-foreground shadow-[0_14px_32px_-18px_rgba(255,185,84,0.85)] scale-[1.02]"
+                  : "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_14px_32px_-18px_rgba(188,194,255,0.85)] scale-[1.02]"
                 : isReached
                   ? "text-foreground"
                   : "text-[#d8d4eb]",
@@ -59,7 +62,8 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
           >
             <Icon
               className={cn(
-                "size-4 shrink-0 transition-colors",
+                "shrink-0 transition-all duration-300 ease-out",
+                isActive ? "size-4" : "size-4",
                 isActive
                   ? "text-current"
                   : isReached
@@ -67,16 +71,22 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
                     : "text-[#d8d4eb]",
               )}
             />
-            {isActive ? (
-              <span
-                className={cn(
-                  "truncate text-[10px] font-semibold uppercase tracking-[0.14em]",
-                  isPausePhase ? "text-tertiary-foreground" : "text-primary-foreground",
-                )}
-              >
-                {phase.label}
-              </span>
-            ) : null}
+            <span
+              aria-hidden={!isActive}
+              className={cn(
+                "overflow-hidden whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.14em] transition-all duration-300 ease-out",
+                isActive
+                  ? "max-w-[120px] opacity-100"
+                  : "max-w-0 opacity-0",
+                isActive
+                  ? isPausePhase
+                    ? "text-tertiary-foreground"
+                    : "text-primary-foreground"
+                  : "",
+              )}
+            >
+              {phase.label}
+            </span>
           </button>
         );
       })}

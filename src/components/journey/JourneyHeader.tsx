@@ -1,5 +1,5 @@
-import { Flame, Sparkles, Star } from "lucide-react";
-import { Pill } from "./Pill";
+import { Flame, Send, Sparkles, Star } from "lucide-react";
+import { StatBadge } from "./StatBadge";
 import { ProgressBar } from "./ProgressBar";
 import { levelFromXp, levelProgressPercent, xpIntoLevel, XP_PER_LEVEL } from "@/lib/journey/xp";
 
@@ -7,9 +7,15 @@ type JourneyHeaderProps = {
   totalXp: number;
   streak: number;
   flightsCompleted: number;
+  onOpenAchievements?: () => void;
 };
 
-export function JourneyHeader({ totalXp, streak, flightsCompleted }: JourneyHeaderProps) {
+export function JourneyHeader({
+  totalXp,
+  streak,
+  flightsCompleted,
+  onOpenAchievements,
+}: JourneyHeaderProps) {
   const level = levelFromXp(totalXp);
   const intoLevel = xpIntoLevel(totalXp);
 
@@ -39,37 +45,39 @@ export function JourneyHeader({ totalXp, streak, flightsCompleted }: JourneyHead
         fill="currentColor"
       />
 
-      <div className="relative flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            <Sparkles className="size-3 text-tertiary" />
-            Your journey
-          </p>
-          <h1 className="mt-1 font-serif text-3xl leading-tight tracking-[-0.03em] text-foreground">
-            Level {level}
-          </h1>
-          <p className="mt-1 text-xs text-muted-foreground">
-            <span className="font-mono text-foreground">{intoLevel}</span>
-            <span className="text-muted-foreground"> / {XP_PER_LEVEL} XP</span>
-            <span className="text-muted-foreground"> toward level {level + 1}</span>
-          </p>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <Pill
-            label="Streak"
-            value={
-              <span className="flex items-center gap-1">
-                {streak}
-                <Flame className="size-3 text-tertiary" fill="currentColor" />
-              </span>
-            }
-            tone="warm"
-          />
-          <Pill label="Flights" value={flightsCompleted} tone="calm" />
-        </div>
+      <div className="relative">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+          <Sparkles className="size-3 text-tertiary" />
+          Your journey
+        </p>
+        <h1 className="mt-1 font-serif text-3xl leading-tight tracking-[-0.03em] text-foreground">
+          Level {level}
+        </h1>
+        <p className="mt-1 text-xs text-muted-foreground">
+          <span className="font-mono text-foreground">{intoLevel}</span>
+          <span> / {XP_PER_LEVEL} XP</span>
+          <span> toward level {level + 1}</span>
+        </p>
       </div>
 
-      <div className="relative mt-5">
+      <div className="relative mt-4 grid grid-cols-2 gap-2.5">
+        <StatBadge
+          tone="warm"
+          icon={<Flame className="size-4" fill="currentColor" />}
+          value={streak}
+          label="Day streak"
+          onPress={onOpenAchievements}
+        />
+        <StatBadge
+          tone="calm"
+          icon={<Send className="size-4" />}
+          value={flightsCompleted}
+          label="Flights done"
+          onPress={onOpenAchievements}
+        />
+      </div>
+
+      <div className="relative mt-4">
         <ProgressBar
           progress={levelProgressPercent(totalXp)}
           label={`${totalXp} XP earned`}

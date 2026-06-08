@@ -11,8 +11,6 @@ const PHASES: { key: JourneyPhase; label: string; icon: typeof Sunrise }[] = [
   { key: "rest", label: "Rest", icon: Moon },
 ];
 
-const PAUSE_INDEX = PHASES.findIndex((p) => p.key === "pause");
-
 type PhaseSwitcherProps = {
   active: JourneyPhase;
   onSelect: (phase: JourneyPhase) => void;
@@ -25,7 +23,7 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-1 rounded-full border px-2 py-1.5",
+        "flex items-stretch gap-1 rounded-2xl border p-1",
         isPause
           ? "border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.06)]"
           : "border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)]",
@@ -46,35 +44,39 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
             role="tab"
             aria-selected={isActive}
             onClick={() => onSelect(phase.key)}
+            aria-label={phase.label}
             className={cn(
-              "group flex flex-1 items-center justify-center gap-1.5 rounded-full px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors",
+              "group relative flex min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-xl px-1.5 py-2 transition-colors",
+              "active:scale-[0.97]",
               isActive
                 ? isPausePhase
                   ? "bg-tertiary text-tertiary-foreground shadow-[0_10px_28px_-18px_rgba(255,185,84,0.7)]"
                   : "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_10px_28px_-18px_rgba(188,194,255,0.7)]"
                 : isReached
-                  ? "text-foreground/95"
+                  ? "text-foreground"
                   : "text-muted-foreground",
             )}
           >
             <Icon
               className={cn(
-                "size-3.5 transition-colors",
+                "size-4 shrink-0 transition-colors",
                 isActive
                   ? "text-current"
                   : isReached
-                    ? "text-foreground/90"
+                    ? "text-foreground"
                     : "text-muted-foreground",
               )}
             />
-            <span
-              className={cn(
-                "hidden sm:inline",
-                isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100",
-              )}
-            >
-              {phase.label}
-            </span>
+            {isActive ? (
+              <span
+                className={cn(
+                  "truncate text-[10px] font-semibold uppercase tracking-[0.14em]",
+                  isPausePhase ? "text-tertiary-foreground" : "text-primary-foreground",
+                )}
+              >
+                {phase.label}
+              </span>
+            ) : null}
           </button>
         );
       })}
@@ -82,4 +84,4 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
   );
 }
 
-export { PHASES, PAUSE_INDEX };
+export { PHASES };

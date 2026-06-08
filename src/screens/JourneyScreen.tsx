@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { Award, Settings2, Sun } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { JourneyHeader } from "@/components/journey/JourneyHeader";
 import { PhaseSwitcher } from "@/components/journey/PhaseSwitcher";
 import { PreflightPanel } from "@/components/journey/PreflightPanel";
@@ -17,7 +19,11 @@ import type { JourneyPhase } from "@/types";
 
 type JourneyView = "main" | "hangar" | "achievements";
 
-const FIRST_FLIGHT_KEY = "mabuhai-journey-first-flight";
+const VIEW_TABS: { key: JourneyView; label: string; icon: typeof Sun }[] = [
+  { key: "main", label: "Today", icon: Sun },
+  { key: "hangar", label: "Hangar", icon: Settings2 },
+  { key: "achievements", label: "Wins", icon: Award },
+];
 
 type JourneyScreenProps = {
   onOpenSupport: () => void;
@@ -70,13 +76,6 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (flightsCompleted === 0 && !localStorage.getItem(FIRST_FLIGHT_KEY)) {
-      localStorage.setItem(FIRST_FLIGHT_KEY, "seen");
-    }
-  }, [flightsCompleted]);
-
   const status = useMemo(
     () => getJourneyStatus(checkpoints, now),
     [checkpoints, now],
@@ -103,6 +102,10 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
     setHintSeen((current) => (current[phase] ? current : { ...current, [phase]: true }));
   };
 
+  const openAchievements = () => {
+    setView("achievements");
+  };
+
   return (
     <div className="relative">
       <div
@@ -119,34 +122,15 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
           totalXp={totalXp}
           streak={streak}
           flightsCompleted={flightsCompleted}
+          onOpenAchievements={openAchievements}
         />
 
-        <PhaseSwitcher active={phase} onSelect={handlePhaseSelect} />
+        <ViewTabs active={view} onChange={setView} />
 
-        {view === "hangar" ? (
-          <div className="space-y-3">
-            <HangarPanel />
-            <button
-              type="button"
-              onClick={() => setView("main")}
-              className="mx-auto block rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-            >
-              ← Back to journey
-            </button>
-          </div>
-        ) : view === "achievements" ? (
-          <div className="space-y-3">
-            <AchievementsPanel showHint={flightsCompleted === 0} />
-            <button
-              type="button"
-              onClick={() => setView("main")}
-              className="mx-auto block rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-            >
-              ← Back to journey
-            </button>
-          </div>
-        ) : (
+        {view !== "main" ? null : (
           <>
+            <PhaseSwitcher active={phase} onSelect={handlePhaseSelect} />
+
             <AffirmationCard />
 
             {phase === "preflight" ? (
@@ -231,28 +215,56 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
                 }}
               />
             ) : null}
-
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setView("hangar")}
-                className="rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-[rgba(188,194,255,0.06)] hover:text-foreground"
-              >
-                Hangar
-              </button>
-              <button
-                type="button"
-                onClick={() => setView("achievements")}
-                className="rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-[rgba(188,194,255,0.06)] hover:text-foreground"
-              >
-                Achievements
-              </button>
-            </div>
           </>
         )}
+
+        {view === "hangar" ? <HangarPanel /> : null}
+
+        {view === "achievements" ? (
+          <AchievementsPanel showHint={flightsCompleted === 0} />
+        ) : null}
       </div>
 
       <IntroOverlay open={!hasSeenIntro} onChoose={handleIntroChoice} />
+    </div>
+  );
+}
+
+type ViewTabsProps = {
+  active: JourneyView;
+  onChange: (view: JourneyView) => void;
+};
+
+function ViewTabs({ active, onChange }: ViewTabsProps) {
+  return (
+    <div
+      className="flex items-stretch gap-1 rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] p-1"
+      role="tablist"
+      aria-label="Journey views"
+    >
+      {VIEW_TABS.map((tab) => {
+        const Icon = tab.icon;
+        const isActive = tab.key === active;
+        return (
+          <button
+            key={tab.key}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => onChange(tab.key)}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-colors",
+              "active:scale-[0.97]",
+              isActive
+                ? "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_10px_28px_-18px_rgba(188,194,255,0.7)]"
+                : "text-muted-foreground",
+            )}
+          >
+            <Icon className="size-3.5" />
+            <span>{tab.label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

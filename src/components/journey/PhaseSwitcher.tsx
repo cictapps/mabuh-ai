@@ -49,12 +49,12 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
               "relative flex min-w-0 items-center justify-center rounded-xl py-2.5 transition-all duration-300 ease-out",
               "active:scale-[0.97]",
               isActive
-                ? "flex-[1.6] gap-1.5 px-3"
-                : "flex-1 gap-0 px-1.5",
+                ? "flex-[2.6] gap-1.5 px-2.5"
+                : "flex-1 gap-0 px-1",
               isActive
                 ? isPausePhase
-                  ? "bg-tertiary text-tertiary-foreground shadow-[0_14px_32px_-18px_rgba(255,185,84,0.85)] scale-[1.02]"
-                  : "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_14px_32px_-18px_rgba(188,194,255,0.85)] scale-[1.02]"
+                  ? "bg-tertiary text-tertiary-foreground shadow-[0_14px_32px_-18px_rgba(255,185,84,0.85)]"
+                  : "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_14px_32px_-18px_rgba(188,194,255,0.85)]"
                 : isReached
                   ? "text-foreground"
                   : "text-[#d8d4eb]",
@@ -62,8 +62,7 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
           >
             <Icon
               className={cn(
-                "shrink-0 transition-all duration-300 ease-out",
-                isActive ? "size-4" : "size-4",
+                "size-4 shrink-0 transition-colors",
                 isActive
                   ? "text-current"
                   : isReached
@@ -74,9 +73,9 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
             <span
               aria-hidden={!isActive}
               className={cn(
-                "overflow-hidden whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.14em] transition-all duration-300 ease-out",
+                "overflow-hidden whitespace-nowrap text-[11px] font-semibold transition-all duration-300 ease-out",
                 isActive
-                  ? "max-w-[120px] opacity-100"
+                  ? "max-w-[160px] opacity-100"
                   : "max-w-0 opacity-0",
                 isActive
                   ? isPausePhase

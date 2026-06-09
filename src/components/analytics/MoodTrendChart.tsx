@@ -49,6 +49,17 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
     date: d.date,
   }));
 
+  // Build a polyline per segment so each segment can take the mood color
+  // of the destination point — the line now visually transitions
+  // stressed (red) -> calm (green) as the score moves.
+  const segments = points.slice(1).map((p, i) => {
+    const prev = points[i];
+    return {
+      d: `M ${prev.x.toFixed(2)} ${prev.y.toFixed(2)} L ${p.x.toFixed(2)} ${p.y.toFixed(2)}`,
+      color: getMoodMeta(p.mood).color,
+    };
+  });
+
   const linePath = cubicPath(points);
   const fillPath =
     linePath +
@@ -70,12 +81,11 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
     >
       <defs>
         <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#bcc2ff" stopOpacity="0.18" />
+          <stop offset="0%" stopColor="#bcc2ff" stopOpacity="0.14" />
           <stop offset="100%" stopColor="#bcc2ff" stopOpacity="0" />
         </linearGradient>
       </defs>
 
-      {/* Y-axis grid lines */}
       {yLabels.map(({ score, label }) => {
         const y = gy(score);
         return (
@@ -102,21 +112,22 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
         );
       })}
 
-      {/* Fill area */}
       <path d={fillPath} fill="url(#trendFill)" />
 
-      {/* Line */}
-      <path
-        d={linePath}
-        fill="none"
-        stroke="#bcc2ff"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity={0.7}
-      />
+      {/* Per-segment colored line. */}
+      {segments.map((seg, i) => (
+        <path
+          key={`seg-${i}`}
+          d={seg.d}
+          fill="none"
+          stroke={seg.color}
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity={0.85}
+        />
+      ))}
 
-      {/* Dots */}
       {points.map((p, i) => {
         const color = getMoodMeta(p.mood).color;
         return (
@@ -126,12 +137,13 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
             cy={p.y}
             r={3.5}
             fill={color}
-            opacity={0.9}
+            opacity={0.95}
+            stroke="rgba(18,20,22,0.6)"
+            strokeWidth={1}
           />
         );
       })}
 
-      {/* X-axis date labels — first and last */}
       {data.length > 1 && (
         <>
           <text

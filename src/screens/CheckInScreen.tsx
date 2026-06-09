@@ -33,6 +33,11 @@ interface CheckInScreenProps {
   dayNote: string;
   socialInteractions: SocialInteraction[];
   activitiesBySection: ActivitySelections;
+  /**
+   * How many check-ins the user has already saved today. Used for
+   * "add another" affordance and copy.
+   */
+  todaysCount: number;
   onSelectMood: (mood: MoodType) => void;
   onToggleTag: (tag: string) => void;
   onJournalChange: (val: string) => void;
@@ -87,26 +92,26 @@ function timeBucket(hour: number): "morning" | "midday" | "evening" | "night" {
 }
 
 const IDLE_SUBLINES: Record<"morning" | "midday" | "evening" | "night", string> = {
-  morning: "A quiet moment to begin.",
-  midday: "A breath, mid-day.",
-  evening: "How did today land?",
-  night: "A small reflection before rest.",
+  morning: "Hey, glad you're here. Take it slow.",
+  midday: "Pause for a moment. How is your heart right now?",
+  evening: "Before the day closes, let's check in with you.",
+  night: "It's been a long day. Let's sit with that for a bit.",
 };
 
 const MOOD_ACKNOWLEDGMENTS: Record<MoodType, string> = {
-  stressed: "That's heavy. You're allowed to feel it.",
-  worried: "Uncertainty is part of being human.",
-  okay: "Steady is good.",
-  calm: "Hold this gently.",
-  happy: "Let this stay with you.",
+  stressed: "I hear you. That sounds really heavy, and it's okay to feel it.",
+  worried: "Worry can be loud. You're not alone in this.",
+  okay: "Okay is a perfectly good place to be.",
+  calm: "I love that you're feeling this. Let it settle in.",
+  happy: "Oh, this is wonderful. Hold onto this feeling.",
 };
 
 const AFFIRMATIONS: Record<MoodType, string> = {
-  stressed: "That took courage. Rest is part of the work.",
-  worried: "Noticing worry is a form of care.",
-  okay: "Steady is good. A small anchor.",
-  calm: "Hold this gently.",
-  happy: "Savor it. Let it stay.",
+  stressed: "You showed up for yourself today. That matters more than you know.",
+  worried: "Naming the worry is a brave first step. Be gentle with yourself.",
+  okay: "Steady days count too. You don't have to be anything more.",
+  calm: "Treasure this feeling. You earned it.",
+  happy: "Soak it in. Moments like this are worth remembering.",
 };
 
 const STRESSED_MOODS: ReadonlySet<MoodType> = new Set<MoodType>(["stressed", "worried"]);
@@ -317,6 +322,177 @@ interface CheckInDetailCardProps {
   emptyHint?: string;
 }
 
+const IDLE_PROMPTS: { icon: React.ReactNode; label: string; hint: string }[] = [
+  {
+    icon: <Heart size={13} />,
+    label: "Name how you feel",
+    hint: "Tap the color that feels closest to home.",
+  },
+  {
+    icon: <Sparkles size={13} />,
+    label: "Add a word or two",
+    hint: "Just a small word is more than enough.",
+  },
+  {
+    icon: <BookOpen size={13} />,
+    label: "Save when you're ready",
+    hint: "There's no rush. Your mood is what matters.",
+  },
+];
+
+function IdlePrompts() {
+  return (
+    <div
+      aria-hidden={false}
+      style={{
+        position: "relative",
+        zIndex: 1,
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        padding: "14px 14px 12px",
+        borderRadius: 18,
+        background:
+          "linear-gradient(180deg, rgba(188,194,255,0.05), rgba(188,194,255,0.02))",
+        border: "1px solid rgba(188,194,255,0.07)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 10.5,
+            fontWeight: 600,
+            letterSpacing: "1.2px",
+            textTransform: "uppercase",
+            color: "rgba(188,194,255,0.55)",
+          }}
+        >
+          Just between us
+        </span>
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            fontSize: 10.5,
+            color: "rgba(188,194,255,0.4)",
+          }}
+        >
+            <span
+              aria-hidden
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#bcc2ff",
+                boxShadow: "0 0 8px rgba(188,194,255,0.5)",
+              }}
+            />
+          about a minute
+        </span>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 8,
+        }}
+      >
+        {IDLE_PROMPTS.map((p, i) => (
+          <div
+            key={p.label}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+              padding: "10px 8px",
+              borderRadius: 12,
+              background: "rgba(188,194,255,0.03)",
+              border: "1px solid rgba(188,194,255,0.05)",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 11,
+                fontWeight: 600,
+                color: "rgba(232,236,255,0.85)",
+                letterSpacing: "0.1px",
+              }}
+            >
+              <span
+                style={{
+                  display: "grid",
+                  placeItems: "center",
+                  width: 18,
+                  height: 18,
+                  borderRadius: 6,
+                  background: "rgba(188,194,255,0.10)",
+                  color: "rgba(220,224,255,0.9)",
+                  flexShrink: 0,
+                }}
+                aria-hidden
+              >
+                {p.icon}
+              </span>
+              <span
+                style={{
+                  fontSize: 9.5,
+                  color: "rgba(188,194,255,0.5)",
+                  fontWeight: 600,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </span>
+            </span>
+            <span
+              style={{
+                fontSize: 11.5,
+                fontWeight: 600,
+                color: "rgba(232,236,255,0.92)",
+                lineHeight: 1.3,
+              }}
+            >
+              {p.label}
+            </span>
+            <span
+              style={{
+                fontSize: 10.5,
+                color: "rgba(188,194,255,0.5)",
+                lineHeight: 1.4,
+              }}
+            >
+              {p.hint}
+            </span>
+          </div>
+        ))}
+      </div>
+      <p
+        style={{
+          fontSize: 11,
+          color: "rgba(188,194,255,0.4)",
+          textAlign: "center",
+          margin: "2px 0 0",
+          lineHeight: 1.5,
+          fontStyle: "italic",
+        }}
+      >
+        This little space is just for you. No scores, no streaks — just a quiet moment.
+      </p>
+    </div>
+  );
+}
+
 function CheckInDetailCard({
   icon,
   title,
@@ -484,6 +660,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   onToggleActivity,
   onAddCustomActivity,
   onSave,
+  todaysCount = 0,
 }) => {
   const displayMood = selectedMood ?? "okay";
   const meta = getMoodMeta(displayMood);
@@ -506,6 +683,13 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   })
     .format(new Date())
     .toUpperCase();
+
+  const todayCountLabel =
+    todaysCount === 0
+      ? null
+      : todaysCount === 1
+        ? "1 check-in so far"
+        : `${todaysCount} check-ins so far`;
 
   // Per-section "filled" state
   const hasLoad = schoolLoad > 0 || activityMinutes > 0 || dayNote.trim().length > 0;
@@ -762,11 +946,11 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
     : 0;
   const personalization =
     journal.trim().length > 120
-      ? `${journalWordCount} honest words.`
+      ? `Thank you for sharing ${journalWordCount} honest words with us.`
       : hasSocial && socialInteractions.length > 0
-        ? `${socialInteractions.length} connection${socialInteractions.length === 1 ? "" : "s"} noticed.`
+        ? `${socialInteractions.length} kind connection${socialInteractions.length === 1 ? "" : "s"} noticed today.`
         : hasActivities && totalActivities > 0
-          ? `${totalActivities} thing${totalActivities === 1 ? "" : "s"} logged.`
+          ? `${totalActivities} little moment${totalActivities === 1 ? "" : "s"} captured.`
           : null;
 
   return (
@@ -805,18 +989,43 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
       />
 
       <div ref={headerRef} style={{ position: "relative", zIndex: 1 }}>
-          <p
+          <div
             style={{
-              fontSize: "clamp(10px, 2.6vw, 11px)",
-              fontWeight: 600,
-              letterSpacing: "1.3px",
-              textTransform: "uppercase",
-              color: "rgba(220,224,255,0.72)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
               marginBottom: 6,
+              flexWrap: "wrap",
             }}
           >
-            {dateLabel}
-          </p>
+            <p
+              style={{
+                fontSize: "clamp(10px, 2.6vw, 11px)",
+                fontWeight: 600,
+                letterSpacing: "1.3px",
+                textTransform: "uppercase",
+                color: "rgba(220,224,255,0.72)",
+                margin: 0,
+              }}
+            >
+              {dateLabel}
+            </p>
+            {todayCountLabel ? (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: "0.4px",
+                  padding: "2px 8px",
+                  borderRadius: 999,
+                  background: "rgba(188,194,255,0.08)",
+                  color: "rgba(188,194,255,0.6)",
+                }}
+              >
+                {todayCountLabel}
+              </span>
+            ) : null}
+          </div>
         <h1
           className="font-serif"
           style={{
@@ -860,6 +1069,10 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
       <div ref={selectorRef} style={{ position: "relative", zIndex: 1 }}>
         <MoodSelector selectedMood={selectedMood} />
       </div>
+
+      {!showDetails && (
+        <IdlePrompts />
+      )}
 
       {isSaved ? (
         <div
@@ -925,8 +1138,24 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
               lineHeight: 1.2,
             }}
           >
-            Saved. <span style={{ color: savedMeta.color }}>Thank you</span> for showing up.
+            Saved with care. <span style={{ color: savedMeta.color }}>Thank you</span> for being here.
           </p>
+          {todaysCount > 1 ? (
+            <p
+              data-affirm
+              style={{
+                fontSize: 11,
+                color: "rgba(188,194,255,0.45)",
+                letterSpacing: "0.4px",
+                textTransform: "uppercase",
+                position: "relative",
+                zIndex: 1,
+                margin: 0,
+              }}
+            >
+              {todaysCount} check-ins today
+            </p>
+          ) : null}
           <p
             data-affirm
             style={{
@@ -959,34 +1188,55 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
               {personalization}
             </p>
           )}
-          <button
+          <div
             data-affirm
-            type="button"
-            onClick={handleDismissAffirmation}
             style={{
+              display: "flex",
+              gap: 8,
               marginTop: 8,
-              padding: "10px 18px",
-              borderRadius: 999,
-              background: "rgba(188,194,255,0.08)",
-              border: "1px solid rgba(188,194,255,0.14)",
-              color: "rgba(216,220,230,0.85)",
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: "pointer",
               position: "relative",
               zIndex: 1,
-              fontFamily: "Plus Jakarta Sans, sans-serif",
-              transition: "background 0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(188,194,255,0.14)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(188,194,255,0.08)";
+              flexWrap: "wrap",
+              justifyContent: "center",
             }}
           >
-            Check in again later
-          </button>
+            <button
+              type="button"
+              onClick={handleDismissAffirmation}
+              style={{
+                padding: "10px 18px",
+                borderRadius: 999,
+                background: `linear-gradient(135deg, ${hexToRgba(savedMeta.color, 0.18)}, ${hexToRgba(savedMeta.color, 0.06)})`,
+                border: `1px solid ${hexToRgba(savedMeta.color, 0.32)}`,
+                color: "#eef1f6",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "Plus Jakarta Sans, sans-serif",
+                transition: "transform 0.12s ease, background 0.15s ease",
+              }}
+            >
+              Add another check-in
+            </button>
+            <button
+              type="button"
+              onClick={handleDismissAffirmation}
+              style={{
+                padding: "10px 18px",
+                borderRadius: 999,
+                background: "rgba(188,194,255,0.04)",
+                border: "1px solid rgba(188,194,255,0.10)",
+                color: "rgba(216,220,230,0.7)",
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: "pointer",
+                fontFamily: "Plus Jakarta Sans, sans-serif",
+                transition: "background 0.15s ease",
+              }}
+            >
+              I'm done for now
+            </button>
+          </div>
         </div>
       ) : showDetails ? (
         <>
@@ -1015,8 +1265,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
               >
                 <Heart size={14} style={{ flexShrink: 0, color: "rgba(255,185,84,0.85)" }} />
                 <span>
-                  If you'd like to talk to someone, the <strong style={{ color: "rgba(255,225,170,0.95)" }}>Support</strong> tab is
-                  here whenever you need it.
+                  You don't have to carry this alone. The <strong style={{ color: "rgba(255,225,170,0.95)" }}>Support</strong> tab is here
+                  whenever you'd like someone to talk to.
                 </span>
               </div>
             )}
@@ -1037,10 +1287,10 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                       }`.trim()
                     : undefined
                 }
-                emptyHint="Skip if it doesn't apply"
+                emptyHint="Only if it feels right"
               >
                 <p style={helperStyle}>
-                  Quick read on how heavy today feels.
+                  A small, honest read on how today has been sitting with you.
                 </p>
                 <div
                   style={{
@@ -1134,12 +1384,12 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                       }}
                     >
                       {activityMinutes === 0
-                        ? "Rest is part of the work."
+                        ? "Rest counts too. Your body thanks you for listening."
                         : activityMinutes < 20
-                          ? "A short stretch still counts."
+                          ? "Even a few minutes of moving is a kind thing to do for yourself."
                           : activityMinutes < 60
-                            ? "Nice movement today."
-                            : "Strong active day."}
+                            ? "Lovely movement today — your body is probably grateful."
+                            : "What a beautifully active day. Be proud of yourself."}
                     </div>
                     <Stepper
                       value={activityMinutes}
@@ -1168,7 +1418,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                     type="text"
                     value={dayNote}
                     onChange={(e) => onDayNoteChange(e.target.value)}
-                    placeholder="A short note for the day (optional)"
+                    placeholder="A little note for today, if you'd like…"
                     maxLength={120}
                     style={{
                       flex: 1,
@@ -1217,7 +1467,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
             <div data-stagger>
               <CheckInDetailCard
                 icon={<BookOpen size={14} />}
-                title="Words & journal"
+                title="A few words for today"
                 filled={hasTags || hasJournal}
                 expanded={isCardOpen("words")}
                 onToggle={() => toggleCard("words")}
@@ -1228,7 +1478,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                       }${hasJournal ? `${journal.trim().split(/\s+/).filter(Boolean).length} words` : ""}`.trim()
                     : undefined
                 }
-                emptyHint="Tap a few words, or write a line"
+                emptyHint="Pick a few words, or just write a line"
               >
                 <div
                   style={{
@@ -1246,7 +1496,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 </div>
                 <div style={{ height: 1, background: "rgba(188,194,255,0.08)" }} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <p style={helperStyle}>A line is enough. Only you can read this.</p>
+                  <p style={helperStyle}>Even a single line is enough. This is just for you.</p>
                   <JournalInput
                     value={journal}
                     onChange={onJournalChange}
@@ -1260,7 +1510,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
             <div data-stagger>
               <CheckInDetailCard
                 icon={<Activity size={14} />}
-                title="What filled today?"
+                title="What filled your day?"
                 filled={hasActivities}
                 expanded={isCardOpen("activities")}
                 onToggle={() => toggleHeavyCard("activities")}
@@ -1283,7 +1533,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
             <div data-stagger>
               <CheckInDetailCard
                 icon={<Users size={14} />}
-                title="Who lifted you up?"
+                title="Who warmed your day?"
                 filled={hasSocial}
                 expanded={isCardOpen("social")}
                 onToggle={() => toggleHeavyCard("social")}
@@ -1307,7 +1557,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
             <div data-stagger>
               <CheckInDetailCard
                 icon={<Sparkles size={14} />}
-                title="A small idea"
+                title="A gentle idea for you"
                 filled={suggestions.length > 0}
                 expanded={isCardOpen("suggestions")}
                 onToggle={() => toggleHeavyCard("suggestions")}
@@ -1317,7 +1567,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 emptyHint="Optional"
               >
                 <p style={helperStyle}>
-                  Gently held. No pressure to do any.
+                  Just little ideas to gently hold onto. Do them only if they feel right.
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {(isCardOpen("suggestions")
@@ -1338,8 +1588,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                         marginTop: 2,
                       }}
                     >
-                      +{suggestions.length - 1} more idea
-                      {suggestions.length - 1 === 1 ? "" : "s"} in this card
+                      +{suggestions.length - 1} more gentle idea
+                      {suggestions.length - 1 === 1 ? "" : "s"} waiting inside
                     </span>
                   )}
                 </div>
@@ -1402,7 +1652,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                   <span style={{ fontVariantNumeric: "tabular-nums" }}>
                     {filledCount}/{detailSections.length}
                   </span>{" "}
-                  filled
+                  shared
                 </span>
               </div>
               <button
@@ -1429,7 +1679,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                   e.currentTarget.style.color = "rgba(188,194,255,0.5)";
                 }}
               >
-                {showAdvanced ? "Hide" : "Quick save"}
+                {showAdvanced ? "Hide" : "A little tip"}
                 <ChevronDown
                   size={12}
                   style={{
@@ -1443,12 +1693,14 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
               disabled={!selectedMood || saveState === "saving"}
               onSave={handleSave}
               label={
-                filledCount === 0
-                  ? "Save this moment"
-                  : `Save ${filledCount === 1 ? "1 note" : `${filledCount} notes`}`
+                todaysCount > 0
+                  ? "Add this check-in"
+                  : filledCount === 0
+                    ? "Save this moment"
+                    : `Save what you've shared`
               }
               savingLabel="Saving…"
-              savedLabel="Saved"
+              savedLabel="All saved"
             />
             <div
               style={{
@@ -1460,7 +1712,9 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 minHeight: 16,
               }}
             >
-              You can save with an empty check-in — your mood is what counts.
+              {todaysCount > 0
+                ? "Your day can hold more than one moment. Add another whenever it shifts."
+                : "Your mood is the heart of this. Save whenever you're ready, with as much or as little as you'd like."}
             </div>
           </div>
 
@@ -1480,8 +1734,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 lineHeight: 1.55,
               }}
             >
-              You can save any time, even with nothing filled in. Adding a few notes
-              helps the trends later, but your mood is the part that counts most.
+              You can save whenever feels right, even with nothing filled in. A few little notes
+              help you notice patterns later, but your mood is always the part that matters most.
             </div>
           )}
         </>

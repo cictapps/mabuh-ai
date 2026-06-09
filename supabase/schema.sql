@@ -99,7 +99,7 @@ revoke all on function public.delete_user() from public;
 grant execute on function public.delete_user() to authenticated;
 
 -- ════════════════════════════════════════════════════════════════════════════
--- 3. Mood entries (one row per check-in; one per user per day via upsert)
+-- 3. Mood entries (multiple check-ins per day are allowed)
 -- ════════════════════════════════════════════════════════════════════════════
 create table if not exists public.mood_entries (
   id uuid primary key default gen_random_uuid(),
@@ -116,8 +116,10 @@ create table if not exists public.mood_entries (
   logged_at timestamptz not null default now()
 );
 
-create unique index if not exists mood_entries_user_entry_date_unique
-  on public.mood_entries (user_id, entry_date);
+-- Allow multiple check-ins per day: the (user_id, entry_date) unique index
+-- is removed.  If you are upgrading an existing project that had the old
+-- unique index in place, drop it first:
+--   drop index if exists public.mood_entries_user_entry_date_unique;
 
 create index if not exists mood_entries_user_logged_at_idx
   on public.mood_entries (user_id, logged_at desc);

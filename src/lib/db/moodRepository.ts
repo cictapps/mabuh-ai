@@ -110,6 +110,7 @@ export async function listMoodEntries(): Promise<MoodEntry[]> {
     .select(
       "id, user_id, mood, tags, journal, school_load, activity_minutes, day_note, social_interactions, activities, entry_date, logged_at",
     )
+    .order("entry_date", { ascending: true })
     .order("logged_at", { ascending: true });
 
   if (error) throw error;
@@ -128,7 +129,7 @@ export async function listJournalEntries(): Promise<JournalEntry[]> {
   return (data ?? []).map((row) => rowToJournalEntry(row as JournalRow));
 }
 
-export async function upsertMoodEntry(
+export async function insertMoodEntry(
   input: MoodEntryInput,
   now: Date = new Date(),
 ): Promise<MoodEntry> {
@@ -155,7 +156,7 @@ export async function upsertMoodEntry(
 
   const { data, error } = await supabase
     .from("mood_entries")
-    .upsert(payload, { onConflict: "user_id,entry_date" })
+    .insert(payload)
     .select(
       "id, user_id, mood, tags, journal, school_load, activity_minutes, day_note, social_interactions, activities, entry_date, logged_at",
     )
@@ -163,6 +164,15 @@ export async function upsertMoodEntry(
 
   if (error) throw error;
   return rowToMoodEntry(data as MoodRow);
+}
+
+export async function deleteMoodEntry(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("mood_entries")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
 }
 
 export async function insertJournalEntry(

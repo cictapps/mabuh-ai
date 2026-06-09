@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { MoodEntry } from "../../types";
 import { getMoodMeta } from "../../data";
+import { MoodGradientBar } from "./MoodGradientBar";
 
 interface MoodHistoryCalendarProps {
   history: MoodEntry[];
@@ -30,13 +31,20 @@ function addMonths(date: Date, delta: number): Date {
   return next;
 }
 
+function formatTime(ts: number): string {
+  return new Date(ts).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 interface DayDetailProps {
-  entry: MoodEntry | undefined;
+  entries: MoodEntry[];
   date: string;
 }
 
-const DayDetail: React.FC<DayDetailProps> = ({ entry, date }) => {
-  if (!entry) {
+const DayDetail: React.FC<DayDetailProps> = ({ entries, date }) => {
+  if (entries.length === 0) {
     return (
       <div
         className="detail-enter"
@@ -47,25 +55,47 @@ const DayDetail: React.FC<DayDetailProps> = ({ entry, date }) => {
           fontSize: 13,
         }}
       >
-        No entry recorded for this day
+        Nothing was shared for this day — and that's okay
       </div>
     );
   }
 
+  return (
+    <div className="detail-enter" style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+      <p
+        style={{
+          fontSize: 11,
+          fontWeight: 500,
+          letterSpacing: "1.1px",
+          textTransform: "uppercase",
+          color: "rgba(188,194,255,0.35)",
+          margin: 0,
+        }}
+      >
+        {entries.length === 1
+          ? "1 check-in"
+          : `${entries.length} check-ins`}{" "}
+        · {formatDate(date)}
+      </p>
+      {entries.map((entry) => (
+        <EntryCard key={entry.id} entry={entry} />
+      ))}
+    </div>
+  );
+};
+
+const EntryCard: React.FC<{ entry: MoodEntry }> = ({ entry }) => {
   const meta = getMoodMeta(entry.mood);
   const socialItems = entry.socialInteractions ?? [];
-
   return (
     <div
-      className="detail-enter"
       style={{
         background: "rgba(188,194,255,0.04)",
         borderRadius: 16,
-        padding: 18,
-        marginTop: 14,
+        padding: 16,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
         <div
           style={{
             width: 10,
@@ -73,21 +103,26 @@ const DayDetail: React.FC<DayDetailProps> = ({ entry, date }) => {
             borderRadius: "50%",
             background: meta.color,
             flexShrink: 0,
+            boxShadow: `0 0 0 3px ${meta.color}22`,
           }}
         />
-        <span
-          className="font-serif"
-          style={{ fontSize: 17, color: "#e8eaf0" }}
-        >
+        <span className="font-serif" style={{ fontSize: 16, color: "#e8eaf0" }}>
           {meta.label}
         </span>
-        <span style={{ fontSize: 11, color: "rgba(188,194,255,0.32)", marginLeft: "auto" }}>
-          {formatDate(date)}
+        <span
+          style={{
+            fontSize: 11,
+            color: "rgba(188,194,255,0.32)",
+            marginLeft: "auto",
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {formatTime(entry.timestamp)}
         </span>
       </div>
 
       {entry.tags.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 10 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 8 }}>
           {entry.tags.map((t) => (
             <span
               key={t}
@@ -112,6 +147,7 @@ const DayDetail: React.FC<DayDetailProps> = ({ entry, date }) => {
             color: "rgba(188,194,255,0.42)",
             lineHeight: 1.6,
             fontStyle: "italic",
+            margin: 0,
           }}
         >
           "{entry.journal}"
@@ -119,18 +155,7 @@ const DayDetail: React.FC<DayDetailProps> = ({ entry, date }) => {
       )}
 
       {socialItems.length > 0 && (
-        <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-          <p
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              letterSpacing: "1.1px",
-              textTransform: "uppercase",
-              color: "rgba(188,194,255,0.35)",
-            }}
-          >
-            Social interactions
-          </p>
+        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
           {socialItems.map((interaction) => (
             <div
               key={interaction.id}
@@ -154,14 +179,10 @@ const DayDetail: React.FC<DayDetailProps> = ({ entry, date }) => {
                 <div style={{ marginTop: 4 }}>Duration: {interaction.durationMinutes} min</div>
               )}
               {interaction.feelings.length > 0 && (
-                <div style={{ marginTop: 4 }}>
-                  Feeling: {interaction.feelings.join(", ")}
-                </div>
+                <div style={{ marginTop: 4 }}>Feeling: {interaction.feelings.join(", ")}</div>
               )}
               {interaction.notes && (
-                <div style={{ marginTop: 4, color: "rgba(220,224,255,0.7)" }}>
-                  {interaction.notes}
-                </div>
+                <div style={{ marginTop: 4, color: "rgba(220,224,255,0.7)" }}>{interaction.notes}</div>
               )}
             </div>
           ))}
@@ -175,9 +196,13 @@ const DayDetail: React.FC<DayDetailProps> = ({ entry, date }) => {
 
 const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ history, showDetail }) => {
   const today = isoToday();
-  const entryMap = useMemo(() => {
-    const m: Record<string, MoodEntry> = {};
-    history.forEach((e) => { m[e.date] = e; });
+  const entryMap = useMemo<Record<string, MoodEntry[]>>(() => {
+    const m: Record<string, MoodEntry[]> = {};
+    history.forEach((e) => {
+      if (!m[e.date]) m[e.date] = [];
+      m[e.date].push(e);
+    });
+    Object.values(m).forEach((arr) => arr.sort((a, b) => a.timestamp - b.timestamp));
     return m;
   }, [history]);
 
@@ -190,33 +215,49 @@ const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ his
     });
   }, []);
 
+  const weekEntries = useMemo(
+    () => weekDates.flatMap((d) => entryMap[d] ?? []),
+    [weekDates, entryMap],
+  );
+
   const [selectedDate, setSelectedDate] = useState<string>(
-    weekDates.find((d) => entryMap[d]) ?? today
+    weekDates.find((d) => entryMap[d]?.length) ?? today,
   );
 
   return (
     <div>
-      {/* Week label: edit copy here. */}
       <p
         style={{
           fontSize: 10,
           letterSpacing: "0.8px",
           textTransform: "uppercase",
           color: "rgba(188,194,255,0.35)",
-          marginBottom: 10,
+          margin: "0 0 8px",
         }}
       >
-        This week
+        This week, gently
       </p>
 
-      {/* Week strip: edit spacing/sizing here. */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
+      <MoodGradientBar entries={weekEntries} period="week" />
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, marginTop: 12 }}>
         {weekDates.map((date) => {
-          const entry = entryMap[date];
+          const entries = entryMap[date] ?? [];
           const isToday = date === today;
           const isSelected = date === selectedDate;
           const d = new Date(date + "T12:00:00");
-          const dotColor = entry ? getMoodMeta(entry.mood).color : "rgba(188,194,255,0.18)";
+          const hasEntries = entries.length > 0;
+          const dominantColor = hasEntries
+            ? getMoodMeta(
+                entries
+                  .slice()
+                  .sort(
+                    (a, b) =>
+                      entries.filter((e) => e.mood === a.mood).length -
+                      entries.filter((e) => e.mood === b.mood).length,
+                  )[0].mood,
+              ).color
+            : "rgba(188,194,255,0.18)";
 
           return (
             <button
@@ -229,6 +270,7 @@ const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ his
                 padding: 0,
                 cursor: "pointer",
               }}
+              aria-label={`${d.toLocaleDateString("en-US", { weekday: "long" })}${hasEntries ? `, ${entries.length} check-in${entries.length > 1 ? "s" : ""}` : ", no check-ins"}`}
             >
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                 <span
@@ -255,18 +297,42 @@ const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ his
                     width: 8,
                     height: 8,
                     borderRadius: "50%",
-                    background: dotColor,
-                    boxShadow: entry ? `0 0 0 3px ${dotColor}22` : "none",
+                    background: dominantColor,
+                    boxShadow: hasEntries ? `0 0 0 3px ${dominantColor}22` : "none",
                     border: isToday ? "1px solid rgba(188,194,255,0.4)" : "none",
+                    position: "relative",
                   }}
-                />
+                >
+                  {entries.length > 1 ? (
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: -3,
+                        right: -7,
+                        background: "rgba(18,20,22,0.9)",
+                        color: "#e8eaf0",
+                        fontSize: 9,
+                        fontWeight: 600,
+                        padding: "0 4px",
+                        borderRadius: 999,
+                        lineHeight: "12px",
+                        minWidth: 12,
+                        textAlign: "center",
+                      }}
+                    >
+                      {entries.length}
+                    </span>
+                  ) : null}
+                </span>
               </div>
             </button>
           );
         })}
       </div>
 
-      {showDetail && <DayDetail entry={entryMap[selectedDate]} date={selectedDate} />}
+      {showDetail && (
+        <DayDetail entries={entryMap[selectedDate] ?? []} date={selectedDate} />
+      )}
     </div>
   );
 };
@@ -275,9 +341,13 @@ const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ his
 
 const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ history, showDetail }) => {
   const today = new Date();
-  const entryMap = useMemo(() => {
-    const m: Record<string, MoodEntry> = {};
-    history.forEach((e) => { m[e.date] = e; });
+  const entryMap = useMemo<Record<string, MoodEntry[]>>(() => {
+    const m: Record<string, MoodEntry[]> = {};
+    history.forEach((e) => {
+      if (!m[e.date]) m[e.date] = [];
+      m[e.date].push(e);
+    });
+    Object.values(m).forEach((arr) => arr.sort((a, b) => a.timestamp - b.timestamp));
     return m;
   }, [history]);
 
@@ -285,11 +355,18 @@ const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ hi
   const [monthOffset, setMonthOffset] = useState(0);
 
   const base = addMonths(today, monthOffset);
-  const year  = base.getFullYear();
+  const year = base.getFullYear();
   const month = base.getMonth();
-  const firstDay   = new Date(year, month, 1).getDay();
+  const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const todayIso = isoToday();
+
+  const monthEntries = useMemo(() => {
+    const monthPrefix = `${year}-${String(month + 1).padStart(2, "0")}`;
+    return history
+      .filter((e) => e.date.startsWith(monthPrefix))
+      .sort((a, b) => a.timestamp - b.timestamp);
+  }, [history, year, month]);
 
   function toIso(day: number) {
     return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -297,7 +374,6 @@ const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ hi
 
   return (
     <div>
-      {/* Month header + nav: edit typography here. */}
       <div
         style={{
           display: "flex",
@@ -321,7 +397,7 @@ const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ hi
         >
           ‹
         </button>
-        <p className="font-serif" style={{ fontSize: 16, color: "#e8eaf0" }}>
+        <p className="font-serif" style={{ fontSize: 16, color: "#e8eaf0", margin: 0 }}>
           {base.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
         </p>
         <button
@@ -341,7 +417,16 @@ const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ hi
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8 }}>
+      <MoodGradientBar entries={monthEntries} period="month" />
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: 8,
+          marginTop: 14,
+        }}
+      >
         {DAYS_SHORT.map((d, i) => (
           <div
             key={i}
@@ -358,17 +443,27 @@ const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ hi
           </div>
         ))}
 
-        {/* blank cells */}
         {Array.from({ length: firstDay }).map((_, i) => (
           <div key={`blank-${i}`} />
         ))}
 
         {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
           const iso = toIso(day);
-          const entry = entryMap[iso];
+          const entries = entryMap[iso] ?? [];
           const isToday = iso === todayIso;
           const isSelected = iso === selectedDate;
-          const dotColor = entry ? getMoodMeta(entry.mood).color : "rgba(188,194,255,0.2)";
+          const hasEntries = entries.length > 0;
+          const dominantColor = hasEntries
+            ? getMoodMeta(
+                entries
+                  .slice()
+                  .sort(
+                    (a, b) =>
+                      entries.filter((e) => e.mood === a.mood).length -
+                      entries.filter((e) => e.mood === b.mood).length,
+                  )[0].mood,
+              ).color
+            : "rgba(188,194,255,0.2)";
 
           return (
             <button
@@ -393,6 +488,7 @@ const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ hi
                   color: isSelected ? "#e8eaf0" : "rgba(188,194,255,0.5)",
                   fontSize: 12,
                   fontWeight: isSelected ? 600 : 500,
+                  position: "relative",
                 }}
               >
                 <span>{day}</span>
@@ -401,11 +497,33 @@ const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ hi
                     width: 7,
                     height: 7,
                     borderRadius: "50%",
-                    background: dotColor,
-                    boxShadow: entry ? `0 0 0 3px ${dotColor}22` : "none",
+                    background: dominantColor,
+                    boxShadow: hasEntries ? `0 0 0 3px ${dominantColor}22` : "none",
                     outline: isToday ? "1px solid rgba(188,194,255,0.4)" : "none",
+                    position: "relative",
                   }}
-                />
+                >
+                  {entries.length > 1 ? (
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: -3,
+                        right: -7,
+                        background: "rgba(18,20,22,0.9)",
+                        color: "#e8eaf0",
+                        fontSize: 9,
+                        fontWeight: 600,
+                        padding: "0 4px",
+                        borderRadius: 999,
+                        lineHeight: "12px",
+                        minWidth: 12,
+                        textAlign: "center",
+                      }}
+                    >
+                      {entries.length}
+                    </span>
+                  ) : null}
+                </span>
               </div>
             </button>
           );
@@ -413,7 +531,7 @@ const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ hi
       </div>
 
       {showDetail && selectedDate && (
-        <DayDetail entry={entryMap[selectedDate]} date={selectedDate} />
+        <DayDetail entries={entryMap[selectedDate] ?? []} date={selectedDate} />
       )}
     </div>
   );
@@ -429,7 +547,6 @@ export const MoodHistoryCalendar: React.FC<MoodHistoryCalendarProps> = ({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {/* Toggle: edit pill colors here. */}
       <div
         style={{
           display: "flex",

@@ -8,10 +8,11 @@ import {
   SocialInteraction,
 } from "../types";
 import {
+  deleteMoodEntry,
   insertJournalEntry,
+  insertMoodEntry,
   listJournalEntries,
   listMoodEntries,
-  upsertMoodEntry,
 } from "../lib/db/moodRepository";
 import { useAuth } from "../lib/auth";
 
@@ -151,7 +152,7 @@ export function useMoodStore() {
     }
     setError(null);
     try {
-      const saved = await upsertMoodEntry({
+      const saved = await insertMoodEntry({
         mood: selectedMood,
         tags: selectedTags,
         journal,
@@ -162,8 +163,10 @@ export function useMoodStore() {
         activities: activitiesBySection,
       });
       setHistory((prev) => {
-        const filtered = prev.filter((e) => e.id !== saved.id && e.date !== saved.date);
-        return [...filtered, saved].sort((a, b) => a.timestamp - b.timestamp);
+        const filtered = prev.filter((e) => e.id !== saved.id);
+        return [...filtered, saved].sort(
+          (a, b) => a.date.localeCompare(b.date) || a.timestamp - b.timestamp,
+        );
       });
       setSelectedMood(null);
       setSelectedTags([]);
@@ -192,6 +195,24 @@ export function useMoodStore() {
     activitiesBySection,
     userId,
   ]);
+
+  const removeEntry = useCallback(
+    async (id: string): Promise<boolean> => {
+      if (!userId) return false;
+      setError(null);
+      try {
+        await deleteMoodEntry(id);
+        setHistory((prev) => prev.filter((e) => e.id !== id));
+        return true;
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Could not delete that check-in.",
+        );
+        return false;
+      }
+    },
+    [userId],
+  );
 
   const addSocialInteraction = useCallback(() => {
     setSocialInteractions((prev) => {
@@ -316,6 +337,49 @@ export function useMoodStore() {
     [],
   );
 
+  // Per-day series: dates -> entries sorted oldest -> newest.
+  // This is the foundation for the weekly/monthly gradient bar.
+  const dailySeries = useMemo<Record<string, MoodEntry[]>>(() => {
+    const m: Record<string, MoodEntry[]> = {};
+    history.forEach((e) => {
+      if (!m[e.date]) m[e.date] = [];
+      m[e.date].push(e);
+    });
+    Object.values(m).forEach((arr) =>
+      arr.sort((a, b) => a.timestamp - b.timestamp),
+    );
+    return m;
+  }, [history]);
+
+  // Per-day aggregate: one MoodEntry-like row per day, plus a mean score
+  // used by the trend chart (now based on days, not raw entries).
+  const dailyAggregate = useMemo<
+    Record<string, { date: string; score: number; mood: MoodType; entries: MoodEntry[] }>
+  >(() => {
+    const out: Record<
+      string,
+      { date: string; score: number; mood: MoodType; entries: MoodEntry[] }
+    > = {};
+    Object.entries(dailySeries).forEach(([date, entries]) => {
+      const counts: Record<string, number> = {};
+      let sum = 0;
+      entries.forEach((e) => {
+        counts[e.mood] = (counts[e.mood] ?? 0) + 1;
+        sum += moodScoreMap[e.mood];
+      });
+      const dominant = (Object.entries(counts).sort(
+        (a, b) => b[1] - a[1],
+      )[0]?.[0] ?? "okay") as MoodType;
+      out[date] = {
+        date,
+        score: sum / Math.max(entries.length, 1),
+        mood: dominant,
+        entries,
+      };
+    });
+    return out;
+  }, [dailySeries, moodScoreMap]);
+
   const dominantMood = useMemo((): MoodType | null => {
     const recent = history.slice(-7);
     if (!recent.length) return null;
@@ -328,14 +392,19 @@ export function useMoodStore() {
   }, [history]);
 
   const trendData = useMemo(() => {
-    return history.slice(-14).map((e) => ({
-      date: e.date,
-      score: moodScoreMap[e.mood],
-      mood: e.mood,
-    }));
-  }, [history, moodScoreMap]);
+    // One point per day, in chronological order, for the last 14 days that
+    // have at least one check-in. Score is the day's mean so multi-mood days
+    // are reflected as a soft mid-point on the line.
+    return Object.values(dailyAggregate)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(-14)
+      .map(({ date, score, mood }) => ({ date, score, mood }));
+  }, [dailyAggregate]);
 
   const distribution = useMemo(() => {
+    // Distribution across days, not raw check-ins, so a student with one
+    // "stressed" check-in in an otherwise-calm day still counts the day as
+    // "calm". This is the more meaningful "what was your day like?" view.
     const counts: Record<MoodType, number> = {
       stressed: 0,
       worried: 0,
@@ -343,16 +412,16 @@ export function useMoodStore() {
       calm: 0,
       happy: 0,
     };
-    history.forEach((e) => {
-      counts[e.mood]++;
+    Object.values(dailyAggregate).forEach(({ mood }) => {
+      counts[mood]++;
     });
-    const total = history.length || 1;
+    const total = Object.keys(dailyAggregate).length || 1;
     return (Object.keys(counts) as MoodType[]).map((mood) => ({
       mood,
       count: counts[mood],
       pct: Math.round((counts[mood] / total) * 100),
     }));
-  }, [history]);
+  }, [dailyAggregate]);
 
   const journalEntries = useMemo(() => {
     const checkinEntries: JournalEntry[] = history
@@ -372,8 +441,15 @@ export function useMoodStore() {
   }, [history, manualJournalEntries]);
 
   const socialStats = useMemo(() => {
-    const recent = history.slice(-7);
-    const interactions = recent.flatMap((entry) => entry.socialInteractions ?? []);
+    // Last 7 days, deduplicated by date — interactions are pooled across all
+    // check-ins that day.
+    const last7Dates = Object.keys(dailySeries)
+      .sort()
+      .slice(-7);
+    const recentEntries = last7Dates.flatMap((d) => dailySeries[d] ?? []);
+    const interactions = recentEntries.flatMap(
+      (entry) => entry.socialInteractions ?? [],
+    );
     const totalInteractions = interactions.length;
     const personCounts: Record<string, number> = {};
     const feelingCounts: Record<string, number> = {};
@@ -388,10 +464,10 @@ export function useMoodStore() {
     const topPerson = Object.entries(personCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
     const topFeeling = Object.entries(feelingCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
     return { totalInteractions, topPerson, topFeeling };
-  }, [history]);
+  }, [dailySeries]);
 
   const analyticsStats = useMemo(() => {
-    const uniqueDates = Array.from(new Set(history.map((entry) => entry.date))).sort();
+    const uniqueDates = Object.keys(dailySeries).sort();
     const dayMs = 24 * 60 * 60 * 1000;
     let longestStreak = 0;
     let currentStreak = 0;
@@ -417,22 +493,41 @@ export function useMoodStore() {
       cursorDate = cursor.toISOString().split("T")[0];
     }
 
-    const recent = history.slice(-30);
-    const scoredRecent = recent.map((entry) => ({
-      entry,
-      score: moodScoreMap[entry.mood],
-    }));
-
-    const bestEntry = scoredRecent.reduce(
+    // Best/worst day (per-day aggregate, not raw check-ins). We surface a
+    // representative MoodEntry for each so existing consumers keep working,
+    // but pick the strongest entry of the day (highest / lowest score).
+    const recentDays = uniqueDates
+      .slice(-30)
+      .map((d) => dailyAggregate[d])
+      .filter(
+        (d): d is { date: string; score: number; mood: MoodType; entries: MoodEntry[] } =>
+          Boolean(d),
+      );
+    const pickEntry = (
+      day: { entries: MoodEntry[] },
+      predicate: (a: number, b: number) => boolean,
+    ): MoodEntry | null => {
+      if (!day.entries.length) return null;
+      return day.entries.reduce((best, current) =>
+        predicate(moodScoreMap[current.mood], moodScoreMap[best.mood])
+          ? current
+          : best,
+      );
+    };
+    const bestDay = recentDays.reduce(
       (best, current) => (current.score > best.score ? current : best),
-      scoredRecent[0] ?? null,
-    )?.entry;
-    const worstEntry = scoredRecent.reduce(
+      recentDays[0] ?? null,
+    );
+    const worstDay = recentDays.reduce(
       (worst, current) => (current.score < worst.score ? current : worst),
-      scoredRecent[0] ?? null,
-    )?.entry;
+      recentDays[0] ?? null,
+    );
+    const bestEntry = bestDay ? pickEntry(bestDay, (a, b) => a > b) : null;
+    const worstEntry = worstDay ? pickEntry(worstDay, (a, b) => a < b) : null;
 
-    const stabilityWindow = history.slice(-14).map((entry) => moodScoreMap[entry.mood]);
+    // Stability: based on per-day mean scores, not per-check-in.
+    const last14 = uniqueDates.slice(-14).map((d) => dailyAggregate[d]?.score ?? 0);
+    const stabilityWindow = last14.filter((s) => s > 0);
     const mean = stabilityWindow.length
       ? stabilityWindow.reduce((sum, val) => sum + val, 0) / stabilityWindow.length
       : 0;
@@ -485,15 +580,17 @@ export function useMoodStore() {
       currentStreak: uniqueDates.length ? activeStreak : 0,
       lifetimeDays: uniqueDates.length,
       stabilityScore: stabilityWindow.length ? stabilityScore : 0,
-      bestEntry: bestEntry ?? null,
-      worstEntry: worstEntry ?? null,
+      bestEntry,
+      worstEntry,
       activityCount: totalActivitySelections,
       activityHighlights,
     };
-  }, [history, moodScoreMap]);
+  }, [history, dailySeries, dailyAggregate, moodScoreMap]);
 
   return {
     history,
+    dailySeries,
+    dailyAggregate,
     selectedMood,
     selectedTags,
     journal,
@@ -519,6 +616,7 @@ export function useMoodStore() {
     addCustomActivity,
     addManualJournalEntry,
     saveEntry,
+    removeEntry,
     setReminder,
     exportData,
     clearAllLocalData,

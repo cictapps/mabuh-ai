@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 type ProgressBarProps = {
   progress: number;
   label?: string;
+  hideLabel?: boolean;
   tone?: "indigo" | "amber";
   className?: string;
 };
@@ -10,6 +11,7 @@ type ProgressBarProps = {
 export function ProgressBar({
   progress,
   label,
+  hideLabel = false,
   tone = "indigo",
   className,
 }: ProgressBarProps) {
@@ -35,7 +37,7 @@ export function ProgressBar({
           style={{ width: `${clamped}%` }}
         />
       </div>
-      {label ? (
+      {label && !hideLabel ? (
         <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#d8d4eb]">
           {label}
         </p>

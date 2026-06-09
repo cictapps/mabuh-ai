@@ -64,9 +64,9 @@ export function AirbornePanel({
             Airborne
           </span>
         </div>
-        <CardTitle className="mt-3 text-2xl">You are in flight</CardTitle>
+        <CardTitle className="mt-3 text-2xl">{greeting}</CardTitle>
         <CardDescription>
-          <span className="block">{greeting} · {dateLabel}</span>
+          <span className="block">{dateLabel}</span>
           <span className="mt-0.5 block font-mono text-xs">{timeLabel}</span>
         </CardDescription>
       </CardHeader>
@@ -75,64 +75,67 @@ export function AirbornePanel({
           <ContextualHint text="This is your between-time view. The countdown tells you when your next waypoint is near — no alarms, just a soft nudge." />
         ) : null}
 
-        <div className="rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] p-4">
-          {hasCheckpoints ? (
-            <>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
-                {status.currentCheckpoint ? "Where you are" : "Up next"}
-              </p>
-              <p className="mt-1 font-serif text-lg tracking-[-0.02em] text-foreground">
-                {status.currentCheckpoint
-                  ? `${status.currentCheckpoint.label} · ${status.currentCheckpoint.time}`
-                  : status.nextCheckpoint
-                    ? `${status.nextCheckpoint.label} · ${status.nextCheckpoint.time}`
-                    : "All waypoints complete"}
-              </p>
+        {hasCheckpoints ? (
+          <div className="rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+              {status.currentCheckpoint ? "Where you are" : "Up next"}
+            </p>
+            <p className="mt-1 font-serif text-lg tracking-[-0.02em] text-foreground">
+              {status.currentCheckpoint
+                ? `${status.currentCheckpoint.label} · ${status.currentCheckpoint.time}`
+                : status.nextCheckpoint
+                  ? `${status.nextCheckpoint.label} · ${status.nextCheckpoint.time}`
+                  : "All waypoints complete"}
+            </p>
 
-              {status.nextCheckpoint ? (
-                <>
-                  <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+            {status.nextCheckpoint ? (
+              <div className="mt-4 flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
                     Next waypoint in
                   </p>
-                  <p className="mt-1 font-mono text-2xl tracking-tight text-foreground">
+                  <p className="mt-0.5 font-mono text-xl tracking-tight text-foreground">
                     {formatDuration(status.msUntilNext)}
                   </p>
-                </>
-              ) : null}
-
-              <div className="mt-4">
-                <ProgressBar
-                  progress={status.progressPercent}
-                  label={`${status.progressPercent}% of this stretch`}
-                />
+                </div>
+                <p className="pb-1 font-mono text-[11px] text-[#d8d4eb]">
+                  {status.progressPercent}% of stretch
+                </p>
               </div>
-            </>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-sm text-foreground">
-                You don't have any waypoints yet.
-              </p>
-              <p className="text-xs leading-relaxed text-[#d8d4eb]">
-                Visit the Hangar to add a few gentle moments to your day — a morning pause, an evening reflection, anything that helps.
-              </p>
-            </div>
-          )}
-        </div>
+            ) : null}
 
-        <div className="grid grid-cols-1 gap-2">
-          <Button onClick={onOpenCheckpoint} disabled={!hasCheckpoints}>
+            <div className="mt-3">
+              <ProgressBar progress={status.progressPercent} hideLabel />
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.02)] p-4">
+            <p className="text-sm text-foreground">No waypoints yet.</p>
+            <p className="mt-1 text-xs leading-relaxed text-[#d8d4eb]">
+              Add a few gentle moments in the Hangar — a morning pause, an evening reflection, anything that helps.
+            </p>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={onOpenCheckpoint}
+            disabled={!hasCheckpoints}
+          >
             <MapPin className="size-4" />
-            Open a checkpoint
+            Pause for a checkpoint
           </Button>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="secondary" onClick={onEnterFinal}>
+            <Button variant="ghost" onClick={onEnterFinal} className="text-[#d8d4eb] hover:text-foreground">
               <Moon className="size-4" />
               Wind down
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={onEnterPause}
-              className="border-[rgba(255,185,84,0.32)] bg-[rgba(255,185,84,0.06)] text-[#ffd99a] hover:bg-[rgba(255,185,84,0.12)]"
+              className="text-[#ffd99a] hover:bg-[rgba(255,185,84,0.08)] hover:text-[#ffd99a]"
             >
               <Heart className="size-4" />
               Need a pause

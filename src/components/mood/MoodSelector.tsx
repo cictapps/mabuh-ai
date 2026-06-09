@@ -46,17 +46,37 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood }) => {
           </p>
         </>
       ) : (
-        <p
-          className="font-serif"
+        <div
           style={{
-            fontSize: 22,
-            fontWeight: 400,
-            color: "rgba(220,224,255,0.7)",
-            lineHeight: 1.3,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 6,
+            padding: "4px 0",
           }}
         >
-          Touch the arc to select
-        </p>
+          <p
+            className="font-serif"
+            style={{
+              fontSize: 22,
+              fontWeight: 400,
+              color: "rgba(220,224,255,0.78)",
+              lineHeight: 1.3,
+            }}
+          >
+            Tap a color to begin
+          </p>
+          <p
+            style={{
+              fontSize: 12,
+              color: "rgba(188,194,255,0.42)",
+              lineHeight: 1.5,
+              maxWidth: 280,
+            }}
+          >
+            No wrong answer. Just notice what's true right now.
+          </p>
+        </div>
       )}
     </div>
   );

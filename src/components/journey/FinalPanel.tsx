@@ -24,7 +24,11 @@ export function FinalPanel({
   onFinish,
   showHint,
 }: FinalPanelProps) {
-  const ready = finalChecks.water && finalChecks.breath && finalMood;
+  const allChecked = finalChecks.water && finalChecks.breath && finalMood;
+  const doneCount =
+    (finalChecks.water ? 1 : 0) +
+    (finalChecks.breath ? 1 : 0) +
+    (finalMood ? 1 : 0);
 
   return (
     <Card>
@@ -35,14 +39,14 @@ export function FinalPanel({
             +5 XP
           </span>
         </div>
-        <CardTitle className="mt-3 text-2xl">Time to land gently</CardTitle>
+        <CardTitle className="mt-3 text-2xl">Time to land</CardTitle>
         <CardDescription>
-          A small close-out for your day — name a feeling and rest.
+          A small close-out, then rest.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         {showHint ? (
-          <ContextualHint text="This is your evening close-out. You can add a sleep reminder, reflect briefly, and rest. Tomorrow's flight is always a new one." />
+          <ContextualHint text="Three soft things, in any order. Tomorrow is always a new flight." />
         ) : null}
 
         <div>
@@ -52,7 +56,7 @@ export function FinalPanel({
           <div className="space-y-2">
             <ChecklistChip
               emoji="💧"
-              label="Sip some water"
+              label="A sip of water"
               done={finalChecks.water}
               onPress={() => onToggleCheck("water")}
             />
@@ -67,13 +71,17 @@ export function FinalPanel({
 
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
-            Closing mood
+            One word for the day
           </p>
           <MoodPicker value={finalMood} onChange={onSelectMood} />
         </div>
 
-        <Button size="lg" className="w-full" onClick={onFinish} disabled={!ready}>
-          Finish today's flight
+        <Button size="lg" className="w-full" onClick={onFinish}>
+          {allChecked
+            ? "Finish today's flight"
+            : doneCount === 0
+              ? "I'll do these later — finish"
+              : `Finish (${3 - doneCount} skipped)`}
         </Button>
       </CardContent>
     </Card>

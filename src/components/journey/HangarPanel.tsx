@@ -43,7 +43,7 @@ export function HangarPanel() {
   const updateEmergencyContact = useJourneyStore((s) => s.updateEmergencyContact);
   const removeEmergencyContact = useJourneyStore((s) => s.removeEmergencyContact);
 
-  const [openSection, setOpenSection] = useState<Section | null>("look");
+  const [openSection, setOpenSection] = useState<Section | null>(null);
   const [label, setLabel] = useState("");
   const [time, setTime] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -86,12 +86,12 @@ export function HangarPanel() {
               Hangar
             </p>
             <CardTitle className="font-serif text-2xl tracking-[-0.02em]">
-              Customise your journey
+              Your journey, your way
             </CardTitle>
           </div>
         </div>
         <CardDescription className="mt-2">
-          Pick a vibe, plan your waypoints, and add people you can lean on.
+          A few optional settings. Open what you want to tweak — the rest can wait.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">

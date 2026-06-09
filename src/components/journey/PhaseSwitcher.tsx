@@ -1,4 +1,4 @@
-import { Sunrise, Plane, MapPin, Heart, Flag, Moon } from "lucide-react";
+import { Sunrise, Plane, MapPin, Flag, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { JourneyPhase } from "@/types";
 
@@ -6,7 +6,6 @@ const PHASES: { key: JourneyPhase; label: string; icon: typeof Sunrise }[] = [
   { key: "preflight", label: "Preflight", icon: Sunrise },
   { key: "airborne", label: "Airborne", icon: Plane },
   { key: "checkpoint", label: "Checkpoint", icon: MapPin },
-  { key: "pause", label: "Pause", icon: Heart },
   { key: "final", label: "Final", icon: Flag },
   { key: "rest", label: "Rest", icon: Moon },
 ];
@@ -18,16 +17,10 @@ type PhaseSwitcherProps = {
 
 export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
   const activeIndex = PHASES.findIndex((p) => p.key === active);
-  const isPause = active === "pause";
 
   return (
     <div
-      className={cn(
-        "relative flex items-stretch gap-1 rounded-2xl border p-1",
-        isPause
-          ? "border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.06)]"
-          : "border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)]",
-      )}
+      className="relative flex items-center justify-between gap-1 rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] px-2 py-2"
       role="tablist"
       aria-label="Journey phases"
     >
@@ -35,58 +28,57 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
         const Icon = phase.icon;
         const isActive = phase.key === active;
         const isReached = index <= activeIndex;
-        const isPausePhase = phase.key === "pause";
+        const isLast = index === PHASES.length - 1;
 
         return (
-          <button
-            key={phase.key}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onSelect(phase.key)}
-            aria-label={phase.label}
-            className={cn(
-              "relative flex min-w-0 items-center justify-center rounded-xl py-2.5 transition-all duration-300 ease-out",
-              "active:scale-[0.97]",
-              isActive
-                ? "flex-[2.6] gap-1.5 px-2.5"
-                : "flex-1 gap-0 px-1",
-              isActive
-                ? isPausePhase
-                  ? "bg-tertiary text-tertiary-foreground shadow-[0_14px_32px_-18px_rgba(255,185,84,0.85)]"
-                  : "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_14px_32px_-18px_rgba(188,194,255,0.85)]"
-                : isReached
-                  ? "text-foreground"
-                  : "text-[#d8d4eb]",
-            )}
-          >
-            <Icon
+          <div key={phase.key} className="flex flex-1 items-center">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => onSelect(phase.key)}
+              aria-label={phase.label}
               className={cn(
-                "size-4 shrink-0 transition-colors",
-                isActive
-                  ? "text-current"
-                  : isReached
-                    ? "text-foreground"
-                    : "text-[#d8d4eb]",
-              )}
-            />
-            <span
-              aria-hidden={!isActive}
-              className={cn(
-                "overflow-hidden whitespace-nowrap text-[11px] font-semibold transition-all duration-300 ease-out",
-                isActive
-                  ? "max-w-[160px] opacity-100"
-                  : "max-w-0 opacity-0",
-                isActive
-                  ? isPausePhase
-                    ? "text-tertiary-foreground"
-                    : "text-primary-foreground"
-                  : "",
+                "group flex flex-1 flex-col items-center gap-1 rounded-xl py-1.5 transition-colors active:scale-[0.97]",
               )}
             >
-              {phase.label}
-            </span>
-          </button>
+              <span
+                className={cn(
+                  "grid size-8 place-items-center rounded-full border transition-all duration-300",
+                  isActive
+                    ? "border-tertiary/50 bg-tertiary/15 text-tertiary shadow-[0_8px_20px_-12px_rgba(255,185,84,0.6)]"
+                    : isReached
+                      ? "border-[rgba(188,194,255,0.20)] bg-[rgba(188,194,255,0.06)] text-foreground"
+                      : "border-[rgba(188,194,255,0.10)] bg-transparent text-[#d8d4eb]/70",
+                )}
+              >
+                <Icon className="size-3.5" aria-hidden />
+              </span>
+              <span
+                className={cn(
+                  "text-[10px] font-semibold leading-none transition-colors",
+                  isActive
+                    ? "text-foreground"
+                    : isReached
+                      ? "text-foreground/80"
+                      : "text-[#d8d4eb]/70",
+                )}
+              >
+                {phase.label}
+              </span>
+            </button>
+            {!isLast ? (
+              <span
+                aria-hidden
+                className={cn(
+                  "mx-0.5 h-px w-2 shrink-0 transition-colors",
+                  isReached && index < activeIndex
+                    ? "bg-[rgba(188,194,255,0.30)]"
+                    : "bg-[rgba(188,194,255,0.10)]",
+                )}
+              />
+            ) : null}
+          </div>
         );
       })}
     </div>

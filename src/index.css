@@ -146,6 +146,37 @@ input[type="password"]::-ms-clear {
   #root {
     @apply min-h-screen;
   }
+
+  /* Centralised safe-area tokens.
+     On Android the WebView reports these as 0 unless viewport-fit=cover is
+     set in index.html. The 0px fallback keeps desktop layouts untouched. */
+  :root {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* Common helper utilities. Use these instead of hard-coded paddings so
+     status-bar / gesture-bar handling stays consistent across screens. */
+  .pt-safe {
+    padding-top: var(--safe-top);
+  }
+  .pb-safe {
+    padding-bottom: var(--safe-bottom);
+  }
+  .pl-safe {
+    padding-left: var(--safe-left);
+  }
+  .pr-safe {
+    padding-right: var(--safe-right);
+  }
+  .pt-safe-content {
+    padding-top: calc(var(--safe-top) + 1.25rem);
+  }
+  .pb-safe-content {
+    padding-bottom: calc(var(--safe-bottom) + 1.25rem);
+  }
 }
 
 @keyframes floatUp {
@@ -214,6 +245,17 @@ input[type="password"]::-ms-clear {
   }
 }
 
+@keyframes onb-slide-in-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes onb-slide-out {
   0% {
     opacity: 1;
@@ -225,13 +267,54 @@ input[type="password"]::-ms-clear {
   }
 }
 
+@keyframes onb-float {
+  0%, 100% {
+    --bob: 0px;
+  }
+  50% {
+    --bob: -6px;
+  }
+}
+
+@keyframes onb-float-dot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+}
+
+@property --bob {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.onb-float {
+  animation: onb-float 5.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.onb-float-dot {
+  animation: onb-float-dot 3.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .journey-breathe {
     animation: none;
   }
   [style*="onb-pulse"],
   [style*="onb-slide-in"],
+  [style*="onb-slide-in-left"],
   [style*="onb-slide-out"] {
+    animation: none !important;
+  }
+  .onb-float,
+  .onb-float-dot {
     animation: none !important;
   }
 }

@@ -10,18 +10,18 @@ type IntroOverlayProps = {
 const STEPS: { icon: typeof Compass; title: string; body: string }[] = [
   {
     icon: Compass,
-    title: "A gentle path through your day",
-    body: "Think of your day as a quiet sky. You'll have a few small waypoints to check in with yourself — no pressure to hit them all.",
+    title: "A gentle day",
+    body: "Your day has a few small waypoints — gentle moments to check in with yourself. No streaks to break, no pressure to hit them all.",
   },
   {
     icon: MapPin,
-    title: "Waypoints, not schedules",
-    body: "Pick a few soft moments: a morning pause, a midday breath, an evening reflection. The app will gently nudge you when one is near.",
+    title: "Soft moments, not schedules",
+    body: "Add waypoints that fit your day — a morning pause, a midday breath, an evening reflection. We'll nudge you softly when one is near.",
   },
   {
     icon: Wind,
     title: "Pause is always welcome",
-    body: "Tough moment? Tap \"Need a pause\" anytime for a grounding breath, a kind thought, and quick access to support.",
+    body: "Tough moment? Tap “Need a pause” anytime for a grounding breath and quick access to support.",
   },
 ];
 
@@ -40,13 +40,18 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
 
   return (
     <div
-      className="screen-enter fixed inset-0 z-50 flex items-end justify-center bg-black/55 px-4 pb-6 backdrop-blur-md sm:items-center sm:pb-0"
+      className="screen-enter fixed inset-0 z-50 flex items-end justify-center bg-black/55 px-4 backdrop-blur-md sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby="journey-intro-title"
+      style={{
+        paddingTop: "env(safe-area-inset-top, 0px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      }}
     >
       <div
         className="relative w-full max-w-md overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.12)] bg-card p-6 shadow-[0_40px_120px_-40px_rgba(8,10,18,0.95)] backdrop-blur-xl"
+        style={{ marginBottom: "1.5rem" }}
       >
         <div
           aria-hidden
@@ -77,7 +82,7 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
           </span>
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d8d4eb]">
-              Welcome to your journey
+              Welcome
             </p>
             <h2
               id="journey-intro-title"

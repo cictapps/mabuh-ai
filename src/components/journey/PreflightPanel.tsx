@@ -25,6 +25,10 @@ export function PreflightPanel({
   showHint,
 }: PreflightPanelProps) {
   const allChecked = preflightChecks.water && preflightChecks.breath && preflightMood;
+  const doneCount =
+    (preflightChecks.water ? 1 : 0) +
+    (preflightChecks.breath ? 1 : 0) +
+    (preflightMood ? 1 : 0);
 
   return (
     <Card>
@@ -35,30 +39,30 @@ export function PreflightPanel({
             +3 XP
           </span>
         </div>
-        <CardTitle className="mt-3 text-2xl">A gentle start to your day</CardTitle>
+        <CardTitle className="mt-3 text-2xl">A gentle start</CardTitle>
         <CardDescription>
-          Set the tone for the hours ahead. Take your time — there is no rush.
+          A small moment to land before the day moves.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         {showHint ? (
-          <ContextualHint text="This is your soft start. Pick a way to arrive and a feeling to name — the rest of the day can unfold from here." />
+          <ContextualHint text="Three soft things, in any order. Skip what doesn't fit — the button is always ready." />
         ) : null}
 
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
-            Soft start
+            Land softly
           </p>
           <div className="space-y-2">
             <ChecklistChip
               emoji="💧"
-              label="Sip some water"
+              label="A sip of water"
               done={preflightChecks.water}
               onPress={() => onToggleCheck("water")}
             />
             <ChecklistChip
               emoji="🌬️"
-              label="Take five slow breaths"
+              label="A few slow breaths"
               done={preflightChecks.breath}
               onPress={() => onToggleCheck("breath")}
             />
@@ -67,7 +71,7 @@ export function PreflightPanel({
 
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
-            How are you arriving?
+            One word for how you feel
           </p>
           <MoodPicker value={preflightMood} onChange={onSelectMood} />
         </div>
@@ -75,10 +79,13 @@ export function PreflightPanel({
         <Button
           size="lg"
           className="w-full"
-          disabled={!allChecked}
           onClick={onTakeoff}
         >
-          Set off
+          {allChecked
+            ? "Set off"
+            : doneCount === 0
+              ? "I'll do these later — set off"
+              : `Set off (${3 - doneCount} skipped)`}
         </Button>
       </CardContent>
     </Card>

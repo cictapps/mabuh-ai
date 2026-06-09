@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Compass } from "lucide-react";
 import { JourneyHeader } from "@/components/journey/JourneyHeader";
 import { PhaseSwitcher } from "@/components/journey/PhaseSwitcher";
 import { ViewTabs, type JourneyView } from "@/components/journey/ViewTabs";
@@ -98,7 +99,10 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
   };
 
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
@@ -120,7 +124,21 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
 
         {view !== "main" ? null : (
           <>
-            <PhaseSwitcher active={phase} onSelect={handlePhaseSelect} />
+            {phase !== "pause" ? (
+              <PhaseSwitcher active={phase} onSelect={handlePhaseSelect} />
+            ) : (
+              <div
+                className="flex items-center gap-2 rounded-2xl border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.06)] px-3.5 py-2.5 text-xs text-[#ffd99a]"
+                role="status"
+                aria-live="polite"
+              >
+                <Compass className="size-3.5" aria-hidden />
+                <span className="font-semibold">Paused</span>
+                <span className="text-[#d8d4eb]">
+                  · take all the time you need
+                </span>
+              </div>
+            )}
 
             <AffirmationCard />
 

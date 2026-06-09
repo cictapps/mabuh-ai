@@ -42,16 +42,16 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
             marginBottom: 10,
           }}
         >
-          Discovered patterns
+          Little things we've noticed
         </p>
         <h2
           className="font-serif"
           style={{ fontSize: 26, fontWeight: 400, color: "#e8eaf0", marginBottom: 4 }}
         >
-          What your moods<br />reveal
+          Gentle reflections
         </h2>
         <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
-          Insights from your recent check-ins
+          Soft little things we noticed from your recent days
         </p>
       </div>
 
@@ -63,14 +63,14 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
 
       {/* Suggestions based on recent mood trend. */}
       <div>
-        <SectionLabel>Suggestions for you</SectionLabel>
+        <SectionLabel>Little ideas to hold onto</SectionLabel>
         {loading && history.length === 0 ? (
           <p style={{ fontSize: 12, color: "rgba(188,194,255,0.4)" }}>
-            Loading your trends…
+            Gathering your trends…
           </p>
         ) : suggestions.length === 0 ? (
           <p style={{ fontSize: 12, color: "rgba(188,194,255,0.4)" }}>
-            Log a few more check-ins to see suggestions.
+            Share a few more check-ins and a soft idea will appear here.
           </p>
         ) : (
           suggestions.map((suggestion) => (

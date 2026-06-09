@@ -94,6 +94,26 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
+function useTightViewport(): boolean {
+  const [tight, setTight] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const evaluate = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      setTight(w < 380 || h < 640);
+    };
+    evaluate();
+    window.addEventListener("resize", evaluate);
+    window.addEventListener("orientationchange", evaluate);
+    return () => {
+      window.removeEventListener("resize", evaluate);
+      window.removeEventListener("orientationchange", evaluate);
+    };
+  }, []);
+  return tight;
+}
+
 function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
   if (kind === "heart") {
     return (
@@ -105,14 +125,14 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          padding: "20px 0 4px",
+          padding: "clamp(8px, 3vw, 20px) 0 clamp(0px, 1.2vw, 4px)",
         }}
       >
         <div
           style={{
             position: "absolute",
-            width: 220,
-            height: 220,
+            width: "clamp(150px, 52vw, 220px)",
+            height: "clamp(150px, 52vw, 220px)",
             borderRadius: "50%",
             background:
               "radial-gradient(circle at 50% 40%, rgba(255,185,84,0.32), rgba(188,194,255,0.16) 55%, transparent 75%)",
@@ -123,8 +143,8 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
         <div
           style={{
             position: "relative",
-            width: 132,
-            height: 132,
+            width: "clamp(96px, 28vw, 132px)",
+            height: "clamp(96px, 28vw, 132px)",
             borderRadius: "50%",
             background:
               "linear-gradient(160deg, rgba(188,194,255,0.92), rgba(212,187,255,0.7) 60%, rgba(255,185,84,0.55))",
@@ -134,7 +154,21 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             color: "#1a1c2b",
           }}
         >
-          <Heart size={56} strokeWidth={1.6} fill="rgba(26,28,43,0.85)" />
+          <div
+            style={{
+              width: "clamp(40px, 11.5vw, 56px)",
+              height: "clamp(40px, 11.5vw, 56px)",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <Heart
+              size={56}
+              strokeWidth={1.6}
+              fill="rgba(26,28,43,0.85)"
+              style={{ width: "100%", height: "100%" }}
+            />
+          </div>
         </div>
         <span
           style={{
@@ -166,11 +200,11 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
 
   if (kind === "moods") {
     const pebbles = [
-      { label: "Calm", color: "#6dba84", x: "8%", y: "30%" },
-      { label: "Okay", color: "#d4b84e", x: "62%", y: "12%" },
-      { label: "Worried", color: "#e0853c", x: "70%", y: "62%" },
-      { label: "Happy", color: "#5bb89e", x: "18%", y: "72%" },
-      { label: "Stressed", color: "#e05c6e", x: "44%", y: "44%" },
+      { label: "Calm", color: "#6dba84", x: "18%", y: "32%", delay: "0s" },
+      { label: "Okay", color: "#d4b84e", x: "70%", y: "22%", delay: "0.7s" },
+      { label: "Worried", color: "#e0853c", x: "76%", y: "70%", delay: "1.4s" },
+      { label: "Happy", color: "#5bb89e", x: "24%", y: "72%", delay: "2.1s" },
+      { label: "Stressed", color: "#e05c6e", x: "48%", y: "48%", delay: "0.35s" },
     ];
     return (
       <div
@@ -178,7 +212,9 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
         style={{
           position: "relative",
           width: "100%",
-          height: 168,
+          height: "clamp(160px, 44vw, 200px)",
+          marginTop: 4,
+          marginBottom: 4,
           borderRadius: 28,
           background:
             "linear-gradient(160deg, rgba(188,194,255,0.12), rgba(255,185,84,0.08) 60%, rgba(212,187,255,0.10))",
@@ -204,37 +240,46 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
               left: p.x,
               top: p.y,
               transform: "translate(-50%, -50%)",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "6px 12px 6px 8px",
-              borderRadius: 999,
-              background: "rgba(18,20,22,0.72)",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-              border: "1px solid rgba(188,194,255,0.10)",
-              boxShadow: "0 10px 24px -16px rgba(0,0,0,0.7)",
             }}
           >
-            <span
+            <div
+              className="onb-float"
               style={{
-                width: 12,
-                height: 12,
-                borderRadius: "50%",
-                background: p.color,
-                boxShadow: `0 0 10px ${p.color}80`,
-              }}
-            />
-            <span
-              style={{
-                fontSize: 11,
-                color: "#eef1f6",
-                fontWeight: 500,
-                letterSpacing: "0.01em",
+                animationDelay: p.delay,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 13px 7px 9px",
+                borderRadius: 999,
+                background: "rgba(18,20,22,0.72)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                border: "1px solid rgba(188,194,255,0.10)",
+                boxShadow: "0 10px 24px -16px rgba(0,0,0,0.7)",
               }}
             >
-              {p.label}
-            </span>
+              <span
+                className="onb-float-dot"
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  background: p.color,
+                  boxShadow: `0 0 10px ${p.color}80`,
+                  animationDelay: p.delay,
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "#eef1f6",
+                  fontWeight: 500,
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {p.label}
+              </span>
+            </div>
           </div>
         ))}
         <Sparkles
@@ -263,12 +308,13 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
         <div
           style={{
             position: "relative",
-            padding: "18px 18px 16px",
+            padding: "18px 56px 16px 18px",
             borderRadius: 22,
             background:
               "linear-gradient(160deg, rgba(188,194,255,0.14), rgba(255,185,84,0.10) 65%, rgba(212,187,255,0.10))",
             border: "1px solid rgba(188,194,255,0.10)",
             boxShadow: "0 24px 60px -36px rgba(8,10,18,0.85)",
+            overflow: "hidden",
           }}
         >
           <div
@@ -299,6 +345,8 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
               lineHeight: 1.55,
               color: "rgba(238,241,246,0.85)",
               fontStyle: "italic",
+              wordBreak: "break-word",
+              overflowWrap: "anywhere",
             }}
           >
             "Felt scattered before the exam, but the breathing pebble helped me
@@ -307,7 +355,9 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
           <div
             style={{
               display: "flex",
+              flexWrap: "wrap",
               gap: 6,
+              rowGap: 6,
               marginTop: 14,
             }}
           >
@@ -321,6 +371,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
                   color: "rgba(220,224,255,0.75)",
                   fontSize: 10.5,
                   letterSpacing: "0.02em",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {t}
@@ -331,10 +382,11 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
         <div
           style={{
             position: "absolute",
-            right: -8,
+            right: 6,
             top: 12,
-            display: "grid",
-            placeItems: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             width: 36,
             height: 36,
             borderRadius: "50%",
@@ -342,6 +394,8 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
               "radial-gradient(circle at 30% 30%, rgba(255,185,84,0.7), rgba(188,194,255,0.4))",
             boxShadow: "0 14px 30px -16px rgba(255,185,84,0.55)",
             color: "#1a1c2b",
+            flexShrink: 0,
+            zIndex: 1,
           }}
         >
           <Sparkles size={16} strokeWidth={1.8} />
@@ -359,7 +413,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: 10,
+        gap: 8,
       }}
     >
       <div
@@ -367,7 +421,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
           display: "flex",
           alignItems: "center",
           gap: 10,
-          padding: "12px 14px",
+          padding: "clamp(8px, 2.4vw, 12px) clamp(10px, 3vw, 14px)",
           borderRadius: 18,
           background: "rgba(188,194,255,0.08)",
           border: "1px solid rgba(188,194,255,0.10)",
@@ -383,6 +437,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             background:
               "linear-gradient(140deg, rgba(188,194,255,0.85), rgba(212,187,255,0.7))",
             color: "#1a1c2b",
+            flexShrink: 0,
           }}
         >
           <MessageCircleHeart size={16} strokeWidth={1.8} />
@@ -414,7 +469,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
           display: "flex",
           alignItems: "center",
           gap: 10,
-          padding: "12px 14px",
+          padding: "clamp(8px, 2.4vw, 12px) clamp(10px, 3vw, 14px)",
           borderRadius: 18,
           background: "rgba(255,185,84,0.10)",
           border: "1px solid rgba(255,185,84,0.18)",
@@ -429,6 +484,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             borderRadius: 12,
             background: "rgba(255,185,84,0.85)",
             color: "#1a1c2b",
+            flexShrink: 0,
           }}
         >
           <Sun size={16} strokeWidth={1.8} />
@@ -517,6 +573,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const reducedMotion = usePrefersReducedMotion();
+  const tight = useTightViewport();
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const slide = SLIDES[index]!;
@@ -585,7 +642,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   const slideStyle: React.CSSProperties = reducedMotion
     ? { opacity: 1, transform: "none" }
     : {
-        animation: `onb-slide-${direction === 1 ? "in" : "out"} 0.45s cubic-bezier(0.22, 1, 0.36, 1) both`,
+        animation: `${direction === 1 ? "onb-slide-in" : "onb-slide-in-left"} 0.45s cubic-bezier(0.22, 1, 0.36, 1) both`,
       };
 
   const visualNode: ReactNode = <SlideVisual kind={slide.visual.kind} />;
@@ -596,6 +653,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
       aria-label="Onboarding"
       style={{
         position: "relative",
+        minHeight: "100dvh",
         height: "100dvh",
         width: "100%",
         display: "flex",
@@ -624,8 +682,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "calc(env(safe-area-inset-top, 0px) + 14px) 20px 6px",
+          padding: tight
+            ? "calc(env(safe-area-inset-top, 0px) + 6px) 16px 4px"
+            : "calc(env(safe-area-inset-top, 0px) + 14px) 20px 6px",
           zIndex: 2,
+          flexShrink: 0,
         }}
       >
         <div
@@ -637,8 +698,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
         >
           <div
             style={{
-              display: "grid",
-              placeItems: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               width: 32,
               height: 32,
               borderRadius: 12,
@@ -646,6 +708,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
                 "linear-gradient(140deg, rgba(188,194,255,0.85), rgba(212,187,255,0.7))",
               color: "#1a1c2b",
               boxShadow: "0 14px 30px -16px rgba(188,194,255,0.5)",
+              flexShrink: 0,
             }}
             aria-hidden
           >
@@ -655,6 +718,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
                 fontSize: 16,
                 fontWeight: 600,
                 lineHeight: 1,
+                display: "block",
+                transform: "translateY(0.5px)",
               }}
             >
               M
@@ -711,28 +776,42 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
         onTouchEnd={onTouchEnd}
         style={{
           position: "relative",
-          flex: 1,
+          flex: "1 1 auto",
           minHeight: 0,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          padding: "8px 24px 0",
+          justifyContent: tight ? "flex-start" : "center",
+          padding: tight ? "4px 20px 0" : "8px 24px 0",
           zIndex: 1,
           ...slideStyle,
         }}
       >
         <div
           style={{
+            flex: tight ? "0 1 auto" : "0 1 auto",
+            minHeight: 0,
+            overflowY: tight ? "auto" : "visible",
+            overflowX: "hidden",
+            overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
+            paddingRight: tight ? 4 : 0,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+        <div
+          style={{
             display: "flex",
             alignItems: "center",
             gap: 8,
-            marginBottom: 14,
+            marginBottom: tight ? 8 : 14,
           }}
         >
           <span
             style={{
-              display: "grid",
-              placeItems: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               width: 26,
               height: 26,
               borderRadius: 9,
@@ -741,10 +820,20 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
               fontFamily: "var(--font-serif)",
               fontSize: 14,
               fontWeight: 600,
+              lineHeight: 1,
+              flexShrink: 0,
             }}
             aria-hidden
           >
-            {eyebrowLetter}
+            <span
+              style={{
+                display: "block",
+                lineHeight: 1,
+                transform: "translateY(0.5px)",
+              }}
+            >
+              {eyebrowLetter}
+            </span>
           </span>
           <span
             style={{
@@ -762,13 +851,13 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
         <h1
           className="font-serif"
           style={{
-            fontSize: "clamp(26px, 7vw, 34px)",
+            fontSize: tight ? "clamp(22px, 6.4vw, 28px)" : "clamp(26px, 7vw, 34px)",
             fontWeight: 500,
             lineHeight: 1.14,
             color: "#f5f1ff",
             letterSpacing: "-0.025em",
             margin: 0,
-            marginBottom: 14,
+            marginBottom: tight ? 8 : 14,
           }}
         >
           {slide.title}
@@ -776,18 +865,18 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 
         <p
           style={{
-            fontSize: 14.5,
-            lineHeight: 1.6,
+            fontSize: tight ? 13.5 : 14.5,
+            lineHeight: 1.55,
             color: "rgba(220,224,255,0.7)",
             margin: 0,
-            marginBottom: 18,
+            marginBottom: tight ? 12 : 18,
             maxWidth: 360,
           }}
         >
           {slide.body}
         </p>
 
-        <div style={{ marginBottom: 18 }}>{visualNode}</div>
+        <div style={{ marginBottom: tight ? 12 : 18 }}>{visualNode}</div>
 
         <ul
           style={{
@@ -796,7 +885,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
             margin: 0,
             display: "flex",
             flexDirection: "column",
-            gap: 10,
+            gap: tight ? 7 : 10,
+            paddingBottom: tight ? 8 : 0,
           }}
         >
           {slide.bullets.map((b) => (
@@ -806,9 +896,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
                 display: "flex",
                 alignItems: "flex-start",
                 gap: 10,
-                fontSize: 13.5,
+                fontSize: tight ? 12.5 : 13.5,
                 color: "rgba(238,241,246,0.85)",
-                lineHeight: 1.5,
+                lineHeight: 1.45,
               }}
             >
               <span
@@ -831,17 +921,20 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
             </li>
           ))}
         </ul>
+        </div>
       </main>
 
       <footer
         style={{
           position: "relative",
           zIndex: 2,
-          padding:
-            "10px 20px calc(env(safe-area-inset-bottom, 0px) + 22px)",
+          padding: tight
+            ? "8px 16px calc(env(safe-area-inset-bottom, 0px) + 12px)"
+            : "10px 20px calc(env(safe-area-inset-bottom, 0px) + 22px)",
           display: "flex",
           flexDirection: "column",
-          gap: 14,
+          gap: tight ? 8 : 14,
+          flexShrink: 0,
         }}
       >
         <PaginationDots
@@ -969,18 +1062,6 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
             <ArrowRight size={16} strokeWidth={2.2} />
           </button>
         </div>
-
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: 11,
-            color: "rgba(188,194,255,0.4)",
-            margin: 0,
-            letterSpacing: "0.02em",
-          }}
-        >
-          You can revisit this tour any time from Settings.
-        </p>
       </footer>
     </div>
   );

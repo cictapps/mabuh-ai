@@ -9,14 +9,15 @@ interface PrivacyPolicyProps {
   isOpen: boolean;
   onClose: () => void;
   onAccept?: () => void;
+  required?: boolean;
 }
 
-const CURRENT_VERSION = '2.0.0';
+const CURRENT_VERSION = '2.1.0';
 
 const SUMMARY_ITEMS = [
   'No personal information collected',
   'Chats deleted after 24 hours',
-  'No AI training on your data',
+  'AI runs on Mistral free tier',
   'Not a replacement for therapy',
 ];
 
@@ -33,12 +34,13 @@ const SECTIONS = [
   },
   {
     icon: Cpu,
-    title: 'AI model: Mistral Small',
+    title: 'AI model: Mistral Small (free tier)',
     content: [
       'Model: mistral-small-latest (7B parameters, 2025).',
-      'No training on user data — each session starts fresh.',
-      'Encryption: TLS 1.3 end-to-end.',
-      'Servers: EU region, GDPR compliant.',
+      'MabuhAi uses the free tier of Mistral AI. As part of their free-tier terms, the prompts and messages you send may be used by Mistral to improve and train their models.',
+      'Please do not share anything you would not be comfortable being seen by an AI provider. Avoid personal names, school names, addresses, phone numbers, or anything sensitive.',
+      'Encryption: TLS 1.3 in transit.',
+      'Servers: Mistral infrastructure (EU region, GDPR compliant).',
     ],
   },
   {
@@ -102,8 +104,9 @@ const SECTIONS = [
   },
 ];
 
-export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, onAccept }) => {
+export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, onAccept, required = false }) => {
   const [checked, setChecked] = useState(false);
+  const [aiConsent, setAiConsent] = useState(false);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [expandedSection, setExpandedSection] = useState<number | null>(null);
   const [accepted, setAccepted] = useState(false);
@@ -111,6 +114,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, o
 
   useEffect(() => {
     if (!isOpen) return;
+    if (!required) return;
     const stored = localStorage.getItem('privacy_policy_accepted');
     const storedVersion = localStorage.getItem('privacy_policy_version');
     const storedDate = localStorage.getItem('privacy_policy_date');
@@ -122,11 +126,12 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, o
         onClose();
       }
     }
-  }, [isOpen]);
+  }, [isOpen, required]);
 
   useEffect(() => {
     if (isOpen) {
       setChecked(false);
+      setAiConsent(false);
       setScrolledToBottom(false);
       setExpandedSection(null);
       setAccepted(false);
@@ -149,47 +154,47 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, o
     setTimeout(onClose, 600);
   };
 
-  const canAccept = checked && scrolledToBottom;
+  const canAccept = checked && aiConsent && scrolledToBottom;
 
   if (!isOpen) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-      onClick={() => scrolledToBottom && onClose()}
+      onClick={() => !required && scrolledToBottom && onClose()}
     >
       <div
-        className="relative flex flex-col w-full max-w-xl max-h-[88vh] bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl overflow-hidden"
-        style={{ border: '0.5px solid rgba(0,0,0,0.1)' }}
+        className="relative flex flex-col w-full max-w-xl max-h-[88vh] bg-neutral-900 text-neutral-100 rounded-2xl shadow-2xl overflow-hidden"
+        style={{ border: '0.5px solid rgba(255,255,255,0.08)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="shrink-0 px-7 pt-6 pb-5" style={{ borderBottom: '0.5px solid rgba(128,128,128,0.15)' }}>
+        <div className="shrink-0 px-7 pt-6 pb-5" style={{ borderBottom: '0.5px solid rgba(255,255,255,0.08)' }}>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <Shield size={18} className="text-neutral-400 dark:text-neutral-500 mt-0.5" />
-              <span className="text-base font-medium text-neutral-900 dark:text-neutral-100">
+              <Shield size={18} className="text-neutral-400 mt-0.5" />
+              <span className="text-base font-medium text-neutral-100">
                 Privacy &amp; safety policy
               </span>
             </div>
             <button
               onClick={onClose}
               aria-label="Close"
-              className="p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className={`p-1 rounded-md text-neutral-400 hover:text-neutral-100 hover:bg-white/5 transition-colors ${required ? "invisible pointer-events-none" : ""}`}
             >
               <X size={16} />
             </button>
           </div>
 
-          <p className="mt-1.5 ml-7 text-xs text-neutral-400 dark:text-neutral-500">
+          <p className="mt-1.5 ml-7 text-xs text-neutral-500">
             Last updated January 2025 · Version {CURRENT_VERSION}
           </p>
 
           <div className="flex gap-2 mt-3 ml-7 flex-wrap">
             {[
-              { label: 'GDPR compliant', color: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400' },
-              { label: 'EU servers', color: 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400' },
-              { label: 'Mistral AI · Free tier', color: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400' },
+              { label: 'GDPR compliant', color: 'bg-emerald-950/40 text-emerald-400' },
+              { label: 'EU servers', color: 'bg-blue-950/40 text-blue-400' },
+              { label: 'Mistral AI · Free tier', color: 'bg-white/5 text-neutral-300' },
             ].map(({ label, color }) => (
               <span key={label} className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${color}`}>
                 {label}
@@ -205,22 +210,40 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, o
           className="flex-1 overflow-y-auto px-7 py-5 space-y-5"
         >
           {/* Summary grid */}
-          <div className="grid grid-cols-2 gap-2 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
+          <div className="grid grid-cols-2 gap-2 p-4 rounded-xl bg-white/[0.03] border border-white/5">
             {SUMMARY_ITEMS.map((item) => (
               <div key={item} className="flex items-start gap-2">
-                <CheckCircle2 size={14} className="text-emerald-500 mt-0.5 shrink-0" />
-                <span className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">{item}</span>
+                <CheckCircle2 size={14} className="text-emerald-400 mt-0.5 shrink-0" />
+                <span className="text-xs text-neutral-300 leading-relaxed">{item}</span>
               </div>
             ))}
           </div>
 
+          {/* AI free-tier disclosure callout */}
+          <div className="rounded-xl p-4 bg-amber-950/20 border border-amber-500/20">
+            <h4 className="text-sm font-semibold text-amber-300 mb-1.5">
+              About the AI behind MabuhAi
+            </h4>
+            <p className="text-xs text-neutral-300 leading-relaxed">
+              MabuhAi runs on the free tier of Mistral AI. Because of how the free tier works, the
+              messages you send here may be used by Mistral to train and improve their models. Please
+              keep this in mind — share only what feels safe to share, and avoid personal details like
+              your full name, school, address, or contact info.
+            </p>
+            <p className="text-[11px] text-amber-200/80 mt-2 leading-relaxed">
+              This feature is optional. If you prefer not to use the AI companion, you can close this
+              dialog and continue using the rest of MabuhAi — check-ins, journal, and support
+              resources will still be available to you.
+            </p>
+          </div>
+
           {/* Accordion sections */}
-          <div style={{ borderTop: '0.5px solid rgba(128,128,128,0.15)' }}>
+          <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.08)' }}>
             {SECTIONS.map((section, idx) => {
               const Icon = section.icon;
               const isOpen = expandedSection === idx;
               return (
-                <div key={idx} style={{ borderBottom: '0.5px solid rgba(128,128,128,0.15)' }}>
+                <div key={idx} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.08)' }}>
                   <button
                     onClick={() => setExpandedSection(isOpen ? null : idx)}
                     className="w-full flex items-center justify-between py-3 text-left group"
@@ -228,15 +251,15 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, o
                     <div className="flex items-center gap-3">
                       <Icon
                         size={15}
-                        className="text-neutral-400 dark:text-neutral-500 shrink-0"
+                        className="text-neutral-400 shrink-0"
                       />
-                      <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
+                      <span className="text-sm font-medium text-neutral-200">
                         {section.title}
                       </span>
                     </div>
                     <ChevronRight
                       size={15}
-                      className="text-neutral-300 dark:text-neutral-600 shrink-0 transition-transform duration-200"
+                      className="text-neutral-500 shrink-0 transition-transform duration-200"
                       style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}
                     />
                   </button>
@@ -244,7 +267,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, o
                   {isOpen && (
                     <div className="pb-4 pl-6 space-y-1.5">
                       {section.content.map((line, i) => (
-                        <p key={i} className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                        <p key={i} className="text-sm text-neutral-400 leading-relaxed">
                           {line}
                         </p>
                       ))}
@@ -255,20 +278,20 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, o
             })}
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mt-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+          <div className="bg-white/[0.03] border border-white/5 rounded-xl p-4 mt-4">
+            <h3 className="font-semibold text-neutral-100 mb-2">
               🇵🇭 Questions or Concerns?
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <p className="text-sm text-neutral-400 mb-2">
               For privacy inquiries, data deletion requests, or safety concerns in the Philippines:
             </p>
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-1 text-neutral-300">
               <p>📧 Email: privacy@mabuhai.com</p>
               <p>🔒 Data Requests: datarequest@mabuhai.com</p>
-              <p className="mt-2 font-semibold">🚨 Crisis Support (Philippines):</p>
+              <p className="mt-2 font-semibold text-neutral-200">🚨 Crisis Support (Philippines):</p>
               <p>📞 NCMH Crisis Hotline: <strong>1553</strong> (toll-free, 24/7)</p>
               <p>📞 DOH Hopeline: <strong>804-4673</strong> / <strong>0917-558-4673</strong></p>
-              <p className="mt-1 font-semibold">🏥 Iloilo City Resources:</p>
+              <p className="mt-1 font-semibold text-neutral-200">🏥 Iloilo City Resources:</p>
               <p>📞 Western Visayas Medical Center: <strong>(033) 321-2841</strong></p>
               <p>📞 Iloilo Mission Hospital: <strong>(033) 509-5711</strong></p>
               <p>📞 The Medical City Iloilo: <strong>(033) 327-2814</strong></p>
@@ -278,40 +301,59 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ isOpen, onClose, o
 
         {/* Footer */}
         <div
-          className="shrink-0 px-7 py-4 bg-white dark:bg-neutral-900 flex items-center justify-between gap-4"
-          style={{ borderTop: '0.5px solid rgba(128,128,128,0.15)' }}
+          className="shrink-0 px-7 py-4 bg-neutral-900 flex flex-col gap-3"
+          style={{ borderTop: '0.5px solid rgba(255,255,255,0.08)' }}
         >
-          <label className="flex items-center gap-2.5 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={checked}
-              onChange={(e) => setChecked(e.target.checked)}
-              className="rounded border-neutral-300 dark:border-neutral-600 accent-neutral-900 dark:accent-white cursor-pointer"
-            />
-            <span className="text-xs text-neutral-500 dark:text-neutral-400">
-              I have read and agree to this policy
-            </span>
-          </label>
+          <div className="flex flex-col gap-2.5">
+            <label className="flex items-start gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={aiConsent}
+                onChange={(e) => setAiConsent(e.target.checked)}
+                className="mt-0.5 rounded border-neutral-600 bg-transparent accent-emerald-500 cursor-pointer"
+              />
+              <span className="text-xs text-neutral-300 leading-relaxed">
+                I understand the AI companion runs on Mistral AI's free tier, and that my messages
+                may be used to train their models. I will avoid sharing personal or sensitive details.
+              </span>
+            </label>
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={(e) => setChecked(e.target.checked)}
+                className="rounded border-neutral-600 bg-transparent accent-emerald-500 cursor-pointer"
+              />
+              <span className="text-xs text-neutral-300">
+                I have read and agree to the rest of this policy
+              </span>
+            </label>
+          </div>
 
-          <button
-            onClick={handleAccept}
-            disabled={!canAccept}
-            className={`
-              shrink-0 px-5 py-2 rounded-lg text-xs font-medium transition-all duration-200
-              ${accepted
-                ? 'bg-emerald-600 text-white cursor-default'
-                : canAccept
-                  ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:opacity-90 cursor-pointer'
-                  : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-600 cursor-not-allowed'
-              }
-            `}
-          >
-            {accepted ? '✓ Accepted' : 'Accept & continue'}
-          </button>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-[11px] text-neutral-500">
+              The AI companion is optional — you can skip it.
+            </span>
+            <button
+              onClick={handleAccept}
+              disabled={!canAccept}
+              className={`
+                shrink-0 px-5 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                ${accepted
+                  ? 'bg-emerald-600 text-white cursor-default'
+                  : canAccept
+                    ? 'bg-white text-neutral-900 hover:opacity-90 cursor-pointer'
+                    : 'bg-white/5 text-neutral-500 cursor-not-allowed'
+                }
+              `}
+            >
+              {accepted ? '✓ Accepted' : 'I understand & continue'}
+            </button>
+          </div>
         </div>
 
         {!scrolledToBottom && (
-          <p className="text-center text-xs text-neutral-400 dark:text-neutral-600 pb-2">
+          <p className="text-center text-xs text-neutral-500 pb-2">
             Scroll to the bottom to enable acceptance
           </p>
         )}

@@ -46,16 +46,16 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, onAddEntr
             marginBottom: 10,
           }}
         >
-          Your reflections
+          Words just for you
         </p>
         <h2
           className="font-serif"
           style={{ fontSize: 26, fontWeight: 400, color: "#e8eaf0", marginBottom: 4 }}
         >
-          Journal
+          A page for your words
         </h2>
         <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
-          Check-ins and personal notes in one place
+          Your check-ins and your quiet little notes, held together
         </p>
       </div>
 
@@ -70,45 +70,49 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, onAddEntr
               marginBottom: 8,
             }}
           >
-            Your writing rhythm
+            Your gentle rhythm
           </p>
           <div
             className="font-serif"
             style={{ fontSize: 22, color: "#f8f4ff", marginBottom: 6 }}
           >
-            {stats.weekCount} moments this week
+            {stats.weekCount === 0
+              ? "A quiet week so far"
+              : stats.weekCount === 1
+                ? "1 little moment this week"
+                : `${stats.weekCount} little moments this week`}
           </div>
           <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
-            Latest entry {stats.latest ? new Date(stats.latest).toLocaleDateString("en-US", {
+            Your last words {stats.latest ? new Date(stats.latest).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
-            }) : "--"}
+            }) : "will live here soon"}
           </p>
         </div>
         <div style={{ display: "grid", gap: 8 }}>
           <div style={statPillStyle}>
             <span style={statValueStyle}>{stats.checkins}</span>
-            <span style={statLabelStyle}>check-ins</span>
+            <span style={statLabelStyle}>check-in moments</span>
           </div>
           <div style={statPillStyle}>
             <span style={statValueStyle}>{stats.manual}</span>
-            <span style={statLabelStyle}>manual notes</span>
+            <span style={statLabelStyle}>heart notes</span>
           </div>
         </div>
       </div>
 
       <div className="journal-compose">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <SectionLabel>New entry</SectionLabel>
+          <SectionLabel>Write a little something</SectionLabel>
           <span style={{ fontSize: 11, color: "rgba(188,194,255,0.45)" }}>
-            Manual journal
+            A heart note
           </span>
         </div>
         <JournalInput
           value={draft}
           onChange={setDraft}
-          label="Optional"
-          placeholder="Capture a thought, a win, or a moment..."
+          label="Just for you"
+          placeholder="A thought, a small win, a moment that mattered…"
           rows={3}
         />
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -122,10 +126,10 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, onAddEntr
             }}
             disabled={!canSave}
           >
-            Save entry
+            Keep this note
           </Button>
           <p style={{ fontSize: 12, color: "rgba(188,194,255,0.4)" }}>
-            Check-ins are recorded automatically.
+            Check-ins already find their way here on their own.
           </p>
         </div>
       </div>
@@ -141,7 +145,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, onAddEntr
               fontSize: 13,
             }}
           >
-            No entries yet. Your next check-in will appear here.
+            Your page is still blank — and that's okay. Your next check-in will rest here gently.
           </div>
         )}
         {sortedEntries.length > 0 && (
@@ -193,7 +197,7 @@ const JournalCard: React.FC<{ entry: JournalEntry }> = ({ entry }) => {
             color: isCheckIn ? "rgba(255,185,84,0.7)" : "rgba(188,194,255,0.45)",
           }}
         >
-          {isCheckIn ? "Check-in" : "Manual"}
+          {isCheckIn ? "From a check-in" : "Heart note"}
         </span>
       </div>
 
@@ -230,7 +234,7 @@ const JournalCard: React.FC<{ entry: JournalEntry }> = ({ entry }) => {
 
       {!entry.content && (
         <p style={{ fontSize: 13, color: "rgba(188,194,255,0.35)", lineHeight: 1.6 }}>
-          No journal text added for this check-in.
+          A quiet check-in with no words — that's perfectly okay too.
         </p>
       )}
     </div>

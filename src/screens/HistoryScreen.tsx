@@ -32,16 +32,16 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ history, loading }
             marginBottom: 10,
           }}
         >
-          Your emotional story
+          Looking back, gently
         </p>
         <h2
           className="font-serif"
           style={{ fontSize: 26, fontWeight: 400, color: "#e8eaf0", marginBottom: 4 }}
         >
-          Mood history
+          Your days, in color
         </h2>
         <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
-          Tap any day to see your entry
+          Tap any day to revisit how you felt
         </p>
       </div>
 
@@ -58,7 +58,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ history, loading }
             textAlign: "center",
           }}
         >
-          Loading your history…
+          Gathering your days…
         </div>
       ) : isEmpty ? (
         <div
@@ -73,10 +73,10 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ history, loading }
             textAlign: "center",
           }}
         >
-          Your story starts with your first check-in.
+          Your story is just beginning. Whenever you're ready,
           <br />
-          Head to the <strong style={{ color: "rgba(216,220,230,0.85)" }}>Check in</strong> tab
-          to add one.
+          the <strong style={{ color: "rgba(216,220,230,0.85)" }}>Check in</strong> tab is
+          waiting with a soft seat for you.
         </div>
       ) : null}
 
@@ -159,7 +159,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ history, loading }
                     marginTop: 8,
                   }}
                 >
-                  Social interactions: {socialCount}
+                  {socialCount === 1 ? "A gentle connection" : "Kind connections"}: {socialCount}
                 </p>
               )}
             </div>

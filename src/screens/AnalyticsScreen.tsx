@@ -57,8 +57,8 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
 
   // Weekly insight text
   const weeklyInsight = domMeta
-    ? `Your emotional tone this week leans mostly ${domMeta.label.toLowerCase()} — ${domMeta.definition.toLowerCase().replace(".", "")}.`
-    : "Log more check-ins to see your weekly insight.";
+    ? `This week, your heart has been resting mostly in ${domMeta.label.toLowerCase()} — ${domMeta.definition.toLowerCase().replace(".", "")}. Whatever you've been feeling, it's been valid.`
+    : "Share a few more check-ins and a gentle weekly note will appear here.";
 
   return (
     <div
@@ -77,7 +77,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             textAlign: "center",
           }}
         >
-          Loading your analytics…
+          Gathering your patterns…
         </div>
       ) : isEmpty ? (
         <div
@@ -93,7 +93,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             textAlign: "center",
           }}
         >
-          Analytics will appear here once you log your first check-in.
+          Your patterns will begin to appear here once you share your first few check-ins.
         </div>
       ) : null}
 
@@ -108,16 +108,16 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             marginBottom: 10,
           }}
         >
-          Emotional landscape
+          A gentle look inward
         </p>
         <h2
           className="font-serif"
           style={{ fontSize: 26, fontWeight: 400, color: "#e8eaf0", marginBottom: 4 }}
         >
-          Mood analytics
+          Your patterns, in soft light
         </h2>
         <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
-          Patterns across the past 30 days
+          A gentle look across the past 30 days
         </p>
 
         <div
@@ -129,9 +129,9 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
           }}
         >
           {[
-            { label: "Longest streak", value: analyticsStats.longestStreak },
-            { label: "Current streak", value: analyticsStats.currentStreak },
-            { label: "Lifetime days", value: analyticsStats.lifetimeDays },
+            { label: "Longest stretch", value: analyticsStats.longestStreak },
+            { label: "Days in a row", value: analyticsStats.currentStreak },
+            { label: "Days with us", value: analyticsStats.lifetimeDays },
           ].map((item) => (
             <div
               key={item.label}
@@ -165,7 +165,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             marginBottom: 10,
           }}
         >
-          Latest entries
+          A few recent days
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
           {latestEntries.map((entry) => {
@@ -202,7 +202,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
                   })}
                 </span>
                 <span style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
-                  {entry.tags.length} tags · {entry.socialInteractions?.length ?? 0} social
+                  {entry.tags.length} {entry.tags.length === 1 ? "word" : "words"} · {entry.socialInteractions?.length ?? 0} connection{entry.socialInteractions?.length === 1 ? "" : "s"}
                 </span>
               </div>
             );
@@ -211,12 +211,12 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       </div>
 
       {/* Trend */}
-      <ChartCard label="14-day mood trend">
+      <ChartCard label="The last 14 days, gently traced">
         <MoodTrendChart data={trendData} />
       </ChartCard>
 
       {/* Distribution */}
-      <ChartCard label="Emotional distribution">
+      <ChartCard label="How your colors have been showing up">
         <MoodDistribution data={distribution} />
       </ChartCard>
 
@@ -243,7 +243,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               color: "rgba(188,194,255,0.35)",
             }}
           >
-            Mood stability
+            A steady heart
           </p>
           <span style={{ fontSize: 14, color: "#e8eaf0", fontWeight: 600 }}>
             {analyticsStats.stabilityScore}/100
@@ -270,7 +270,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <div>
-            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>Best day</p>
+            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>Your brightest day</p>
             <p style={{ fontSize: 13, color: "#e8eaf0" }}>
               {analyticsStats.bestEntry
                 ? `${getMoodMeta(analyticsStats.bestEntry.mood).label} · ${new Date(
@@ -280,7 +280,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             </p>
           </div>
           <div>
-            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>Worst day</p>
+            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>Your heaviest day</p>
             <p style={{ fontSize: 13, color: "#e8eaf0" }}>
               {analyticsStats.worstEntry
                 ? `${getMoodMeta(analyticsStats.worstEntry.mood).label} · ${new Date(
@@ -290,7 +290,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             </p>
           </div>
           <div>
-            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>Activity count</p>
+            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>Little moments noticed</p>
             <p style={{ fontSize: 13, color: "#e8eaf0" }}>{analyticsStats.activityCount}</p>
           </div>
         </div>
@@ -316,7 +316,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             color: "rgba(188,194,255,0.35)",
           }}
         >
-          Activity highlights
+          Moments that mattered
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
           {analyticsStats.activityHighlights.map((item) => (
@@ -336,7 +336,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
                 {item.label ?? "--"}
               </p>
               <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
-                {item.count} logged
+                {item.count === 1 ? "captured once" : `captured ${item.count} times`}
               </p>
             </div>
           ))}
@@ -384,7 +384,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             color: "rgba(188,194,255,0.35)",
           }}
         >
-          Social pulse (last 7 days)
+          Your kind connections (last 7 days)
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <div>
@@ -392,7 +392,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               {socialStats.totalInteractions}
             </p>
             <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
-              interactions logged
+              moments shared
             </p>
           </div>
           <div>
@@ -400,7 +400,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               {socialStats.topPerson ?? "--"}
             </p>
             <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
-              most seen person
+              warmest presence
             </p>
           </div>
           <div>
@@ -408,7 +408,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               {socialStats.topFeeling ?? "--"}
             </p>
             <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
-              common feeling
+              feeling that lingered
             </p>
           </div>
         </div>

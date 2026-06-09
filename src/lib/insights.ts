@@ -15,8 +15,8 @@ function isoDate(d: Date): string {
 function buildEmptyInsight(): InsightCard {
   return {
     id: "insight-empty",
-    title: "Insights need a few more check-ins",
-    body: "Log a handful of moods and we’ll start surfacing patterns from your real history.",
+    title: "We'd love a few more check-ins first",
+    body: "Once you've shared a handful of moods, gentle little patterns will start to show themselves here.",
     color: "#bcc2ff",
   };
 }
@@ -52,15 +52,15 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
     if (avgWeekend - avgWeekday >= 0.5) {
       insights.push({
         id: "insight-weekend",
-        title: "You feel calmer on weekends",
-        body: "Your weekend check-ins sit noticeably higher than weekdays. A reset that carries into the week.",
+        title: "Your weekends seem to soften you",
+        body: "Your weekend check-ins sit a little higher than your weekdays. That little pause seems to be good for your heart.",
         color: "#6dba84",
       });
     } else if (avgWeekday - avgWeekend >= 0.5) {
       insights.push({
         id: "insight-weekday",
-        title: "You feel steadier on weekdays",
-        body: "Your weekday check-ins trend higher than weekends. Routine may be doing you good.",
+        title: "Your weekdays feel steadier",
+        body: "Your weekday check-ins seem to sit a little higher than your weekends. There's something comforting in your routine.",
         color: "#8c9bff",
       });
     }
@@ -81,8 +81,8 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
     if (avgWith - avgWithout >= 0.4) {
       insights.push({
         id: "insight-journal",
-        title: "Journaling lifts your mood",
-        body: "Check-ins with journal text trend toward calmer, happier moods. The act of writing may be doing some of the work.",
+        title: "Writing seems to lift your days",
+        body: "On days when you write a little, your moods tend to be a touch calmer and brighter. The words may be doing some quiet work for you.",
         color: "#ffb954",
       });
     }
@@ -102,8 +102,8 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
     const pct = Math.round((topCount / history.length) * 100);
     insights.push({
       id: "insight-dominant",
-      title: `Your most-logged mood is ${meta.label.toLowerCase()}`,
-      body: `${pct}% of your check-ins have been ${meta.label.toLowerCase()}. ${meta.definition}`,
+      title: `${meta.label.toLowerCase()} has been your most-visited color`,
+      body: `About ${pct}% of your check-ins have rested in ${meta.label.toLowerCase()}. ${meta.definition} Whatever it means for you, it's been a real and valid place.`,
       color: meta.color,
     });
   }
@@ -123,8 +123,8 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
       if (avgLow - avgHigh >= 0.4) {
         insights.push({
           id: "insight-load",
-          title: "Lighter school days feel brighter",
-          body: "On low-load days your check-ins sit higher. Short breaks between heavy days may help.",
+          title: "Lighter school days feel a little brighter",
+          body: "On lower-load days, your check-ins tend to sit a touch higher. Tiny pauses between heavy days seem to be kind to you.",
           color: "#e05c6e",
         });
       }
@@ -144,15 +144,15 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
       if (avgRecent - avgOlder >= 0.6) {
         insights.push({
           id: "insight-trend-up",
-          title: "Your week is trending up",
-          body: "Compared to the week before, your recent check-ins are higher. Something is working.",
+          title: "Your days are softening this week",
+          body: "Compared to the week before, your recent check-ins sit a little higher. Something gentle is working for you right now.",
           color: "#6dba84",
         });
       } else if (avgOlder - avgRecent >= 0.6) {
         insights.push({
           id: "insight-trend-down",
-          title: "Your week feels heavier",
-          body: "Recent check-ins are lower than the week before. A small ritual — water, a walk, a journal line — may help.",
+          title: "This week feels a little heavier",
+          body: "Your recent check-ins have been sitting lower than the week before. A small ritual — a glass of water, a short walk, a single journal line — might be kind to try.",
           color: "#e0853c",
         });
       }

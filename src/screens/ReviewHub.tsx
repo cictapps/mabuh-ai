@@ -54,10 +54,10 @@ interface ReviewHubProps {
 }
 
 const tabs: Array<{ id: ReviewTabId; label: string; icon: string }> = [
-  { id: "history", label: "History", icon: "history" },
-  { id: "analytics", label: "Analytics", icon: "analytics" },
-  { id: "insights", label: "Insights", icon: "insights" },
-  { id: "journal", label: "Journal", icon: "journal" },
+  { id: "history", label: "Days", icon: "history" },
+  { id: "analytics", label: "Patterns", icon: "analytics" },
+  { id: "insights", label: "Reflections", icon: "insights" },
+  { id: "journal", label: "Writing", icon: "journal" },
 ];
 
 const renderTabIcon = (iconName: string, isActive: boolean) => {
@@ -114,16 +114,16 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
             marginBottom: 10,
           }}
         >
-          Review and reflect
+          A quiet look back
         </p>
         <h2
           className="font-serif"
           style={{ fontSize: 26, fontWeight: 400, color: "#e8eaf0", marginBottom: 4 }}
         >
-          Review
+          Your story so far
         </h2>
         <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
-          History, patterns, insights, and writing in one place
+          Your history, gentle patterns, and words — all in one safe place
         </p>
       </div>
 

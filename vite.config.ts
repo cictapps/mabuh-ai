@@ -36,5 +36,14 @@ export default defineConfig(async () => ({
       // 3. tell Vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
     },
+    // The Android WebView defaults to Referrer-Policy
+    // "strict-origin-when-cross-origin", which strips the path off any
+    // cross-origin request and surfaces a "strict-origin-when-cross-origin
+    // on local testing" hint in the Chrome devtools console. Send an
+    // explicit header from the dev server so the WebView uses the same
+    // policy on every response.
+    headers: {
+      "Referrer-Policy": "no-referrer-when-downgrade",
+    },
   },
 }));

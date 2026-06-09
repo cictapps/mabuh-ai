@@ -1,0 +1,300 @@
+# Deploying MabuhAi as a mobile app
+
+This guide covers the two pieces of configuration the mobile build needs at
+build time — the **Supabase project** (auth + mood/journal data) and the
+**chat server** that proxies the Mistral API.
+
+> **TL;DR for a new contributor**
+>
+> 1. Create a Supabase project, run `supabase/schema.sql`, copy the URL +
+>    anon key.
+> 2. Deploy the chat server with a `MISTRAL_API_KEY` env var set.
+> 3. Copy `.env.example` to `.env`, fill in the four values.
+> 4. `npm install && npm run build && cargo tauri android build --debug --apk`.
+> 5. The APK is at
+>    `src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk`.
+
+---
+
+## 1. Environment variables (the short list)
+
+The mobile bundle reads only four `VITE_*` variables. They are inlined into
+the JavaScript at `npm run build` time — there is no runtime env injection
+on Android, so a rebuild is required to change them.
+
+| Variable | What it does | Where to get it |
+|---|---|---|
+| `VITE_SUPABASE_URL` | Endpoint of your Supabase project | Supabase dashboard → **Settings → API** |
+| `VITE_SUPABASE_ANON_KEY` | Public, publishable client key (safe to ship) | Same page. Starts with `sb_publishable_…` |
+| `VITE_AUTH_GOOGLE_ENABLED` | `"true"` to show the "Continue with Google" button after you've enabled the provider | Boolean |
+| `VITE_CHAT_SERVER_URL` | Public URL of the Mistral proxy server (no trailing slash) | Deploy the server (section 3), paste its URL |
+
+Everything else (the Mistral key, OpenAI keys, etc.) lives **on the chat
+server**, never in the app.
+
+---
+
+## 2. Supabase setup
+
+1. **Create a project** at [supabase.com](https://supabase.com).
+2. **Run the schema**: in the dashboard go to **SQL Editor → New query**,
+   paste the entire contents of [`supabase/schema.sql`](./supabase/schema.sql),
+   and run. The script is idempotent — safe to re-run.
+   It will create:
+   - `profiles` (extends `auth.users` with `display_name`)
+   - `mood_entries` (multiple check-ins per day allowed)
+   - `journal_entries` (manual notes)
+   - Row-Level-Security policies so a user can only read/write their own rows
+   - The `delete_user()` self-service RPC used by the "Delete my account"
+     flow in **Settings**
+3. **Copy the API values**: **Settings → API** and copy
+   - **Project URL** → `VITE_SUPABASE_URL`
+   - **Publishable key** (or legacy **anon** key) → `VITE_SUPABASE_ANON_KEY`
+4. **Configure auth redirect URLs** in **Authentication → URL
+   Configuration** so the Google OAuth round-trip works on Android:
+   - `tauri://localhost`
+   - `tauri://localhost/auth/callback`
+   - `tauri://localhost/auth/reset`
+   - (For desktop dev also add `http://localhost:1420/auth/callback` and
+     `http://localhost:5173/auth/callback`.)
+5. **Enable Google sign-in (optional)**: **Authentication → Providers →
+   Google**, paste your OAuth client ID/secret, save. Then set
+   `VITE_AUTH_GOOGLE_ENABLED=true` in `.env`.
+
+### Database migration note (existing projects)
+
+If you are upgrading an installation that already had the old "one mood
+per day" schema, the new `schema.sql` no longer creates the unique index
+`mood_entries_user_entry_date_unique`. To upgrade, run this once in the
+SQL editor before applying the new schema:
+
+```sql
+drop index if exists public.mood_entries_user_entry_date_unique;
+```
+
+After running the new schema, multiple check-ins per day are allowed.
+
+---
+
+## 3. Chat server (the Mistral proxy)
+
+The mobile app **never** calls `api.mistral.ai` directly — the Mistral
+key is too sensitive to ship in a public bundle, and rotating it would
+force an app release. Instead the app calls a tiny server you control,
+which holds the key server-side.
+
+### 3.1 What the app expects
+
+A single endpoint:
+
+```
+POST {VITE_CHAT_SERVER_URL}/chat
+Content-Type: application/json
+
+{ "message": "…", "intent": "general" | "support" | "grounding", "history": [] }
+→ { "reply": "…" }
+```
+
+### 3.2 Minimal Express server (~30 lines)
+
+```js
+// server/server.js
+import express from "express";
+import cors from "cors";
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.post("/chat", async (req, res) => {
+  const { message, intent = "general", history = [] } = req.body ?? {};
+  if (!message || typeof message !== "string") {
+    return res.status(400).json({ error: "message is required" });
+  }
+
+  // Crisis routing — short-circuit to a safety message for high-risk intents.
+  if (intent === "support") {
+    return res.json({
+      reply:
+        "It sounds heavy. You don't have to carry this alone — tap Support to reach a person who can listen.",
+    });
+  }
+
+  const resp = await fetch("https://api.mistral.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.MISTRAL_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: process.env.MISTRAL_MODEL ?? "mistral-small-latest",
+      temperature: 0.6,
+      max_tokens: 320,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a warm, brief, non-clinical companion for a Filipino student. " +
+            "Use plain language. Never diagnose. Suggest professional help if the user " +
+            "mentions self-harm or crisis.",
+        },
+        ...history,
+        { role: "user", content: message },
+      ],
+    }),
+  });
+
+  if (!resp.ok) {
+    return res.status(502).json({ error: `mistral ${resp.status}` });
+  }
+  const data = await resp.json();
+  res.json({ reply: data.choices?.[0]?.message?.content ?? "" });
+});
+
+const port = process.env.PORT ?? 3000;
+app.listen(port, () => console.log(`mabuh chat server on :${port}`));
+```
+
+### 3.3 Environment variables for the **server** (not the app)
+
+| Var | Required | Notes |
+|---|---|---|
+| `MISTRAL_API_KEY` | **Yes** | From [console.mistral.ai](https://console.mistral.ai) → API Keys |
+| `MISTRAL_MODEL` | No | Defaults to `mistral-small-latest` |
+| `PORT` | No | Defaults to `3000` |
+
+Add a `server/.env` (and `.env.example` for documentation) — **never**
+commit the real key.
+
+### 3.4 Deploying the server
+
+Any Node-friendly host works. Two free options:
+
+- **Render** — connect a GitHub repo, set the start command to `node
+  server/server.js`, add `MISTRAL_API_KEY` as a secret environment
+  variable. Render will give you a URL like
+  `https://your-app.onrender.com` — that's your
+  `VITE_CHAT_SERVER_URL`.
+- **Fly.io / Railway / Vercel (serverless)** — same env vars, point at
+  the `server/server.js` entrypoint.
+
+After deploying, smoke-test:
+
+```bash
+curl -X POST https://your-app.example.com/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"hello","intent":"general"}'
+```
+
+You should get a JSON `{"reply": "…"}` back.
+
+---
+
+## 4. Putting it together for the Android build
+
+### 4.1 Local dev (sanity check)
+
+```bash
+cp .env.example .env
+# edit .env and fill in the four values
+
+npm install
+npm run dev
+```
+
+The app should boot, you can sign up, save a mood, and chat. The dev
+build reads the same `.env` as the production build.
+
+### 4.2 Building a debug APK
+
+```bash
+npm run build                  # inlines the VITE_* vars into dist/
+cargo tauri android build --debug --apk --target aarch64
+# or for a per-ABI split (much smaller):
+cargo tauri android build --debug --apk --split-per-abi
+```
+
+The APK is at:
+
+```
+src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
+# or for split:
+src-tauri/gen/android/app/build/outputs/apk/arm64-v8a/debug/app-arm64-v8a-debug.apk
+```
+
+Install it on a connected device with:
+
+```bash
+adb install -r src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
+```
+
+### 4.3 Release build (for the Play Store)
+
+```bash
+# 1. Generate a release keystore (one time)
+keytool -genkey -v -keystore mabuh-release.keystore \
+  -alias mabuh -keyalg RSA -keysize 2048 -validity 10000
+
+# 2. Put these in src-tauri/gen/android/key.properties (gitignored)
+#    storeFile=../mabuh-release.keystore
+#    storePassword=…
+#    keyAlias=mabuh
+#    keyPassword=…
+
+# 3. Build
+npm run build
+cargo tauri android build --apk --aab --target aarch64
+```
+
+The signed `.aab` lands at
+`src-tauri/gen/android/app/build/outputs/bundle/release/app.aab`.
+
+### 4.4 CI / build-machine env vars
+
+The Android build needs these in the build environment (in addition to
+the four Vite vars in `.env`):
+
+| Var | Why |
+|---|---|
+| `ANDROID_HOME` / `ANDROID_SDK_ROOT` | Location of the Android SDK |
+| `ANDROID_NDK_HOME` | NDK used by the Tauri Rust build |
+| `JAVA_HOME` | JDK 17+ |
+| `PATH` | Must include `$ANDROID_HOME/platform-tools` (for `adb`) and the JDK bin |
+
+---
+
+## 5. What does **not** go in `.env`
+
+A few things people often try to put in the client env. Don't.
+
+- **`MISTRAL_API_KEY`** — goes on the chat server only.
+- **Supabase service-role key** — never used; the app talks to Supabase
+  with the publishable/anon key, which respects RLS. If you ever need
+  admin work, do it in the Supabase dashboard.
+- **JWT secrets / OAuth client secrets** — go in the Supabase dashboard
+  or your auth provider's console, never in the app.
+
+---
+
+## 6. Troubleshooting
+
+- **"Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY"** at boot → your
+  `.env` is missing or Vite couldn't see it. Make sure the file is in
+  the repo root, not in `src/`, and that you ran `npm run build` after
+  editing it.
+- **Mood saves return 409 conflict** → your database still has the old
+  `mood_entries_user_entry_date_unique` index. Run `drop index if
+  exists public.mood_entries_user_entry_date_unique;` in the SQL editor.
+- **Chat says "Network request failed"** → your `VITE_CHAT_SERVER_URL` is
+  wrong, the server is down, or the server's CORS config doesn't allow
+  the WebView origin. The WebView sends an `Origin` header that often
+  looks like `tauri://localhost` or `https://tauri.localhost`; make sure
+  the chat server's CORS allowlist includes both (or use `*` during
+  testing).
+- **Google sign-in loops back without logging in** → the redirect URL
+  isn't on Supabase's allowlist. Add the four URLs from step 2.4
+  above.
+- **The APK works in dev but not after a Play Store release** → most
+  often `usesCleartextTraffic` — set the release manifest placeholder
+  to `"false"` in `gen/android/app/build.gradle.kts` (this is the
+  default), and make sure your chat server is HTTPS.

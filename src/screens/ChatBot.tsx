@@ -10,13 +10,25 @@ import {
   Sparkles,
   Ghost,
   MessageCircle,
+  Shield,
   X,
 } from "lucide-react";
 
 import { ChatBubble } from "../components/chatbot-components/ChatBubble";
 import { PrivacyPolicy } from "./PrivacyPolicy";
 
-const SERVER_URL = "https://mabuh-ai-server.onrender.com";
+// The Mistral API key is never shipped with the mobile app. The chat
+// proxies through a small Express server you deploy separately — the URL
+// of that server is the only thing the client needs to know about, and
+// it's read from the VITE_CHAT_SERVER_URL env var at build time. The
+// hard-coded fallback below points at the original Render host so the
+// app keeps working out-of-the-box.
+const DEFAULT_CHAT_SERVER_URL = "https://mabuh-ai-server.onrender.com";
+const SERVER_URL =
+  (import.meta.env.VITE_CHAT_SERVER_URL as string | undefined)?.replace(
+    /\/+$/,
+    "",
+  ) || DEFAULT_CHAT_SERVER_URL;
 
 interface Message {
   id: string;
@@ -216,21 +228,19 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
 
   useEffect(() => {
     const accepted = localStorage.getItem("privacy_policy_accepted");
     const acceptedVersion = localStorage.getItem("privacy_policy_version");
 
-    if (accepted === "true" && acceptedVersion === "2.0.0") {
+    if (accepted === "true" && acceptedVersion === "2.1.0") {
+      setHasAcceptedPolicy(true);
       return;
     }
 
-    const timer = window.setTimeout(() => {
-      setShowPrivacyPolicy(true);
-    }, 1000);
-
-    return () => window.clearTimeout(timer);
+    setShowPrivacyPolicy(true);
   }, []);
 
   const getInitialMessage = (mask: boolean): Message => ({
@@ -270,6 +280,10 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
 
   const sendMessage = async (text: string, intent: string = "general") => {
     if (!text.trim() || isLoading) return;
+    if (!hasAcceptedPolicy) {
+      setShowPrivacyPolicy(true);
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -418,6 +432,22 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
           </div>
         </div>
 
+        <div className="flex items-center gap-2">
+          {hasAcceptedPolicy && (
+            <button
+              type="button"
+              onClick={() => setShowPrivacyPolicy(true)}
+              aria-label="Privacy and safety"
+              className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 ${
+                isMaskMode
+                  ? "border-white/15 bg-white/5 text-white hover:bg-white/10"
+                  : "border-border bg-surface-low text-foreground hover:border-primary/40 hover:text-primary"
+              }`}
+            >
+              <Shield size={15} />
+            </button>
+          )}
+
         <button
           type="button"
           onClick={() => setIsMaskMode((prev) => !prev)}
@@ -453,6 +483,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
             />
           </span>
         </button>
+        </div>
       </header>
 
       <main
@@ -571,7 +602,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       >
         <div className="relative mx-auto flex max-w-4xl items-end gap-3">
           <AnimatePresence>
-            {emojiPickerOpen && (
+            {emojiPickerOpen && hasAcceptedPolicy && (
               <EmojiPicker
                 onSelect={insertEmoji}
                 onClose={() => setEmojiPickerOpen(false)}
@@ -579,18 +610,19 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
             )}
           </AnimatePresence>
 
-          <div className="flex-1 rounded-2xl border border-border bg-surface-low px-3 py-2 transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
+          <div className={`flex-1 rounded-2xl border border-border bg-surface-low px-3 py-2 transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 ${!hasAcceptedPolicy ? "opacity-60" : ""}`}>
             <div className="flex items-end gap-2">
               <button
                 type="button"
                 onClick={handleToggleEmojiPicker}
                 aria-label={emojiPickerOpen ? "Close emoji picker" : "Open emoji picker"}
                 aria-expanded={emojiPickerOpen}
+                disabled={!hasAcceptedPolicy}
                 className={`shrink-0 rounded-full p-1.5 transition-colors ${
                   emojiPickerOpen
                     ? "bg-primary/15 text-primary"
                     : "text-muted-foreground hover:bg-white/5 hover:text-primary"
-                }`}
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 <Smile size={20} />
               </button>
@@ -607,21 +639,22 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
                     setEmojiPickerOpen(false);
                   }
                 }}
-                className="max-h-32 flex-1 resize-none border-none bg-transparent py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-0"
-                placeholder="Type a message..."
+                className="max-h-32 flex-1 resize-none border-none bg-transparent py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-0 disabled:cursor-not-allowed"
+                placeholder={hasAcceptedPolicy ? "Type a message..." : "Read the privacy notice to start chatting"}
                 rows={1}
-                disabled={isLoading}
+                disabled={isLoading || !hasAcceptedPolicy}
               />
             </div>
           </div>
 
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={hasAcceptedPolicy ? { scale: 1.05 } : undefined}
+            whileTap={hasAcceptedPolicy ? { scale: 0.95 } : undefined}
             onClick={handleSendMessage}
-            disabled={!inputText.trim() || isLoading}
-            className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-secondary to-tertiary text-primary-foreground shadow-lg shadow-primary/20 transition-all disabled:opacity-50 disabled:grayscale"
+            disabled={!inputText.trim() || isLoading || !hasAcceptedPolicy}
+            className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-secondary to-tertiary text-primary-foreground shadow-lg shadow-primary/20 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
             type="button"
+            aria-label="Send message"
           >
             <Send size={20} />
           </motion.button>
@@ -634,8 +667,18 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
 
       <PrivacyPolicy
         isOpen={showPrivacyPolicy}
-        onClose={() => setShowPrivacyPolicy(false)}
-        onAccept={() => undefined}
+        onClose={() => {
+          if (!hasAcceptedPolicy) {
+            setShowPrivacyPolicy(true);
+            return;
+          }
+          setShowPrivacyPolicy(false);
+        }}
+        onAccept={() => {
+          setHasAcceptedPolicy(true);
+          setShowPrivacyPolicy(false);
+        }}
+        required={!hasAcceptedPolicy}
       />
     </div>
   );

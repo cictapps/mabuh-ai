@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Leaf, Ghost } from "lucide-react";
+import { Ghost, Copy, Check } from "lucide-react";
 
 // ─── Rich Text Parser ────────────────────────────────────────────────────────
 
@@ -159,6 +160,7 @@ interface ChatBubbleProps {
   isAi?: boolean;
   isTyping?: boolean;
   isMaskMode?: boolean;
+  errorDiagnostics?: string | null;
 }
 
 export const ChatBubble = ({
@@ -166,12 +168,34 @@ export const ChatBubble = ({
   isAi = false,
   isTyping = false,
   isMaskMode = false,
+  errorDiagnostics = null,
 }: ChatBubbleProps) => {
+  const [copied, setCopied] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
   // Parse markdown only for plain string AI messages
   const rendered =
     isAi && typeof message === "string"
       ? parseMarkdown(message)
       : message;
+
+  const handleCopy = async () => {
+    if (!errorDiagnostics) return;
+    try {
+      await navigator.clipboard.writeText(errorDiagnostics);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Fallback: select the textarea so the user can copy manually
+      const ta = document.getElementById(
+        "chat-error-details",
+      ) as HTMLTextAreaElement | null;
+      if (ta) {
+        ta.focus();
+        ta.select();
+      }
+    }
+  };
 
   return (
     <motion.div
@@ -182,7 +206,7 @@ export const ChatBubble = ({
     >
       {/* AI avatar */}
       {isAi && (
-        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border ${
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border overflow-hidden ${
           isMaskMode
             ? "border-white/10 bg-white/5"
             : "border-border bg-surface-high/80 backdrop-blur-sm"
@@ -193,9 +217,12 @@ export const ChatBubble = ({
               className={`text-white/70 ${isTyping ? "animate-pulse" : ""}`}
             />
           ) : (
-            <Leaf
-              size={18}
-              className={`text-primary ${isTyping ? "animate-pulse" : ""}`}
+            <img
+              src="/app-logo-light.svg"
+              alt=""
+              width={36}
+              height={36}
+              className={`h-9 w-9 ${isTyping ? "animate-pulse" : ""}`}
             />
           )}
         </div>
@@ -216,6 +243,45 @@ export const ChatBubble = ({
         }`}
       >
         {isTyping ? <TypingDots isMaskMode={isMaskMode} /> : rendered}
+
+        {isAi && errorDiagnostics && !isTyping && (
+          <div className="mt-3 border-t border-current/10 pt-2">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDetails((v) => !v)}
+                className="text-[11px] font-semibold uppercase tracking-wide opacity-70 hover:opacity-100"
+              >
+                {showDetails ? "Hide details" : "Show details"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide opacity-70 hover:opacity-100"
+                aria-label="Copy error details to clipboard"
+              >
+                {copied ? (
+                  <>
+                    <Check size={12} /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy size={12} /> Copy details
+                  </>
+                )}
+              </button>
+            </div>
+            {showDetails && (
+              <textarea
+                id="chat-error-details"
+                readOnly
+                value={errorDiagnostics}
+                className="mt-2 w-full resize-none rounded-md bg-black/20 p-2 font-mono text-[11px] leading-snug text-foreground/90 outline-none"
+                rows={Math.min(12, errorDiagnostics.split("\n").length + 1)}
+              />
+            )}
+          </div>
+        )}
       </div>
     </motion.div>
   );

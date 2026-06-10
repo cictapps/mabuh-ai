@@ -89,11 +89,36 @@ A single endpoint:
 
 ```
 POST {VITE_CHAT_SERVER_URL}/chat
+Authorization: Bearer <supabase access_token>
 Content-Type: application/json
 
-{ "message": "…", "intent": "general" | "support" | "grounding", "history": [] }
-→ { "reply": "…" }
+{ "message": "…", "intent": "general" | "support" | "grounding", "history": [],
+  "context": { …user/mood/journal/journey snapshot… } }
+→ 200 { "reply": "…" }
 ```
+
+The client obtains the `access_token` from the user's live Supabase
+session via `supabase.auth.getSession()`. The server **must** verify
+the JWT against your Supabase project's JWKS endpoint — do **not**
+compare the token against a static `CHAT_API_KEYS` secret. The full
+flow lives in `src/services/chatClient.ts` and the test suite at
+`src/services/chatClient.test.ts` covers the auth contract.
+
+The server is free to ignore any field it doesn't understand. The original
+three fields (`message`, `intent`, `history`) are still the only required
+ones; `context` is optional and only used to make the model more relevant
+to the current student. See **§3.5 Context payload** for the full shape.
+
+**Status codes the app handles explicitly:**
+
+| Status | Client behaviour |
+|---|---|
+| 200 | Show the reply. |
+| 401 | Refresh the Supabase session once, retry once. If it still 401s, clear the session and route the user to `/login`. |
+| 429 | "You're sending messages too quickly." |
+| 503 | "The chat service is temporarily unavailable." |
+| Network failure | "I couldn't reach the chat server." |
+| Malformed JSON | Generic parser error. |
 
 ### 3.2 Minimal Express server (~30 lines)
 
@@ -155,6 +180,123 @@ const port = process.env.PORT ?? 3000;
 app.listen(port, () => console.log(`mabuh chat server on :${port}`));
 ```
 
+### 3.5 Context payload
+
+When the user is signed in and **not** in Mask Mode, the app attaches a
+`context` object to every `/chat` request so the model can be aware of
+their recent state. Mask Mode sends only `{ anonymous: true, timestamp }`
+to honour the "no identity, no memory" promise.
+
+```ts
+context: {
+  user: { displayName: string | null },
+
+  mood: {
+    recent: Array<{                // last 7 mood check-ins, oldest → newest
+      date: "YYYY-MM-DD",
+      mood: "stressed" | "worried" | "okay" | "calm" | "happy",
+      tags: string[],
+      schoolLoad: 1 | 2 | 3 | 4 | 5,
+      activityMinutes: number,
+      activities: { work: [], health: [], sleep: [], food: [],
+                    hobbies: [], weather: [], sports: [] },
+      socialInteractions: Array<{ name, relationship, interactionType,
+                                   durationMinutes, feelings, notes? }>,
+      dayNote: string,
+    }>,
+    dominantMood: "stressed" | "worried" | "okay" | "calm" | "happy" | null,
+    trend: Array<{ date, score: 1-5, mood }>,            // last 14 days
+    distribution: Array<{ mood, count, pct }>,           // day-level mix
+  },
+
+  journal: {
+    recent: Array<{                // last 5 entries, newest first
+      date: "YYYY-MM-DD",
+      content: string,
+      source: "manual" | "checkin",
+      mood?: "stressed" | "worried" | "okay" | "calm" | "happy",
+    }>,
+  },
+
+  journey: {                      // gamified daily-routine tracker
+    phase: "preflight" | "airborne" | "checkpoint" | "pause"
+         | "final" | "rest",
+    streak: number,                // consecutive-day count
+    totalXp: number,
+    flightsCompleted: number,      // lifetime flights finished
+    lastFlightDate: "YYYY-MM-DD" | null,
+    preflightMood: "stressed" | "worried" | "okay" | "calm" | "happy" | null,
+    checkpointMood: "stressed" | "worried" | "okay" | "calm" | "happy" | null,
+    finalMood:    "stressed" | "worried" | "okay" | "calm" | "happy" | null,
+  },
+
+  social: {                        // last 7 days
+    totalInteractions: number,
+    topPerson: string | null,
+    topFeeling: string | null,
+  },
+
+  analytics: {
+    currentStreak: number | null,
+    lifetimeDays: number | null,
+    stabilityScore: number | null,  // 0-100
+  },
+
+  timestamp: number,               // ms epoch, when the request was built
+}
+```
+
+**How the server should use it.** The reference implementation in §3.2
+ignores `context` entirely — that's still a valid response, and the chat
+keeps working. To make the model context-aware, fold the fields into the
+system prompt. A minimal pattern:
+
+```js
+const ctx = req.body?.context ?? {};
+const sysParts = [
+  "You are a warm, brief, non-clinical companion for a Filipino student.",
+  "Use plain language. Never diagnose. Suggest professional help if the user mentions self-harm or crisis.",
+  "Scope: this assistant is for EMOTIONAL SUPPORT ONLY. Do NOT answer coding, programming, debugging, homework, factual lookup, math, or general-knowledge questions. If the user asks for any of those, politely decline, name yourself as their emotional support companion, and invite them to talk about how they feel instead.",
+];
+if (ctx.mood?.dominantMood) {
+  sysParts.push(`The student's recent dominant mood is "${ctx.mood.dominantMood}".`);
+}
+if (ctx.mood?.trend?.length) {
+  const last = ctx.mood.trend.at(-1);
+  if (last) sysParts.push(`Today's mood score: ${last.score}/5 (${last.mood}).`);
+}
+if (ctx.journal?.recent?.length) {
+  const latest = ctx.journal.recent[0];
+  sysParts.push(`Their latest journal entry (${latest.date}, ${latest.source}): "${latest.content.slice(0, 240)}"`);
+}
+if (ctx.journey?.streak) {
+  sysParts.push(`They are on a ${ctx.journey.streak}-day self-care streak.`);
+}
+if (ctx.social?.topPerson) {
+  sysParts.push(`They recently spent time with ${ctx.social.topPerson}.`);
+}
+const systemPrompt = sysParts.join(" ");
+```
+
+The server may also short-circuit the LLM call (or add safety rails) when
+the context shows a sharp mood drop, multiple "stressed" days in a row,
+or journal content matching crisis keywords.
+
+**Scope / guardrails.** This assistant is **emotional support only**. The
+server's system prompt must instruct the model to refuse coding help,
+homework help, factual lookups, and similar non-support tasks, and to
+re-direct the user back to feelings. The client (`src/screens/ChatBot.tsx`)
+performs a first-pass regex check and answers those locally with a fixed
+declination, so the request never reaches Mistral in the common cases —
+but the server-side instruction is still required as a backstop for
+phrasing the regex misses.
+
+**Privacy.** Everything in `context` is already on the user's own
+device. The server must not log it, forward it to a third party, or
+include it in telemetry. The Supabase anon key + RLS are what protect the
+data at rest; the chat server should treat the request body as
+short-lived and forget it after the response is sent.
+
 ### 3.3 Environment variables for the **server** (not the app)
 
 | Var | Required | Notes |
@@ -178,12 +320,57 @@ Any Node-friendly host works. Two free options:
 - **Fly.io / Railway / Vercel (serverless)** — same env vars, point at
   the `server/server.js` entrypoint.
 
+If you want to lock the endpoint down, the recommended approach is to
+verify the user's Supabase JWT on every request — **not** to compare the
+token against a static secret. Use your Supabase project's JWKS endpoint
+and the `jose` (or `jsonwebtoken` + `jwks-rsa`) library. The flow below
+uses `jose` because it caches the JWKS for you:
+
+```js
+// server/server.js (add right after app.use(express.json()))
+import { createRemoteJWKSet, jwtVerify } from "jose";
+
+const SUPABASE_URL = process.env.SUPABASE_URL; // e.g. https://abcdefg.supabase.co
+const JWKS = createRemoteJWKSet(new URL(`${SUPABASE_URL}/auth/v1/.well-known/jwks.json`));
+
+app.use("/chat", async (req, res, next) => {
+  const auth = req.header("authorization") || "";
+  const [scheme, token] = auth.split(" ");
+  if (scheme !== "Bearer" || !token) {
+    return res.status(401).json({
+      error: { code: "UNAUTHORIZED", message: "Missing bearer token" },
+    });
+  }
+  try {
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: SUPABASE_URL,
+      audience: "authenticated",
+    });
+    req.user = { id: payload.sub, email: payload.email };
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      error: { code: "UNAUTHORIZED", message: "Invalid or expired session" },
+    });
+  }
+});
+```
+
+Do **not** compare the bearer token against a `CHAT_API_KEYS` array. The
+client obtains its token from the user's live Supabase session and
+rotates it via `supabase.auth.refreshSession()`; a static API key would
+defeat that rotation and force the app to ship a secret.
+
 After deploying, smoke-test:
 
 ```bash
+# Pull a fresh access token from your local Supabase session (any way
+# you like — e.g. supabase.auth.getSession() in the browser devtools
+# console) and use it here:
 curl -X POST https://your-app.example.com/chat \
+  -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"message":"hello","intent":"general"}'
+  -d '{"message":"hello","intent":"general","history":[]}'
 ```
 
 You should get a JSON `{"reply": "…"}` back.

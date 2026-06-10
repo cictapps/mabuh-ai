@@ -5,6 +5,15 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "opener:default"
+    "deep-link:default",
+    "opener:default",
+    {
+      "identifier": "http:default",
+      "allow": [
+        { "url": "https://mabuh-ai-server.onrender.com" },
+        { "url": "https://mabuh-ai-server-29h8.onrender.com" },
+        { "url": "http://localhost:*" }
+      ]
+    }
   ]
 }

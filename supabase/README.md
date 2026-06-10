@@ -32,13 +32,15 @@ URLs for local dev and Tauri:
 - `tauri://localhost` (Tauri production)
 - `tauri://localhost/auth/callback` (Tauri production auth callbacks)
 - `tauri://localhost/auth/reset` (Tauri production password reset)
+- `mabuhai://auth/callback` (installed Android/iOS Google OAuth callback)
 
 Keep email confirmations enabled for production-like testing.
 
 ### Google OAuth
 
-The app already has a Google sign-in button and callback route. It is hidden
-until `VITE_AUTH_GOOGLE_ENABLED=true`.
+The app has Google sign-in and sign-up buttons. Web builds use the browser
+callback route; installed Tauri mobile builds open Google in the system browser
+through the opener plugin and return through the `mabuhai://` deep link.
 
 1. In Google Cloud / Google Auth Platform, create a Web application OAuth
    client.
@@ -53,7 +55,8 @@ until `VITE_AUTH_GOOGLE_ENABLED=true`.
    - Enable Google.
    - Paste the Google Client ID and Client Secret.
 5. In Supabase Dashboard -> Authentication -> URL Configuration, keep the app
-   redirect URLs listed above, especially `/auth/callback`.
+   redirect URLs listed above, especially `/auth/callback` and
+   `mabuhai://auth/callback`.
 6. In `.env`, set:
    ```env
    VITE_AUTH_GOOGLE_ENABLED=true

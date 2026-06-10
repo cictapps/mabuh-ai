@@ -26,7 +26,7 @@ The app currently implements:
 - Display of the signed-in user's name/email
 - Forgot-password request modal
 - Reset-password completion page at `/auth/reset`
-- Optional Google OAuth login behind `VITE_AUTH_GOOGLE_ENABLED=true`
+- Google OAuth login and signup for web and Tauri mobile
 - OAuth/email-confirmation callback route at `/auth/callback`
 
 ## 2. Dependencies added

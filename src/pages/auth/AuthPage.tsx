@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 type Tab = "sign-in" | "sign-up";
 
-const googleAuthEnabled = import.meta.env.VITE_AUTH_GOOGLE_ENABLED === "true";
+const googleAuthEnabled = import.meta.env.VITE_AUTH_GOOGLE_ENABLED !== "false";
 
 export interface AuthPageProps {
   initialTab?: Tab;
@@ -73,7 +73,7 @@ function PasswordField({
           minLength={minLength}
           value={value}
           onChange={(e) => onChange(e.currentTarget.value)}
-          className="pr-11"
+          className="h-12 pr-11 text-base"
         />
         <button
           type="button"
@@ -123,22 +123,36 @@ function SubmitButton({
 function GoogleButton({
   loading,
   onClick,
+  mode,
 }: {
   loading?: boolean;
   onClick: () => void;
+  mode: Tab;
 }) {
+  const label = mode === "sign-in" ? "Sign in with Google" : "Sign up with Google";
+
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={loading}
+      aria-label={label}
       className={cn(
-        "flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 py-3 text-sm font-semibold text-foreground",
-        "transition-all duration-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60",
+        "relative flex h-12 w-full items-center justify-center rounded-full border border-[#8e918f] bg-[#131314] px-12",
+        "font-['Roboto',sans-serif] text-sm font-medium text-[#e3e3e3]",
+        "transition-all duration-200 hover:bg-[#202124] hover:shadow-lg hover:shadow-black/20",
+        "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/25",
+        "disabled:cursor-not-allowed disabled:opacity-60",
       )}
     >
-      {loading ? <Loader2 className="size-4 animate-spin" /> : <span className="text-base">G</span>}
-      {loading ? "Opening Google..." : "Continue with Google"}
+      <span className="absolute left-4 flex size-5 items-center justify-center">
+        {loading ? (
+          <Loader2 className="size-5 animate-spin" />
+        ) : (
+          <img src="/google-g.svg" alt="" width={20} height={20} />
+        )}
+      </span>
+      {loading ? "Opening Google..." : label}
     </button>
   );
 }
@@ -147,7 +161,9 @@ function EmailDivider() {
   return (
     <div className="flex items-center gap-3">
       <div className="h-px flex-1 bg-border" />
-      <span className="text-xs text-muted-foreground">or</span>
+      <span className="text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+        or use email
+      </span>
       <div className="h-px flex-1 bg-border" />
     </div>
   );
@@ -187,8 +203,9 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
     try {
       await signInWithGoogle(from);
     } catch (err) {
-      setOauthSubmitting(false);
       setError(err instanceof Error ? err.message : "Could not open Google sign-in.");
+    } finally {
+      setOauthSubmitting(false);
     }
   }
 
@@ -211,7 +228,11 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
       {googleAuthEnabled && (
         <>
           <Stagger delay="40ms">
-            <GoogleButton loading={oauthSubmitting} onClick={() => void handleGoogleSignIn()} />
+            <GoogleButton
+              mode="sign-in"
+              loading={oauthSubmitting}
+              onClick={() => void handleGoogleSignIn()}
+            />
           </Stagger>
 
           <Stagger delay="100ms">
@@ -229,6 +250,9 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
             id="si-email"
             type="email"
             autoComplete="email"
+            inputMode="email"
+            placeholder="you@school.edu"
+            className="h-12 text-base"
             required
             value={email}
             onChange={(e) => setEmail(e.currentTarget.value)}
@@ -289,8 +313,9 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
     try {
       await signInWithGoogle("/");
     } catch (err) {
-      setOauthSubmitting(false);
       setError(err instanceof Error ? err.message : "Could not open Google sign-in.");
+    } finally {
+      setOauthSubmitting(false);
     }
   }
 
@@ -338,7 +363,11 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
       {googleAuthEnabled && (
         <>
           <Stagger delay="40ms">
-            <GoogleButton loading={oauthSubmitting} onClick={() => void handleGoogleSignIn()} />
+            <GoogleButton
+              mode="sign-up"
+              loading={oauthSubmitting}
+              onClick={() => void handleGoogleSignIn()}
+            />
           </Stagger>
 
           <Stagger delay="100ms">
@@ -355,6 +384,8 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           <Input
             id="su-name"
             autoComplete="nickname"
+            placeholder="What should we call you?"
+            className="h-12 text-base"
             required
             value={displayName}
             onChange={(e) => setDisplayName(e.currentTarget.value)}
@@ -371,6 +402,9 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
             id="su-email"
             type="email"
             autoComplete="email"
+            inputMode="email"
+            placeholder="you@school.edu"
+            className="h-12 text-base"
             required
             value={email}
             onChange={(e) => setEmail(e.currentTarget.value)}
@@ -388,7 +422,9 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
             autoComplete="new-password"
             minLength={8}
           />
-          <p className="mt-1.5 pl-0.5 text-xs text-muted-foreground">At least 8 characters.</p>
+          <p className="mt-1.5 pl-0.5 text-xs text-muted-foreground">
+            At least 8 characters.
+          </p>
         </div>
       </Stagger>
 
@@ -418,9 +454,12 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
     setLoading(true);
 
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/auth/reset`,
-      });
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        {
+          redirectTo: `${window.location.origin}/auth/reset`,
+        },
+      );
 
       if (resetError) {
         const msg = resetError.message.toLowerCase();
@@ -469,7 +508,10 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
         ) : (
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
             <div className="space-y-1.5">
-              <label htmlFor="fp-email" className="text-sm font-medium text-muted-foreground">
+              <label
+                htmlFor="fp-email"
+                className="text-sm font-medium text-muted-foreground"
+              >
                 Email
               </label>
               <Input
@@ -513,6 +555,7 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [slideDir, setSlideDir] = useState<"left" | "right">("right");
   const [showForgot, setShowForgot] = useState(false);
+  const [nativeAuthError, setNativeAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     void initialize();
@@ -529,13 +572,23 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
     }
   }, [isAuthenticated, navigate]);
 
+  useEffect(() => {
+    function handleNativeAuthError(event: Event) {
+      const message = (event as CustomEvent<string>).detail;
+      if (message) setNativeAuthError(message);
+    }
+
+    window.addEventListener("mabuhai:auth-error", handleNativeAuthError);
+    return () => window.removeEventListener("mabuhai:auth-error", handleNativeAuthError);
+  }, []);
+
   function switchTab(t: Tab) {
     setSlideDir(t === "sign-up" ? "right" : "left");
     setTab(t);
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <main className="relative min-h-dvh overflow-x-hidden overflow-y-auto bg-background text-foreground">
       {/* Animated gradient overlay */}
       <div
         aria-hidden
@@ -560,52 +613,93 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
         <div className="absolute -right-16 bottom-0 h-56 w-56 rounded-full bg-secondary/20 blur-3xl" />
       </div>
 
-      {/* Card */}
-      <div className="relative w-full max-w-md overflow-hidden rounded-[1.5rem] border border-white/10 bg-card/80 px-8 py-9 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl">
-        {/* Header */}
-        <div className="mb-7 space-y-1">
-          <h1 className="font-serif text-[2.25rem] leading-tight tracking-[-0.03em] text-foreground">
-            Mabuh-ai
-          </h1>
-          <p className="font-sans text-sm text-muted-foreground">
-            A quiet space to breathe and reflect.
+      <section className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-[calc(var(--safe-bottom)+1.25rem)] pt-[calc(var(--safe-top)+1.25rem)] sm:px-7">
+        <header className="flex flex-col items-center text-center">
+          <div className="relative">
+            <div
+              aria-hidden
+              className="absolute inset-3 rounded-full bg-primary/20 blur-2xl"
+            />
+            <img
+              src="/app-logo.svg"
+              alt="Mabuh-ai"
+              width={104}
+              height={104}
+              className="relative size-[6.5rem] drop-shadow-[0_16px_28px_rgba(0,0,0,0.28)]"
+            />
+          </div>
+          <p className="-mt-1 text-xs font-medium tracking-wide text-muted-foreground">
+            Your quiet campus companion
           </p>
+        </header>
+
+        <div className="flex flex-1 flex-col justify-center py-6">
+          <div className="mb-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-tertiary">
+              {tab === "sign-in" ? "Welcome back" : "Start your space"}
+            </p>
+            <h1 className="mt-2 font-serif text-[2rem] leading-[1.08] tracking-[-0.04em]">
+              {tab === "sign-in" ? "Take a breath. You’re back." : "A space that’s yours."}
+            </h1>
+            <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+              {tab === "sign-in"
+                ? "Sign in to continue your check-ins and reflections."
+                : "Create an account for private check-ins, reflection, and support."}
+            </p>
+          </div>
+
+          <div
+            className="mb-5 flex min-h-12 rounded-full bg-surface-highest p-1"
+            role="tablist"
+            aria-label="Account access"
+          >
+            {(["sign-in", "sign-up"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="tab"
+                aria-selected={tab === t}
+                onClick={() => switchTab(t)}
+                className={cn(
+                  "flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200",
+                  "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20",
+                  tab === t
+                    ? "bg-primary/20 text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                    : "text-muted-foreground active:bg-white/5",
+                )}
+              >
+                {t === "sign-in" ? "Sign in" : "Sign up"}
+              </button>
+            ))}
+          </div>
+
+          {nativeAuthError && (
+            <div className="mb-4">
+              <ErrorBanner message={nativeAuthError} />
+            </div>
+          )}
+
+          <div
+            key={tab}
+            role="tabpanel"
+            className={cn(
+              "animate-in fade-in-0 duration-200",
+              slideDir === "right" ? "slide-in-from-right-4" : "slide-in-from-left-4",
+            )}
+          >
+            {tab === "sign-in" ? (
+              <SignInForm onForgotPassword={() => setShowForgot(true)} />
+            ) : (
+              <SignUpForm onSuccess={() => switchTab("sign-in")} />
+            )}
+          </div>
         </div>
 
-        {/* Tab switcher */}
-        <div className="mb-7 flex rounded-full bg-surface-highest p-1">
-          {(["sign-in", "sign-up"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => switchTab(t)}
-              className={cn(
-                "flex-1 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
-                tab === t
-                  ? "bg-primary/20 text-primary"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t === "sign-in" ? "Sign in" : "Sign up"}
-            </button>
-          ))}
-        </div>
-
-        {/* Active form */}
-        <div
-          key={tab}
-          className={cn(
-            "animate-in fade-in-0 duration-200",
-            slideDir === "right" ? "slide-in-from-right-4" : "slide-in-from-left-4",
-          )}
-        >
-          {tab === "sign-in" ? (
-            <SignInForm onForgotPassword={() => setShowForgot(true)} />
-          ) : (
-            <SignUpForm onSuccess={() => switchTab("sign-in")} />
-          )}
-        </div>
-      </div>
+        <footer className="text-center text-[0.6875rem] leading-5 text-muted-foreground/70">
+          <p>Your reflections stay connected to your account.</p>
+          <p>Mabuh-ai supports wellbeing and does not replace professional care.</p>
+        </footer>
+      </section>
 
       {showForgot && <ForgotPasswordModal onClose={() => setShowForgot(false)} />}
     </main>

@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import type { Provider, Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import {
+  getNativeGoogleRedirectUrl,
+  initializeNativeAuthDeepLinks,
+  isNativeApp,
+  openNativeOAuthUrl,
+} from "@/lib/auth/nativeOAuth";
 
 export type Profile = {
   id: string;
@@ -114,6 +120,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     authInitializationPromise = (async () => {
       try {
+        await initializeNativeAuthDeepLinks();
+
         const { data } = await supabase.auth.getSession();
         const snapshot = await getAuthSnapshot(data.session);
 
@@ -184,17 +192,28 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signInWithGoogle: async (nextPath = "/") => {
     const provider: Provider = "google";
-    const next = encodeURIComponent(nextPath.startsWith("/") ? nextPath : "/");
-    const { error } = await supabase.auth.signInWithOAuth({
+    const safeNextPath = nextPath.startsWith("/") ? nextPath : "/";
+    const native = isNativeApp();
+    const next = encodeURIComponent(safeNextPath);
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: getAuthRedirectUrl(`/auth/callback?next=${next}`),
+        redirectTo: native
+          ? getNativeGoogleRedirectUrl(safeNextPath)
+          : getAuthRedirectUrl(`/auth/callback?next=${next}`),
+        skipBrowserRedirect: native,
         queryParams: {
           prompt: "select_account",
         },
       },
     });
     if (error) throw error;
+
+    if (native) {
+      if (!data.url)
+        throw new Error("Google sign-in did not return an authorization URL.");
+      await openNativeOAuthUrl(data.url);
+    }
   },
 
   resendConfirmation: async (email) => {

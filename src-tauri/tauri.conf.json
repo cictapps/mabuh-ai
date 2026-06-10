@@ -33,6 +33,14 @@
     ]
   },
   "plugins": {
+    "deep-link": {
+      "mobile": [
+        {
+          "scheme": ["mabuhai"],
+          "appLink": false
+        }
+      ]
+    },
     "http": {
       "dangerousRemoteDomainIpcAccess": [
         {

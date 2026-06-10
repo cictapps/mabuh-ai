@@ -703,27 +703,20 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
               justifyContent: "center",
               width: 32,
               height: 32,
-              borderRadius: 12,
-              background:
-                "linear-gradient(140deg, rgba(188,194,255,0.85), rgba(212,187,255,0.7))",
-              color: "#1a1c2b",
+              borderRadius: 10,
+              overflow: "hidden",
               boxShadow: "0 14px 30px -16px rgba(188,194,255,0.5)",
               flexShrink: 0,
             }}
             aria-hidden
           >
-            <span
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 16,
-                fontWeight: 600,
-                lineHeight: 1,
-                display: "block",
-                transform: "translateY(0.5px)",
-              }}
-            >
-              M
-            </span>
+            <img
+              src="/app-logo.svg"
+              alt=""
+              width={32}
+              height={32}
+              style={{ display: "block", width: "100%", height: "100%" }}
+            />
           </div>
           <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
             <span

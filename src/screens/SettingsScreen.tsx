@@ -810,13 +810,36 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         >
           <InfoTile label="App" value="Mabuh-ai" />
           <InfoTile label="Version" value={APP_VERSION} />
-          <InfoTile
-            label="Storage"
-            value="Supabase Postgres"
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 18,
+            padding: "14px 12px",
+            borderRadius: 14,
+            background: "rgba(188,194,255,0.04)",
+            border: "1px solid rgba(188,194,255,0.06)",
+          }}
+        >
+          <img
+            src="/wvsu-logo.svg"
+            alt="West Visayas State University"
+            style={{ height: 56, width: "auto", opacity: 0.9 }}
           />
-          <InfoTile
-            label="Theme"
-            value="Twilight"
+          <span
+            aria-hidden
+            style={{
+              width: 1,
+              height: 40,
+              background: "rgba(188,194,255,0.12)",
+            }}
+          />
+          <img
+            src="/cict-logo.svg"
+            alt="College of Information and Communications Technology"
+            style={{ height: 56, width: "auto", opacity: 0.9 }}
           />
         </div>
         <p
@@ -827,8 +850,21 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             margin: 0,
           }}
         >
-          Mabuh-ai is a quiet space for reflection. Your entries are private —
-          protected by row-level security in the database.
+          Mabuh-ai is a quiet space for reflection, made with care for students.
+        </p>
+        <p
+          style={{
+            fontSize: 11,
+            color: "rgba(188,194,255,0.45)",
+            lineHeight: 1.6,
+            margin: 0,
+            textAlign: "center",
+            fontStyle: "italic",
+          }}
+        >
+          Created with care by BSIS students of West Visayas State University —
+          College of Information and Communications Technology, as a project
+          for their Mobile App Development class.
         </p>
       </Section>
 

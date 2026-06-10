@@ -13,7 +13,12 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
-import { ActivitySelections, ActivitySectionId, MoodType, SocialInteraction } from "../types";
+import {
+  ActivitySelections,
+  ActivitySectionId,
+  MoodType,
+  SocialInteraction,
+} from "../types";
 import { getMoodMeta, SUGGESTIONS } from "../data";
 import { MoodArc } from "../components/mood/MoodArc";
 import { MoodSelector } from "../components/mood/MoodSelector";
@@ -253,7 +258,15 @@ function Stepper({
   );
 }
 
-function LoadMeter({ value, max = 5, color }: { value: number; max?: number; color: string }) {
+function LoadMeter({
+  value,
+  max = 5,
+  color,
+}: {
+  value: number;
+  max?: number;
+  color: string;
+}) {
   const pct = Math.max(0, Math.min(1, value / max));
   return (
     <div
@@ -285,9 +298,7 @@ function LoadMeter({ value, max = 5, color }: { value: number; max?: number; col
               style={{
                 height: 6,
                 borderRadius: 999,
-                background: isFilled
-                  ? color
-                  : "rgba(188,194,255,0.10)",
+                background: isFilled ? color : "rgba(188,194,255,0.10)",
                 opacity: isFilled ? 0.9 : 1,
                 transition: "background 0.2s ease",
               }}
@@ -385,16 +396,16 @@ function IdlePrompts() {
             color: "rgba(188,194,255,0.4)",
           }}
         >
-            <span
-              aria-hidden
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: "#bcc2ff",
-                boxShadow: "0 0 8px rgba(188,194,255,0.5)",
-              }}
-            />
+          <span
+            aria-hidden
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: "#bcc2ff",
+              boxShadow: "0 0 8px rgba(188,194,255,0.5)",
+            }}
+          />
           about a minute
         </span>
       </div>
@@ -508,9 +519,7 @@ function CheckInDetailCard({
     <div
       style={{
         borderRadius: 20,
-        background: filled
-          ? "rgba(188,194,255,0.05)"
-          : "rgba(188,194,255,0.03)",
+        background: filled ? "rgba(188,194,255,0.05)" : "rgba(188,194,255,0.03)",
         border: filled
           ? "1px solid rgba(188,194,255,0.10)"
           : "1px solid rgba(188,194,255,0.06)",
@@ -552,12 +561,8 @@ function CheckInDetailCard({
             width: 30,
             height: 30,
             borderRadius: 9,
-            background: filled
-              ? "rgba(188,194,255,0.16)"
-              : "rgba(188,194,255,0.07)",
-            color: filled
-              ? "rgba(220,224,255,0.95)"
-              : "rgba(188,194,255,0.55)",
+            background: filled ? "rgba(188,194,255,0.16)" : "rgba(188,194,255,0.07)",
+            color: filled ? "rgba(220,224,255,0.95)" : "rgba(188,194,255,0.55)",
             transition: "background 0.2s ease, color 0.2s ease",
             flexShrink: 0,
           }}
@@ -572,9 +577,7 @@ function CheckInDetailCard({
               fontWeight: 600,
               letterSpacing: "1.1px",
               textTransform: "uppercase",
-              color: filled
-                ? "rgba(232,236,255,0.95)"
-                : "rgba(220,224,255,0.75)",
+              color: filled ? "rgba(232,236,255,0.95)" : "rgba(220,224,255,0.75)",
               transition: "color 0.2s ease",
               margin: 0,
               lineHeight: 1.2,
@@ -673,7 +676,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   const reducedMotion = usePrefersReducedMotion();
 
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const greeting =
+    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const idleSubline = IDLE_SUBLINES[timeBucket(hour)];
 
   const dateLabel = new Intl.DateTimeFormat("en-US", {
@@ -765,6 +769,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   const affirmationRef = useRef<HTMLDivElement | null>(null);
   const rippleRef = useRef<HTMLDivElement | null>(null);
   const arcWrapperRef = useRef<HTMLDivElement | null>(null);
+  const arcLogoRef = useRef<HTMLDivElement | null>(null);
+  const arcLogoGlowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     return () => {
@@ -806,6 +812,34 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
           repeat: -1,
         });
       }
+
+      if (arcLogoGlowRef.current) {
+        gsap.fromTo(
+          arcLogoGlowRef.current,
+          { scale: 0.94, opacity: 0.5 },
+          {
+            scale: 1.1,
+            opacity: 0.95,
+            duration: 5,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+          },
+        );
+        if (arcLogoRef.current) {
+          gsap.fromTo(
+            arcLogoRef.current,
+            { filter: "drop-shadow(0 0 0px rgba(255,255,255,0))" },
+            {
+              filter: `drop-shadow(0 0 16px ${hexToRgba(meta.color, 0.6)}) drop-shadow(0 0 36px ${hexToRgba(meta.color, 0.35)})`,
+              duration: 5,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+            },
+          );
+        }
+      }
     },
     { scope: rootRef, dependencies: [reducedMotion] },
   );
@@ -822,11 +856,31 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
           ease: "power2.out",
         });
       }
+      if (arcLogoGlowRef.current) {
+        gsap.to(arcLogoGlowRef.current, {
+          background: `radial-gradient(circle, ${hexToRgba(meta.color, 0.55)}, transparent 65%)`,
+          duration: 0.6,
+          ease: "power2.out",
+        });
+      }
+      if (arcLogoRef.current) {
+        gsap.to(arcLogoRef.current, {
+          backgroundColor: meta.color,
+          duration: 0.6,
+          ease: "power2.out",
+        });
+      }
       if (sublineRef.current) {
         gsap.fromTo(
           sublineRef.current,
           { y: 6, opacity: 0.5 },
-          { y: 0, opacity: 1, color: hexToRgba(meta.color, 1), duration: 0.5, ease: "power2.out" },
+          {
+            y: 0,
+            opacity: 1,
+            color: hexToRgba(meta.color, 1),
+            duration: 0.5,
+            ease: "power2.out",
+          },
         );
       }
     });
@@ -843,10 +897,23 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
       gsap.fromTo(
         targets,
         { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.55, ease: "power2.out", stagger: 0.09, delay: 0.05 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.55,
+          ease: "power2.out",
+          stagger: 0.09,
+          delay: 0.05,
+        },
       );
     } else {
-      gsap.to(targets, { y: -6, opacity: 0, duration: 0.2, ease: "power2.in", stagger: 0.02 });
+      gsap.to(targets, {
+        y: -6,
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in",
+        stagger: 0.02,
+      });
     }
   }, [showDetails, reducedMotion]);
 
@@ -915,11 +982,19 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         );
       }
       if (affirmationRef.current) {
-        const items = affirmationRef.current.querySelectorAll<HTMLElement>("[data-affirm]");
+        const items =
+          affirmationRef.current.querySelectorAll<HTMLElement>("[data-affirm]");
         gsap.fromTo(
           items,
           { y: 10, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.55, ease: "power2.out", stagger: 0.08, delay: 0.1 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.55,
+            ease: "power2.out",
+            stagger: 0.08,
+            delay: 0.1,
+          },
         );
         const dot = affirmationRef.current.querySelector<HTMLElement>("[data-breath]");
         if (dot) {
@@ -989,43 +1064,43 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
       />
 
       <div ref={headerRef} style={{ position: "relative", zIndex: 1 }}>
-          <div
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 6,
+            flexWrap: "wrap",
+          }}
+        >
+          <p
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              marginBottom: 6,
-              flexWrap: "wrap",
+              fontSize: "clamp(10px, 2.6vw, 11px)",
+              fontWeight: 600,
+              letterSpacing: "1.3px",
+              textTransform: "uppercase",
+              color: "rgba(220,224,255,0.72)",
+              margin: 0,
             }}
           >
-            <p
+            {dateLabel}
+          </p>
+          {todayCountLabel ? (
+            <span
               style={{
-                fontSize: "clamp(10px, 2.6vw, 11px)",
+                fontSize: 10,
                 fontWeight: 600,
-                letterSpacing: "1.3px",
-                textTransform: "uppercase",
-                color: "rgba(220,224,255,0.72)",
-                margin: 0,
+                letterSpacing: "0.4px",
+                padding: "2px 8px",
+                borderRadius: 999,
+                background: "rgba(188,194,255,0.08)",
+                color: "rgba(188,194,255,0.6)",
               }}
             >
-              {dateLabel}
-            </p>
-            {todayCountLabel ? (
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  letterSpacing: "0.4px",
-                  padding: "2px 8px",
-                  borderRadius: 999,
-                  background: "rgba(188,194,255,0.08)",
-                  color: "rgba(188,194,255,0.6)",
-                }}
-              >
-                {todayCountLabel}
-              </span>
-            ) : null}
-          </div>
+              {todayCountLabel}
+            </span>
+          ) : null}
+        </div>
         <h1
           className="font-serif"
           style={{
@@ -1054,15 +1129,60 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         </p>
       </div>
 
-      <div
-        ref={arcRef}
-        style={{ position: "relative", zIndex: 1, width: "100%" }}
-      >
+      <div ref={arcRef} style={{ position: "relative", zIndex: 1, width: "100%" }}>
         <div
           ref={arcWrapperRef}
-          style={{ width: "100%", maxWidth: 420, margin: "0 auto" }}
+          style={{ width: "100%", maxWidth: 420, margin: "0 auto", position: "relative" }}
         >
           <MoodArc selectedMood={selectedMood} onSelect={onSelectMood} />
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "70%",
+              width: 168,
+              height: 168,
+              transform: "translate(-50%, -50%)",
+              pointerEvents: "none",
+            }}
+          >
+            <div
+              ref={arcLogoGlowRef}
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: 24,
+                background: `radial-gradient(circle, ${hexToRgba(meta.color, 0.55)}, transparent 65%)`,
+                filter: "blur(18px)",
+                willChange: "transform, opacity",
+                transformOrigin: "center",
+              }}
+            />
+            <div
+              ref={arcLogoRef}
+              role="img"
+              aria-label="MabuhAi logo"
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: 24,
+                backgroundColor: meta.color,
+                WebkitMaskImage: "url(/app-logo-light.svg)",
+                maskImage: "url(/app-logo-light.svg)",
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                WebkitMaskPosition: "center",
+                maskPosition: "center",
+                WebkitMaskSize: "contain",
+                maskSize: "contain",
+                transition: "background-color 0.6s ease",
+                transformOrigin: "center",
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -1070,9 +1190,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         <MoodSelector selectedMood={selectedMood} />
       </div>
 
-      {!showDetails && (
-        <IdlePrompts />
-      )}
+      {!showDetails && <IdlePrompts />}
 
       {isSaved ? (
         <div
@@ -1138,7 +1256,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
               lineHeight: 1.2,
             }}
           >
-            Saved with care. <span style={{ color: savedMeta.color }}>Thank you</span> for being here.
+            Saved with care. <span style={{ color: savedMeta.color }}>Thank you</span> for
+            being here.
           </p>
           {todaysCount > 1 ? (
             <p
@@ -1240,10 +1359,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         </div>
       ) : showDetails ? (
         <>
-          <div
-            ref={detailsRef}
-            style={{ ...detailsStyle, gap: 14 }}
-          >
+          <div ref={detailsRef} style={{ ...detailsStyle, gap: 14 }}>
             {showCrisisHint && (
               <div
                 data-stagger
@@ -1263,10 +1379,14 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                   zIndex: 1,
                 }}
               >
-                <Heart size={14} style={{ flexShrink: 0, color: "rgba(255,185,84,0.85)" }} />
+                <Heart
+                  size={14}
+                  style={{ flexShrink: 0, color: "rgba(255,185,84,0.85)" }}
+                />
                 <span>
-                  You don't have to carry this alone. The <strong style={{ color: "rgba(255,225,170,0.95)" }}>Support</strong> tab is here
-                  whenever you'd like someone to talk to.
+                  You don't have to carry this alone. The{" "}
+                  <strong style={{ color: "rgba(255,225,170,0.95)" }}>Support</strong> tab
+                  is here whenever you'd like someone to talk to.
                 </span>
               </div>
             )}
@@ -1496,7 +1616,9 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 </div>
                 <div style={{ height: 1, background: "rgba(188,194,255,0.08)" }} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <p style={helperStyle}>Even a single line is enough. This is just for you.</p>
+                  <p style={helperStyle}>
+                    Even a single line is enough. This is just for you.
+                  </p>
                   <JournalInput
                     value={journal}
                     onChange={onJournalChange}
@@ -1561,9 +1683,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 filled={suggestions.length > 0}
                 expanded={isCardOpen("suggestions")}
                 onToggle={() => toggleHeavyCard("suggestions")}
-                summary={
-                  suggestions.length > 0 ? suggestions[0].title : undefined
-                }
+                summary={suggestions.length > 0 ? suggestions[0].title : undefined}
                 emptyHint="Optional"
               >
                 <p style={helperStyle}>
@@ -1574,10 +1694,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                     ? suggestions
                     : suggestions.slice(0, 1)
                   ).map((suggestion) => (
-                    <SuggestionCard
-                      key={suggestion.id}
-                      suggestion={suggestion}
-                    />
+                    <SuggestionCard key={suggestion.id} suggestion={suggestion} />
                   ))}
                   {!isCardOpen("suggestions") && suggestions.length > 1 && (
                     <span
@@ -1734,8 +1851,9 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 lineHeight: 1.55,
               }}
             >
-              You can save whenever feels right, even with nothing filled in. A few little notes
-              help you notice patterns later, but your mood is always the part that matters most.
+              You can save whenever feels right, even with nothing filled in. A few little
+              notes help you notice patterns later, but your mood is always the part that
+              matters most.
             </div>
           )}
         </>

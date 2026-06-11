@@ -40,8 +40,15 @@ function readPersistedNav(
     const raw = window.sessionStorage.getItem(NAV_STATE_KEY);
     if (!raw) return fallback;
     const parsed = JSON.parse(raw) as Partial<PersistedNavState>;
+    // Settings is a transient screen reached only via the top-right
+    // button — it is not a valid bottom-nav tab and must never be
+    // restored as the landing hub after sign-in.
+    const restoredHub =
+      parsed.activeHub && parsed.activeHub !== "settings"
+        ? parsed.activeHub
+        : fallback.activeHub;
     return {
-      activeHub: parsed.activeHub ?? fallback.activeHub,
+      activeHub: restoredHub,
       supportView: parsed.supportView ?? fallback.supportView,
     };
   } catch {
@@ -70,6 +77,10 @@ export default function App({
   // the user to the same tab they were on before leaving /.
   useEffect(() => {
     if (location.pathname !== "/") return;
+    // Settings is a transient top-bar screen; never persist it as the
+    // active hub or the next session would land on settings instead of
+    // the bottom-nav home (checkin).
+    if (activeHub === "settings") return;
     try {
       window.sessionStorage.setItem(
         NAV_STATE_KEY,

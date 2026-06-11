@@ -3,7 +3,6 @@ import {
   ArrowRight,
   BookOpen,
   Check,
-  Heart,
   MessageCircleHeart,
   Sparkles,
   Sun,
@@ -148,27 +147,27 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             borderRadius: "50%",
             background:
               "linear-gradient(160deg, rgba(188,194,255,0.92), rgba(212,187,255,0.7) 60%, rgba(255,185,84,0.55))",
-            boxShadow: "0 28px 60px -28px rgba(188,194,255,0.55)",
+            boxShadow:
+              "0 28px 60px -28px rgba(188,194,255,0.55), 0 0 48px -8px rgba(212,187,255,0.35)",
             display: "grid",
             placeItems: "center",
             color: "#1a1c2b",
+            animation:
+              "onb-glow 4.5s ease-in-out infinite, onb-float 4.5s ease-in-out infinite",
+            willChange: "transform, box-shadow",
           }}
         >
-          <div
+          <img
+            src="/app-logo-light.svg"
+            alt=""
+            aria-hidden
             style={{
-              width: "clamp(40px, 11.5vw, 56px)",
-              height: "clamp(40px, 11.5vw, 56px)",
-              display: "grid",
-              placeItems: "center",
+              width: "clamp(54px, 15vw, 72px)",
+              height: "clamp(54px, 15vw, 72px)",
+              filter:
+                "drop-shadow(0 0 6px rgba(255,255,255,0.6)) drop-shadow(0 0 16px rgba(212,187,255,0.55)) drop-shadow(0 0 28px rgba(188,194,255,0.4))",
             }}
-          >
-            <Heart
-              size={56}
-              strokeWidth={1.6}
-              fill="rgba(26,28,43,0.85)"
-              style={{ width: "100%", height: "100%" }}
-            />
-          </div>
+          />
         </div>
         <span
           style={{
@@ -180,6 +179,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             borderRadius: "50%",
             background: "rgba(255,185,84,0.75)",
             boxShadow: "0 0 18px rgba(255,185,84,0.5)",
+            animation: "onb-twinkle 3.2s ease-in-out infinite",
           }}
         />
         <span
@@ -192,6 +192,8 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             borderRadius: "50%",
             background: "rgba(212,187,255,0.7)",
             boxShadow: "0 0 14px rgba(212,187,255,0.4)",
+            animation: "onb-twinkle 3.2s ease-in-out infinite",
+            animationDelay: "1.6s",
           }}
         />
       </div>

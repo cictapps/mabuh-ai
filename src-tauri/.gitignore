@@ -6,3 +6,8 @@
 # will have schema files for capabilities auto-completion
 /gen/schemas
 src-tauri/.cargo/config.toml
+
+# Android release signing (never commit)
+gen/android/key.properties
+*.keystore
+*.jks

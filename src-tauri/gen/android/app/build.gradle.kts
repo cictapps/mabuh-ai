@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
@@ -13,6 +14,22 @@ val tauriProperties = Properties().apply {
     }
 }
 
+// Tauri signing — do not delete; see ../key.properties.example.
+// Reads signing material from `key.properties` (local dev, gitignored) or
+// from TAURI_SIGNING_* env vars (CI). Never commit real secrets.
+val signingProps = Properties().apply {
+    val f = rootProject.file("key.properties")
+    if (f.exists()) FileInputStream(f).use { load(it) }
+}
+fun signingValue(name: String): String? {
+    val fromFile = signingProps.getProperty(name)
+    if (!fromFile.isNullOrBlank()) return fromFile
+    val envKey = "TAURI_SIGNING_" + name.uppercase()
+        .replace(".", "_")
+        .replace("ALIAS", "KEY_ALIAS")
+    return System.getenv(envKey)
+}
+
 android {
     compileSdk = 36
     namespace = "com.user.mabuh_ai"
@@ -23,6 +40,18 @@ android {
         targetSdk = 36
         versionCode = tauriProperties.getProperty("tauri.android.versionCode", "1").toInt()
         versionName = tauriProperties.getProperty("tauri.android.versionName", "1.0")
+    }
+    signingConfigs {
+        create("release") {
+            val store = signingValue("storeFile")
+            val storePwd = signingValue("storePassword")
+            if (!store.isNullOrBlank() && !storePwd.isNullOrBlank()) {
+                storeFile = file(store)
+                storePassword = storePwd
+                keyAlias = signingValue("keyAlias")
+                keyPassword = signingValue("keyPassword")
+            }
+        }
     }
     buildTypes {
         getByName("debug") {
@@ -37,6 +66,9 @@ android {
             }
         }
         getByName("release") {
+            if (signingConfigs.getByName("release").storeFile != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = true
             proguardFiles(
                 *fileTree(".") { include("**/*.pro") }

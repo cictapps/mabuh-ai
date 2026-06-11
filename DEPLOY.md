@@ -419,14 +419,14 @@ adb install -r src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-u
 
 ```bash
 # 1. Generate a release keystore (one time)
-keytool -genkey -v -keystore mabuh-release.keystore \
-  -alias mabuh -keyalg RSA -keysize 2048 -validity 10000
+keytool -genkey -v -keystore ~/keystores/cictappskey.keystore \
+  -alias cictkey -keyalg RSA -keysize 2048 -validity 10000
 
-# 2. Put these in src-tauri/gen/android/key.properties (gitignored)
-#    storeFile=../mabuh-release.keystore
-#    storePassword=…
-#    keyAlias=mabuh
-#    keyPassword=…
+# 2. Create src-tauri/gen/android/key.properties (gitignored, never commit)
+#    Copy from key.properties.example and fill in the real values.
+cp src-tauri/gen/android/key.properties.example \
+   src-tauri/gen/android/key.properties
+# edit the four fields (storeFile, storePassword, keyAlias, keyPassword)
 
 # 3. Build
 npm run build
@@ -435,6 +435,37 @@ cargo tauri android build --apk --aab --target aarch64
 
 The signed `.aab` lands at
 `src-tauri/gen/android/app/build/outputs/bundle/release/app.aab`.
+
+#### 4.3.1 CI / build-machine signing
+
+In CI, do **not** create `key.properties` from a checked-in template. Pass
+the four values as environment variables; `build.gradle.kts` will pick them
+up automatically:
+
+| Env var | What |
+|---|---|
+| `TAURI_SIGNING_STORE_FILE` | Absolute path to the keystore on the build machine |
+| `TAURI_SIGNING_STORE_PASSWORD` | Keystore password |
+| `TAURI_SIGNING_KEY_ALIAS` | Key alias (e.g. `cictkey`) |
+| `TAURI_SIGNING_KEY_PASSWORD` | Key password |
+
+Example GitHub Actions step:
+
+```yaml
+- name: Build signed Android release
+  env:
+    TAURI_SIGNING_STORE_FILE: ${{ github.workspace }}/keystores/cictappskey.keystore
+    TAURI_SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+    TAURI_SIGNING_KEY_ALIAS: cictkey
+    TAURI_SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+  run: |
+    npm run build
+    cargo tauri android build --apk --aab --target aarch64
+```
+
+If none of `key.properties` or the env vars are present, the `release`
+build type falls back to the debug signing key — the APK will not install
+on a release device, so watch for that in CI logs.
 
 ### 4.4 CI / build-machine env vars
 

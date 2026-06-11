@@ -223,6 +223,26 @@ input[type="password"]::-ms-clear {
   transform-origin: center;
 }
 
+@keyframes settings-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(120deg);
+  }
+}
+
+.settings-spin {
+  animation: settings-spin 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-spin {
+    animation: none;
+  }
+}
+
 @keyframes onb-pulse {
   0%, 100% {
     transform: scale(1);

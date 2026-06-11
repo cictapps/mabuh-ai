@@ -357,19 +357,30 @@ function IdlePrompts() {
   return (
     <div
       aria-hidden={false}
+      className="relative overflow-hidden"
       style={{
-        position: "relative",
         zIndex: 1,
         display: "flex",
         flexDirection: "column",
         gap: 8,
-        padding: "14px 14px 12px",
-        borderRadius: 18,
-        background:
-          "linear-gradient(180deg, rgba(188,194,255,0.05), rgba(188,194,255,0.02))",
-        border: "1px solid rgba(188,194,255,0.07)",
+        padding: "18px 16px 14px",
+        borderRadius: "1.75rem",
+        background: "rgba(188,194,255,0.04)",
+        border: "1px solid rgba(188,194,255,0.10)",
+        boxShadow: "0 28px 80px -40px rgba(8,10,18,0.85)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
       }}
     >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.12),transparent_60%)] blur-2xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(212,187,255,0.08),transparent_60%)] blur-2xl"
+      />
+      <div className="relative">
       <div
         style={{
           display: "flex",
@@ -502,6 +513,7 @@ function IdlePrompts() {
       >
         This little space is just for you. No scores, no streaks — just a quiet moment.
       </p>
+      </div>
     </div>
   );
 }
@@ -519,16 +531,26 @@ function CheckInDetailCard({
   const headerId = `checkin-card-${title.toLowerCase().replace(/\s+/g, "-")}`;
   return (
     <div
+      className="relative overflow-hidden"
       style={{
-        borderRadius: 20,
-        background: filled ? "rgba(188,194,255,0.05)" : "rgba(188,194,255,0.03)",
-        border: filled
-          ? "1px solid rgba(188,194,255,0.10)"
-          : "1px solid rgba(188,194,255,0.06)",
-        overflow: "hidden",
+        borderRadius: "1.75rem",
+        background: "rgba(188,194,255,0.04)",
+        border: "1px solid rgba(188,194,255,0.10)",
+        boxShadow: "0 28px 80px -40px rgba(8,10,18,0.85)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
         transition: "background 0.2s ease, border-color 0.2s ease",
       }}
     >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.12),transparent_60%)] blur-2xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(212,187,255,0.08),transparent_60%)] blur-2xl"
+      />
+      <div className="relative">
       <button
         type="button"
         onClick={onToggle}
@@ -639,6 +661,7 @@ function CheckInDetailCard({
         >
           {children}
         </div>
+      </div>
       </div>
     </div>
   );
@@ -1034,18 +1057,31 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   return (
     <div
       ref={rootRef}
-      className="checkin-root screen-enter"
-      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 160px)" }}
+      className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
+      style={{
+        paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)",
+        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 160px)",
+      }}
     >
       <TopBarSettingsButton onClick={onOpenSettings} />
 
-      {/* Soft static glow tied to the page */}
+      {/* Page-level mood-tinted glow at the very top */}
       <div
         className="checkin-glow"
         style={{
           ["--checkin-glow" as string]: hexToRgba(meta.color, 0.22),
         }}
         aria-hidden
+      />
+
+      {/* Decorative background blobs (matches journey aesthetic) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-20 top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.10),transparent_60%)] blur-3xl"
       />
 
       {/* Breath circle aligned to the arc's center, recolored to the mood */}
@@ -1068,72 +1104,91 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         }}
       />
 
-      <div ref={headerRef} style={{ position: "relative", zIndex: 1 }}>
+      {/* Header card */}
+      <div
+        ref={headerRef}
+        className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.10)] bg-card p-5 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl"
+        style={{
+          paddingRight: 72,
+          clipPath: `path('M 28 0 H calc(100% - 72px) A 52 52 0 0 1 calc(100% - 0px) 48 V calc(100% - 28px) A 28 28 0 0 1 calc(100% - 56px) calc(100% - 0px) H 28 A 28 28 0 0 1 0 calc(100% - 56px) V 28 A 28 28 0 0 1 28 0 Z')`,
+        }}
+      >
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginBottom: 6,
-            flexWrap: "wrap",
-          }}
-        >
-          <p
+          aria-hidden
+          className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.16),transparent_60%)] blur-2xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 -left-12 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.16),transparent_60%)] blur-2xl"
+        />
+        <div className="relative">
+          <div
             style={{
-              fontSize: "clamp(10px, 2.6vw, 11px)",
-              fontWeight: 600,
-              letterSpacing: "1.3px",
-              textTransform: "uppercase",
-              color: "rgba(220,224,255,0.72)",
-              margin: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 10,
+              flexWrap: "wrap",
             }}
           >
-            {dateLabel}
-          </p>
-          {todayCountLabel ? (
-            <span
+            <p
               style={{
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: 600,
-                letterSpacing: "0.4px",
-                padding: "2px 8px",
-                borderRadius: 999,
-                background: "rgba(188,194,255,0.08)",
-                color: "rgba(188,194,255,0.6)",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "#d8d4eb",
+                margin: 0,
               }}
             >
-              {todayCountLabel}
-            </span>
-          ) : null}
+              {dateLabel}
+            </p>
+            {todayCountLabel ? (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: "0.18em",
+                  padding: "2px 8px",
+                  borderRadius: 999,
+                  background: "rgba(188,194,255,0.08)",
+                  color: "rgba(188,194,255,0.7)",
+                }}
+              >
+                {todayCountLabel}
+              </span>
+            ) : null}
+          </div>
+          <h1
+            className="font-serif"
+            style={{
+              fontSize: "clamp(24px, 6.5vw, 30px)",
+              fontWeight: 500,
+              lineHeight: 1.15,
+              color: "#eef1f6",
+              marginBottom: 4,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            {greeting}
+          </h1>
+          <p
+            ref={sublineRef}
+            className="font-serif"
+            style={{
+              fontSize: "clamp(14px, 4vw, 16px)",
+              color: showDetails ? meta.color : "rgba(216,212,235,0.78)",
+              letterSpacing: "0.2px",
+              transition: "color 0.3s ease",
+              minHeight: "1.5em",
+            }}
+          >
+            {showDetails ? MOOD_ACKNOWLEDGMENTS[displayMood] : idleSubline}
+          </p>
         </div>
-        <h1
-          className="font-serif"
-          style={{
-            fontSize: "clamp(24px, 6.5vw, 30px)",
-            fontWeight: 500,
-            lineHeight: 1.18,
-            color: "#eef1f6",
-            marginBottom: 6,
-            letterSpacing: "-0.03em",
-          }}
-        >
-          {greeting}
-        </h1>
-        <p
-          ref={sublineRef}
-          className="font-serif"
-          style={{
-            fontSize: "clamp(14px, 4vw, 17px)",
-            color: showDetails ? meta.color : "rgba(220,224,255,0.78)",
-            letterSpacing: "0.2px",
-            transition: "color 0.3s ease",
-            minHeight: "1.5em",
-          }}
-        >
-          {showDetails ? MOOD_ACKNOWLEDGMENTS[displayMood] : idleSubline}
-        </p>
       </div>
 
+      {/* Mood arc + logo (no card — sits in the open air with the breath circle) */}
       <div ref={arcRef} style={{ position: "relative", zIndex: 1, width: "100%" }}>
         <div
           ref={arcWrapperRef}
@@ -1191,6 +1246,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         </div>
       </div>
 
+      {/* Mood selector — just a centered text block, no card wrapper needed */}
       <div ref={selectorRef} style={{ position: "relative", zIndex: 1 }}>
         <MoodSelector selectedMood={selectedMood} />
       </div>

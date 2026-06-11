@@ -179,9 +179,15 @@ export function useMoodStore() {
       setLastSavedAt(Date.now());
       return true;
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Could not save your check-in.",
-      );
+      const message =
+        (typeof err === "object" && err !== null && "message" in err && (err as { message?: unknown }).message) ||
+        (typeof err === "object" && err !== null && "hint" in err && (err as { hint?: unknown }).hint) ||
+        (typeof err === "object" && err !== null && "details" in err && (err as { details?: unknown }).details) ||
+        (err instanceof Error ? err.message : null) ||
+        (typeof err === "string" ? err : null) ||
+        "Could not save your check-in.";
+      console.error("[saveEntry] failed:", err);
+      setError(String(message));
       return false;
     }
   }, [
@@ -278,9 +284,15 @@ export function useMoodStore() {
         const saved = await insertJournalEntry(trimmed);
         setManualJournalEntries((prev) => [...prev, saved]);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Could not save your journal entry.",
-        );
+        const message =
+          (typeof err === "object" && err !== null && "message" in err && (err as { message?: unknown }).message) ||
+          (typeof err === "object" && err !== null && "hint" in err && (err as { hint?: unknown }).hint) ||
+          (typeof err === "object" && err !== null && "details" in err && (err as { details?: unknown }).details) ||
+          (err instanceof Error ? err.message : null) ||
+          (typeof err === "string" ? err : null) ||
+          "Could not save your journal entry.";
+        console.error("[addManualJournalEntry] failed:", err);
+        setError(String(message));
       }
     },
     [userId],

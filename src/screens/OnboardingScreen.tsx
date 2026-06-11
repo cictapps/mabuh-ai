@@ -924,8 +924,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
           position: "relative",
           zIndex: 2,
           padding: tight
-            ? "8px 16px calc(env(safe-area-inset-bottom, 0px) + 12px)"
-            : "10px 20px calc(env(safe-area-inset-bottom, 0px) + 22px)",
+            ? "8px 16px calc(env(safe-area-inset-bottom, 0px) + 56px)"
+            : "10px 20px calc(env(safe-area-inset-bottom, 0px) + 68px)",
           display: "flex",
           flexDirection: "column",
           gap: tight ? 8 : 14,

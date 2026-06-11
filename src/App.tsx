@@ -272,7 +272,7 @@ export default function App({
           </main>
 
           {/* Bottom navigation */}
-          {activeHub !== "settings" && !(activeHub === "support" && supportView === "chat") && (
+          {!(activeHub === "support" && supportView === "chat") && (
             <BottomNav
               items={NAV_ITEMS}
               active={activeHub}

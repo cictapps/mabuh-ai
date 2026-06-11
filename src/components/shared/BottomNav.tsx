@@ -5,6 +5,7 @@ import {
   BarChart3,
   Compass,
   MessageCircle,
+  Settings,
 } from "lucide-react";
 
 interface BottomNavProps {
@@ -25,6 +26,8 @@ const renderIcon = (iconName: string, isActive: boolean) => {
       return <Compass size={size} strokeWidth={strokeWidth} />;
     case "support":
       return <MessageCircle size={size} strokeWidth={strokeWidth} />;
+    case "settings":
+      return <Settings size={size} strokeWidth={strokeWidth} />;
     default:
       return null;
   }

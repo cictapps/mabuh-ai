@@ -9,6 +9,12 @@ import { ProtectedRoute } from "./lib/auth";
 const AuthPage = lazy(async () => import("./pages/auth/AuthPage"));
 const AuthCallback = lazy(async () => import("./pages/auth/AuthCallback"));
 const ResetPassword = lazy(async () => import("./pages/auth/ResetPassword"));
+const PrivacyPolicyPage = lazy(
+  async () => import("./pages/legal/PrivacyPolicyPage"),
+);
+const TermsAndConditionsPage = lazy(
+  async () => import("./pages/legal/TermsAndConditionsPage"),
+);
 
 function RouteFallback() {
   return (
@@ -26,6 +32,23 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <Route path="/signup" element={<AuthPage initialTab="sign-up" />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/auth/reset" element={<ResetPassword />} />
+
+        <Route
+          path="/privacy"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <PrivacyPolicyPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <TermsAndConditionsPage />
+            </Suspense>
+          }
+        />
 
         <Route
           path="/"

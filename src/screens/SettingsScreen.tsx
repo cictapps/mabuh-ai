@@ -882,6 +882,73 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           College of Information and Communications Technology, as a project
           for their Mobile App Development class.
         </p>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            paddingTop: 4,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 11,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(216,212,235,0.55)",
+            }}
+          >
+            <span aria-hidden style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }} />
+            <span>Legal</span>
+            <span aria-hidden style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }} />
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              onClick={() => navigate("/terms")}
+              style={{
+                flex: 1,
+                appearance: "none",
+                cursor: "pointer",
+                padding: "10px 12px",
+                borderRadius: 12,
+                background: "rgba(188,194,255,0.06)",
+                border: "0.5px solid rgba(188,194,255,0.12)",
+                color: "#eef1f6",
+                fontSize: 13,
+                fontWeight: 500,
+                fontFamily: "var(--font-sans)",
+                transition: "background 0.15s ease",
+              }}
+            >
+              Terms & Conditions
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/privacy")}
+              style={{
+                flex: 1,
+                appearance: "none",
+                cursor: "pointer",
+                padding: "10px 12px",
+                borderRadius: 12,
+                background: "rgba(188,194,255,0.06)",
+                border: "0.5px solid rgba(188,194,255,0.12)",
+                color: "#eef1f6",
+                fontSize: 13,
+                fontWeight: 500,
+                fontFamily: "var(--font-sans)",
+                transition: "background 0.15s ease",
+              }}
+            >
+              Privacy Policy
+            </button>
+          </div>
+        </div>
       </Section>
 
       <section

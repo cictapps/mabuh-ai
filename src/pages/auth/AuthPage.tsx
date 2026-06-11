@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth, useAuthActions, useAuthStore } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
@@ -620,8 +620,26 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
           </div>
         </div>
 
-        <footer className="text-center text-[0.6875rem] leading-5 text-muted-foreground/50">
-          Mabuh-ai supports wellbeing and does not replace professional care.
+        <footer className="flex flex-col items-center gap-2 pt-2 text-center text-[0.6875rem] leading-5 text-muted-foreground/50">
+          <p>By continuing, you agree to our</p>
+          <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+            <Link
+              to="/terms"
+              className="font-medium text-foreground/70 underline decoration-[rgba(188,194,255,0.35)] underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+            >
+              Terms & Conditions
+            </Link>
+            <span aria-hidden className="text-muted-foreground/40">
+              ·
+            </span>
+            <Link
+              to="/privacy"
+              className="font-medium text-foreground/70 underline decoration-[rgba(188,194,255,0.35)] underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+            >
+              Privacy Policy
+            </Link>
+          </p>
+          <p>Mabuh-ai supports wellbeing and does not replace professional care.</p>
         </footer>
       </section>
 

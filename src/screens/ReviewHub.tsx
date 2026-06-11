@@ -5,7 +5,6 @@ import { AnalyticsScreen } from "./AnalyticsScreen";
 import { InsightsScreen } from "./InsightsScreen";
 import { JournalScreen } from "./JournalScreen";
 import { History, TrendingUp, Lightbulb, PenTool } from "lucide-react";
-import { TopBarSettingsButton } from "../components/shared/TopBarSettingsButton";
 
 interface DistItem {
   mood: MoodType;
@@ -52,7 +51,6 @@ interface ReviewHubProps {
   onAddJournalEntry: (content: string) => void;
   loading?: boolean;
   error?: string | null;
-  onOpenSettings: () => void;
 }
 
 const tabs: Array<{ id: ReviewTabId; label: string; icon: string }> = [
@@ -92,7 +90,6 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
   refreshToken,
   journalEntries,
   onAddJournalEntry,
-  onOpenSettings,
   loading,
   error,
 }) => {
@@ -106,8 +103,6 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
         minHeight: "100%",
       }}
     >
-      <TopBarSettingsButton onClick={onOpenSettings} />
-
       {/* Decorative background blobs (matches journey aesthetic) */}
       <div
         aria-hidden

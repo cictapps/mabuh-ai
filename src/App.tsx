@@ -145,13 +145,6 @@ export default function App({
     });
   }, []);
 
-  const handleOpenSettings = useCallback(() => {
-    setActiveHub((prev) => {
-      previousHubRef.current = prev;
-      return "settings";
-    });
-  }, []);
-
   const handleCloseSettings = useCallback(() => {
     setActiveHub(previousHubRef.current);
   }, []);
@@ -214,7 +207,6 @@ export default function App({
                 onToggleActivity={toggleActivity}
                 onAddCustomActivity={addCustomActivity}
                 onSave={saveEntry}
-                onOpenSettings={handleOpenSettings}
               />
             </div>
             <div style={{ display: activeHub === "review" ? "block" : "none" }}>
@@ -230,13 +222,11 @@ export default function App({
                 onAddJournalEntry={addManualJournalEntry}
                 loading={loading}
                 error={error}
-                onOpenSettings={handleOpenSettings}
               />
             </div>
             <div style={{ display: activeHub === "journey" ? "block" : "none" }}>
               <JourneyScreen
                 onOpenSupport={() => navigate("/help")}
-                onOpenSettings={handleOpenSettings}
               />
             </div>
             <div
@@ -252,7 +242,6 @@ export default function App({
                 view={supportView}
                 onOpenChat={() => setSupportView("chat")}
                 onCloseChat={() => setSupportView("hub")}
-                onOpenSettings={handleOpenSettings}
               />
             </div>
             <div

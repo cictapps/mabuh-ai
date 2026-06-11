@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { MessageCircle, MapPin, Phone, ShieldAlert, ArrowUpRight } from "lucide-react";
 
 import { ChatbotShell } from "./ChatBot";
-import { TopBarSettingsButton } from "../components/shared/TopBarSettingsButton";
 
 type SupportView = "hub" | "chat";
 
@@ -11,7 +10,6 @@ interface SupportHubProps {
   view: SupportView;
   onOpenChat: () => void;
   onCloseChat: () => void;
-  onOpenSettings: () => void;
 }
 
 interface Hotline {
@@ -30,7 +28,7 @@ function telHref(number: string): string {
   return `tel:${number.replace(/[^+\d]/g, "")}`;
 }
 
-export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onCloseChat, onOpenSettings }) => {
+export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onCloseChat }) => {
   const navigate = useNavigate();
 
   if (view === "chat") {
@@ -58,8 +56,6 @@ export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onClos
         minHeight: "100%",
       }}
     >
-      <TopBarSettingsButton onClick={onOpenSettings} />
-
       {/* Decorative background blobs (matches journey aesthetic) */}
       <div
         aria-hidden

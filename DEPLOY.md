@@ -27,6 +27,7 @@ on Android, so a rebuild is required to change them.
 | `VITE_SUPABASE_URL` | Endpoint of your Supabase project | Supabase dashboard → **Settings → API** |
 | `VITE_SUPABASE_ANON_KEY` | Public, publishable client key (safe to ship) | Same page. Starts with `sb_publishable_…` |
 | `VITE_AUTH_GOOGLE_ENABLED` | `"true"` to show the "Continue with Google" button after you've enabled the provider | Boolean |
+| `VITE_GOOGLE_WEB_CLIENT_ID` | Web OAuth client ID from Google Cloud Console (required for native Google sign-in on Android) | Google Cloud Console → Credentials |
 | `VITE_CHAT_SERVER_URL` | Public URL of the Mistral proxy server (no trailing slash) | Deploy the server (section 3), paste its URL |
 
 Everything else (the Mistral key, OpenAI keys, etc.) lives **on the chat
@@ -57,9 +58,23 @@ server**, never in the app.
    - `tauri://localhost/auth/reset`
    - (For desktop dev also add `http://localhost:1420/auth/callback` and
      `http://localhost:5173/auth/callback`.)
-5. **Enable Google sign-in (optional)**: **Authentication → Providers →
-   Google**, paste your OAuth client ID/secret, save. Then set
-   `VITE_AUTH_GOOGLE_ENABLED=true` in `.env`.
+5. **Enable Google sign-in (optional)**:
+   - **Native (Android):** uses `tauri-plugin-google-auth` (Credential
+     Manager). Configure Google Cloud Console:
+     1. **APIs & Services → Credentials → Create OAuth client ID → Android**
+        with package name `com.user.mabuhai` and the SHA-1 of your release
+        keystore (`keytool -list -v -keystore ~/keystores/cictappskey.keystore
+        -alias cictappskey`). Add the debug SHA-1 too if you'll run dev
+        builds.
+     2. **APIs & Services → Credentials → Create OAuth client ID → Web
+        application**. Copy the **Client ID** (not the secret — native
+        flow doesn't need it).
+     3. In **Authentication → Providers → Google** in the Supabase
+        dashboard, paste the **Web** client ID and secret.
+     4. Set `VITE_GOOGLE_WEB_CLIENT_ID=<web-client-id>` and
+        `VITE_AUTH_GOOGLE_ENABLED=true` in `.env`.
+   - **Web/desktop** (the fallback used when the app is not on Android):
+     the Supabase redirect URLs above (step 4) are still required.
 
 ### Database migration note (existing projects)
 

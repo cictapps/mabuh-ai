@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@choochmeque/tauri-plugin-google-auth-api": "^0.5.1",
     "@gsap/react": "^2.1.2",
     "@supabase/supabase-js": "^2.103.3",
     "@tauri-apps/api": "^2.11.0",

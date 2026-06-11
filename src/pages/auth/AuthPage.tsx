@@ -537,7 +537,7 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
       />
 
       <section className="relative mx-auto flex min-h-dvh w-full max-w-[26rem] flex-col px-6 pb-[calc(var(--safe-bottom)+1.5rem)] pt-[calc(var(--safe-top)+2.5rem)]">
-        <header className="flex items-center justify-center gap-5">
+        <header className="flex items-center justify-start gap-5">
           <img
             src="/app-logo.svg"
             alt="Mabuh-ai"
@@ -551,7 +551,7 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
         </header>
 
         <div className="flex flex-1 flex-col justify-center py-10">
-          <div className="mb-8 space-y-2">
+          <div className="mb-8 space-y-2 text-left">
             <h1 className="font-serif text-[1.75rem] leading-[1.15] tracking-[-0.03em] text-foreground">
               {tab === "sign-in" ? "Welcome back" : "Create your account"}
             </h1>

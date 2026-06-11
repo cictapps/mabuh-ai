@@ -4,8 +4,9 @@ import { supabase } from "@/lib/supabase";
 import {
   getNativeGoogleRedirectUrl,
   initializeNativeAuthDeepLinks,
+  isAndroidApp,
   isNativeApp,
-  openNativeOAuthUrl,
+  signInWithGoogleNative,
 } from "@/lib/auth/nativeOAuth";
 
 export type Profile = {
@@ -191,11 +192,24 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signInWithGoogle: async (nextPath = "/") => {
-    const provider: Provider = "google";
     const safeNextPath = nextPath.startsWith("/") ? nextPath : "/";
+
+    if (isAndroidApp()) {
+      await signInWithGoogleNative(safeNextPath);
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session) {
+        const snapshot = await ensureProfile(
+          await getAuthSnapshot(sessionData.session),
+        );
+        set({ ...snapshot, loading: false });
+      }
+      return;
+    }
+
+    const provider: Provider = "google";
     const native = isNativeApp();
     const next = encodeURIComponent(safeNextPath);
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: native
@@ -208,12 +222,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       },
     });
     if (error) throw error;
-
-    if (native) {
-      if (!data.url)
-        throw new Error("Google sign-in did not return an authorization URL.");
-      await openNativeOAuthUrl(data.url);
-    }
   },
 
   resendConfirmation: async (email) => {

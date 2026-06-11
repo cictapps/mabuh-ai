@@ -1,6 +1,6 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { signIn as nativeGoogleSignIn } from "@choochmeque/tauri-plugin-google-auth-api";
 import { supabase } from "@/lib/supabase";
 
 const NATIVE_AUTH_SCHEME = "mabuhai:";
@@ -89,12 +89,54 @@ export function getNativeGoogleRedirectUrl(nextPath: string) {
   return `${NATIVE_AUTH_CALLBACK}?next=${next}`;
 }
 
-export async function openNativeOAuthUrl(url: string) {
-  await openUrl(url);
-}
-
 export function isNativeApp() {
   return isTauri();
+}
+
+export function isAndroidApp(): boolean {
+  if (!isTauri()) return false;
+  if (typeof navigator === "undefined") return false;
+  return /android/i.test(navigator.userAgent);
+}
+
+export async function signInWithGoogleNative(nextPath: string) {
+  const webClientId = import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID as
+    | string
+    | undefined;
+
+  if (!webClientId) {
+    throw new Error(
+      "Google sign-in is not configured: set VITE_GOOGLE_WEB_CLIENT_ID in .env.",
+    );
+  }
+
+  const tokens = await nativeGoogleSignIn({
+    clientId: webClientId,
+    scopes: ["openid", "email", "profile"],
+    flowType: "native",
+  });
+
+  const idToken = tokens.idToken;
+  if (!idToken) {
+    throw new Error(
+      "Google Sign-In did not return an ID token. Make sure your OAuth client is configured for the native flow.",
+    );
+  }
+
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider: "google",
+    token: idToken,
+    access_token: tokens.accessToken,
+  });
+  if (error) throw error;
+
+  const safeNext = getSafeNextPath(nextPath);
+  if (safeNext !== window.location.pathname) {
+    window.history.replaceState({}, "", safeNext);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+
+  return data;
 }
 
 export async function initializeNativeAuthDeepLinks() {

@@ -62,6 +62,7 @@ export default function App({
   );
   const [activeHub, setActiveHub] = useState<ScreenId>(initialState.activeHub);
   const [supportView, setSupportView] = useState<SupportView>(initialState.supportView);
+  const previousHubRef = useRef<ScreenId>(initialState.activeHub);
   const mainRef = useRef<HTMLElement | null>(null);
   const { hasCompleted, complete: completeOnboarding, reset: resetOnboarding } = useOnboarding();
 
@@ -127,7 +128,21 @@ export default function App({
   }, [dailySeries, lastSavedAt]);
 
   const handleNavSelect = useCallback((id: ScreenId) => {
-    setActiveHub(id);
+    setActiveHub((prev) => {
+      previousHubRef.current = prev;
+      return id;
+    });
+  }, []);
+
+  const handleOpenSettings = useCallback(() => {
+    setActiveHub((prev) => {
+      previousHubRef.current = prev;
+      return "settings";
+    });
+  }, []);
+
+  const handleCloseSettings = useCallback(() => {
+    setActiveHub(previousHubRef.current);
   }, []);
 
   useEffect(() => {
@@ -188,6 +203,7 @@ export default function App({
                 onToggleActivity={toggleActivity}
                 onAddCustomActivity={addCustomActivity}
                 onSave={saveEntry}
+                onOpenSettings={handleOpenSettings}
               />
             </div>
             <div style={{ display: activeHub === "review" ? "block" : "none" }}>
@@ -203,10 +219,14 @@ export default function App({
                 onAddJournalEntry={addManualJournalEntry}
                 loading={loading}
                 error={error}
+                onOpenSettings={handleOpenSettings}
               />
             </div>
             <div style={{ display: activeHub === "journey" ? "block" : "none" }}>
-              <JourneyScreen onOpenSupport={() => navigate("/help")} />
+              <JourneyScreen
+                onOpenSupport={() => navigate("/help")}
+                onOpenSettings={handleOpenSettings}
+              />
             </div>
             <div
               style={{
@@ -221,6 +241,7 @@ export default function App({
                 view={supportView}
                 onOpenChat={() => setSupportView("chat")}
                 onCloseChat={() => setSupportView("hub")}
+                onOpenSettings={handleOpenSettings}
               />
             </div>
             <div
@@ -234,12 +255,13 @@ export default function App({
                 onExportData={exportData}
                 onClearAllLocalData={clearAllLocalData}
                 onReplayOnboarding={resetOnboarding}
+                onBack={handleCloseSettings}
               />
             </div>
           </main>
 
           {/* Bottom navigation */}
-          {!(activeHub === "support" && supportView === "chat") && (
+          {activeHub !== "settings" && !(activeHub === "support" && supportView === "chat") && (
             <BottomNav
               items={NAV_ITEMS}
               active={activeHub}

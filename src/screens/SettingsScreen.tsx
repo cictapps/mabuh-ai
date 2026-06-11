@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import type { ReminderPreferences } from "../hooks/useMoodStore";
+import { TopBarBackButton } from "../components/shared/TopBarBackButton";
 
 interface SettingsScreenProps {
   reminder: ReminderPreferences;
@@ -27,6 +28,7 @@ interface SettingsScreenProps {
   onExportData: () => void;
   onClearAllLocalData: () => void;
   onReplayOnboarding?: () => void;
+  onBack: () => void;
 }
 
 const APP_VERSION = "0.1.0";
@@ -351,6 +353,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onExportData,
   onClearAllLocalData,
   onReplayOnboarding,
+  onBack,
 }) => {
   const { user, profile } = useAuth();
   const {
@@ -495,38 +498,51 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       className="checkin-root screen-enter"
       style={{ gap: "clamp(14px, 4vw, 22px)" }}
     >
-      <div style={{ position: "relative", zIndex: 1 }}>
-        <p
-          style={{
-            fontSize: "clamp(10px, 2.6vw, 11px)",
-            fontWeight: 500,
-            letterSpacing: "1.3px",
-            textTransform: "uppercase",
-            color: "rgba(216,220,230,0.42)",
-            marginBottom: 6,
-          }}
-        >
-          Sanctuary preferences
-        </p>
+      <header
+        style={{
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          minHeight: 40,
+        }}
+      >
+        <TopBarBackButton onClick={onBack} />
         <h1
           className="font-serif"
           style={{
-            fontSize: "clamp(26px, 6.8vw, 32px)",
+            flex: 1,
+            minWidth: 0,
+            fontSize: "clamp(18px, 4.6vw, 20px)",
             fontWeight: 500,
-            lineHeight: 1.18,
+            lineHeight: 1.2,
             color: "#eef1f6",
-            marginBottom: 4,
-            letterSpacing: "-0.03em",
+            letterSpacing: "-0.02em",
+            margin: 0,
+            textAlign: "left",
           }}
         >
           Settings
         </h1>
+      </header>
+
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+        }}
+      >
         <p
           className="font-serif"
           style={{
             fontSize: "clamp(14px, 4vw, 16px)",
             color: "rgba(188,194,255,0.55)",
             letterSpacing: "0.2px",
+            margin: 0,
           }}
         >
           Tune the space to feel like yours.

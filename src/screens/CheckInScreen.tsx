@@ -28,6 +28,7 @@ import { SaveMoodButton } from "../components/mood/SaveMoodButton";
 import { SocialTrackingPanel } from "../components/mood/SocialTrackingPanel";
 import { ActivitySectionsPanel } from "../components/mood/ActivitySectionsPanel";
 import { SuggestionCard } from "../components/suggestions/SuggestionCard";
+import { TopBarSettingsButton } from "../components/shared/TopBarSettingsButton";
 
 interface CheckInScreenProps {
   selectedMood: MoodType | null;
@@ -55,6 +56,7 @@ interface CheckInScreenProps {
   onToggleActivity: (section: ActivitySectionId, label: string) => void;
   onAddCustomActivity: (section: ActivitySectionId, label: string) => void;
   onSave: () => Promise<boolean>;
+  onOpenSettings: () => void;
 }
 
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -663,6 +665,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   onToggleActivity,
   onAddCustomActivity,
   onSave,
+  onOpenSettings,
   todaysCount = 0,
 }) => {
   const displayMood = selectedMood ?? "okay";
@@ -1034,6 +1037,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
       className="checkin-root screen-enter"
       style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 160px)" }}
     >
+      <TopBarSettingsButton onClick={onOpenSettings} />
+
       {/* Soft static glow tied to the page */}
       <div
         className="checkin-glow"

@@ -79,5 +79,4 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "review", label: "Review", icon: "review" },
   { id: "journey", label: "Journey", icon: "journey" },
   { id: "support", label: "Support", icon: "support" },
-  { id: "settings", label: "Settings", icon: "settings" },
 ];

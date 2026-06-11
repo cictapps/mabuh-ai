@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth, useAuthActions, useAuthStore } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { Input } from "@/components/ui/input";
@@ -20,9 +20,9 @@ function ErrorBanner({ message }: { message: string }) {
   return (
     <div
       role="alert"
-      className="flex items-start gap-2.5 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+      className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive"
     >
-      <AlertCircle className="mt-0.5 size-4 shrink-0" />
+      <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
       <span>{message}</span>
     </div>
   );
@@ -32,59 +32,10 @@ function SuccessBanner({ message }: { message: string }) {
   return (
     <div
       role="status"
-      className="flex items-start gap-2.5 rounded-2xl border border-tertiary/30 bg-tertiary/10 px-4 py-3 text-sm text-tertiary"
+      className="flex items-start gap-2 rounded-lg border border-tertiary/30 bg-tertiary/10 px-3.5 py-2.5 text-sm text-tertiary"
     >
-      <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+      <CheckCircle2 className="mt-0.5 size-3.5 shrink-0" />
       <span>{message}</span>
-    </div>
-  );
-}
-
-// ---------- Password field ----------
-
-function PasswordField({
-  id,
-  label,
-  value,
-  onChange,
-  autoComplete,
-  minLength,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  autoComplete?: string;
-  minLength?: number;
-}) {
-  const [visible, setVisible] = useState(false);
-
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-muted-foreground">
-        {label}
-      </label>
-      <div className="relative">
-        <Input
-          id={id}
-          type={visible ? "text" : "password"}
-          autoComplete={autoComplete}
-          required
-          minLength={minLength}
-          value={value}
-          onChange={(e) => onChange(e.currentTarget.value)}
-          className="h-12 pr-11 text-base"
-        />
-        <button
-          type="button"
-          tabIndex={-1}
-          aria-label={visible ? "Hide password" : "Show password"}
-          onClick={() => setVisible((v) => !v)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-        </button>
-      </div>
     </div>
   );
 }
@@ -107,10 +58,11 @@ function SubmitButton({
       type="submit"
       disabled={loading || disabled}
       className={cn(
-        "flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold text-primary-foreground",
-        "bg-gradient-to-r from-primary via-secondary to-primary",
-        "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20",
-        "disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0",
+        "flex h-11 w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold",
+        "bg-foreground text-background",
+        "transition-colors duration-150 hover:bg-foreground/90",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
     >
@@ -138,20 +90,18 @@ function GoogleButton({
       disabled={loading}
       aria-label={label}
       className={cn(
-        "relative flex h-12 w-full items-center justify-center rounded-full border border-[#8e918f] bg-[#131314] px-12",
-        "font-['Roboto',sans-serif] text-sm font-medium text-[#e3e3e3]",
-        "transition-all duration-200 hover:bg-[#202124] hover:shadow-lg hover:shadow-black/20",
-        "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/25",
-        "disabled:cursor-not-allowed disabled:opacity-60",
+        "flex h-11 w-full items-center justify-center gap-3 rounded-lg border border-white/10 bg-transparent px-4",
+        "text-sm font-medium text-foreground/90",
+        "transition-colors duration-150 hover:bg-white/5",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "disabled:cursor-not-allowed disabled:opacity-50",
       )}
     >
-      <span className="absolute left-4 flex size-5 items-center justify-center">
-        {loading ? (
-          <Loader2 className="size-5 animate-spin" />
-        ) : (
-          <img src="/google-g.svg" alt="" width={20} height={20} />
-        )}
-      </span>
+      {loading ? (
+        <Loader2 className="size-4 animate-spin" />
+      ) : (
+        <img src="/google-g.svg" alt="" width={18} height={18} />
+      )}
       {loading ? "Opening Google..." : label}
     </button>
   );
@@ -160,24 +110,11 @@ function GoogleButton({
 function EmailDivider() {
   return (
     <div className="flex items-center gap-3">
-      <div className="h-px flex-1 bg-border" />
-      <span className="text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-        or use email
+      <div className="h-px flex-1 bg-white/10" />
+      <span className="text-[0.6875rem] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        or
       </span>
-      <div className="h-px flex-1 bg-border" />
-    </div>
-  );
-}
-
-// ---------- Stagger wrapper ----------
-
-function Stagger({ delay, children }: { delay: string; children: React.ReactNode }) {
-  return (
-    <div
-      className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
-      style={{ animationDelay: delay, animationFillMode: "both" }}
-    >
-      {children}
+      <div className="h-px flex-1 bg-white/10" />
     </div>
   );
 }
@@ -224,26 +161,24 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {googleAuthEnabled && (
         <>
-          <Stagger delay="40ms">
-            <GoogleButton
-              mode="sign-in"
-              loading={oauthSubmitting}
-              onClick={() => void handleGoogleSignIn()}
-            />
-          </Stagger>
-
-          <Stagger delay="100ms">
-            <EmailDivider />
-          </Stagger>
+          <GoogleButton
+            mode="sign-in"
+            loading={oauthSubmitting}
+            onClick={() => void handleGoogleSignIn()}
+          />
+          <EmailDivider />
         </>
       )}
 
-      <Stagger delay="140ms">
+      <div className="space-y-3">
         <div className="space-y-1.5">
-          <label htmlFor="si-email" className="text-sm font-medium text-muted-foreground">
+          <label
+            htmlFor="si-email"
+            className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground"
+          >
             Email
           </label>
           <Input
@@ -252,43 +187,46 @@ function SignInForm({ onForgotPassword }: { onForgotPassword: () => void }) {
             autoComplete="email"
             inputMode="email"
             placeholder="you@school.edu"
-            className="h-12 text-base"
+            className="h-11 rounded-lg text-sm"
             required
             value={email}
             onChange={(e) => setEmail(e.currentTarget.value)}
           />
         </div>
-      </Stagger>
 
-      <Stagger delay="200ms">
-        <PasswordField
-          id="si-password"
-          label="Password"
-          value={password}
-          onChange={setPassword}
-          autoComplete="current-password"
-        />
-      </Stagger>
-
-      <Stagger delay="260ms">
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={onForgotPassword}
-            className="text-xs text-primary transition-colors hover:text-primary/80"
-          >
-            Forgot password?
-          </button>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="si-password"
+              className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground"
+            >
+              Password
+            </label>
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Forgot?
+            </button>
+          </div>
+          <Input
+            id="si-password"
+            type="password"
+            autoComplete="current-password"
+            className="h-11 rounded-lg text-sm"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.currentTarget.value)}
+          />
         </div>
-      </Stagger>
+      </div>
 
       {error && <ErrorBanner message={error} />}
 
-      <Stagger delay="320ms">
-        <SubmitButton loading={submitting} className="w-full">
-          {submitting ? "Signing in…" : "Sign in"}
-        </SubmitButton>
-      </Stagger>
+      <SubmitButton loading={submitting} className="w-full">
+        {submitting ? "Signing in…" : "Sign in"}
+      </SubmitButton>
     </form>
   );
 }
@@ -359,43 +297,42 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {googleAuthEnabled && (
         <>
-          <Stagger delay="40ms">
-            <GoogleButton
-              mode="sign-up"
-              loading={oauthSubmitting}
-              onClick={() => void handleGoogleSignIn()}
-            />
-          </Stagger>
-
-          <Stagger delay="100ms">
-            <EmailDivider />
-          </Stagger>
+          <GoogleButton
+            mode="sign-up"
+            loading={oauthSubmitting}
+            onClick={() => void handleGoogleSignIn()}
+          />
+          <EmailDivider />
         </>
       )}
 
-      <Stagger delay="140ms">
+      <div className="space-y-3">
         <div className="space-y-1.5">
-          <label htmlFor="su-name" className="text-sm font-medium text-muted-foreground">
+          <label
+            htmlFor="su-name"
+            className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground"
+          >
             Display name
           </label>
           <Input
             id="su-name"
             autoComplete="nickname"
             placeholder="What should we call you?"
-            className="h-12 text-base"
+            className="h-11 rounded-lg text-sm"
             required
             value={displayName}
             onChange={(e) => setDisplayName(e.currentTarget.value)}
           />
         </div>
-      </Stagger>
 
-      <Stagger delay="200ms">
         <div className="space-y-1.5">
-          <label htmlFor="su-email" className="text-sm font-medium text-muted-foreground">
+          <label
+            htmlFor="su-email"
+            className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground"
+          >
             Email
           </label>
           <Input
@@ -404,38 +341,40 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
             autoComplete="email"
             inputMode="email"
             placeholder="you@school.edu"
-            className="h-12 text-base"
+            className="h-11 rounded-lg text-sm"
             required
             value={email}
             onChange={(e) => setEmail(e.currentTarget.value)}
           />
         </div>
-      </Stagger>
 
-      <Stagger delay="260ms">
-        <div>
-          <PasswordField
+        <div className="space-y-1.5">
+          <label
+            htmlFor="su-password"
+            className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground"
+          >
+            Password
+          </label>
+          <Input
             id="su-password"
-            label="Password"
-            value={password}
-            onChange={setPassword}
+            type="password"
             autoComplete="new-password"
             minLength={8}
+            className="h-11 rounded-lg text-sm"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.currentTarget.value)}
           />
-          <p className="mt-1.5 pl-0.5 text-xs text-muted-foreground">
-            At least 8 characters.
-          </p>
+          <p className="text-xs text-muted-foreground/70">At least 8 characters.</p>
         </div>
-      </Stagger>
+      </div>
 
       {error && <ErrorBanner message={error} />}
       {success && <SuccessBanner message={success} />}
 
-      <Stagger delay="330ms">
-        <SubmitButton loading={submitting} disabled={!!success} className="w-full">
-          {submitting ? "Creating account…" : "Create account"}
-        </SubmitButton>
-      </Stagger>
+      <SubmitButton loading={submitting} disabled={!!success} className="w-full">
+        {submitting ? "Creating account…" : "Create account"}
+      </SubmitButton>
     </form>
   );
 }
@@ -481,13 +420,13 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 px-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-6 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-sm rounded-[1.5rem] border border-white/10 bg-card/90 p-7 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl">
-        <h2 className="font-serif text-xl tracking-[-0.03em] text-foreground">
+      <div className="w-full max-w-sm rounded-xl border border-white/10 bg-card p-6 shadow-2xl">
+        <h2 className="font-serif text-lg tracking-[-0.02em] text-foreground">
           Reset password
         </h2>
         <p className="mt-1.5 text-sm text-muted-foreground">
@@ -500,7 +439,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-full py-2.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+              className="w-full rounded-lg border border-white/10 py-2.5 text-sm font-medium text-foreground/90 transition-colors hover:bg-white/5"
             >
               Close
             </button>
@@ -510,7 +449,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
             <div className="space-y-1.5">
               <label
                 htmlFor="fp-email"
-                className="text-sm font-medium text-muted-foreground"
+                className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground"
               >
                 Email
               </label>
@@ -518,6 +457,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
                 id="fp-email"
                 type="email"
                 autoComplete="email"
+                className="h-11 rounded-lg text-sm"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.currentTarget.value)}
@@ -526,11 +466,11 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
 
             {error && <ErrorBanner message={error} />}
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-full py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="flex-1 rounded-lg border border-white/10 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
               >
                 Cancel
               </button>
@@ -553,7 +493,6 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
   const navigate = useNavigate();
 
   const [tab, setTab] = useState<Tab>(initialTab);
-  const [slideDir, setSlideDir] = useState<"left" | "right">("right");
   const [showForgot, setShowForgot] = useState(false);
   const [nativeAuthError, setNativeAuthError] = useState<string | null>(null);
 
@@ -563,7 +502,6 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
 
   useEffect(() => {
     setTab(initialTab);
-    setSlideDir(initialTab === "sign-up" ? "right" : "left");
   }, [initialTab]);
 
   useEffect(() => {
@@ -583,73 +521,49 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
   }, []);
 
   function switchTab(t: Tab) {
-    setSlideDir(t === "sign-up" ? "right" : "left");
     setTab(t);
   }
 
   return (
     <main className="relative min-h-dvh overflow-x-hidden overflow-y-auto bg-background text-foreground">
-      {/* Animated gradient overlay */}
+      {/* Subtle background gradient */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 -z-10"
-        style={{ animation: "aurora-shift 18s ease-in-out infinite" }}
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            background: [
-              "radial-gradient(ellipse 60% 50% at 20% 15%, rgba(188,194,255,0.08) 0%, transparent 100%)",
-              "radial-gradient(ellipse 50% 60% at 80% 85%, rgba(212,187,255,0.08) 0%, transparent 100%)",
-              "radial-gradient(ellipse 40% 40% at 55% 105%, rgba(255,185,84,0.07) 0%, transparent 100%)",
-            ].join(", "),
-          }}
-        />
-      </div>
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(188,194,255,0.06) 0%, transparent 60%)",
+        }}
+      />
 
-      {/* Decorative blur circles */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-20 -top-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute -right-16 bottom-0 h-56 w-56 rounded-full bg-secondary/20 blur-3xl" />
-      </div>
-
-      <section className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-[calc(var(--safe-bottom)+1.25rem)] pt-[calc(var(--safe-top)+1.25rem)] sm:px-7">
-        <header className="flex flex-col items-center text-center">
-          <div className="relative">
-            <div
-              aria-hidden
-              className="absolute inset-3 rounded-full bg-primary/20 blur-2xl"
-            />
-            <img
-              src="/app-logo.svg"
-              alt="Mabuh-ai"
-              width={104}
-              height={104}
-              className="relative size-[6.5rem] drop-shadow-[0_16px_28px_rgba(0,0,0,0.28)]"
-            />
-          </div>
-          <p className="-mt-1 text-xs font-medium tracking-wide text-muted-foreground">
-            Your quiet campus companion
-          </p>
+      <section className="relative mx-auto flex min-h-dvh w-full max-w-[26rem] flex-col px-6 pb-[calc(var(--safe-bottom)+1.5rem)] pt-[calc(var(--safe-top)+2.5rem)]">
+        <header className="flex items-center justify-center gap-5">
+          <img
+            src="/app-logo.svg"
+            alt="Mabuh-ai"
+            width={72}
+            height={72}
+            className="size-18"
+          />
+          <span className="font-serif text-4xl font-medium tracking-[-0.02em] text-foreground">
+            Mabuh<span className="text-muted-foreground">-ai</span>
+          </span>
         </header>
 
-        <div className="flex flex-1 flex-col justify-center py-6">
-          <div className="mb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-tertiary">
-              {tab === "sign-in" ? "Welcome back" : "Start your space"}
-            </p>
-            <h1 className="mt-2 font-serif text-[2rem] leading-[1.08] tracking-[-0.04em]">
-              {tab === "sign-in" ? "Take a breath. You’re back." : "A space that’s yours."}
+        <div className="flex flex-1 flex-col justify-center py-10">
+          <div className="mb-8 space-y-2">
+            <h1 className="font-serif text-[1.75rem] leading-[1.15] tracking-[-0.03em] text-foreground">
+              {tab === "sign-in" ? "Welcome back" : "Create your account"}
             </h1>
-            <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               {tab === "sign-in"
-                ? "Sign in to continue your check-ins and reflections."
-                : "Create an account for private check-ins, reflection, and support."}
+                ? "Sign in to continue your check-ins."
+                : "A quiet space for your check-ins and reflections."}
             </p>
           </div>
 
           <div
-            className="mb-5 flex min-h-12 rounded-full bg-surface-highest p-1"
+            className="mb-7 flex border-b border-white/10"
             role="tablist"
             aria-label="Account access"
           >
@@ -661,16 +575,30 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
                 aria-selected={tab === t}
                 onClick={() => switchTab(t)}
                 className={cn(
-                  "flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200",
-                  "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20",
+                  "relative -mb-px px-1 pb-2.5 text-sm font-medium transition-colors duration-150",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   tab === t
-                    ? "bg-primary/20 text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-                    : "text-muted-foreground active:bg-white/5",
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground/70",
                 )}
               >
                 {t === "sign-in" ? "Sign in" : "Sign up"}
+                {tab === t && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-0 -bottom-px h-px bg-foreground"
+                  />
+                )}
               </button>
             ))}
+            <div className="ml-6" />
+            <button
+              type="button"
+              onClick={() => switchTab(tab === "sign-in" ? "sign-up" : "sign-in")}
+              className="ml-auto -mb-px pb-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground/70"
+            >
+              {tab === "sign-in" ? "New here? Create an account" : "Have an account? Sign in"}
+            </button>
           </div>
 
           {nativeAuthError && (
@@ -682,10 +610,7 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
           <div
             key={tab}
             role="tabpanel"
-            className={cn(
-              "animate-in fade-in-0 duration-200",
-              slideDir === "right" ? "slide-in-from-right-4" : "slide-in-from-left-4",
-            )}
+            className="animate-in fade-in-0 duration-200"
           >
             {tab === "sign-in" ? (
               <SignInForm onForgotPassword={() => setShowForgot(true)} />
@@ -695,9 +620,8 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
           </div>
         </div>
 
-        <footer className="text-center text-[0.6875rem] leading-5 text-muted-foreground/70">
-          <p>Your reflections stay connected to your account.</p>
-          <p>Mabuh-ai supports wellbeing and does not replace professional care.</p>
+        <footer className="text-center text-[0.6875rem] leading-5 text-muted-foreground/50">
+          Mabuh-ai supports wellbeing and does not replace professional care.
         </footer>
       </section>
 

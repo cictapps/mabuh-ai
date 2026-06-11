@@ -13,15 +13,17 @@ import { HangarPanel } from "@/components/journey/HangarPanel";
 import { AchievementsPanel } from "@/components/journey/AchievementsPanel";
 import { AffirmationCard } from "@/components/journey/AffirmationCard";
 import { IntroOverlay } from "@/components/journey/IntroOverlay";
+import { TopBarSettingsButton } from "@/components/shared/TopBarSettingsButton";
 import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 import { getJourneyStatus } from "@/lib/journey/schedule";
 import type { JourneyPhase } from "@/types";
 
 type JourneyScreenProps = {
   onOpenSupport: () => void;
+  onOpenSettings: () => void;
 };
 
-export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
+export function JourneyScreen({ onOpenSupport, onOpenSettings }: JourneyScreenProps) {
   const phase = useJourneyStore((s) => s.phase);
   const setPhase = useJourneyStore((s) => s.setPhase);
   const totalXp = useJourneyStore((s) => s.totalXp);
@@ -103,6 +105,8 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
       className="relative"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
+      <TopBarSettingsButton onClick={onOpenSettings} />
+
       <div
         aria-hidden
         className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"

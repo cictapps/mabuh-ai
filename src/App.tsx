@@ -166,7 +166,7 @@ export default function App({
         height: "100dvh",
         display: "flex",
         flexDirection: "column",
-        background: "#121416",
+        background: "transparent",
         maxWidth: 430,
         margin: "0 auto",
         position: "relative",

@@ -1,5 +1,11 @@
 import { Award, Gift, Lock, MapPin, Sparkles, Star } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Pill } from "./Pill";
 import { ProgressBar } from "./ProgressBar";
 import { ContextualHint } from "./ContextualHint";
@@ -14,9 +20,9 @@ import {
 } from "@/lib/journey/xp";
 
 const XP_RULES: { label: string; value: string }[] = [
-  { label: "Begin your day (preflight)", value: `+${XP_REWARDS.preflight} XP` },
-  { label: "Pause for a checkpoint (×3 daily)", value: `+${XP_REWARDS.checkpoint} XP` },
-  { label: "Close out your day", value: `+${XP_REWARDS.final} XP` },
+  { label: "Begin Flight or Garden", value: `+${XP_REWARDS.preflight} XP` },
+  { label: "Checkpoint or care moment (×3)", value: `+${XP_REWARDS.checkpoint} XP` },
+  { label: "Close out Flight or Garden", value: `+${XP_REWARDS.final} XP` },
   { label: "Mood check-in (×2 daily)", value: `+${XP_REWARDS.mood_checkin} XP` },
   { label: "Journal entry", value: `+${XP_REWARDS.journal_entry} XP` },
 ];
@@ -28,6 +34,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   accent: "Card accent",
   background: "Background",
   title: "Custom title",
+  plant: "Plant variety",
 };
 
 type AchievementsPanelProps = {
@@ -38,6 +45,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
   const totalXp = useJourneyStore((s) => s.totalXp);
   const streak = useJourneyStore((s) => s.streak);
   const flightsCompleted = useJourneyStore((s) => s.flightsCompleted);
+  const gardenDaysCompleted = useJourneyStore((s) => s.gardenDaysCompleted);
   const unlockedRewards = useJourneyStore((s) => s.unlockedRewards);
   const pauseCount = useJourneyStore((s) => s.pauseCount);
   const journalEntryCount = useJourneyStore((s) => s.journalEntryCount);
@@ -45,7 +53,13 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
   const level = levelFromXp(totalXp);
   const intoLevel = xpIntoLevel(totalXp);
 
-  const milestones = reachedMilestones(flightsCompleted, journalEntryCount, pauseCount, bestRhythm);
+  const milestones = reachedMilestones(
+    flightsCompleted,
+    gardenDaysCompleted,
+    journalEntryCount,
+    pauseCount,
+    bestRhythm,
+  );
 
   return (
     <Card>
@@ -69,13 +83,13 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
         ) : null}
 
         <div className="grid grid-cols-3 gap-2">
-          <Pill
-            label="Streak"
-            value={`${streak} 🔥`}
-            tone="warm"
-          />
+          <Pill label="Streak" value={`${streak} 🔥`} tone="warm" />
           <Pill label="Level" value={`Lv.${level}`} tone="calm" />
-          <Pill label="Flights" value={flightsCompleted} tone="soft" />
+          <Pill
+            label="Journeys"
+            value={flightsCompleted + gardenDaysCompleted}
+            tone="soft"
+          />
         </div>
 
         <div>
@@ -140,12 +154,18 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
                     <span className="block text-sm font-semibold">
                       {reward.label}
                       {unlocked ? (
-                        <span className="ml-1.5 text-[10px] font-medium text-tertiary">Unlocked</span>
+                        <span className="ml-1.5 text-[10px] font-medium text-tertiary">
+                          Unlocked
+                        </span>
                       ) : locked ? (
-                        <span className="ml-1.5 text-[10px] text-[#d8d4eb]/40">Level {reward.level}</span>
+                        <span className="ml-1.5 text-[10px] text-[#d8d4eb]/40">
+                          Level {reward.level}
+                        </span>
                       ) : null}
                     </span>
-                    <span className="block text-[11px] opacity-80">{reward.description}</span>
+                    <span className="block text-[11px] opacity-80">
+                      {reward.description}
+                    </span>
                   </span>
                   <span className="shrink-0 text-right text-[10px] capitalize text-[#d8d4eb]/60">
                     {CATEGORY_LABELS[reward.category] ?? reward.category}
@@ -165,7 +185,8 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
           <ul className="space-y-1.5">
             {milestones.length === 0 ? (
               <li className="rounded-xl border border-dashed border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.02)] px-3 py-3 text-xs text-[#d8d4eb]">
-                Complete your first flight, journal entry, or pause to earn your first milestone.
+                Complete your first Flight, Garden day, journal entry, or pause to earn a
+                milestone.
               </li>
             ) : (
               milestones.map((ms) => (
@@ -180,7 +201,9 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
                     <span className="block text-sm font-semibold">{ms.label}</span>
                     <span className="block text-[11px] opacity-80">{ms.body}</span>
                   </span>
-                  <span className="shrink-0 font-mono text-[10px] text-tertiary">Reached</span>
+                  <span className="shrink-0 font-mono text-[10px] text-tertiary">
+                    Reached
+                  </span>
                 </li>
               ))
             )}

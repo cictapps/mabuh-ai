@@ -6,6 +6,9 @@ export const XP_REWARDS: Record<JourneyActivityType, number> = {
   preflight: 3,
   checkpoint: 1,
   final: 5,
+  garden_start: 3,
+  garden_care: 1,
+  garden_finish: 5,
   mood_checkin: 2,
   journal_entry: 3,
 } as const;
@@ -14,6 +17,9 @@ export const DAILY_CAPS: Record<JourneyActivityType, number> = {
   preflight: 1,
   checkpoint: 3,
   final: 1,
+  garden_start: 1,
+  garden_care: 3,
+  garden_finish: 1,
   mood_checkin: 2,
   journal_entry: 1,
 };
@@ -47,7 +53,10 @@ export function isYesterday(prev: Date, today: Date): boolean {
 }
 
 export function todayKey(now: Date = new Date()): string {
-  return now.toISOString().slice(0, 10);
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -104,10 +113,24 @@ export function canAward(
   sourceId: string,
 ): boolean {
   const cap = DAILY_CAPS[action];
-  const used = ledger.counts[action] ?? 0;
+  const group = awardGroup(action);
+  const used = ledger.events.filter((event) => awardGroup(event.action) === group).length;
   if (used >= cap) return false;
-  if (ledger.events.some((e) => e.action === action && e.sourceId === sourceId)) return false;
+  if (
+    ledger.events.some(
+      (event) => awardGroup(event.action) === group && event.sourceId === sourceId,
+    )
+  ) {
+    return false;
+  }
   return true;
+}
+
+function awardGroup(action: JourneyActivityType): string {
+  if (action === "preflight" || action === "garden_start") return "journey_start";
+  if (action === "checkpoint" || action === "garden_care") return "journey_care";
+  if (action === "final" || action === "garden_finish") return "journey_finish";
+  return action;
 }
 
 export function awardAction(
@@ -127,16 +150,126 @@ export function awardAction(
 // ── Rewards ────────────────────────────────────────────────────────────
 
 export const REWARDS: JourneyReward[] = [
-  { id: "dusk-trainer", level: 1, label: "Dusk sky & Trainer", description: "Evening calm palette with the Trainer companion", category: "theme", preview: "Dusk" },
-  { id: "dawn-sky", level: 2, label: "Dawn sky", description: "Morning amber palette", category: "theme", preview: "Dawn" },
-  { id: "cruiser", level: 3, label: "Cruiser companion", description: "Upgrade your companion to the Cruiser", category: "plane", preview: "Cruiser" },
-  { id: "meadow-sky", level: 4, label: "Meadow sky", description: "Midday green palette", category: "theme", preview: "Meadow" },
-  { id: "steady-ground", level: 5, label: "Steady Ground", description: "Affirmation pack: steady ground", category: "affirmation", preview: "Affirmation pack" },
-  { id: "glider", level: 6, label: "Glider companion", description: "Upgrade your companion to the Glider", category: "plane", preview: "Glider" },
-  { id: "amber-accent", level: 7, label: "Warm amber accent", description: "Warm amber card accent colour", category: "accent", preview: "Amber accent" },
-  { id: "late-night-kindness", level: 8, label: "Late-Night Kindness", description: "Affirmation pack: late-night kindness", category: "affirmation", preview: "Affirmation pack" },
-  { id: "constellation-bg", level: 9, label: "Constellation background", description: "Soft constellation background pattern", category: "background", preview: "Constellations" },
-  { id: "custom-title", level: 10, label: "Custom title", description: "Choose your own Journey title", category: "title", preview: "Custom title" },
+  {
+    id: "dusk-trainer",
+    level: 1,
+    label: "Dusk sky & Trainer",
+    description: "Evening calm palette with the Trainer companion",
+    category: "theme",
+    preview: "Dusk",
+  },
+  {
+    id: "plant-sunflower",
+    level: 1,
+    label: "Sunflower seed",
+    description: "A bright first plant for your Garden",
+    category: "plant",
+    preview: "Sunflower",
+  },
+  {
+    id: "dawn-sky",
+    level: 2,
+    label: "Dawn sky",
+    description: "Morning amber palette",
+    category: "theme",
+    preview: "Dawn",
+  },
+  {
+    id: "cruiser",
+    level: 3,
+    label: "Cruiser companion",
+    description: "Upgrade your companion to the Cruiser",
+    category: "plane",
+    preview: "Cruiser",
+  },
+  {
+    id: "plant-fern",
+    level: 3,
+    label: "Fern seedling",
+    description: "A calm, leafy Garden companion",
+    category: "plant",
+    preview: "Fern",
+  },
+  {
+    id: "meadow-sky",
+    level: 4,
+    label: "Meadow sky",
+    description: "Midday green palette",
+    category: "theme",
+    preview: "Meadow",
+  },
+  {
+    id: "steady-ground",
+    level: 5,
+    label: "Steady Ground",
+    description: "Affirmation pack: steady ground",
+    category: "affirmation",
+    preview: "Affirmation pack",
+  },
+  {
+    id: "plant-lavender",
+    level: 5,
+    label: "Lavender seed",
+    description: "A soft violet bloom for your Garden",
+    category: "plant",
+    preview: "Lavender",
+  },
+  {
+    id: "glider",
+    level: 6,
+    label: "Glider companion",
+    description: "Upgrade your companion to the Glider",
+    category: "plane",
+    preview: "Glider",
+  },
+  {
+    id: "amber-accent",
+    level: 7,
+    label: "Warm amber accent",
+    description: "Warm amber card accent colour",
+    category: "accent",
+    preview: "Amber accent",
+  },
+  {
+    id: "plant-monstera",
+    level: 7,
+    label: "Monstera cutting",
+    description: "A broad-leaf plant for your Garden",
+    category: "plant",
+    preview: "Monstera",
+  },
+  {
+    id: "late-night-kindness",
+    level: 8,
+    label: "Late-Night Kindness",
+    description: "Affirmation pack: late-night kindness",
+    category: "affirmation",
+    preview: "Affirmation pack",
+  },
+  {
+    id: "constellation-bg",
+    level: 9,
+    label: "Constellation background",
+    description: "Soft constellation background pattern",
+    category: "background",
+    preview: "Constellations",
+  },
+  {
+    id: "plant-cherry-blossom",
+    level: 9,
+    label: "Cherry blossom",
+    description: "A flowering tree for experienced gardeners",
+    category: "plant",
+    preview: "Cherry blossom",
+  },
+  {
+    id: "custom-title",
+    level: 10,
+    label: "Custom title",
+    description: "Choose your own Journey title",
+    category: "title",
+    preview: "Custom title",
+  },
 ];
 
 export function rewardsForLevel(level: number): JourneyReward[] {
@@ -162,28 +295,97 @@ export function newRewardsAtLevel(
 // ── Milestones ─────────────────────────────────────────────────────────
 
 export const MILESTONES: JourneyMilestone[] = [
-  { id: "first-flight", type: "flight", threshold: 1, label: "First flight", body: "Welcome aboard." },
-  { id: "three-flights", type: "flight", threshold: 3, label: "Steady skies", body: "Three flights complete." },
-  { id: "five-flights", type: "flight", threshold: 5, label: "City hops", body: "You're finding your rhythm." },
-  { id: "ten-flights", type: "flight", threshold: 10, label: "Wide horizons", body: "Ten days of gentle practice." },
-  { id: "twentyfive-flights", type: "flight", threshold: 25, label: "Sanctuary pilot", body: "This is becoming yours." },
-  { id: "first-journal", type: "journal", threshold: 1, label: "First words", body: "You wrote your first journal entry." },
-  { id: "first-pause", type: "pause", threshold: 1, label: "Rest is part of it", body: "You paused — that takes awareness." },
-  { id: "weekly-rhythm", type: "rhythm", threshold: 7, label: "Weekly rhythm", body: "A full week of gentle practice." },
+  {
+    id: "first-flight",
+    type: "flight",
+    threshold: 1,
+    label: "First flight",
+    body: "Welcome aboard.",
+  },
+  {
+    id: "three-flights",
+    type: "flight",
+    threshold: 3,
+    label: "Steady skies",
+    body: "Three flights complete.",
+  },
+  {
+    id: "five-flights",
+    type: "flight",
+    threshold: 5,
+    label: "City hops",
+    body: "You're finding your rhythm.",
+  },
+  {
+    id: "ten-flights",
+    type: "flight",
+    threshold: 10,
+    label: "Wide horizons",
+    body: "Ten days of gentle practice.",
+  },
+  {
+    id: "twentyfive-flights",
+    type: "flight",
+    threshold: 25,
+    label: "Sanctuary pilot",
+    body: "This is becoming yours.",
+  },
+  {
+    id: "first-plant-day",
+    type: "plant",
+    threshold: 1,
+    label: "First sprout",
+    body: "You gave your Garden its first day of care.",
+  },
+  {
+    id: "first-bloom",
+    type: "plant",
+    threshold: 7,
+    label: "First bloom",
+    body: "Seven gentle days helped a plant bloom.",
+  },
+  {
+    id: "first-journal",
+    type: "journal",
+    threshold: 1,
+    label: "First words",
+    body: "You wrote your first journal entry.",
+  },
+  {
+    id: "first-pause",
+    type: "pause",
+    threshold: 1,
+    label: "Rest is part of it",
+    body: "You paused — that takes awareness.",
+  },
+  {
+    id: "weekly-rhythm",
+    type: "rhythm",
+    threshold: 7,
+    label: "Weekly rhythm",
+    body: "A full week of gentle practice.",
+  },
 ];
 
 export function reachedMilestones(
   flightsCompleted: number,
+  gardenDaysCompleted: number,
   journalCount: number,
   pauseCount: number,
   bestRhythm: number,
 ): JourneyMilestone[] {
   return MILESTONES.filter((m) => {
     switch (m.type) {
-      case "flight": return flightsCompleted >= m.threshold;
-      case "journal": return journalCount >= m.threshold;
-      case "pause": return pauseCount >= m.threshold;
-      case "rhythm": return bestRhythm >= m.threshold;
+      case "flight":
+        return flightsCompleted >= m.threshold;
+      case "plant":
+        return gardenDaysCompleted >= m.threshold;
+      case "journal":
+        return journalCount >= m.threshold;
+      case "pause":
+        return pauseCount >= m.threshold;
+      case "rhythm":
+        return bestRhythm >= m.threshold;
     }
   });
 }

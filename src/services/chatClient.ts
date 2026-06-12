@@ -35,7 +35,8 @@ export type ChatIntent =
   | "calm"
   | "support"
   | "affirmation"
-  | "self-care";
+  | "self-care"
+  | "reflect";
 
 export interface ChatRequest {
   message: string;
@@ -125,7 +126,8 @@ export type ServerChatIntent =
   | "support"
   | "vent"
   | "affirmation"
-  | "self_care";
+  | "self_care"
+  | "reflect";
 
 export function normalizeChatIntent(intent: ChatIntent): ServerChatIntent {
   switch (intent) {
@@ -137,6 +139,8 @@ export function normalizeChatIntent(intent: ChatIntent): ServerChatIntent {
       return "affirmation";
     case "self-care":
       return "self_care";
+    case "reflect":
+      return "reflect";
     case "calm":
     case "general":
     default:

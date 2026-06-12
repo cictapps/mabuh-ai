@@ -1,16 +1,29 @@
 import React, { useMemo, useState } from "react";
 import { Button } from "../components/ui/button";
 import { JournalInput } from "../components/mood/JournalInput";
+import { ReflectWithAIPanel } from "../components/journal/ReflectWithAIPanel";
 import { SectionLabel } from "../components/shared/SectionLabel";
-import { JournalEntry, MoodType } from "../types";
+import { JournalEntry, MoodEntry, MoodType } from "../types";
 import { getMoodMeta } from "../data";
+import type { ReflectContext } from "../services/reflect";
+
+function formatDateTime(ts: number): string {
+  return new Date(ts).toLocaleString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
 interface JournalScreenProps {
   entries: JournalEntry[];
+  recentMoods: MoodEntry[];
   onAddEntry: (content: string) => void;
 }
 
-export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, onAddEntry }) => {
+export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, recentMoods, onAddEntry }) => {
   const [draft, setDraft] = useState("");
 
   const sortedEntries = useMemo(
@@ -29,6 +42,37 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, onAddEntr
   }, [entries, sortedEntries]);
 
   const canSave = draft.trim().length > 0;
+
+  // Build a context payload for the AI reflection so it can reference
+  // recent mood + journal state. Trimmed and bounded to keep the
+  // request small.
+  const buildReflectionContext = (): ReflectContext => {
+    const recentMoodSlice = [...recentMoods]
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 3)
+      .map((m) => {
+        const meta = getMoodMeta(m.mood);
+        return {
+          date: m.date,
+          mood: m.mood,
+          moodLabel: meta?.label ?? m.mood,
+          journal: m.journal ? m.journal.slice(0, 240) : undefined,
+        };
+      });
+    const recentJournalSlice = sortedEntries
+      .slice(0, 2)
+      .map((e) => ({
+        date: e.date,
+        content: e.content.slice(0, 240),
+        mood: e.mood,
+      }));
+    return {
+      draftText: draft.trim() || undefined,
+      mood: null,
+      recentMoods: recentMoodSlice,
+      recentJournal: recentJournalSlice,
+    };
+  };
 
   return (
     <div
@@ -83,10 +127,8 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, onAddEntr
                 : `${stats.weekCount} little moments this week`}
           </div>
           <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
-            Your last words {stats.latest ? new Date(stats.latest).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            }) : "will live here soon"}
+            Your last words{" "}
+            {stats.latest ? formatDateTime(stats.latest) : "will live here soon"}
           </p>
         </div>
         <div style={{ display: "grid", gap: 8 }}>
@@ -132,6 +174,28 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, onAddEntr
             Check-ins already find their way here on their own.
           </p>
         </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 10.5,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(188,194,255,0.45)",
+            }}
+          >
+            <span aria-hidden style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }} />
+            <span>Or sit with what you wrote</span>
+            <span aria-hidden style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }} />
+          </div>
+          <ReflectWithAIPanel
+            text={draft}
+            buildContext={buildReflectionContext}
+          />
+        </div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -153,7 +217,11 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, onAddEntr
             {sortedEntries.map((entry) => (
               <div key={entry.id} className="journal-row">
                 <div className="journal-dot" />
-                <JournalCard entry={entry} />
+                <JournalCard
+                  entry={entry}
+                  recentMoods={recentMoods}
+                  sortedEntries={sortedEntries}
+                />
               </div>
             ))}
           </div>
@@ -163,7 +231,11 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, onAddEntr
   );
 };
 
-const JournalCard: React.FC<{ entry: JournalEntry }> = ({ entry }) => {
+const JournalCard: React.FC<{
+  entry: JournalEntry;
+  recentMoods: MoodEntry[];
+  sortedEntries: JournalEntry[];
+}> = ({ entry, recentMoods, sortedEntries }) => {
   const isCheckIn = entry.source === "checkin";
   const meta = entry.mood ? getMoodMeta(entry.mood as MoodType) : null;
 
@@ -182,11 +254,7 @@ const JournalCard: React.FC<{ entry: JournalEntry }> = ({ entry }) => {
           />
         )}
         <span style={{ fontSize: 12, color: "rgba(188,194,255,0.5)" }}>
-          {new Date(entry.timestamp).toLocaleDateString("en-US", {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-          })}
+          {formatDateTime(entry.timestamp)}
         </span>
         <span
           style={{
@@ -237,6 +305,34 @@ const JournalCard: React.FC<{ entry: JournalEntry }> = ({ entry }) => {
           A quiet check-in with no words — that's perfectly okay too.
         </p>
       )}
+
+      <ReflectWithAIPanel
+        text={entry.content}
+        buttonLabel="Reflect on this again"
+        compact
+        buildContext={() => ({
+          existingEntryId: entry.id,
+          mood: meta
+            ? { type: meta.id, label: meta.label }
+            : null,
+          recentMoods: recentMoods
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .slice(0, 3)
+            .map((m) => ({
+              date: m.date,
+              mood: m.mood,
+              moodLabel: getMoodMeta(m.mood)?.label ?? m.mood,
+              journal: m.journal ? m.journal.slice(0, 240) : undefined,
+            })),
+          recentJournal: sortedEntries
+            .slice(0, 2)
+            .map((e) => ({
+              date: e.date,
+              content: e.content.slice(0, 240),
+              mood: e.mood,
+            })),
+        })}
+      />
     </div>
   );
 };

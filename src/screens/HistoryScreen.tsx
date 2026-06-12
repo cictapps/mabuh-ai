@@ -112,12 +112,15 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ history, loading }
                     marginLeft: "auto",
                     fontSize: 11,
                     color: "rgba(188,194,255,0.35)",
+                    fontVariantNumeric: "tabular-nums",
                   }}
                 >
-                  {new Date(entry.timestamp).toLocaleDateString("en-US", {
+                  {new Date(entry.timestamp).toLocaleString(undefined, {
                     weekday: "short",
                     month: "short",
                     day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
                   })}
                 </span>
               </div>

@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Heart, Plane, MapPin, Moon } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "./ProgressBar";
 import { ContextualHint } from "./ContextualHint";
+import { AirborneFlightScene } from "./AirborneFlightScene";
 import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 import { formatDuration, getJourneyStatus } from "@/lib/journey/schedule";
 
@@ -29,6 +36,8 @@ export function AirbornePanel({
   showHint,
 }: AirbornePanelProps) {
   const checkpoints = useJourneyStore((s) => s.checkpoints);
+  const theme = useJourneyStore((s) => s.theme);
+  const plane = useJourneyStore((s) => s.plane);
   const [now, setNow] = useState<Date>(() => new Date());
 
   useEffect(() => {
@@ -36,10 +45,7 @@ export function AirbornePanel({
     return () => clearInterval(interval);
   }, []);
 
-  const status = useMemo(
-    () => getJourneyStatus(checkpoints, now),
-    [checkpoints, now],
-  );
+  const status = useMemo(() => getJourneyStatus(checkpoints, now), [checkpoints, now]);
 
   const hasCheckpoints = checkpoints.length > 0;
   const greeting = timeOfDayGreeting(now.getHours());
@@ -74,6 +80,8 @@ export function AirbornePanel({
         {showHint ? (
           <ContextualHint text="This is your between-time view. The countdown tells you when your next waypoint is near — no alarms, just a soft nudge." />
         ) : null}
+
+        <AirborneFlightScene theme={theme} plane={plane} />
 
         {hasCheckpoints ? (
           <div className="rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] p-4">
@@ -112,7 +120,8 @@ export function AirbornePanel({
           <div className="rounded-2xl border border-dashed border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.02)] p-4">
             <p className="text-sm text-foreground">No waypoints yet.</p>
             <p className="mt-1 text-xs leading-relaxed text-[#d8d4eb]">
-              Add a few gentle moments in the Hangar — a morning pause, an evening reflection, anything that helps.
+              Add a few gentle moments in the Hangar — a morning pause, an evening
+              reflection, anything that helps.
             </p>
           </div>
         )}
@@ -128,7 +137,11 @@ export function AirbornePanel({
             Pause for a checkpoint
           </Button>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="ghost" onClick={onEnterFinal} className="text-[#d8d4eb] hover:text-foreground">
+            <Button
+              variant="ghost"
+              onClick={onEnterFinal}
+              className="text-[#d8d4eb] hover:text-foreground"
+            >
               <Moon className="size-4" />
               Wind down
             </Button>

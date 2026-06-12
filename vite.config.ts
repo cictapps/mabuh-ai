@@ -2,15 +2,47 @@ import { fileURLToPath, URL } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { visualizer } from "rollup-plugin-visualizer";
 
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    visualizer({
+      filename: "dist/bundle-report.html",
+      gzipSize: true,
+      brotliSize: true,
+      template: "treemap",
+    }),
+  ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("node_modules")) {
+            if (id.includes("leaflet")) return "vendor-leaflet";
+            if (id.includes("framer-motion")) return "vendor-motion";
+            if (id.includes("gsap")) return "vendor-gsap";
+            if (id.includes("react-router")) return "vendor-router";
+            if (id.includes("lucide-react")) return "vendor-lucide";
+            if (id.includes("@supabase")) return "vendor-supabase";
+            if (id.includes("zustand")) return "vendor";
+            // React, react-dom, scheduler, and react-is share a single
+            // chunk because they are all pulled in by every route.
+            return "vendor";
+          }
+          return undefined;
+        },
+      },
     },
   },
 

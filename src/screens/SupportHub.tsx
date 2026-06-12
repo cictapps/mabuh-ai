@@ -1,8 +1,24 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { MessageCircle, MapPin, Phone, ShieldAlert, ArrowUpRight } from "lucide-react";
+import { MessageCircle, MapPin, Phone, ShieldAlert, ArrowUpRight, Info } from "lucide-react";
 
-import { ChatbotShell } from "./ChatBot";
+import { loadHotlines, summarizeDirectory, type HotlineRecord } from "../data/providers";
+
+const ChatbotShell = lazy(async () => {
+  const mod = await import("./ChatBot");
+  return { default: mod.ChatbotShell };
+});
+
+function ChatFallback() {
+  return (
+    <div
+      className="flex flex-1 w-full items-center justify-center py-10 text-xs text-muted-foreground"
+      aria-live="polite"
+    >
+      Loading chat…
+    </div>
+  );
+}
 
 type SupportView = "hub" | "chat";
 
@@ -12,23 +28,44 @@ interface SupportHubProps {
   onCloseChat: () => void;
 }
 
-interface Hotline {
+interface HotlineView {
+  key: string;
   label: string;
   detail: string;
   number: string;
+  tel: string;
+  unverified: boolean;
 }
 
-const HOTLINES: Hotline[] = [
-  { label: "NCMH Crisis Hotline", detail: "Toll-free, 24/7", number: "1553" },
-  { label: "DOH Hopeline", detail: "Globe · 24/7", number: "09175584673" },
-  { label: "Hopeline (Landline)", detail: "Globe · 24/7", number: "8044673" },
-];
-
-function telHref(number: string): string {
-  return `tel:${number.replace(/[^+\d]/g, "")}`;
+function viewFor(h: HotlineRecord): HotlineView {
+  const number = h.phone ?? "";
+  const detail = h.hours?.display
+    ? h.hours.isConfirmed
+      ? h.coverage
+        ? `${h.coverage} · ${h.hours.display}`
+        : h.hours.display
+      : `Hours: ${h.hours.display} (unverified)`
+    : (h.coverage ?? "Philippines");
+  return {
+    key: h.id,
+    label: h.name,
+    detail,
+    number,
+    tel: number ? `tel:${number.replace(/[^+\d]/g, "")}` : "#",
+    unverified: h.verification.lastVerifiedAt == null,
+  };
 }
 
-export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onCloseChat }) => {
+const HOTLINES: HotlineView[] = loadHotlines().map(viewFor);
+
+const directorySummary = summarizeDirectory();
+const PRIMARY_REGIONS = directorySummary.regions.filter((r) => r !== "National");
+
+export const SupportHub: React.FC<SupportHubProps> = ({
+  view,
+  onOpenChat,
+  onCloseChat,
+}) => {
   const navigate = useNavigate();
 
   if (view === "chat") {
@@ -43,7 +80,9 @@ export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onClos
           minHeight: 0,
         }}
       >
-        <ChatbotShell embedded onBack={onCloseChat} />
+        <Suspense fallback={<ChatFallback />}>
+          <ChatbotShell embedded onBack={onCloseChat} />
+        </Suspense>
       </div>
     );
   }
@@ -114,6 +153,39 @@ export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onClos
         </div>
       </div>
 
+      <div
+        role="note"
+        aria-label="Local coverage notice"
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 10,
+          padding: "12px 14px",
+          borderRadius: 18,
+          background: "rgba(255,185,84,0.08)",
+          border: "1px solid rgba(255,185,84,0.18)",
+          color: "rgba(255,225,184,0.95)",
+        }}
+      >
+        <Info
+          size={16}
+          color="#ffd99a"
+          style={{ marginTop: 2, flexShrink: 0 }}
+          aria-hidden
+        />
+        <p
+          style={{
+            fontSize: 12,
+            lineHeight: 1.55,
+            margin: 0,
+          }}
+        >
+          {PRIMARY_REGIONS.length > 0
+            ? `Local listings currently focus on ${PRIMARY_REGIONS.join(" and ")}. National hotlines are also listed. Coverage and operating hours are still being verified — please confirm details with the provider before travelling.`
+            : "Local listings are still being assembled. National hotlines are listed below. Please confirm details with the provider before travelling."}
+        </p>
+      </div>
+
       {/* Quick actions card — primary entry points come first. */}
       <section
         aria-label="Quick actions"
@@ -143,7 +215,12 @@ export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onClos
             </p>
             <h3
               className="font-serif"
-              style={{ fontSize: 20, fontWeight: 500, color: "#f5f1ff", lineHeight: 1.25 }}
+              style={{
+                fontSize: 20,
+                fontWeight: 500,
+                color: "#f5f1ff",
+                lineHeight: 1.25,
+              }}
             >
               Choose the right kind of help
             </h3>
@@ -252,19 +329,37 @@ export const SupportHub: React.FC<SupportHubProps> = ({ view, onOpenChat, onClos
           <div className="flex flex-col gap-2">
             {HOTLINES.map((h) => (
               <a
-                key={h.number}
-                href={telHref(h.number)}
+                key={h.key}
+                href={h.tel}
+                onClick={(e) => {
+                  if (h.tel === "#") e.preventDefault();
+                }}
                 className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/5 px-3 py-2.5 text-[13px] transition-colors duration-200 hover:bg-white/10"
                 style={{
                   borderColor: "rgba(255,255,255,0.08)",
                   color: "#f5e5e5",
                   textDecoration: "none",
+                  opacity: h.unverified ? 0.85 : 1,
                 }}
               >
                 <Phone size={14} color="rgba(255,170,170,0.85)" />
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold" style={{ color: "#f7e4e4" }}>
                     {h.label}
+                    {h.unverified && (
+                      <span
+                        style={{
+                          marginLeft: 6,
+                          fontSize: 9,
+                          fontWeight: 500,
+                          letterSpacing: "0.12em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,200,200,0.7)",
+                        }}
+                      >
+                        unverified
+                      </span>
+                    )}
                   </span>
                   <span
                     className="mt-0.5 block text-[11px]"

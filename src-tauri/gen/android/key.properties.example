@@ -3,7 +3,7 @@
 #
 # Generate the keystore with:
 #   keytool -genkey -v -keystore ~/keystores/cictappskey.keystore \
-#     -alias cictkey -keyalg RSA -keysize 2048 -validity 10000
+#     -alias cictappskey -keyalg RSA -keysize 2048 -validity 10000
 #
 # CI should use the TAURI_SIGNING_* environment variables instead:
 #   TAURI_SIGNING_STORE_FILE, TAURI_SIGNING_STORE_PASSWORD,
@@ -12,5 +12,5 @@
 # storeFile uses an absolute path so it resolves the same way locally and in CI.
 storeFile=/home/<you>/keystores/cictappskey.keystore
 storePassword=
-keyAlias=cictkey
+keyAlias=cictappskey
 keyPassword=

@@ -14,8 +14,11 @@ import { AchievementsPanel } from "@/components/journey/AchievementsPanel";
 import { AffirmationCard } from "@/components/journey/AffirmationCard";
 import { RewardToast } from "@/components/journey/RewardToast";
 import { IntroOverlay } from "@/components/journey/IntroOverlay";
+import { GardenPanel } from "@/components/journey/GardenPanel";
+import { JourneyModeSelector } from "@/components/journey/JourneyModeSelector";
 import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 import { getJourneyStatus } from "@/lib/journey/schedule";
+import { todayKey } from "@/lib/journey/xp";
 import type { JourneyPhase } from "@/types";
 
 type JourneyScreenProps = {
@@ -24,10 +27,14 @@ type JourneyScreenProps = {
 
 export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
   const phase = useJourneyStore((s) => s.phase);
+  const mode = useJourneyStore((s) => s.mode);
+  const modeDate = useJourneyStore((s) => s.modeDate);
+  const selectMode = useJourneyStore((s) => s.selectMode);
   const setPhase = useJourneyStore((s) => s.setPhase);
   const totalXp = useJourneyStore((s) => s.totalXp);
   const streak = useJourneyStore((s) => s.streak);
   const flightsCompleted = useJourneyStore((s) => s.flightsCompleted);
+  const gardenDaysCompleted = useJourneyStore((s) => s.gardenDaysCompleted);
   const checkpoints = useJourneyStore((s) => s.checkpoints);
   const hasSeenIntro = useJourneyStore((s) => s.hasSeenIntro);
   const dismissIntro = useJourneyStore((s) => s.dismissIntro);
@@ -69,12 +76,11 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const status = useMemo(
-    () => getJourneyStatus(checkpoints, now),
-    [checkpoints, now],
-  );
+  const status = useMemo(() => getJourneyStatus(checkpoints, now), [checkpoints, now]);
 
   const activeCheckpoint = status.currentCheckpoint ?? status.nextCheckpoint;
+  const modeLocked = modeDate === todayKey(now);
+  const activeFlightPhase = modeLocked ? phase : "preflight";
 
   const handleIntroChoice = (option: "setup" | "start") => {
     dismissIntro();
@@ -100,10 +106,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
   };
 
   return (
-    <div
-      className="relative"
-      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
-    >
+    <div className="relative" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
       <div
         aria-hidden
         className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
@@ -117,17 +120,25 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
         <JourneyHeader
           totalXp={totalXp}
           streak={streak}
-          flightsCompleted={flightsCompleted}
+          journeysCompleted={flightsCompleted + gardenDaysCompleted}
           onOpenAchievements={openAchievements}
         />
 
-        <ViewTabs active={view} onChange={setView} />
+        <ViewTabs
+          active={view}
+          onChange={setView}
+          workshopLabel={mode === "garden" ? "Garden Shed" : "Hangar"}
+        />
 
         {view !== "main" ? null : (
           <>
-            {phase !== "pause" ? (
+            <JourneyModeSelector mode={mode} locked={modeLocked} onSelect={selectMode} />
+
+            {mode === "flight" && modeLocked && phase !== "pause" ? (
               <PhaseSwitcher active={phase} onSelect={handlePhaseSelect} />
-            ) : (
+            ) : null}
+
+            {mode === "flight" && phase === "pause" && modeLocked ? (
               <div
                 className="flex items-center gap-2 rounded-2xl border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.06)] px-3.5 py-2.5 text-xs text-[#ffd99a]"
                 role="status"
@@ -135,15 +146,17 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
               >
                 <Compass className="size-3.5" aria-hidden />
                 <span className="font-semibold">Paused</span>
-                <span className="text-[#d8d4eb]">
-                  · take all the time you need
-                </span>
+                <span className="text-[#d8d4eb]">· take all the time you need</span>
               </div>
-            )}
+            ) : null}
 
             <AffirmationCard />
 
-            {phase === "preflight" ? (
+            {mode === "garden" ? (
+              <GardenPanel onOpenSupport={onOpenSupport} locked={modeLocked} />
+            ) : null}
+
+            {mode === "flight" && activeFlightPhase === "preflight" ? (
               <PreflightPanel
                 preflightChecks={preflightChecks}
                 preflightMood={preflightMood}
@@ -157,7 +170,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
               />
             ) : null}
 
-            {phase === "airborne" ? (
+            {mode === "flight" && activeFlightPhase === "airborne" ? (
               <AirbornePanel
                 onOpenCheckpoint={() => {
                   setPhase("checkpoint");
@@ -172,11 +185,9 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
               />
             ) : null}
 
-            {phase === "checkpoint" ? (
+            {mode === "flight" && activeFlightPhase === "checkpoint" ? (
               <CheckpointPanel
-                checkpointLabel={
-                  activeCheckpoint?.label ?? "A soft check-in"
-                }
+                checkpointLabel={activeCheckpoint?.label ?? "A soft check-in"}
                 checkpointTime={activeCheckpoint?.time ?? "—"}
                 checks={checkpointChecks}
                 mood={checkpointMood}
@@ -193,7 +204,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
               />
             ) : null}
 
-            {phase === "pause" ? (
+            {mode === "flight" && activeFlightPhase === "pause" ? (
               <PausePanel
                 onClose={() => {
                   setPhase("airborne");
@@ -203,7 +214,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
               />
             ) : null}
 
-            {phase === "final" ? (
+            {mode === "flight" && activeFlightPhase === "final" ? (
               <FinalPanel
                 finalChecks={finalChecks}
                 finalMood={finalMood}
@@ -217,7 +228,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
               />
             ) : null}
 
-            {phase === "rest" ? (
+            {mode === "flight" && activeFlightPhase === "rest" ? (
               <RestPanel
                 onPrepareNext={() => {
                   prepareNextFlight();
@@ -228,10 +239,10 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
           </>
         )}
 
-        {view === "hangar" ? <HangarPanel /> : null}
+        {view === "hangar" ? <HangarPanel mode={mode} /> : null}
 
         {view === "achievements" ? (
-          <AchievementsPanel showHint={flightsCompleted === 0} />
+          <AchievementsPanel showHint={flightsCompleted + gardenDaysCompleted === 0} />
         ) : null}
       </div>
 

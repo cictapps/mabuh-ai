@@ -120,7 +120,16 @@ describe("levelFromXp / xpIntoLevel / levelProgressPercent", () => {
 
 describe("XP_REWARDS and DAILY_CAPS", () => {
   it("all actions have a reward defined", () => {
-    const actions = ["preflight", "checkpoint", "final", "mood_checkin", "journal_entry"] as const;
+    const actions = [
+      "preflight",
+      "checkpoint",
+      "final",
+      "garden_start",
+      "garden_care",
+      "garden_finish",
+      "mood_checkin",
+      "journal_entry",
+    ] as const;
     for (const a of actions) {
       expect(XP_REWARDS[a]).toBeGreaterThan(0);
       expect(DAILY_CAPS[a]).toBeGreaterThan(0);
@@ -143,7 +152,12 @@ describe("activity ledger", () => {
   });
 
   it("blocks duplicate sourceId", () => {
-    const ledger = awardAction(emptyLedger("2025-01-10"), "preflight", "src-1", "2025-01-10T12:00:00Z");
+    const ledger = awardAction(
+      emptyLedger("2025-01-10"),
+      "preflight",
+      "src-1",
+      "2025-01-10T12:00:00Z",
+    );
     expect(canAward(ledger, "preflight", "src-1")).toBe(false);
   });
 
@@ -171,6 +185,17 @@ describe("activity ledger", () => {
     expect(result.counts.preflight).toBe(1);
     expect(result.counts.journal_entry).toBe(1);
   });
+
+  it("shares daily caps between Flight and Garden equivalents", () => {
+    let ledger = emptyLedger("2025-01-10");
+    ledger = awardAction(ledger, "preflight", "journey-start", "2025-01-10T08:00:00Z");
+    expect(canAward(ledger, "garden_start", "garden-start")).toBe(false);
+
+    ledger = awardAction(ledger, "checkpoint", "care-1", "2025-01-10T10:00:00Z");
+    ledger = awardAction(ledger, "garden_care", "care-2", "2025-01-10T12:00:00Z");
+    ledger = awardAction(ledger, "checkpoint", "care-3", "2025-01-10T14:00:00Z");
+    expect(canAward(ledger, "garden_care", "care-4")).toBe(false);
+  });
 });
 
 describe("newRewardsAtLevel", () => {
@@ -195,13 +220,13 @@ describe("newRewardsAtLevel", () => {
   it("does not re-award already unlocked rewards", () => {
     const already = new Set(["dusk-trainer", "dawn-sky"]);
     const r = newRewardsAtLevel(1, 3, already);
-    expect(r.map((x) => x.id)).toEqual(["cruiser"]);
+    expect(r.map((x) => x.id)).toEqual(["cruiser", "plant-fern"]);
   });
 });
 
 describe("REWARDS", () => {
-  it("has exactly 10 rewards for levels 1-10", () => {
-    expect(REWARDS).toHaveLength(10);
+  it("has rewards across levels 1-10", () => {
+    expect(REWARDS.length).toBeGreaterThanOrEqual(10);
     for (let i = 1; i <= 10; i++) {
       expect(REWARDS.some((r) => r.level === i)).toBe(true);
     }
@@ -210,30 +235,36 @@ describe("REWARDS", () => {
 
 describe("reachedMilestones", () => {
   it("returns first-flight milestone at 1 flight", () => {
-    const ms = reachedMilestones(1, 0, 0, 0);
+    const ms = reachedMilestones(1, 0, 0, 0, 0);
     expect(ms.some((m) => m.id === "first-flight")).toBe(true);
     expect(ms.some((m) => m.id === "three-flights")).toBe(false);
   });
 
   it("returns flight milestones up to 10 flights", () => {
-    const ms = reachedMilestones(10, 0, 0, 0);
+    const ms = reachedMilestones(10, 0, 0, 0, 0);
     expect(ms.some((m) => m.id === "first-flight")).toBe(true);
     expect(ms.some((m) => m.id === "ten-flights")).toBe(true);
     expect(ms.some((m) => m.id === "twentyfive-flights")).toBe(false);
   });
 
   it("returns first-journal milestone", () => {
-    const ms = reachedMilestones(0, 1, 0, 0);
+    const ms = reachedMilestones(0, 0, 1, 0, 0);
     expect(ms.some((m) => m.id === "first-journal")).toBe(true);
   });
 
   it("returns first-pause milestone", () => {
-    const ms = reachedMilestones(0, 0, 1, 0);
+    const ms = reachedMilestones(0, 0, 0, 1, 0);
     expect(ms.some((m) => m.id === "first-pause")).toBe(true);
   });
 
   it("returns weekly-rhythm milestone", () => {
-    const ms = reachedMilestones(0, 0, 0, 7);
+    const ms = reachedMilestones(0, 0, 0, 0, 7);
     expect(ms.some((m) => m.id === "weekly-rhythm")).toBe(true);
+  });
+
+  it("returns Garden milestones without requiring a flight", () => {
+    const ms = reachedMilestones(0, 7, 0, 0, 0);
+    expect(ms.some((m) => m.id === "first-plant-day")).toBe(true);
+    expect(ms.some((m) => m.id === "first-bloom")).toBe(true);
   });
 });

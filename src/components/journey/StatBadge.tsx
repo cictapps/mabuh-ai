@@ -8,6 +8,7 @@ type StatBadgeProps = {
   value: ReactNode;
   label: string;
   tone?: StatBadgeTone;
+  layout?: "row" | "stacked";
   onPress?: () => void;
   className?: string;
 };
@@ -35,6 +36,7 @@ export function StatBadge({
   value,
   label,
   tone = "soft",
+  layout = "row",
   onPress,
   className,
 }: StatBadgeProps) {
@@ -58,7 +60,7 @@ export function StatBadge({
         >
           {value}
         </span>
-        <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+        <span className="mt-1 block text-[9px] font-semibold uppercase leading-tight tracking-[0.14em] text-[#d8d4eb]">
           {label}
         </span>
       </span>
@@ -66,8 +68,10 @@ export function StatBadge({
   );
 
   const baseClasses = cn(
-    "flex items-center gap-3 rounded-2xl border px-3 py-2.5 transition-colors",
-    "active:scale-[0.98]",
+    "flex rounded-2xl border transition-all duration-200 active:scale-[0.98]",
+    layout === "stacked"
+      ? "min-h-[88px] flex-col items-start justify-between gap-2.5 p-3"
+      : "items-center gap-3 px-3 py-2.5",
     TONE_STYLES[tone],
     className,
   );
@@ -77,7 +81,11 @@ export function StatBadge({
       <button
         type="button"
         onClick={onPress}
-        className={cn(baseClasses, "w-full text-left")}
+        aria-label={`${label}: ${String(value)}. Open wins`}
+        className={cn(
+          baseClasses,
+          "w-full text-left hover:border-[rgba(188,194,255,0.28)] hover:bg-[rgba(188,194,255,0.08)]",
+        )}
       >
         {content}
       </button>

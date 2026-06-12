@@ -251,6 +251,7 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
         <div style={{ display: activeTab === "journal" ? "block" : "none" }}>
           <JournalScreen
             entries={journalEntries}
+            recentMoods={history}
             onAddEntry={onAddJournalEntry}
           />
         </div>

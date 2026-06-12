@@ -4,7 +4,10 @@ import type {
   JourneyActivityType,
   JourneyCheckpoint,
   JourneyEmergencyContact,
+  GardenPhase,
+  GardenPlant,
   JourneyPhase,
+  JourneyMode,
   JourneyPlane,
   JourneyTheme,
   MoodType,
@@ -21,11 +24,21 @@ import {
 } from "./xp";
 
 type JourneyStateShape = {
+  mode: JourneyMode;
+  modeDate: string | null;
   phase: JourneyPhase;
+  gardenPhase: GardenPhase;
+  gardenPlant: GardenPlant;
+  gardenStage: number;
+  gardenMood: MoodType | null;
+  lastGrowthDate: string | null;
+  gardenDaysCompleted: number;
+  plantsCompleted: number;
   checkpoints: JourneyCheckpoint[];
   totalXp: number;
   streak: number;
   lastFlightDate: string | null;
+  lastJourneyDate: string | null;
   pauseUsedThisFlight: boolean;
   theme: JourneyTheme;
   plane: JourneyPlane;
@@ -50,6 +63,10 @@ type JourneyStateShape = {
   lastRewardNotification: string[];
 
   setPhase: (phase: JourneyPhase) => void;
+  selectMode: (mode: JourneyMode) => void;
+  setGardenPhase: (phase: GardenPhase) => void;
+  setGardenPlant: (plant: GardenPlant) => void;
+  setGardenMood: (mood: MoodType) => void;
   dismissIntro: () => void;
   addCheckpoint: (checkpoint: JourneyCheckpoint) => void;
   removeCheckpoint: (id: string) => void;
@@ -70,10 +87,17 @@ type JourneyStateShape = {
   completePreflight: () => void;
   completeCheckpoint: () => void;
   completeFinal: () => void;
+  completeGardenStart: () => void;
+  completeGardenCare: () => void;
+  completeGardenDay: () => void;
+  prepareNextGarden: () => void;
   prepareNextFlight: () => void;
   resetAll: () => void;
 
-  awardXp: (action: JourneyActivityType, sourceId?: string) => { awarded: boolean; xpGained: number; newRewards: string[] };
+  awardXp: (
+    action: JourneyActivityType,
+    sourceId?: string,
+  ) => { awarded: boolean; xpGained: number; newRewards: string[] };
   setSelectedTitle: (title: string | null) => void;
   clearRewardNotification: () => void;
   incrementJournalCount: () => void;
@@ -100,7 +124,16 @@ export const useJourneyStore = create<JourneyStateShape>()(
       }
 
       return {
+        mode: "flight",
+        modeDate: null,
         phase: "preflight",
+        gardenPhase: "prepare",
+        gardenPlant: "sunflower",
+        gardenStage: 0,
+        gardenMood: null,
+        lastGrowthDate: null,
+        gardenDaysCompleted: 0,
+        plantsCompleted: 0,
         checkpoints: [
           { id: "seed-morning", label: "Morning pause", time: "09:00 AM" },
           { id: "seed-midday", label: "Midday check-in", time: "12:30 PM" },
@@ -109,6 +142,7 @@ export const useJourneyStore = create<JourneyStateShape>()(
         totalXp: 0,
         streak: 0,
         lastFlightDate: null,
+        lastJourneyDate: null,
         pauseUsedThisFlight: false,
         theme: "dusk",
         plane: "trainer",
@@ -123,7 +157,7 @@ export const useJourneyStore = create<JourneyStateShape>()(
         flightsCompleted: 0,
         hasSeenIntro: false,
 
-        unlockedRewards: ["dusk-trainer"],
+        unlockedRewards: ["dusk-trainer", "plant-sunflower"],
         selectedTitle: null,
         currentRhythm: 0,
         bestRhythm: 0,
@@ -133,6 +167,11 @@ export const useJourneyStore = create<JourneyStateShape>()(
         lastRewardNotification: [],
 
         setPhase: (phase) => set({ phase }),
+        selectMode: (mode) =>
+          set((state) => (state.modeDate === todayKey() ? {} : { mode })),
+        setGardenPhase: (gardenPhase) => set({ gardenPhase }),
+        setGardenPlant: (gardenPlant) => set({ gardenPlant }),
+        setGardenMood: (gardenMood) => set({ gardenMood }),
         dismissIntro: () => set({ hasSeenIntro: true }),
 
         addCheckpoint: (checkpoint) =>
@@ -202,7 +241,9 @@ export const useJourneyStore = create<JourneyStateShape>()(
         completePreflight: () =>
           set((state) => {
             const ledger = ensureLedger();
-            if (!canAward(ledger, "preflight", "preflight")) return { phase: "airborne" };
+            if (!canAward(ledger, "preflight", "journey-start")) {
+              return { phase: "airborne", mode: "flight", modeDate: todayKey() };
+            }
             const xp = XP_REWARDS.preflight;
             const newTotal = state.totalXp + xp;
             const oldLevel = Math.floor(state.totalXp / 50) + 1;
@@ -211,8 +252,15 @@ export const useJourneyStore = create<JourneyStateShape>()(
             const fresh = newRewardsAtLevel(oldLevel, newLevel, already);
             return {
               phase: "airborne",
+              mode: "flight",
+              modeDate: todayKey(),
               totalXp: newTotal,
-              dailyLedger: awardAction(ledger, "preflight", "preflight", new Date().toISOString()),
+              dailyLedger: awardAction(
+                ledger,
+                "preflight",
+                "journey-start",
+                new Date().toISOString(),
+              ),
               unlockedRewards: [...state.unlockedRewards, ...fresh.map((r) => r.id)],
               lastRewardNotification: fresh.map((r) => r.id),
             };
@@ -232,7 +280,12 @@ export const useJourneyStore = create<JourneyStateShape>()(
             return {
               phase: "airborne",
               totalXp: newTotal,
-              dailyLedger: awardAction(ledger, "checkpoint", sourceId, new Date().toISOString()),
+              dailyLedger: awardAction(
+                ledger,
+                "checkpoint",
+                sourceId,
+                new Date().toISOString(),
+              ),
               unlockedRewards: [...state.unlockedRewards, ...fresh.map((r) => r.id)],
               lastRewardNotification: fresh.map((r) => r.id),
             };
@@ -243,7 +296,7 @@ export const useJourneyStore = create<JourneyStateShape>()(
           const today = todayKey(now);
           set((state) => {
             const result = nextStreak({
-              lastFlightDate: state.lastFlightDate,
+              lastFlightDate: state.lastJourneyDate ?? state.lastFlightDate,
               currentStreak: state.streak,
               today: now,
             });
@@ -253,7 +306,7 @@ export const useJourneyStore = create<JourneyStateShape>()(
                 phase: "rest" as JourneyPhase,
                 streak: result.streak,
                 lastFlightDate: today,
-                flightsCompleted: state.flightsCompleted + 1,
+                lastJourneyDate: today,
                 pauseUsedThisFlight: false,
                 currentRhythm: result.streak,
                 bestRhythm: Math.max(state.bestRhythm, result.streak),
@@ -270,6 +323,7 @@ export const useJourneyStore = create<JourneyStateShape>()(
               totalXp: newTotal,
               streak: result.streak,
               lastFlightDate: today,
+              lastJourneyDate: today,
               flightsCompleted: state.flightsCompleted + 1,
               pauseUsedThisFlight: false,
               dailyLedger: awardAction(ledger, "final", "final", now.toISOString()),
@@ -280,6 +334,132 @@ export const useJourneyStore = create<JourneyStateShape>()(
             };
           });
         },
+
+        completeGardenStart: () =>
+          set((state) => {
+            const ledger = ensureLedger();
+            if (!canAward(ledger, "garden_start", "journey-start")) {
+              return {
+                gardenPhase: "growing" as GardenPhase,
+                mode: "garden" as JourneyMode,
+                modeDate: todayKey(),
+              };
+            }
+            const xp = XP_REWARDS.garden_start;
+            const newTotal = state.totalXp + xp;
+            const fresh = newRewardsAtLevel(
+              Math.floor(state.totalXp / 50) + 1,
+              Math.floor(newTotal / 50) + 1,
+              new Set(state.unlockedRewards),
+            );
+            return {
+              mode: "garden" as JourneyMode,
+              modeDate: todayKey(),
+              gardenPhase: "growing" as GardenPhase,
+              totalXp: newTotal,
+              dailyLedger: awardAction(
+                ledger,
+                "garden_start",
+                "journey-start",
+                new Date().toISOString(),
+              ),
+              unlockedRewards: [
+                ...state.unlockedRewards,
+                ...fresh.map((reward) => reward.id),
+              ],
+              lastRewardNotification: fresh.map((reward) => reward.id),
+            };
+          }),
+
+        completeGardenCare: () =>
+          set((state) => {
+            const ledger = ensureLedger();
+            const sourceId = `garden-care-${Date.now()}`;
+            if (!canAward(ledger, "garden_care", sourceId)) {
+              return { gardenPhase: "growing" as GardenPhase };
+            }
+            const xp = XP_REWARDS.garden_care;
+            const newTotal = state.totalXp + xp;
+            const fresh = newRewardsAtLevel(
+              Math.floor(state.totalXp / 50) + 1,
+              Math.floor(newTotal / 50) + 1,
+              new Set(state.unlockedRewards),
+            );
+            return {
+              gardenPhase: "growing" as GardenPhase,
+              totalXp: newTotal,
+              dailyLedger: awardAction(
+                ledger,
+                "garden_care",
+                sourceId,
+                new Date().toISOString(),
+              ),
+              unlockedRewards: [
+                ...state.unlockedRewards,
+                ...fresh.map((reward) => reward.id),
+              ],
+              lastRewardNotification: fresh.map((reward) => reward.id),
+            };
+          }),
+
+        completeGardenDay: () => {
+          const now = new Date();
+          const today = todayKey(now);
+          set((state) => {
+            const ledger = ensureLedger();
+            const mayGrow = state.lastGrowthDate !== today;
+            const nextStage = mayGrow
+              ? Math.min(7, state.gardenStage + 1)
+              : state.gardenStage;
+            const justBloomed = mayGrow && state.gardenStage < 7 && nextStage === 7;
+            const result = nextStreak({
+              lastFlightDate: state.lastJourneyDate ?? state.lastFlightDate,
+              currentStreak: state.streak,
+              today: now,
+            });
+            const base = {
+              gardenPhase: "rest" as GardenPhase,
+              gardenStage: nextStage,
+              lastGrowthDate: mayGrow ? today : state.lastGrowthDate,
+              gardenDaysCompleted: state.gardenDaysCompleted + (mayGrow ? 1 : 0),
+              plantsCompleted: state.plantsCompleted + (justBloomed ? 1 : 0),
+              lastJourneyDate: today,
+              streak: result.streak,
+              currentRhythm: result.streak,
+              bestRhythm: Math.max(state.bestRhythm, result.streak),
+            };
+            if (!canAward(ledger, "garden_finish", "journey-finish")) return base;
+            const xp = XP_REWARDS.garden_finish;
+            const newTotal = state.totalXp + xp;
+            const fresh = newRewardsAtLevel(
+              Math.floor(state.totalXp / 50) + 1,
+              Math.floor(newTotal / 50) + 1,
+              new Set(state.unlockedRewards),
+            );
+            return {
+              ...base,
+              totalXp: newTotal,
+              dailyLedger: awardAction(
+                ledger,
+                "garden_finish",
+                "journey-finish",
+                now.toISOString(),
+              ),
+              unlockedRewards: [
+                ...state.unlockedRewards,
+                ...fresh.map((reward) => reward.id),
+              ],
+              lastRewardNotification: fresh.map((reward) => reward.id),
+            };
+          });
+        },
+
+        prepareNextGarden: () =>
+          set((state) => ({
+            gardenPhase: "prepare",
+            gardenMood: null,
+            gardenStage: state.gardenStage >= 7 ? 0 : state.gardenStage,
+          })),
 
         prepareNextFlight: () =>
           set({
@@ -296,10 +476,20 @@ export const useJourneyStore = create<JourneyStateShape>()(
 
         resetAll: () =>
           set({
+            mode: "flight",
+            modeDate: null,
             phase: "preflight",
+            gardenPhase: "prepare",
+            gardenPlant: "sunflower",
+            gardenStage: 0,
+            gardenMood: null,
+            lastGrowthDate: null,
+            gardenDaysCompleted: 0,
+            plantsCompleted: 0,
             totalXp: 0,
             streak: 0,
             lastFlightDate: null,
+            lastJourneyDate: null,
             pauseUsedThisFlight: false,
             flightsCompleted: 0,
             preflightMood: null as MoodType | null,
@@ -309,7 +499,7 @@ export const useJourneyStore = create<JourneyStateShape>()(
             checkpointChecks: { ...defaultChecks },
             finalChecks: { ...defaultChecks },
             deepBreaths: 0,
-            unlockedRewards: ["dusk-trainer"],
+            unlockedRewards: ["dusk-trainer", "plant-sunflower"],
             selectedTitle: null,
             currentRhythm: 0,
             bestRhythm: 0,
@@ -353,11 +543,21 @@ export const useJourneyStore = create<JourneyStateShape>()(
       name: "mabuhai-journey-state",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
+        mode: state.mode,
+        modeDate: state.modeDate,
         phase: state.phase,
+        gardenPhase: state.gardenPhase,
+        gardenPlant: state.gardenPlant,
+        gardenStage: state.gardenStage,
+        gardenMood: state.gardenMood,
+        lastGrowthDate: state.lastGrowthDate,
+        gardenDaysCompleted: state.gardenDaysCompleted,
+        plantsCompleted: state.plantsCompleted,
         checkpoints: state.checkpoints,
         totalXp: state.totalXp,
         streak: state.streak,
         lastFlightDate: state.lastFlightDate,
+        lastJourneyDate: state.lastJourneyDate,
         theme: state.theme,
         plane: state.plane,
         emergencyContacts: state.emergencyContacts,
@@ -369,7 +569,29 @@ export const useJourneyStore = create<JourneyStateShape>()(
         bestRhythm: state.bestRhythm,
         pauseCount: state.pauseCount,
         journalEntryCount: state.journalEntryCount,
+        dailyLedger: state.dailyLedger,
       }),
+      version: 2,
+      migrate: (persisted) => {
+        const state = persisted as Partial<JourneyStateShape>;
+        const unlockedRewards = new Set(state.unlockedRewards ?? ["dusk-trainer"]);
+        unlockedRewards.add("plant-sunflower");
+        return {
+          ...state,
+          mode: state.mode ?? "flight",
+          modeDate: state.modeDate ?? null,
+          gardenPhase: state.gardenPhase ?? "prepare",
+          gardenPlant: state.gardenPlant ?? "sunflower",
+          gardenStage: state.gardenStage ?? 0,
+          gardenMood: state.gardenMood ?? null,
+          lastGrowthDate: state.lastGrowthDate ?? null,
+          gardenDaysCompleted: state.gardenDaysCompleted ?? 0,
+          plantsCompleted: state.plantsCompleted ?? 0,
+          lastJourneyDate: state.lastJourneyDate ?? state.lastFlightDate ?? null,
+          unlockedRewards: [...unlockedRewards],
+          dailyLedger: state.dailyLedger ?? emptyLedger(todayKey()),
+        };
+      },
     },
   ),
 );

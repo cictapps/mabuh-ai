@@ -72,6 +72,14 @@ export type JourneyPhase =
   | "final"
   | "rest";
 
+export type JourneyMode = "flight" | "garden";
+export type GardenPhase = "prepare" | "growing" | "care" | "reflect" | "rest";
+export type GardenPlant =
+  | "sunflower"
+  | "fern"
+  | "lavender"
+  | "monstera"
+  | "cherry-blossom";
 export type JourneyTheme = "dusk" | "dawn" | "meadow";
 export type JourneyPlane = "trainer" | "cruiser" | "glider";
 
@@ -79,6 +87,9 @@ export type JourneyActivityType =
   | "preflight"
   | "checkpoint"
   | "final"
+  | "garden_start"
+  | "garden_care"
+  | "garden_finish"
   | "mood_checkin"
   | "journal_entry";
 
@@ -87,25 +98,42 @@ export interface JourneyReward {
   level: number;
   label: string;
   description: string;
-  category: "theme" | "plane" | "affirmation" | "accent" | "background" | "title";
+  category:
+    | "theme"
+    | "plane"
+    | "plant"
+    | "affirmation"
+    | "accent"
+    | "background"
+    | "title";
   preview?: string;
 }
 
 export interface JourneyMilestone {
   id: string;
-  type: "flight" | "journal" | "pause" | "rhythm";
+  type: "flight" | "plant" | "journal" | "pause" | "rhythm";
   threshold: number;
   label: string;
   body: string;
 }
 
 export interface JourneyProgress {
+  mode: JourneyMode;
+  modeDate: string | null;
   totalXp: number;
   level: number;
   flightsCompleted: number;
   streak: number;
   bestRhythm: number;
   lastFlightDate: string | null;
+  lastJourneyDate: string | null;
+  gardenPhase: GardenPhase;
+  gardenPlant: GardenPlant;
+  gardenStage: number;
+  gardenMood: MoodType | null;
+  lastGrowthDate: string | null;
+  gardenDaysCompleted: number;
+  plantsCompleted: number;
   unlockedRewards: string[];
   selectedTheme: JourneyTheme | null;
   selectedPlane: JourneyPlane | null;

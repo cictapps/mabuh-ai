@@ -25,6 +25,7 @@ import { MoodSelector } from "../components/mood/MoodSelector";
 import { MoodTagGroup } from "../components/mood/MoodTagGroup";
 import { JournalInput } from "../components/mood/JournalInput";
 import { SaveMoodButton } from "../components/mood/SaveMoodButton";
+import { SavedAffirmationDialog } from "../components/mood/SavedAffirmationDialog";
 import { SocialTrackingPanel } from "../components/mood/SocialTrackingPanel";
 import { ActivitySectionsPanel } from "../components/mood/ActivitySectionsPanel";
 import { SuggestionCard } from "../components/suggestions/SuggestionCard";
@@ -109,14 +110,6 @@ const MOOD_ACKNOWLEDGMENTS: Record<MoodType, string> = {
   okay: "Okay is a perfectly good place to be.",
   calm: "I love that you're feeling this. Let it settle in.",
   happy: "Oh, this is wonderful. Hold onto this feeling.",
-};
-
-const AFFIRMATIONS: Record<MoodType, string> = {
-  stressed: "You showed up for yourself today. That matters more than you know.",
-  worried: "Naming the worry is a brave first step. Be gentle with yourself.",
-  okay: "Steady days count too. You don't have to be anything more.",
-  calm: "Treasure this feeling. You earned it.",
-  happy: "Soak it in. Moments like this are worth remembering.",
 };
 
 const STRESSED_MOODS: ReadonlySet<MoodType> = new Set<MoodType>(["stressed", "worried"]);
@@ -779,8 +772,11 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
 
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [savedMood, setSavedMood] = useState<MoodType | null>(null);
+  const [savedAtMs, setSavedAtMs] = useState<number | null>(null);
+  const [savedPersonalization, setSavedPersonalization] = useState<string | null>(
+    null,
+  );
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const dismissTimer = useRef<number | null>(null);
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const breathRef = useRef<HTMLDivElement | null>(null);
@@ -789,17 +785,9 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   const selectorRef = useRef<HTMLDivElement | null>(null);
   const sublineRef = useRef<HTMLParagraphElement | null>(null);
   const detailsRef = useRef<HTMLDivElement | null>(null);
-  const affirmationRef = useRef<HTMLDivElement | null>(null);
-  const rippleRef = useRef<HTMLDivElement | null>(null);
   const arcWrapperRef = useRef<HTMLDivElement | null>(null);
   const arcLogoRef = useRef<HTMLDivElement | null>(null);
   const arcLogoGlowRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
-    };
-  }, []);
 
   useGSAP(
     () => {
@@ -967,12 +955,9 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
       const ok = await onSave();
       if (ok) {
         setSavedMood(selectedMood);
+        setSavedAtMs(Date.now());
+        setSavedPersonalization(computePersonalization());
         setSaveState("saved");
-        if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
-        dismissTimer.current = window.setTimeout(() => {
-          setSaveState("idle");
-          setSavedMood(null);
-        }, 5200);
       } else {
         setSaveState("idle");
       }
@@ -984,72 +969,39 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   }
 
   function handleDismissAffirmation() {
-    if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
     setSaveState("idle");
     setSavedMood(null);
+    setSavedAtMs(null);
+    setSavedPersonalization(null);
   }
 
   // Animate the affirmation entrance + ripple.
-  useEffect(() => {
-    if (saveState !== "saved" || !affirmationRef.current) return;
+  // (Removed: the saved-with-care celebration now lives in the
+  // AlertDialog at the bottom of this file. The dialog animates in
+  // via Radix's data-state attributes, so no GSAP is required.)
 
-    if (reducedMotion) return;
+  // Compute the personalization line from the *current* form state
+  // (called right before the form resets in handleSave so the dialog
+  // can show the line that was true at the moment of saving).
+  function computePersonalization(): string | null {
+    const journalWordCount = Math.max(
+      1,
+      Math.round(journal.trim().split(/\s+/).filter(Boolean).length),
+    );
+    if (journal.trim().length > 120) {
+      return `Thank you for sharing ${journalWordCount} honest words with us.`;
+    }
+    if (hasSocial && socialInteractions.length > 0) {
+      return `${socialInteractions.length} kind connection${socialInteractions.length === 1 ? "" : "s"} noticed today.`;
+    }
+    if (hasActivities && totalActivities > 0) {
+      return `${totalActivities} little moment${totalActivities === 1 ? "" : "s"} captured.`;
+    }
+    return null;
+  }
 
-    const ctx = gsap.context(() => {}, affirmationRef);
-    ctx.add(() => {
-      if (rippleRef.current) {
-        gsap.fromTo(
-          rippleRef.current,
-          { scale: 0.4, opacity: 0.55 },
-          { scale: 2.4, opacity: 0, duration: 1.8, ease: "power2.out" },
-        );
-      }
-      if (affirmationRef.current) {
-        const items =
-          affirmationRef.current.querySelectorAll<HTMLElement>("[data-affirm]");
-        gsap.fromTo(
-          items,
-          { y: 10, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.55,
-            ease: "power2.out",
-            stagger: 0.08,
-            delay: 0.1,
-          },
-        );
-        const dot = affirmationRef.current.querySelector<HTMLElement>("[data-breath]");
-        if (dot) {
-          gsap.to(dot, {
-            scale: 1.4,
-            opacity: 0.55,
-            duration: 3.2,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: -1,
-          });
-        }
-      }
-    });
-    return () => ctx.revert();
-  }, [saveState, reducedMotion]);
-
-  const isSaved = saveState === "saved" && savedMood;
+  const isSaved = saveState === "saved" && savedMood !== null;
   const savedMeta = savedMood ? getMoodMeta(savedMood) : meta;
-
-  // Build a personalization line for the saved affirmation
-  const journalWordCount = savedMood
-    ? Math.max(1, Math.round(journal.trim().split(/\s+/).filter(Boolean).length))
-    : 0;
-  const personalization =
-    journal.trim().length > 120
-      ? `Thank you for sharing ${journalWordCount} honest words with us.`
-      : hasSocial && socialInteractions.length > 0
-        ? `${socialInteractions.length} kind connection${socialInteractions.length === 1 ? "" : "s"} noticed today.`
-        : hasActivities && totalActivities > 0
-          ? `${totalActivities} little moment${totalActivities === 1 ? "" : "s"} captured.`
-          : null;
 
   return (
     <div
@@ -1248,172 +1200,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
 
       {!showDetails && <IdlePrompts />}
 
-      {isSaved ? (
-        <div
-          ref={affirmationRef}
-          aria-live="polite"
-          style={{
-            position: "relative",
-            zIndex: 1,
-            padding: "28px 22px 24px",
-            borderRadius: 24,
-            background: `linear-gradient(160deg, ${hexToRgba(savedMeta.color, 0.12)}, rgba(188,194,255,0.04))`,
-            border: `1px solid ${hexToRgba(savedMeta.color, 0.22)}`,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 10,
-            textAlign: "center",
-            overflow: "hidden",
-            boxShadow: `0 24px 60px -36px ${hexToRgba(savedMeta.color, 0.55)}`,
-          }}
-        >
-          <div
-            ref={rippleRef}
-            aria-hidden
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              width: 140,
-              height: 140,
-              transform: "translate(-50%, -50%)",
-              borderRadius: "50%",
-              background: `radial-gradient(circle, ${hexToRgba(savedMeta.color, 0.5)}, transparent 65%)`,
-              filter: "blur(8px)",
-              pointerEvents: "none",
-            }}
-          />
-          <div
-            data-breath
-            aria-hidden
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: "50%",
-              background: savedMeta.color,
-              boxShadow: `0 0 28px ${hexToRgba(savedMeta.color, 0.6)}`,
-              position: "relative",
-              zIndex: 1,
-              marginBottom: 4,
-            }}
-          />
-          <p
-            data-affirm
-            className="font-serif"
-            style={{
-              fontSize: 24,
-              color: "#eef1f6",
-              fontWeight: 500,
-              letterSpacing: "-0.01em",
-              position: "relative",
-              zIndex: 1,
-              maxWidth: 340,
-              lineHeight: 1.2,
-            }}
-          >
-            Saved with care. <span style={{ color: savedMeta.color }}>Thank you</span> for
-            being here.
-          </p>
-          {todaysCount > 1 ? (
-            <p
-              data-affirm
-              style={{
-                fontSize: 11,
-                color: "rgba(188,194,255,0.45)",
-                letterSpacing: "0.4px",
-                textTransform: "uppercase",
-                position: "relative",
-                zIndex: 1,
-                margin: 0,
-              }}
-            >
-              {todaysCount} check-ins today
-            </p>
-          ) : null}
-          <p
-            data-affirm
-            style={{
-              fontSize: 13,
-              color: "rgba(188,194,255,0.6)",
-              lineHeight: 1.6,
-              position: "relative",
-              zIndex: 1,
-              maxWidth: 340,
-            }}
-          >
-            {AFFIRMATIONS[savedMood as MoodType]}
-          </p>
-          {personalization && (
-            <p
-              data-affirm
-              style={{
-                fontSize: 12,
-                color: "rgba(216,220,230,0.75)",
-                lineHeight: 1.5,
-                position: "relative",
-                zIndex: 1,
-                padding: "6px 12px",
-                borderRadius: 999,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.06)",
-                fontStyle: "italic",
-              }}
-            >
-              {personalization}
-            </p>
-          )}
-          <div
-            data-affirm
-            style={{
-              display: "flex",
-              gap: 8,
-              marginTop: 8,
-              position: "relative",
-              zIndex: 1,
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
-          >
-            <button
-              type="button"
-              onClick={handleDismissAffirmation}
-              style={{
-                padding: "10px 18px",
-                borderRadius: 999,
-                background: `linear-gradient(135deg, ${hexToRgba(savedMeta.color, 0.18)}, ${hexToRgba(savedMeta.color, 0.06)})`,
-                border: `1px solid ${hexToRgba(savedMeta.color, 0.32)}`,
-                color: "#eef1f6",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "Plus Jakarta Sans, sans-serif",
-                transition: "transform 0.12s ease, background 0.15s ease",
-              }}
-            >
-              Add another check-in
-            </button>
-            <button
-              type="button"
-              onClick={handleDismissAffirmation}
-              style={{
-                padding: "10px 18px",
-                borderRadius: 999,
-                background: "rgba(188,194,255,0.04)",
-                border: "1px solid rgba(188,194,255,0.10)",
-                color: "rgba(216,220,230,0.7)",
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: "pointer",
-                fontFamily: "Plus Jakarta Sans, sans-serif",
-                transition: "background 0.15s ease",
-              }}
-            >
-              I'm done for now
-            </button>
-          </div>
-        </div>
-      ) : showDetails ? (
+      {showDetails ? (
         <>
           <div ref={detailsRef} style={{ ...detailsStyle, gap: 14 }}>
             {showCrisisHint && (
@@ -1914,6 +1701,16 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
           )}
         </>
       ) : null}
+      <SavedAffirmationDialog
+        open={isSaved}
+        onOpenChange={(open) => {
+          if (!open) handleDismissAffirmation();
+        }}
+        moodColor={savedMeta.color}
+        personalization={savedPersonalization}
+        checkInsToday={todaysCount}
+        savedAt={savedAtMs}
+      />
     </div>
   );
 };

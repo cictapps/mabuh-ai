@@ -1,4 +1,4 @@
-package com.user.mabuh_ai
+package com.user.mabuhai
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

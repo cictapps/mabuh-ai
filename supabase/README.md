@@ -12,11 +12,37 @@
 
 ## 2. Run the schema
 
-Open the Supabase SQL Editor and run [`schema.sql`](./schema.sql). It creates:
+The schema is now versioned as a set of non-destructive migrations. The
+old monolithic `schema.sql` is kept only as a no-op for backward
+compatibility — re-running it does nothing.
 
-- `profiles` table linked to `auth.users` (RLS: owner-only)
-- Trigger to auto-insert a profile row on signup
-- Example `journal_entries` and `mood_logs` tables with owner-only RLS
+### Recommended: Supabase CLI
+
+```bash
+supabase link --project-ref <your-project-ref>
+supabase db push
+```
+
+This applies every file in `supabase/migrations/` in order and records
+which ones have run in `supabase_migrations.schema_migrations`.
+
+### Alternative: SQL editor (no CLI)
+
+If you cannot use the CLI, open each file in
+`supabase/migrations/` in the Supabase SQL editor and run them in
+numeric order. After the first `0001_migration_table.sql`, the
+`supabase_migrations.schema_migrations` table exists, and the remaining
+migrations use the same `if not exists` / `drop policy if exists`
+pattern that makes them safe to re-run. If you also want the CLI to
+know the migrations have been applied, run the snippet at the bottom of
+`schema.sql` in the editor.
+
+The migrations create:
+
+- `profiles` table linked to `auth.users` (RLS: owner-only) — `0002`
+- Auto-profile trigger + `public.delete_user()` RPC — `0003`
+- `mood_entries` table (owner-only RLS) — `0004`
+- `journal_entries` table (owner-only RLS) — `0005`
 
 ## 3. Auth settings
 
@@ -76,5 +102,5 @@ RLS enforces owner-only access **at the database**, so even if the frontend has
 a bug, Supabase will refuse to return other users' rows. Always:
 
 - Enable RLS on every new table that holds user data.
-- Write the policy *before* you insert any real data.
+- Write the policy _before_ you insert any real data.
 - Never ship the service role key to the client — only the anon key.

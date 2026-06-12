@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Compass, Sparkles, MapPin, Wind } from "lucide-react";
+import { Compass, Sparkles, MapPin, Wind, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type IntroOverlayProps = {
@@ -10,8 +10,13 @@ type IntroOverlayProps = {
 const STEPS: { icon: typeof Compass; title: string; body: string }[] = [
   {
     icon: Compass,
-    title: "A gentle day",
-    body: "Your day has a few small waypoints — gentle moments to check in with yourself. No streaks to break, no pressure to hit them all.",
+    title: "Choose today’s path",
+    body: "Fly through gentle waypoints or grow a plant through today’s weather. Both paths share the same XP and level.",
+  },
+  {
+    icon: Sprout,
+    title: "Every weather can grow",
+    body: "In Garden mode, your mood shapes the weather and suggests a care action. Difficult days never damage your plant.",
   },
   {
     icon: MapPin,
@@ -90,22 +95,16 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
             >
               {current.title}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-[#d8d4eb]">
-              {current.body}
-            </p>
+            <p className="mt-2 text-sm leading-relaxed text-[#d8d4eb]">{current.body}</p>
           </div>
         </div>
 
         <div className="relative mt-6 space-y-2">
           {isLast ? (
             <>
-              <Button
-                size="lg"
-                className="w-full"
-                onClick={() => onChoose("setup")}
-              >
+              <Button size="lg" className="w-full" onClick={() => onChoose("setup")}>
                 <Sparkles className="size-4" />
-                Set up my waypoints
+                Open customization
               </Button>
               <Button
                 size="lg"
@@ -117,11 +116,7 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
               </Button>
             </>
           ) : (
-            <Button
-              size="lg"
-              className="w-full"
-              onClick={() => setStep((s) => s + 1)}
-            >
+            <Button size="lg" className="w-full" onClick={() => setStep((s) => s + 1)}>
               Continue
             </Button>
           )}

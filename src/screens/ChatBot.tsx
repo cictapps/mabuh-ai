@@ -22,6 +22,11 @@ import { useAuth } from "../lib/auth";
 import { useMoodStore } from "../hooks/useMoodStore";
 import { useJourneyStore } from "../lib/journey/useJourneyStore";
 import { ChatError, sendChatMessage, type ChatIntent } from "../services/chatClient";
+import { useAiConsentStore, hasAnyConsentEnabled } from "../lib/aiConsent";
+import { buildChatContext, type ChatContextInput } from "../lib/aiContext";
+import { detectCrisis, resourceForKey, type CrisisSignal } from "../lib/crisis";
+import { CrisisResourcePanel } from "../components/shared/CrisisResourcePanel";
+import { AiConsentDialog } from "../components/shared/AiConsentDialog";
 
 // The Mistral API key is never shipped with the mobile app. The chat
 // proxies through a small Express server you deploy separately — the URL
@@ -516,9 +521,6 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   const { profile } = useAuth();
   const {
     history: moodHistory,
-    dominantMood,
-    trendData,
-    distribution,
     journalEntries,
     socialStats,
     analyticsStats,
@@ -532,35 +534,33 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   const finalMood = useJourneyStore((s) => s.finalMood);
   const lastFlightDate = useJourneyStore((s) => s.lastFlightDate);
 
-  const chatContext = useMemo(() => {
-    const recentMoods = moodHistory.slice(-7).map((e) => ({
-      date: e.date,
-      mood: e.mood,
-      tags: e.tags,
-      schoolLoad: e.schoolLoad,
-      activityMinutes: e.activityMinutes,
-      activities: e.activities,
-      socialInteractions: e.socialInteractions,
-      dayNote: e.dayNote,
-    }));
-    const recentJournals = journalEntries.slice(0, 5).map((j) => ({
-      date: j.date,
-      content: j.content,
-      source: j.source,
-      mood: j.mood,
-    }));
+  const consentToggles = useAiConsentStore((s) => s.toggles);
+  const consentAcknowledged = useAiConsentStore((s) => s.consentAcknowledged);
+
+  const fullContextInput = useMemo<ChatContextInput>(() => {
     return {
-      user: {
-        displayName: profile?.display_name ?? null,
-      },
-      mood: {
-        recent: recentMoods,
-        dominantMood,
-        trend: trendData,
-        distribution,
-      },
-      journal: {
-        recent: recentJournals,
+      displayName: profile?.display_name ?? null,
+      moods: moodHistory.slice(-7).map((e) => ({
+        date: e.date,
+        mood: e.mood,
+        tags: e.tags,
+        schoolLoad: e.schoolLoad,
+        activityMinutes: e.activityMinutes,
+        activities: e.activities,
+        socialInteractions: e.socialInteractions,
+        dayNote: e.dayNote,
+      })),
+      journals: journalEntries.slice(0, 5).map((j) => ({
+        date: j.date,
+        content: j.content,
+        source: j.source,
+        mood: j.mood,
+      })),
+      socialStats,
+      analytics: {
+        currentStreak: analyticsStats?.currentStreak ?? null,
+        lifetimeDays: analyticsStats?.lifetimeDays ?? null,
+        stabilityScore: analyticsStats?.stabilityScore ?? null,
       },
       journey: {
         phase: journeyPhase,
@@ -572,20 +572,10 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
         checkpointMood,
         finalMood,
       },
-      social: socialStats,
-      analytics: {
-        currentStreak: analyticsStats?.currentStreak ?? null,
-        lifetimeDays: analyticsStats?.lifetimeDays ?? null,
-        stabilityScore: analyticsStats?.stabilityScore ?? null,
-      },
-      timestamp: Date.now(),
     };
   }, [
     profile?.display_name,
     moodHistory,
-    dominantMood,
-    trendData,
-    distribution,
     journalEntries,
     socialStats,
     analyticsStats,
@@ -599,13 +589,31 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     finalMood,
   ]);
 
+  const sharedContext = useMemo(
+    () => buildChatContext(fullContextInput, consentToggles),
+    [fullContextInput, consentToggles],
+  );
+
+  const chatContext = useMemo(() => {
+    return {
+      ...sharedContext.payload,
+      audience: sharedContext.audience,
+      timestamp: Date.now(),
+    };
+  }, [sharedContext]);
+
   const [isMaskMode, setIsMaskMode] = useState(false);
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
+  const [showAiConsent, setShowAiConsent] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [activeCrisis, setActiveCrisis] = useState<{
+    signal: CrisisSignal;
+    id: string;
+  } | null>(null);
   const [devPanelOpen, setDevPanelOpen] = useState(false);
   const [devTest, setDevTest] = useState<
     | { state: "idle" }
@@ -676,7 +684,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     const accepted = localStorage.getItem("privacy_policy_accepted");
     const acceptedVersion = localStorage.getItem("privacy_policy_version");
 
-    if (accepted === "true" && acceptedVersion === "2.1.0") {
+    if (accepted === "true" && acceptedVersion === "2.2.0") {
       setHasAcceptedPolicy(true);
       return;
     }
@@ -758,6 +766,11 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       status: "done",
     };
 
+    const crisisSignal = detectCrisis(text);
+    if (crisisSignal) {
+      setActiveCrisis({ signal: crisisSignal, id: `${Date.now()}-crisis` });
+    }
+
     if (offTopicCategory) {
       setMessages((prev) => [
         ...prev,
@@ -770,6 +783,14 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
         },
       ]);
       return;
+    }
+
+    if (
+      !isMaskMode &&
+      !consentAcknowledged &&
+      hasAnyConsentEnabled(consentToggles) === false
+    ) {
+      setShowAiConsent(true);
     }
 
     const aiMessageId = (Date.now() + 1).toString();
@@ -789,7 +810,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
 
     try {
       const context = isMaskMode
-        ? { anonymous: true, timestamp: Date.now() }
+        ? { audience: "student", anonymous: true, timestamp: Date.now() }
         : chatContext;
 
       const result = await sendChatMessage(
@@ -1106,6 +1127,21 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
           </span>
         </div>
 
+        {activeCrisis && (
+          <motion.div
+            key={activeCrisis.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            <CrisisResourcePanel
+              level={activeCrisis.signal.level}
+              resource={resourceForKey(activeCrisis.signal.resourceKey)}
+              onDismiss={() => setActiveCrisis(null)}
+            />
+          </motion.div>
+        )}
+
         <AnimatePresence mode="popLayout">
           {messages.map((msg) => (
             <motion.div
@@ -1312,6 +1348,12 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
           setShowPrivacyPolicy(false);
         }}
         required={!hasAcceptedPolicy}
+      />
+
+      <AiConsentDialog
+        open={showAiConsent}
+        canClose
+        onClose={() => setShowAiConsent(false)}
       />
     </div>
   );

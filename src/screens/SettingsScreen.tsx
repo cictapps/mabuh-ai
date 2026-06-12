@@ -6,6 +6,7 @@ import { useGSAP } from "@gsap/react";
 import {
   AlertTriangle,
   Bell,
+  Cpu as CpuIcon,
   Download,
   KeyRound,
   LogOut,
@@ -21,6 +22,8 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import type { ReminderPreferences } from "../hooks/useMoodStore";
 import { TopBarBackButton } from "../components/shared/TopBarBackButton";
+import { AiConsentSettings } from "../components/shared/AiConsentSettings";
+import { getReminderPermission } from "../lib/reminders";
 
 interface SettingsScreenProps {
   reminder: ReminderPreferences;
@@ -94,14 +97,14 @@ function ToggleRow({
         >
           {label}
         </span>
-          {description && (
-            <span
-              style={{
-                display: "block",
-                fontSize: 12,
-                color: "rgba(220,224,255,0.7)",
-                marginTop: 2,
-                lineHeight: 1.5,
+        {description && (
+          <span
+            style={{
+              display: "block",
+              fontSize: 12,
+              color: "rgba(220,224,255,0.7)",
+              marginTop: 2,
+              lineHeight: 1.5,
             }}
           >
             {description}
@@ -314,10 +317,19 @@ function ConfirmDialog({
         >
           {title}
         </h3>
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.6)", lineHeight: 1.55, margin: 0 }}>
+        <p
+          style={{
+            fontSize: 13,
+            color: "rgba(188,194,255,0.6)",
+            lineHeight: 1.55,
+            margin: 0,
+          }}
+        >
           {description}
         </p>
-        <div style={{ display: "flex", gap: 10, marginTop: 8, justifyContent: "flex-end" }}>
+        <div
+          style={{ display: "flex", gap: 10, marginTop: 8, justifyContent: "flex-end" }}
+        >
           <Button type="button" variant="ghost" onClick={onCancel} disabled={busy}>
             Cancel
           </Button>
@@ -356,22 +368,21 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onBack,
 }) => {
   const { user, profile } = useAuth();
-  const {
-    signOut,
-    updateProfile,
-    requestPasswordReset,
-    changePassword,
-    deleteAccount,
-  } = useAuthActions();
+  const { signOut, updateProfile, requestPasswordReset, changePassword, deleteAccount } =
+    useAuthActions();
   const navigate = useNavigate();
   const reducedMotion = usePrefersReducedMotion();
   const useIso = useIsoLayoutEffect();
 
   const [displayName, setDisplayName] = useState(profile?.display_name ?? "");
-  const [nameStatus, setNameStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [nameStatus, setNameStatus] = useState<"idle" | "saving" | "saved" | "error">(
+    "idle",
+  );
   const [nameError, setNameError] = useState<string | null>(null);
 
-  const [resetStatus, setResetStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [resetStatus, setResetStatus] = useState<"idle" | "sending" | "sent" | "error">(
+    "idle",
+  );
   const [resetError, setResetError] = useState<string | null>(null);
 
   const [newPassword, setNewPassword] = useState("");
@@ -590,7 +601,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               {nameStatus === "saving" ? "Saving…" : "Save"}
             </Button>
           </div>
-          {nameStatus === "saved" && <StatusLine kind="success" message="Name updated." />}
+          {nameStatus === "saved" && (
+            <StatusLine kind="success" message="Name updated." />
+          )}
           {nameStatus === "error" && nameError && (
             <StatusLine kind="error" message={nameError} />
           )}
@@ -634,6 +647,22 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       </Section>
 
+      <Section title="AI companion context" icon={<CpuIcon />}>
+        <AiConsentSettings compact />
+        <p
+          style={{
+            fontSize: 11,
+            color: "rgba(216,212,235,0.5)",
+            lineHeight: 1.55,
+            margin: 0,
+            marginTop: 4,
+          }}
+        >
+          Each toggle only affects what gets sent to the AI server. You will be reminded
+          of this choice before your first chat message.
+        </p>
+      </Section>
+
       <Section title="Daily reminder" icon={<Bell size={16} />}>
         <ToggleRow
           label="Gentle check-in nudge"
@@ -641,6 +670,30 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           checked={reminder.enabled}
           onChange={(next) => onSetReminder({ enabled: next })}
         />
+        {reminder.enabled && (
+          <p
+            role="status"
+            style={{
+              fontSize: 11,
+              color:
+                getReminderPermission() === "granted"
+                  ? "rgba(109,186,132,0.9)"
+                  : "rgba(255,185,84,0.9)",
+              lineHeight: 1.5,
+              margin: 0,
+              marginTop: -4,
+            }}
+          >
+            {getReminderPermission() === "granted" &&
+              `Reminders will fire at ${formatHour(reminder.hour, reminder.minute)} daily in this browser. Allow notifications if you don't see one.`}
+            {getReminderPermission() === "default" &&
+              "Allow notifications when prompted to start receiving reminders."}
+            {getReminderPermission() === "denied" &&
+              "Notifications are blocked in this browser. Update site permissions to receive reminders."}
+            {getReminderPermission() === "unsupported" &&
+              "This browser does not support notifications. Reminders are off until you switch to a supported browser."}
+          </p>
+        )}
         <div
           style={{
             display: "flex",
@@ -670,7 +723,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               aria-label="Reminder hour"
               style={timeInputStyle}
             />
-            <span style={{ color: "rgba(188,194,255,0.45)", alignSelf: "center" }}>:</span>
+            <span style={{ color: "rgba(188,194,255,0.45)", alignSelf: "center" }}>
+              :
+            </span>
             <input
               type="number"
               min={0}
@@ -766,7 +821,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           {pwStatus === "saved" && (
             <StatusLine kind="success" message="Password updated." />
           )}
-          {pwStatus === "error" && pwError && <StatusLine kind="error" message={pwError} />}
+          {pwStatus === "error" && pwError && (
+            <StatusLine kind="error" message={pwError} />
+          )}
         </div>
       </Section>
 
@@ -779,8 +836,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             margin: 0,
           }}
         >
-          Reopen the first-time introduction whenever you'd like a refresher on
-          what MabuhAi can do. Your data and settings stay exactly as they are.
+          Reopen the first-time introduction whenever you'd like a refresher on what
+          MabuhAi can do. Your data and settings stay exactly as they are.
         </p>
         <div>
           <Button
@@ -805,8 +862,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             margin: 0,
           }}
         >
-          Download a copy of every check-in, journal entry, and your saved
-          preferences. The file is a single JSON you can keep or move elsewhere.
+          Download a copy of every check-in, journal entry, and your saved preferences.
+          The file is a single JSON you can keep or move elsewhere.
         </p>
         <div>
           <Button type="button" variant="outline" size="sm" onClick={onExportData}>
@@ -878,9 +935,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             fontStyle: "italic",
           }}
         >
-          Created with care by BSIS students of West Visayas State University —
-          College of Information and Communications Technology, as a project
-          for their Mobile App Development class.
+          Created with care by BSIS students of West Visayas State University — College of
+          Information and Communications Technology, as a project for their Mobile App
+          Development class.
         </p>
 
         <div
@@ -902,9 +959,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               color: "rgba(216,212,235,0.55)",
             }}
           >
-            <span aria-hidden style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }} />
+            <span
+              aria-hidden
+              style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }}
+            />
             <span>Legal</span>
-            <span aria-hidden style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }} />
+            <span
+              aria-hidden
+              style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }}
+            />
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button
@@ -997,9 +1060,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             Sign out
           </h2>
         </header>
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.5)", lineHeight: 1.55, margin: 0 }}>
-          You'll need to sign in again next time you open Mabuh-ai. Your data
-          stays safe and waiting.
+        <p
+          style={{
+            fontSize: 13,
+            color: "rgba(188,194,255,0.5)",
+            lineHeight: 1.55,
+            margin: 0,
+          }}
+        >
+          You'll need to sign in again next time you open Mabuh-ai. Your data stays safe
+          and waiting.
         </p>
         <div>
           <Button type="button" variant="outline" onClick={() => setConfirmSignOut(true)}>
@@ -1025,8 +1095,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               margin: 0,
             }}
           >
-            Delete account — permanently removes your profile, check-ins,
-            journals, and account from Mabuh-ai. This cannot be undone.
+            Delete account — permanently removes your profile, check-ins, journals, and
+            account from Mabuh-ai. This cannot be undone.
           </p>
           <div>
             <Button

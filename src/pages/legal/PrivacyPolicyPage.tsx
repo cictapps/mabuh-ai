@@ -21,10 +21,12 @@ const SECTIONS: Section[] = [
   },
   {
     id: "ai-mistral-free",
-    title: "AI companion: free Mistral AI",
+    title: "AI companion and reflections: free Mistral AI",
     body: [
-      "The chat companion inside Mabuh-ai is powered by the free tier of Mistral AI (the mistral-small model). Because the chat runs on a free-tier API, the messages you send to the companion may be used by Mistral to train and improve their models. This is a condition of using the free tier and not a choice we can opt out of.",
-      "Please keep that in mind when you talk to the companion. Avoid sharing your full name, home or school address, phone number, account numbers, or any information you would not be comfortable being seen by a third-party AI provider. The companion is optional — you can use every other part of Mabuh-ai without ever talking to it.",
+      "Two features in Mabuh-ai use the free tier of Mistral AI: the chat companion and the new 'Reflect with AI' button on journal entries. Both run on the same chat server, which uses the mistral-small model.",
+      "Because the chat runs on a free-tier API, the messages you send to either feature may be used by Mistral to train and improve their models. This is a condition of using the free tier and not a choice we can opt out of.",
+      "For the reflection feature, the request also includes a small context payload: the entry you are reflecting on, your three most recent mood check-ins (mood type, label, and a 240-character snippet of the journal text), and your two most recent journal entries. The context is trimmed and bounded; we never send your full raw history.",
+      "Please keep that in mind. Avoid sharing your full name, home or school address, phone number, account numbers, or any information you would not be comfortable being seen by a third-party AI provider. Both features are optional — you can use every other part of Mabuh-ai without ever talking to the AI.",
     ],
   },
   {

@@ -38,6 +38,10 @@ function formatTime(ts: number): string {
   });
 }
 
+function formatDateTime(iso: string, ts: number): string {
+  return `${formatDate(iso)} · ${formatTime(ts)}`;
+}
+
 interface DayDetailProps {
   entries: MoodEntry[];
   date: string;
@@ -76,6 +80,13 @@ const DayDetail: React.FC<DayDetailProps> = ({ entries, date }) => {
           ? "1 check-in"
           : `${entries.length} check-ins`}{" "}
         · {formatDate(date)}
+        {entries.length > 0
+          ? ` · first at ${formatTime(entries[0]!.timestamp)}${
+              entries.length > 1
+                ? ` · last at ${formatTime(entries[entries.length - 1]!.timestamp)}`
+                : ""
+            }`
+          : ""}
       </p>
       {entries.map((entry) => (
         <EntryCard key={entry.id} entry={entry} />
@@ -117,7 +128,7 @@ const EntryCard: React.FC<{ entry: MoodEntry }> = ({ entry }) => {
             fontVariantNumeric: "tabular-nums",
           }}
         >
-          {formatTime(entry.timestamp)}
+          {formatDateTime(entry.date, entry.timestamp)}
         </span>
       </div>
 

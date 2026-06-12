@@ -13,8 +13,7 @@
       "identifier": "http:default",
       "allow": [
         { "url": "https://mabuh-ai-server.onrender.com" },
-        { "url": "https://mabuh-ai-server-29h8.onrender.com" },
-        { "url": "http://localhost:*" }
+        { "url": "https://mabuh-ai-server-29h8.onrender.com" }
       ]
     }
   ]

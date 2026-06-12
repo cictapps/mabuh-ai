@@ -1,17 +1,34 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspense } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ScreenId } from "./types";
 import { NAV_ITEMS } from "./data";
 import { useMoodStore } from "./hooks/useMoodStore";
 import { useOnboarding } from "./hooks/useOnboarding";
+import { scheduleReminder, cancelReminder, requestReminderPermission } from "./lib/reminders";
+import { useJourneyStore } from "./lib/journey/useJourneyStore";
 
 import { BottomNav } from "./components/shared/BottomNav";
-import { CheckInScreen }    from "./screens/CheckInScreen";
+import { CheckInScreen } from "./screens/CheckInScreen";
 import { ReviewHub } from "./screens/ReviewHub";
-import { JourneyScreen } from "./screens/JourneyScreen";
 import { SupportHub } from "./screens/SupportHub";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
+
+const JourneyScreen = lazy(async () => {
+  const mod = await import("./screens/JourneyScreen");
+  return { default: mod.JourneyScreen };
+});
+
+function InlineFallback() {
+  return (
+    <div
+      className="flex w-full items-center justify-center py-10 text-xs text-muted-foreground"
+      aria-live="polite"
+    >
+      Loading…
+    </div>
+  );
+}
 
 type SupportView = "hub" | "chat";
 
@@ -71,7 +88,11 @@ export default function App({
   const [supportView, setSupportView] = useState<SupportView>(initialState.supportView);
   const previousHubRef = useRef<ScreenId>(initialState.activeHub);
   const mainRef = useRef<HTMLElement | null>(null);
-  const { hasCompleted, complete: completeOnboarding, reset: resetOnboarding } = useOnboarding();
+  const {
+    hasCompleted,
+    complete: completeOnboarding,
+    reset: resetOnboarding,
+  } = useOnboarding();
 
   // Persist nav state so the back button from /help or /chatbot returns
   // the user to the same tab they were on before leaving /.
@@ -130,6 +151,25 @@ export default function App({
     analyticsStats,
   } = useMoodStore();
 
+  const wrappedSaveEntry = useCallback(async () => {
+    const ok = await saveEntry();
+    if (ok) {
+      useJourneyStore.getState().awardXp("mood_checkin");
+    }
+    return ok;
+  }, [saveEntry]);
+
+  const wrappedAddManualJournalEntry = useCallback(
+    async (content: string) => {
+      await addManualJournalEntry(content);
+      if (content.trim()) {
+        useJourneyStore.getState().awardXp("journal_entry");
+        useJourneyStore.getState().incrementJournalCount();
+      }
+    },
+    [addManualJournalEntry],
+  );
+
   const todaysCount = useMemo(() => {
     const today = new Date();
     const y = today.getFullYear();
@@ -152,6 +192,26 @@ export default function App({
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0, behavior: "auto" });
   }, [activeHub, supportView]);
+
+  useEffect(() => {
+    if (!reminder.enabled) {
+      cancelReminder();
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const status = await requestReminderPermission();
+      if (cancelled) return;
+      if (status === "granted") {
+        scheduleReminder(reminder);
+      } else {
+        cancelReminder();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [reminder]);
 
   return (
     <div
@@ -177,9 +237,11 @@ export default function App({
             style={{
               flex: 1,
               minHeight: 0,
-              display: activeHub === "support" && supportView === "chat" ? "flex" : "block",
+              display:
+                activeHub === "support" && supportView === "chat" ? "flex" : "block",
               flexDirection: "column",
-              overflowY: activeHub === "support" && supportView === "chat" ? "hidden" : "auto",
+              overflowY:
+                activeHub === "support" && supportView === "chat" ? "hidden" : "auto",
               overflowX: "hidden",
               WebkitOverflowScrolling: "touch",
             }}
@@ -206,7 +268,7 @@ export default function App({
                 onUpdateSocialInteraction={updateSocialInteraction}
                 onToggleActivity={toggleActivity}
                 onAddCustomActivity={addCustomActivity}
-                onSave={saveEntry}
+                onSave={wrappedSaveEntry}
               />
             </div>
             <div style={{ display: activeHub === "review" ? "block" : "none" }}>
@@ -219,15 +281,15 @@ export default function App({
                 analyticsStats={analyticsStats}
                 refreshToken={lastSavedAt}
                 journalEntries={journalEntries}
-                onAddJournalEntry={addManualJournalEntry}
+                onAddJournalEntry={wrappedAddManualJournalEntry}
                 loading={loading}
                 error={error}
               />
             </div>
             <div style={{ display: activeHub === "journey" ? "block" : "none" }}>
-              <JourneyScreen
-                onOpenSupport={() => navigate("/help")}
-              />
+              <Suspense fallback={<InlineFallback />}>
+                <JourneyScreen onOpenSupport={() => navigate("/help")} />
+              </Suspense>
             </div>
             <div
               style={{
@@ -262,11 +324,7 @@ export default function App({
 
           {/* Bottom navigation */}
           {!(activeHub === "support" && supportView === "chat") && (
-            <BottomNav
-              items={NAV_ITEMS}
-              active={activeHub}
-              onSelect={handleNavSelect}
-            />
+            <BottomNav items={NAV_ITEMS} active={activeHub} onSelect={handleNavSelect} />
           )}
         </>
       )}

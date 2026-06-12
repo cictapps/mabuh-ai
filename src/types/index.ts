@@ -75,6 +75,50 @@ export type JourneyPhase =
 export type JourneyTheme = "dusk" | "dawn" | "meadow";
 export type JourneyPlane = "trainer" | "cruiser" | "glider";
 
+export type JourneyActivityType =
+  | "preflight"
+  | "checkpoint"
+  | "final"
+  | "mood_checkin"
+  | "journal_entry";
+
+export interface JourneyReward {
+  id: string;
+  level: number;
+  label: string;
+  description: string;
+  category: "theme" | "plane" | "affirmation" | "accent" | "background" | "title";
+  preview?: string;
+}
+
+export interface JourneyMilestone {
+  id: string;
+  type: "flight" | "journal" | "pause" | "rhythm";
+  threshold: number;
+  label: string;
+  body: string;
+}
+
+export interface JourneyProgress {
+  totalXp: number;
+  level: number;
+  flightsCompleted: number;
+  streak: number;
+  bestRhythm: number;
+  lastFlightDate: string | null;
+  unlockedRewards: string[];
+  selectedTheme: JourneyTheme | null;
+  selectedPlane: JourneyPlane | null;
+  selectedTitle: string | null;
+  migrationComplete: boolean;
+}
+
+export interface DailyLedgerEntry {
+  action: JourneyActivityType;
+  sourceId: string;
+  occurredAt: string;
+}
+
 export interface JourneyCheckpoint {
   id: string;
   label: string;

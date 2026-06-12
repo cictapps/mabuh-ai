@@ -1,7 +1,16 @@
-import { Flame, Send, Sparkles, Star } from "lucide-react";
+import { useMemo } from "react";
+import { Flame, Gift, Send, Sparkles, Star } from "lucide-react";
 import { StatBadge } from "./StatBadge";
 import { ProgressBar } from "./ProgressBar";
-import { levelFromXp, levelProgressPercent, xpIntoLevel, XP_PER_LEVEL } from "@/lib/journey/xp";
+import {
+  levelFromXp,
+  levelProgressPercent,
+  xpIntoLevel,
+  XP_PER_LEVEL,
+  REWARDS,
+  newRewardsAtLevel,
+} from "@/lib/journey/xp";
+import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 
 type JourneyHeaderProps = {
   totalXp: number;
@@ -16,8 +25,19 @@ export function JourneyHeader({
   flightsCompleted,
   onOpenAchievements,
 }: JourneyHeaderProps) {
+  const unlockedRewards = useJourneyStore((s) => s.unlockedRewards);
   const level = levelFromXp(totalXp);
   const intoLevel = xpIntoLevel(totalXp);
+
+  const nextLevelRewards = useMemo(() => {
+    const already = new Set(unlockedRewards);
+    return newRewardsAtLevel(level, level + 1, already);
+  }, [level, unlockedRewards]);
+
+  const rewardCount = useMemo(
+    () => REWARDS.filter((r) => unlockedRewards.includes(r.id)).length,
+    [unlockedRewards],
+  );
 
   return (
     <div
@@ -64,9 +84,14 @@ export function JourneyHeader({
           <span> / {XP_PER_LEVEL} XP</span>
           <span> toward level {level + 1}</span>
         </p>
+        {nextLevelRewards.length > 0 && (
+          <p className="mt-0.5 text-[11px] text-tertiary">
+            Next: {nextLevelRewards.map((r) => r.label).join(", ")}
+          </p>
+        )}
       </div>
 
-      <div className="relative mt-4 grid grid-cols-2 gap-2.5">
+      <div className="relative mt-4 grid grid-cols-3 gap-2.5">
         <StatBadge
           tone="warm"
           icon={<Flame className="size-4" fill="currentColor" />}
@@ -79,6 +104,13 @@ export function JourneyHeader({
           icon={<Send className="size-4" />}
           value={flightsCompleted}
           label="Flights done"
+          onPress={onOpenAchievements}
+        />
+        <StatBadge
+          tone="soft"
+          icon={<Gift className="size-4" />}
+          value={rewardCount}
+          label={`${REWARDS.length} rewards`}
           onPress={onOpenAchievements}
         />
       </div>

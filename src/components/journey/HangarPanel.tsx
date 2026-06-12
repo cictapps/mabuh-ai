@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import {
+  Lock,
   Palette,
   MapPin,
   UserPlus,
@@ -7,6 +8,7 @@ import {
   Settings2,
   Trash2,
   ChevronDown,
+  Gift,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,16 +18,26 @@ import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 import type { JourneyPlane, JourneyTheme } from "@/types";
 import { normalizeCheckpointTime, sortCheckpoints } from "@/lib/journey/schedule";
 
-const THEME_OPTIONS: { key: JourneyTheme; label: string; gradient: string }[] = [
-  { key: "dusk", label: "Dusk", gradient: "from-indigo-500/40 to-fuchsia-500/30" },
-  { key: "dawn", label: "Dawn", gradient: "from-amber-400/40 to-rose-400/30" },
-  { key: "meadow", label: "Meadow", gradient: "from-emerald-400/40 to-teal-400/30" },
+const THEME_OPTIONS: {
+  key: JourneyTheme;
+  label: string;
+  gradient: string;
+  rewardId: string;
+}[] = [
+  { key: "dusk", label: "Dusk", gradient: "from-indigo-500/40 to-fuchsia-500/30", rewardId: "dusk-trainer" },
+  { key: "dawn", label: "Dawn", gradient: "from-amber-400/40 to-rose-400/30", rewardId: "dawn-sky" },
+  { key: "meadow", label: "Meadow", gradient: "from-emerald-400/40 to-teal-400/30", rewardId: "meadow-sky" },
 ];
 
-const PLANE_OPTIONS: { key: JourneyPlane; label: string; icon: string }[] = [
-  { key: "trainer", label: "Trainer", icon: "🛩️" },
-  { key: "cruiser", label: "Cruiser", icon: "✈️" },
-  { key: "glider", label: "Glider", icon: "🪽" },
+const PLANE_OPTIONS: {
+  key: JourneyPlane;
+  label: string;
+  icon: string;
+  rewardId: string;
+}[] = [
+  { key: "trainer", label: "Trainer", icon: "🛩️", rewardId: "dusk-trainer" },
+  { key: "cruiser", label: "Cruiser", icon: "✈️", rewardId: "cruiser" },
+  { key: "glider", label: "Glider", icon: "🪽", rewardId: "glider" },
 ];
 
 type Section = "look" | "waypoints" | "people";
@@ -33,6 +45,7 @@ type Section = "look" | "waypoints" | "people";
 export function HangarPanel() {
   const theme = useJourneyStore((s) => s.theme);
   const plane = useJourneyStore((s) => s.plane);
+  const unlockedRewards = useJourneyStore((s) => s.unlockedRewards);
   const setTheme = useJourneyStore((s) => s.setTheme);
   const setPlane = useJourneyStore((s) => s.setPlane);
   const checkpoints = useJourneyStore((s) => s.checkpoints);
@@ -74,6 +87,14 @@ export function HangarPanel() {
     setOpenSection((current) => (current === section ? null : section));
   };
 
+  const isUnlocked = (rewardId: string) => unlockedRewards.includes(rewardId);
+
+  const canSelectTheme = (option: typeof THEME_OPTIONS[number]) =>
+    isUnlocked(option.rewardId);
+
+  const canSelectPlane = (option: typeof PLANE_OPTIONS[number]) =>
+    isUnlocked(option.rewardId);
+
   return (
     <Card>
       <CardHeader>
@@ -109,24 +130,33 @@ export function HangarPanel() {
             <div className="grid grid-cols-3 gap-2">
               {THEME_OPTIONS.map((option) => {
                 const selected = theme === option.key;
+                const unlocked = canSelectTheme(option);
                 return (
                   <button
                     key={option.key}
                     type="button"
-                    onClick={() => setTheme(option.key)}
+                    onClick={() => {
+                      if (unlocked) setTheme(option.key);
+                    }}
                     aria-pressed={selected}
+                    disabled={!unlocked}
                     className={cn(
                       "flex flex-col items-start gap-2 rounded-2xl border p-3 text-left transition-colors",
                       selected
                         ? "border-[rgba(255,185,84,0.32)] bg-[rgba(255,185,84,0.08)]"
-                        : "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.03)] hover:bg-[rgba(188,194,255,0.06)]",
+                        : unlocked
+                          ? "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.03)] hover:bg-[rgba(188,194,255,0.06)]"
+                          : "border-[rgba(188,194,255,0.04)] bg-[rgba(188,194,255,0.01)] opacity-50 cursor-not-allowed",
                     )}
                   >
                     <span
                       className={cn("h-6 w-full rounded-full bg-gradient-to-r", option.gradient)}
                       aria-hidden
                     />
-                    <span className="text-xs font-semibold">{option.label}</span>
+                    <span className="flex items-center gap-1.5 text-xs font-semibold">
+                      {!unlocked && <Lock className="size-3" />}
+                      {option.label}
+                    </span>
                   </button>
                 );
               })}
@@ -140,25 +170,40 @@ export function HangarPanel() {
             <div className="grid grid-cols-3 gap-2">
               {PLANE_OPTIONS.map((option) => {
                 const selected = plane === option.key;
+                const unlocked = canSelectPlane(option);
                 return (
                   <button
                     key={option.key}
                     type="button"
-                    onClick={() => setPlane(option.key)}
+                    onClick={() => {
+                      if (unlocked) setPlane(option.key);
+                    }}
                     aria-pressed={selected}
+                    disabled={!unlocked}
                     className={cn(
                       "flex flex-col items-center gap-1 rounded-2xl border px-3 py-2.5 text-xs font-semibold transition-colors",
                       selected
                         ? "border-[rgba(255,185,84,0.32)] bg-[rgba(255,185,84,0.08)]"
-                        : "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.03)] hover:bg-[rgba(188,194,255,0.06)]",
+                        : unlocked
+                          ? "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.03)] hover:bg-[rgba(188,194,255,0.06)]"
+                          : "border-[rgba(188,194,255,0.04)] bg-[rgba(188,194,255,0.01)] opacity-50 cursor-not-allowed",
                     )}
                   >
                     <span className="text-xl leading-none">{option.icon}</span>
-                    <span>{option.label}</span>
+                    <span className="flex items-center gap-1">
+                      {!unlocked && <Lock className="size-2.5" />}
+                      {option.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
+            {!isUnlocked("cruiser") || !isUnlocked("glider") ? (
+              <p className="mt-2 flex items-center gap-1 text-[10px] text-[#d8d4eb]/60">
+                <Gift className="size-3" />
+                More companions unlock as you level up
+              </p>
+            ) : null}
           </div>
         </Section>
 

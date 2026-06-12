@@ -12,6 +12,7 @@ import { RestPanel } from "@/components/journey/RestPanel";
 import { HangarPanel } from "@/components/journey/HangarPanel";
 import { AchievementsPanel } from "@/components/journey/AchievementsPanel";
 import { AffirmationCard } from "@/components/journey/AffirmationCard";
+import { RewardToast } from "@/components/journey/RewardToast";
 import { IntroOverlay } from "@/components/journey/IntroOverlay";
 import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 import { getJourneyStatus } from "@/lib/journey/schedule";
@@ -234,6 +235,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
         ) : null}
       </div>
 
+      <RewardToast />
       <IntroOverlay open={!hasSeenIntro} onChoose={handleIntroChoice} />
     </div>
   );

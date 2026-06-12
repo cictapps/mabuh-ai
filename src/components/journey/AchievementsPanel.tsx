@@ -1,24 +1,34 @@
-import { Award, MapPin, Sparkles } from "lucide-react";
+import { Award, Gift, Lock, MapPin, Sparkles, Star } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pill } from "./Pill";
 import { ProgressBar } from "./ProgressBar";
 import { ContextualHint } from "./ContextualHint";
 import { useJourneyStore } from "@/lib/journey/useJourneyStore";
-import { levelFromXp, xpIntoLevel, XP_PER_LEVEL, XP_REWARDS } from "@/lib/journey/xp";
+import {
+  levelFromXp,
+  xpIntoLevel,
+  XP_PER_LEVEL,
+  XP_REWARDS,
+  REWARDS,
+  reachedMilestones,
+} from "@/lib/journey/xp";
 
 const XP_RULES: { label: string; value: string }[] = [
   { label: "Begin your day (preflight)", value: `+${XP_REWARDS.preflight} XP` },
-  { label: "Pause for a checkpoint", value: `+${XP_REWARDS.checkpoint} XP` },
+  { label: "Pause for a checkpoint (×3 daily)", value: `+${XP_REWARDS.checkpoint} XP` },
   { label: "Close out your day", value: `+${XP_REWARDS.final} XP` },
+  { label: "Mood check-in (×2 daily)", value: `+${XP_REWARDS.mood_checkin} XP` },
+  { label: "Journal entry", value: `+${XP_REWARDS.journal_entry} XP` },
 ];
 
-const FLIGHT_MILESTONES = [
-  { count: 1, label: "First flight", body: "Welcome aboard." },
-  { count: 3, label: "Steady skies", body: "Three flights complete." },
-  { count: 5, label: "City hops", body: "You're finding your rhythm." },
-  { count: 10, label: "Wide horizons", body: "Ten days of gentle practice." },
-  { count: 25, label: "Sanctuary pilot", body: "This is becoming yours." },
-];
+const CATEGORY_LABELS: Record<string, string> = {
+  theme: "Sky tone",
+  plane: "Companion",
+  affirmation: "Affirmation pack",
+  accent: "Card accent",
+  background: "Background",
+  title: "Custom title",
+};
 
 type AchievementsPanelProps = {
   showHint: boolean;
@@ -28,8 +38,14 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
   const totalXp = useJourneyStore((s) => s.totalXp);
   const streak = useJourneyStore((s) => s.streak);
   const flightsCompleted = useJourneyStore((s) => s.flightsCompleted);
+  const unlockedRewards = useJourneyStore((s) => s.unlockedRewards);
+  const pauseCount = useJourneyStore((s) => s.pauseCount);
+  const journalEntryCount = useJourneyStore((s) => s.journalEntryCount);
+  const bestRhythm = useJourneyStore((s) => s.bestRhythm);
   const level = levelFromXp(totalXp);
   const intoLevel = xpIntoLevel(totalXp);
+
+  const milestones = reachedMilestones(flightsCompleted, journalEntryCount, pauseCount, bestRhythm);
 
   return (
     <Card>
@@ -91,34 +107,83 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
           </ul>
         </div>
 
+        {/* Rewards */}
         <div>
           <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
-            <MapPin className="size-3" />
-            Flight milestones
+            <Gift className="size-3" />
+            Level rewards
           </p>
           <ul className="space-y-1.5">
-            {FLIGHT_MILESTONES.map((milestone) => {
-              const reached = flightsCompleted >= milestone.count;
+            {REWARDS.map((reward) => {
+              const unlocked = unlockedRewards.includes(reward.id);
+              const locked = reward.level > level;
               return (
                 <li
-                  key={milestone.label}
+                  key={reward.id}
                   className={
-                    "flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-xs " +
-                    (reached
+                    "flex items-center gap-3 rounded-xl border px-3 py-2.5 text-xs " +
+                    (unlocked
                       ? "border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.08)] text-foreground"
-                      : "border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] text-[#d8d4eb]")
+                      : locked
+                        ? "border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] text-[#d8d4eb]/50"
+                        : "border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] text-[#d8d4eb]")
                   }
                 >
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold">{milestone.label}</span>
-                    <span className="block text-[11px] opacity-80">{milestone.body}</span>
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(188,194,255,0.08)]">
+                    {unlocked ? (
+                      <Gift className="size-3.5 text-tertiary" />
+                    ) : (
+                      <Lock className="size-3.5" />
+                    )}
                   </span>
-                  <span className="shrink-0 font-mono text-[11px]">
-                    {reached ? "Reached" : `${milestone.count} flights`}
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold">
+                      {reward.label}
+                      {unlocked ? (
+                        <span className="ml-1.5 text-[10px] font-medium text-tertiary">Unlocked</span>
+                      ) : locked ? (
+                        <span className="ml-1.5 text-[10px] text-[#d8d4eb]/40">Level {reward.level}</span>
+                      ) : null}
+                    </span>
+                    <span className="block text-[11px] opacity-80">{reward.description}</span>
+                  </span>
+                  <span className="shrink-0 text-right text-[10px] capitalize text-[#d8d4eb]/60">
+                    {CATEGORY_LABELS[reward.category] ?? reward.category}
                   </span>
                 </li>
               );
             })}
+          </ul>
+        </div>
+
+        {/* Milestones */}
+        <div>
+          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+            <MapPin className="size-3" />
+            Milestones
+          </p>
+          <ul className="space-y-1.5">
+            {milestones.length === 0 ? (
+              <li className="rounded-xl border border-dashed border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.02)] px-3 py-3 text-xs text-[#d8d4eb]">
+                Complete your first flight, journal entry, or pause to earn your first milestone.
+              </li>
+            ) : (
+              milestones.map((ms) => (
+                <li
+                  key={ms.id}
+                  className="flex items-center gap-3 rounded-xl border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.08)] px-3 py-2.5 text-xs text-foreground"
+                >
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(255,185,84,0.16)] text-tertiary">
+                    <Star className="size-3.5" fill="currentColor" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold">{ms.label}</span>
+                    <span className="block text-[11px] opacity-80">{ms.body}</span>
+                  </span>
+                  <span className="shrink-0 font-mono text-[10px] text-tertiary">Reached</span>
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </CardContent>

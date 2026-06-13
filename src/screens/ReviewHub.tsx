@@ -5,6 +5,7 @@ import { AnalyticsScreen } from "./AnalyticsScreen";
 import { InsightsScreen } from "./InsightsScreen";
 import { JournalScreen } from "./JournalScreen";
 import { History, TrendingUp, Lightbulb, PenTool } from "lucide-react";
+import type { MoodEntryInput } from "../lib/db/moodRepository";
 
 interface DistItem {
   mood: MoodType;
@@ -49,6 +50,8 @@ interface ReviewHubProps {
     tags?: string[];
   }>;
   onAddJournalEntry: (content: string) => void;
+  onUpdateEntry: (id: string, input: MoodEntryInput) => Promise<boolean>;
+  onDeleteEntry: (id: string) => Promise<boolean>;
   loading?: boolean;
   error?: string | null;
 }
@@ -90,6 +93,8 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
   refreshToken,
   journalEntries,
   onAddJournalEntry,
+  onUpdateEntry,
+  onDeleteEntry,
   loading,
   error,
 }) => {
@@ -99,7 +104,7 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
     <div
       className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
       style={{
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)",
+        paddingTop: "calc(env(safe-area-inset-top, 0px) + 4px)",
         minHeight: "100%",
       }}
     >
@@ -225,7 +230,12 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
         )}
 
         <div style={{ display: activeTab === "history" ? "block" : "none" }}>
-          <HistoryScreen history={history} loading={loading} />
+          <HistoryScreen
+            history={history}
+            loading={loading}
+            onUpdateEntry={onUpdateEntry}
+            onDeleteEntry={onDeleteEntry}
+          />
         </div>
 
         <div style={{ display: activeTab === "analytics" ? "block" : "none" }}>

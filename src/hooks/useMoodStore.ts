@@ -13,6 +13,8 @@ import {
   insertMoodEntry,
   listJournalEntries,
   listMoodEntries,
+  updateMoodEntry,
+  type MoodEntryInput,
 } from "../lib/db/moodRepository";
 import { useAuth } from "../lib/auth";
 
@@ -213,6 +215,29 @@ export function useMoodStore() {
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Could not delete that check-in.",
+        );
+        return false;
+      }
+    },
+    [userId],
+  );
+
+  const updateEntry = useCallback(
+    async (id: string, input: MoodEntryInput): Promise<boolean> => {
+      if (!userId) return false;
+      setError(null);
+      try {
+        const updated = await updateMoodEntry(id, input);
+        setHistory((prev) => {
+          const filtered = prev.filter((e) => e.id !== updated.id);
+          return [...filtered, updated].sort(
+            (a, b) => a.date.localeCompare(b.date) || a.timestamp - b.timestamp,
+          );
+        });
+        return true;
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Could not update that check-in.",
         );
         return false;
       }
@@ -629,6 +654,7 @@ export function useMoodStore() {
     addManualJournalEntry,
     saveEntry,
     removeEntry,
+    updateEntry,
     setReminder,
     exportData,
     clearAllLocalData,

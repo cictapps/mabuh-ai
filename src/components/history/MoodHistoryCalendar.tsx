@@ -1,11 +1,33 @@
-import React, { useState, useMemo } from "react";
-import { MoodEntry } from "../../types";
+import React, { useState, useMemo, useCallback } from "react";
+import {
+  animate,
+  motion,
+  type PanInfo,
+  useMotionValue,
+  useReducedMotion,
+} from "framer-motion";
+import { Pencil, Trash2, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
+import type { MoodEntry } from "../../types";
 import { getMoodMeta } from "../../data";
 import { MoodGradientBar } from "./MoodGradientBar";
+import { EditMoodEntryDialog } from "./EditMoodEntryDialog";
+import type { MoodEntryInput } from "../../lib/db/moodRepository";
 
 interface MoodHistoryCalendarProps {
   history: MoodEntry[];
   showDetail?: boolean;
+  onUpdateEntry: (id: string, input: MoodEntryInput) => Promise<boolean>;
+  onDeleteEntry: (id: string) => Promise<boolean>;
 }
 
 const DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -22,7 +44,11 @@ function startOfWeekSunday(date: Date): Date {
 
 function formatDate(iso: string): string {
   const d = new Date(iso + "T12:00:00");
-  return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  return d.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 function addMonths(date: Date, delta: number): Date {
@@ -45,9 +71,11 @@ function formatDateTime(iso: string, ts: number): string {
 interface DayDetailProps {
   entries: MoodEntry[];
   date: string;
+  onEdit: (entry: MoodEntry) => void;
+  onAskDelete: (entry: MoodEntry) => void;
 }
 
-const DayDetail: React.FC<DayDetailProps> = ({ entries, date }) => {
+const DayDetail: React.FC<DayDetailProps> = ({ entries, date, onEdit, onAskDelete }) => {
   if (entries.length === 0) {
     return (
       <div
@@ -65,7 +93,10 @@ const DayDetail: React.FC<DayDetailProps> = ({ entries, date }) => {
   }
 
   return (
-    <div className="detail-enter" style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+    <div
+      className="detail-enter"
+      style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}
+    >
       <p
         style={{
           fontSize: 11,
@@ -76,10 +107,8 @@ const DayDetail: React.FC<DayDetailProps> = ({ entries, date }) => {
           margin: 0,
         }}
       >
-        {entries.length === 1
-          ? "1 check-in"
-          : `${entries.length} check-ins`}{" "}
-        · {formatDate(date)}
+        {entries.length === 1 ? "1 check-in" : `${entries.length} check-ins`} ·{" "}
+        {formatDate(date)}
         {entries.length > 0
           ? ` · first at ${formatTime(entries[0]!.timestamp)}${
               entries.length > 1
@@ -89,123 +118,393 @@ const DayDetail: React.FC<DayDetailProps> = ({ entries, date }) => {
           : ""}
       </p>
       {entries.map((entry) => (
-        <EntryCard key={entry.id} entry={entry} />
+        <EntryCard
+          key={entry.id}
+          entry={entry}
+          onEdit={onEdit}
+          onAskDelete={onAskDelete}
+        />
       ))}
     </div>
   );
 };
 
-const EntryCard: React.FC<{ entry: MoodEntry }> = ({ entry }) => {
+const EntryCard: React.FC<{
+  entry: MoodEntry;
+  onEdit: (entry: MoodEntry) => void;
+  onAskDelete: (entry: MoodEntry) => void;
+}> = ({ entry, onEdit, onAskDelete }) => {
   const meta = getMoodMeta(entry.mood);
   const socialItems = entry.socialInteractions ?? [];
+  const hasDetails =
+    entry.tags.length > 0 ||
+    Boolean(entry.journal) ||
+    Boolean(entry.dayNote?.trim()) ||
+    socialItems.length > 0;
+
+  return (
+    <SwipeableEntry entry={entry} onEdit={onEdit} onAskDelete={onAskDelete}>
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          minHeight: 52,
+          flexDirection: "column",
+          justifyContent: "center",
+          background: "rgb(27 30 39)",
+          borderRadius: 16,
+          padding: "16px 16px 16px 34px",
+        }}
+      >
+        <span
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: 9,
+            top: "50%",
+            display: "inline-flex",
+            alignItems: "center",
+            color: "rgba(216,212,235,0.28)",
+            transform: "translateY(-50%)",
+          }}
+        >
+          <ChevronLeft size={10} strokeWidth={1.8} />
+          <ChevronRight size={10} strokeWidth={1.8} style={{ marginLeft: -4 }} />
+        </span>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginBottom: hasDetails ? 8 : 0,
+          }}
+        >
+          <div
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: meta.color,
+              flexShrink: 0,
+              boxShadow: `0 0 0 3px ${meta.color}22`,
+            }}
+          />
+          <span className="font-serif" style={{ fontSize: 16, color: "#e8eaf0" }}>
+            {meta.label}
+          </span>
+          <span
+            style={{
+              fontSize: 11,
+              color: "rgba(188,194,255,0.32)",
+              marginLeft: "auto",
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
+            {formatDateTime(entry.date, entry.timestamp)}
+          </span>
+        </div>
+
+        {entry.tags.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 8 }}>
+            {entry.tags.map((t) => (
+              <span
+                key={t}
+                style={{
+                  padding: "3px 10px",
+                  borderRadius: 999,
+                  fontSize: 11,
+                  background: "rgba(188,194,255,0.07)",
+                  color: "rgba(188,194,255,0.45)",
+                }}
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {entry.journal && (
+          <p
+            style={{
+              fontSize: 13,
+              color: "rgba(188,194,255,0.42)",
+              lineHeight: 1.6,
+              fontStyle: "italic",
+              margin: 0,
+            }}
+          >
+            "{entry.journal}"
+          </p>
+        )}
+
+        {entry.dayNote && entry.dayNote.trim().length > 0 && (
+          <p
+            style={{
+              marginTop: 8,
+              fontSize: 12,
+              color: "rgba(188,194,255,0.4)",
+              lineHeight: 1.5,
+            }}
+          >
+            <span style={{ color: "rgba(188,194,255,0.5)", fontWeight: 600 }}>
+              Day note:
+            </span>{" "}
+            {entry.dayNote}
+          </p>
+        )}
+
+        {socialItems.length > 0 && (
+          <div
+            style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}
+          >
+            {socialItems.map((interaction) => (
+              <div
+                key={interaction.id}
+                style={{
+                  padding: "10px 12px",
+                  borderRadius: 12,
+                  background: "rgba(188,194,255,0.06)",
+                  color: "rgba(188,194,255,0.5)",
+                  fontSize: 12,
+                }}
+              >
+                <div
+                  style={{ display: "flex", justifyContent: "space-between", gap: 10 }}
+                >
+                  <span style={{ color: "#e8eaf0", fontWeight: 600 }}>
+                    {interaction.name || "Unnamed"}
+                  </span>
+                  <span>
+                    {interaction.relationship.replace("_", " ")} ·{" "}
+                    {interaction.interactionType.replace("_", " ")}
+                  </span>
+                </div>
+                {interaction.durationMinutes !== undefined && (
+                  <div style={{ marginTop: 4 }}>
+                    Duration: {interaction.durationMinutes} min
+                  </div>
+                )}
+                {interaction.feelings.length > 0 && (
+                  <div style={{ marginTop: 4 }}>
+                    Feeling: {interaction.feelings.join(", ")}
+                  </div>
+                )}
+                {interaction.notes && (
+                  <div style={{ marginTop: 4, color: "rgba(220,224,255,0.7)" }}>
+                    {interaction.notes}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </SwipeableEntry>
+  );
+};
+
+const REVEAL_THRESHOLD = 56;
+const ACTION_BUTTON_WIDTH = 104;
+const COMMIT_THRESHOLD = 156;
+const MAX_DRAG = 184;
+
+const SwipeableEntry: React.FC<{
+  entry: MoodEntry;
+  onEdit: (entry: MoodEntry) => void;
+  onAskDelete: (entry: MoodEntry) => void;
+  children: React.ReactNode;
+}> = ({ entry, onEdit, onAskDelete, children }) => {
+  const x = useMotionValue(0);
+  const prefersReducedMotion = useReducedMotion();
+  const [revealed, setRevealed] = useState<"edit" | "delete" | null>(null);
+
+  const snapTo = useCallback(
+    (target: number) => {
+      if (prefersReducedMotion) {
+        x.set(target);
+        return;
+      }
+      animate(x, target, {
+        type: "spring",
+        stiffness: 520,
+        damping: 42,
+        mass: 0.75,
+      });
+    },
+    [prefersReducedMotion, x],
+  );
+
+  const close = useCallback(() => {
+    setRevealed(null);
+    snapTo(0);
+  }, [snapTo]);
+
+  const handleEdit = useCallback(() => {
+    close();
+    onEdit(entry);
+  }, [close, onEdit, entry]);
+
+  const handleDelete = useCallback(() => {
+    close();
+    onAskDelete(entry);
+  }, [close, onAskDelete, entry]);
+
+  const handleDragEnd = useCallback(
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      const current = x.get();
+      const isQuickCommit =
+        Math.abs(info.velocity.x) > 900 && Math.abs(current) > REVEAL_THRESHOLD;
+
+      if (current >= COMMIT_THRESHOLD || (isQuickCommit && info.velocity.x > 0)) {
+        handleEdit();
+      } else if (current <= -COMMIT_THRESHOLD || (isQuickCommit && info.velocity.x < 0)) {
+        handleDelete();
+      } else if (current >= REVEAL_THRESHOLD) {
+        snapTo(ACTION_BUTTON_WIDTH);
+        setRevealed("edit");
+      } else if (current <= -REVEAL_THRESHOLD) {
+        snapTo(-ACTION_BUTTON_WIDTH);
+        setRevealed("delete");
+      } else {
+        close();
+      }
+    },
+    [close, handleDelete, handleEdit, snapTo, x],
+  );
+
   return (
     <div
       style={{
-        background: "rgba(188,194,255,0.04)",
+        position: "relative",
         borderRadius: 16,
-        padding: 16,
+        overflow: "hidden",
+        touchAction: "pan-y",
+        userSelect: revealed ? "none" : "auto",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-        <div
+      <div
+        style={{
+          position: "absolute",
+          inset: 1,
+          borderRadius: 15,
+          overflow: "hidden",
+          background:
+            "linear-gradient(90deg, #aeb7ff 0%, #cbb2ff 42%, #ff8f8f 58%, #ff7373 100%)",
+        }}
+      >
+        <motion.button
+          type="button"
+          onClick={handleEdit}
+          tabIndex={revealed === "edit" ? 0 : -1}
           style={{
-            width: 10,
-            height: 10,
-            borderRadius: "50%",
-            background: meta.color,
-            flexShrink: 0,
-            boxShadow: `0 0 0 3px ${meta.color}22`,
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            gap: 8,
+            paddingLeft: 22,
+            background: "transparent",
+            color: "#171925",
+            border: "none",
+            cursor: "pointer",
+            pointerEvents: revealed === "edit" ? "auto" : "none",
           }}
-        />
-        <span className="font-serif" style={{ fontSize: 16, color: "#e8eaf0" }}>
-          {meta.label}
-        </span>
-        <span
-          style={{
-            fontSize: 11,
-            color: "rgba(188,194,255,0.32)",
-            marginLeft: "auto",
-            fontVariantNumeric: "tabular-nums",
-          }}
+          aria-label={`Edit check-in from ${formatTime(entry.timestamp)}`}
         >
-          {formatDateTime(entry.date, entry.timestamp)}
-        </span>
+          <span
+            aria-hidden
+            style={{
+              display: "grid",
+              width: 38,
+              height: 38,
+              placeItems: "center",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.24)",
+            }}
+          >
+            <Pencil size={18} strokeWidth={2.2} />
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.01em" }}>
+            Edit
+          </span>
+        </motion.button>
+        <motion.button
+          type="button"
+          onClick={handleDelete}
+          tabIndex={revealed === "delete" ? 0 : -1}
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            flexDirection: "row-reverse",
+            gap: 8,
+            paddingRight: 22,
+            background: "transparent",
+            color: "#260b0b",
+            border: "none",
+            cursor: "pointer",
+            pointerEvents: revealed === "delete" ? "auto" : "none",
+          }}
+          aria-label={`Delete check-in from ${formatTime(entry.timestamp)}`}
+        >
+          <span
+            aria-hidden
+            style={{
+              display: "grid",
+              width: 38,
+              height: 38,
+              placeItems: "center",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.24)",
+            }}
+          >
+            <Trash2 size={18} strokeWidth={2.2} />
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.01em" }}>
+            Delete
+          </span>
+        </motion.button>
       </div>
 
-      {entry.tags.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 8 }}>
-          {entry.tags.map((t) => (
-            <span
-              key={t}
-              style={{
-                padding: "3px 10px",
-                borderRadius: 999,
-                fontSize: 11,
-                background: "rgba(188,194,255,0.07)",
-                color: "rgba(188,194,255,0.45)",
-              }}
-            >
-              {t}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {entry.journal && (
-        <p
-          style={{
-            fontSize: 13,
-            color: "rgba(188,194,255,0.42)",
-            lineHeight: 1.6,
-            fontStyle: "italic",
-            margin: 0,
-          }}
-        >
-          "{entry.journal}"
-        </p>
-      )}
-
-      {socialItems.length > 0 && (
-        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
-          {socialItems.map((interaction) => (
-            <div
-              key={interaction.id}
-              style={{
-                padding: "10px 12px",
-                borderRadius: 12,
-                background: "rgba(188,194,255,0.06)",
-                color: "rgba(188,194,255,0.5)",
-                fontSize: 12,
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-                <span style={{ color: "#e8eaf0", fontWeight: 600 }}>
-                  {interaction.name || "Unnamed"}
-                </span>
-                <span>
-                  {interaction.relationship.replace("_", " ")} · {interaction.interactionType.replace("_", " ")}
-                </span>
-              </div>
-              {interaction.durationMinutes !== undefined && (
-                <div style={{ marginTop: 4 }}>Duration: {interaction.durationMinutes} min</div>
-              )}
-              {interaction.feelings.length > 0 && (
-                <div style={{ marginTop: 4 }}>Feeling: {interaction.feelings.join(", ")}</div>
-              )}
-              {interaction.notes && (
-                <div style={{ marginTop: 4, color: "rgba(220,224,255,0.7)" }}>{interaction.notes}</div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: -MAX_DRAG, right: MAX_DRAG }}
+        dragElastic={0.08}
+        dragMomentum={false}
+        onDragEnd={handleDragEnd}
+        onTap={revealed ? close : undefined}
+        style={{
+          x,
+          position: "relative",
+          zIndex: 1,
+          touchAction: "pan-y",
+        }}
+        aria-label="Swipe right to edit or left to delete this check-in"
+      >
+        {children}
+      </motion.div>
     </div>
   );
 };
 
 // ─── Weekly View ──────────────────────────────────────────────────────────────
 
-const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ history, showDetail }) => {
+const WeekView: React.FC<{
+  history: MoodEntry[];
+  showDetail: boolean;
+  onEdit: (entry: MoodEntry) => void;
+  onAskDelete: (entry: MoodEntry) => void;
+}> = ({ history, showDetail, onEdit, onAskDelete }) => {
   const today = isoToday();
   const entryMap = useMemo<Record<string, MoodEntry[]>>(() => {
     const m: Record<string, MoodEntry[]> = {};
@@ -251,7 +550,14 @@ const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ his
 
       <MoodGradientBar entries={weekEntries} period="week" />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, marginTop: 12 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: 6,
+          marginTop: 12,
+        }}
+      >
         {weekDates.map((date) => {
           const entries = entryMap[date] ?? [];
           const isToday = date === today;
@@ -283,7 +589,14 @@ const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ his
               }}
               aria-label={`${d.toLocaleDateString("en-US", { weekday: "long" })}${hasEntries ? `, ${entries.length} check-in${entries.length > 1 ? "s" : ""}` : ", no check-ins"}`}
             >
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
                 <span
                   style={{
                     fontSize: 10,
@@ -342,7 +655,12 @@ const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ his
       </div>
 
       {showDetail && (
-        <DayDetail entries={entryMap[selectedDate] ?? []} date={selectedDate} />
+        <DayDetail
+          entries={entryMap[selectedDate] ?? []}
+          date={selectedDate}
+          onEdit={onEdit}
+          onAskDelete={onAskDelete}
+        />
       )}
     </div>
   );
@@ -350,7 +668,12 @@ const WeekView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ his
 
 // ─── Monthly View ─────────────────────────────────────────────────────────────
 
-const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ history, showDetail }) => {
+const MonthView: React.FC<{
+  history: MoodEntry[];
+  showDetail: boolean;
+  onEdit: (entry: MoodEntry) => void;
+  onAskDelete: (entry: MoodEntry) => void;
+}> = ({ history, showDetail, onEdit, onAskDelete }) => {
   const today = new Date();
   const entryMap = useMemo<Record<string, MoodEntry[]>>(() => {
     const m: Record<string, MoodEntry[]> = {};
@@ -542,7 +865,12 @@ const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ hi
       </div>
 
       {showDetail && selectedDate && (
-        <DayDetail entries={entryMap[selectedDate] ?? []} date={selectedDate} />
+        <DayDetail
+          entries={entryMap[selectedDate] ?? []}
+          date={selectedDate}
+          onEdit={onEdit}
+          onAskDelete={onAskDelete}
+        />
       )}
     </div>
   );
@@ -553,8 +881,56 @@ const MonthView: React.FC<{ history: MoodEntry[]; showDetail: boolean }> = ({ hi
 export const MoodHistoryCalendar: React.FC<MoodHistoryCalendarProps> = ({
   history,
   showDetail = true,
+  onUpdateEntry,
+  onDeleteEntry,
 }) => {
   const [view, setView] = useState<"week" | "month">("week");
+  const [editing, setEditing] = useState<MoodEntry | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<MoodEntry | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleAskDelete = useCallback((entry: MoodEntry) => {
+    setPendingDelete(entry);
+    setDeleteError(null);
+  }, []);
+
+  const handleCancelDelete = useCallback(() => {
+    if (deleting) return;
+    setPendingDelete(null);
+    setDeleteError(null);
+  }, [deleting]);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!pendingDelete || deleting) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const ok = await onDeleteEntry(pendingDelete.id);
+      if (ok) {
+        setPendingDelete(null);
+      } else {
+        setDeleteError("Could not delete that check-in. Please try again.");
+      }
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setDeleting(false);
+    }
+  }, [pendingDelete, deleting, onDeleteEntry]);
+
+  const handleCloseEdit = useCallback(() => {
+    setEditing(null);
+  }, []);
+
+  const handleSaveEdit = useCallback(
+    async (id: string, input: MoodEntryInput) => {
+      const ok = await onUpdateEntry(id, input);
+      if (ok) setEditing(null);
+      return ok;
+    },
+    [onUpdateEntry],
+  );
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -593,10 +969,76 @@ export const MoodHistoryCalendar: React.FC<MoodHistoryCalendarProps> = ({
       </div>
 
       {view === "week" ? (
-        <WeekView history={history} showDetail={showDetail} />
+        <WeekView
+          history={history}
+          showDetail={showDetail}
+          onEdit={setEditing}
+          onAskDelete={handleAskDelete}
+        />
       ) : (
-        <MonthView history={history} showDetail={showDetail} />
+        <MonthView
+          history={history}
+          showDetail={showDetail}
+          onEdit={setEditing}
+          onAskDelete={handleAskDelete}
+        />
       )}
+
+      <EditMoodEntryDialog
+        open={editing !== null}
+        entry={editing}
+        onClose={handleCloseEdit}
+        onSave={handleSaveEdit}
+      />
+
+      <AlertDialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) handleCancelDelete();
+        }}
+      >
+        <AlertDialogContent style={{ margin: 16 }}>
+          <AlertDialogHeader>
+            <span
+              aria-hidden
+              className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full"
+              style={{
+                background: "rgba(255,123,123,0.10)",
+                color: "rgba(255,170,170,0.95)",
+              }}
+            >
+              <AlertTriangle size={18} />
+            </span>
+            <AlertDialogTitle>Delete this check-in?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingDelete
+                ? `This will permanently remove the ${formatTime(pendingDelete.timestamp)} check-in from ${formatDate(pendingDelete.date)}. This can't be undone.`
+                : ""}
+            </AlertDialogDescription>
+            {deleteError ? (
+              <p
+                role="alert"
+                className="mt-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs text-rose-200"
+              >
+                {deleteError}
+              </p>
+            ) : null}
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleConfirmDelete();
+              }}
+              disabled={deleting}
+              className="bg-rose-500 text-white hover:bg-rose-500/90"
+            >
+              {deleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

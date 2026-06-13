@@ -1,14 +1,22 @@
 import React, { useMemo } from "react";
-import { MoodEntry } from "../types";
+import type { MoodEntry } from "../types";
 import { MoodHistoryCalendar } from "../components/history/MoodHistoryCalendar";
 import { getMoodMeta } from "../data";
+import type { MoodEntryInput } from "../lib/db/moodRepository";
 
 interface HistoryScreenProps {
   history: MoodEntry[];
   loading?: boolean;
+  onUpdateEntry: (id: string, input: MoodEntryInput) => Promise<boolean>;
+  onDeleteEntry: (id: string) => Promise<boolean>;
 }
 
-export const HistoryScreen: React.FC<HistoryScreenProps> = ({ history, loading }) => {
+export const HistoryScreen: React.FC<HistoryScreenProps> = ({
+  history,
+  loading,
+  onUpdateEntry,
+  onDeleteEntry,
+}) => {
   const latestThree = useMemo(
     () => [...history].sort((a, b) => b.timestamp - a.timestamp).slice(0, 3),
     [history]
@@ -45,7 +53,12 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ history, loading }
         </p>
       </div>
 
-      <MoodHistoryCalendar history={history} showDetail={false} />
+      <MoodHistoryCalendar
+        history={history}
+        showDetail
+        onUpdateEntry={onUpdateEntry}
+        onDeleteEntry={onDeleteEntry}
+      />
 
       {loading ? (
         <div

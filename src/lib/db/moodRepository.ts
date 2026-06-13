@@ -175,6 +175,32 @@ export async function deleteMoodEntry(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function updateMoodEntry(
+  id: string,
+  input: MoodEntryInput,
+): Promise<MoodEntry> {
+  const { data, error } = await supabase
+    .from("mood_entries")
+    .update({
+      mood: input.mood,
+      tags: input.tags ?? [],
+      journal: input.journal ?? "",
+      school_load: input.schoolLoad ?? null,
+      activity_minutes: input.activityMinutes ?? null,
+      day_note: input.dayNote ?? null,
+      social_interactions: input.socialInteractions ?? [],
+      activities: input.activities ?? emptyActivities(),
+    })
+    .eq("id", id)
+    .select(
+      "id, user_id, mood, tags, journal, school_load, activity_minutes, day_note, social_interactions, activities, entry_date, logged_at",
+    )
+    .single();
+
+  if (error) throw error;
+  return rowToMoodEntry(data as MoodRow);
+}
+
 export async function insertJournalEntry(
   body: string,
   now: Date = new Date(),

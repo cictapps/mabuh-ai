@@ -4,6 +4,7 @@ import type { ScreenId } from "./types";
 import { NAV_ITEMS } from "./data";
 import { useMoodStore } from "./hooks/useMoodStore";
 import { useOnboarding } from "./hooks/useOnboarding";
+import { useAuthActions } from "./lib/auth";
 import {
   scheduleReminder,
   cancelReminder,
@@ -145,6 +146,8 @@ export default function App({
     addCustomActivity,
     addManualJournalEntry,
     saveEntry,
+    removeEntry,
+    updateEntry,
     setReminder,
     exportData,
     clearAllLocalData,
@@ -174,6 +177,30 @@ export default function App({
     },
     [addManualJournalEntry],
   );
+
+  const wrappedUpdateEntry = useCallback(
+    async (id: string, input: Parameters<typeof updateEntry>[1]) => {
+      return updateEntry(id, input);
+    },
+    [updateEntry],
+  );
+
+  const wrappedDeleteEntry = useCallback(
+    async (id: string) => {
+      return removeEntry(id);
+    },
+    [removeEntry],
+  );
+
+  const { deleteAllData } = useAuthActions();
+  const handleDeleteAllData = useCallback(async () => {
+    await deleteAllData();
+    // The account is preserved; only user-scoped data is gone. Wipe the
+    // local cache so the UI stops showing the entries the server just
+    // deleted, and reset the journey progression and reminder prefs.
+    clearAllLocalData();
+    useJourneyStore.getState().resetAll();
+  }, [deleteAllData, clearAllLocalData]);
 
   const todaysCount = useMemo(() => {
     const today = new Date();
@@ -284,6 +311,8 @@ export default function App({
                 refreshToken={lastSavedAt}
                 journalEntries={journalEntries}
                 onAddJournalEntry={wrappedAddManualJournalEntry}
+                onUpdateEntry={wrappedUpdateEntry}
+                onDeleteEntry={wrappedDeleteEntry}
                 loading={loading}
                 error={error}
               />
@@ -319,6 +348,7 @@ export default function App({
                 onSetReminder={setReminder}
                 onExportData={exportData}
                 onClearAllLocalData={clearAllLocalData}
+                onDeleteAllData={handleDeleteAllData}
                 onReplayOnboarding={resetOnboarding}
                 onBack={handleCloseSettings}
               />

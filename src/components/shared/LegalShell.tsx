@@ -39,7 +39,7 @@ export function LegalShell({
     <main
       className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
       style={{
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)",
+        paddingTop: "calc(env(safe-area-inset-top, 0px) + 4px)",
         minHeight: "100%",
       }}
     >

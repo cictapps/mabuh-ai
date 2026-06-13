@@ -18,6 +18,7 @@ interface PrivacyPolicyProps {
   isOpen: boolean;
   onClose: () => void;
   onAccept?: () => void;
+  onDecline?: () => void;
   required?: boolean;
 }
 
@@ -113,6 +114,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
   isOpen,
   onClose,
   onAccept,
+  onDecline,
   required = false,
 }) => {
   const [checked, setChecked] = useState(false);
@@ -162,6 +164,14 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
     setAccepted(true);
     onAccept?.();
     setTimeout(onClose, 600);
+  };
+
+  const handleDecline = () => {
+    if (onDecline) {
+      onDecline();
+    } else {
+      onClose();
+    }
   };
 
   const canAccept = checked && aiConsent && scrolledToBottom;
@@ -300,34 +310,10 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
               🇵🇭 Questions or Concerns?
             </h3>
             <p className="text-sm text-neutral-400 mb-2">
-              For privacy inquiries, data deletion requests, or safety concerns in the
-              Philippines:
+              For privacy inquiries, data deletion requests, or safety concerns:
             </p>
             <div className="text-sm space-y-1 text-neutral-300">
               <p>📧 Email: cictapps@wvsu.edu.ph</p>
-              <p>🔒 Data Requests: datarequest@mabuhai.com</p>
-              <p className="mt-2 font-semibold text-neutral-200">
-                🚨 Crisis Support (Philippines):
-              </p>
-              <p>
-                📞 NCMH Crisis Hotline: <strong>1553</strong> (toll-free, 24/7)
-              </p>
-              <p>
-                📞 DOH Hopeline: <strong>804-4673</strong> /{" "}
-                <strong>0917-558-4673</strong>
-              </p>
-              <p className="mt-1 font-semibold text-neutral-200">
-                🏥 Iloilo City Resources:
-              </p>
-              <p>
-                📞 Western Visayas Medical Center: <strong>(033) 321-2841</strong>
-              </p>
-              <p>
-                📞 Iloilo Mission Hospital: <strong>(033) 509-5711</strong>
-              </p>
-              <p>
-                📞 The Medical City Iloilo: <strong>(033) 327-2814</strong>
-              </p>
             </div>
           </div>
         </div>
@@ -364,26 +350,39 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
             </label>
           </div>
 
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-[11px] text-neutral-500">
+          <div className="flex flex-col gap-3">
+            <span className="text-[11px] text-neutral-500 text-center sm:text-left">
               The AI companion is optional — you can skip it.
             </span>
-            <button
-              onClick={handleAccept}
-              disabled={!canAccept}
-              className={`
-                shrink-0 px-5 py-2 rounded-lg text-xs font-medium transition-all duration-200
-                ${
-                  accepted
-                    ? "bg-emerald-600 text-white cursor-default"
-                    : canAccept
-                      ? "bg-white text-neutral-900 hover:opacity-90 cursor-pointer"
-                      : "bg-white/5 text-neutral-500 cursor-not-allowed"
-                }
-              `}
-            >
-              {accepted ? "✓ Accepted" : "I understand & continue"}
-            </button>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
+              {required ? (
+                <button
+                  type="button"
+                  onClick={handleDecline}
+                  disabled={accepted}
+                  className="w-full shrink-0 rounded-lg px-3 py-2.5 text-xs text-neutral-300 transition-colors hover:bg-white/5 hover:text-neutral-100 disabled:opacity-50 sm:w-auto"
+                >
+                  Not now
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={handleAccept}
+                disabled={!canAccept}
+                className={`
+                  w-full shrink-0 rounded-lg px-5 py-2.5 text-xs font-medium transition-all duration-200 sm:w-auto
+                  ${
+                    accepted
+                      ? "bg-emerald-600 text-white cursor-default"
+                      : canAccept
+                        ? "bg-white text-neutral-900 hover:opacity-90 cursor-pointer"
+                        : "bg-white/5 text-neutral-500 cursor-not-allowed"
+                  }
+                `}
+              >
+                {accepted ? "✓ Accepted" : "I understand & continue"}
+              </button>
+            </div>
           </div>
         </div>
 

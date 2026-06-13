@@ -1,4 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
+import { isTauri } from "@tauri-apps/api/core";
+import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { supabaseStorage } from "./supabaseStorage";
 
 const url = import.meta.env.VITE_SUPABASE_URL;
@@ -10,11 +12,18 @@ if (!url || !anonKey) {
   );
 }
 
+const supabaseFetch: typeof globalThis.fetch = isTauri()
+  ? tauriFetch
+  : globalThis.fetch.bind(globalThis);
+
 export const supabase = createClient(url, anonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
     storage: supabaseStorage,
+  },
+  global: {
+    fetch: supabaseFetch,
   },
 });

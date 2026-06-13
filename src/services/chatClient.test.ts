@@ -513,3 +513,60 @@ describe("resolveApiBaseUrl", () => {
     }
   });
 });
+
+describe("sendChatMessage timeout", () => {
+  let getSession: ReturnType<typeof vi.fn>;
+  let refreshSession: ReturnType<typeof vi.fn>;
+  let signOut: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    getSession = vi.fn();
+    refreshSession = vi.fn();
+    signOut = vi.fn();
+  });
+
+  it("surfaces a friendly 'unavailable' error when the fetch rejects with an AbortError", async () => {
+    getSession.mockResolvedValue({ data: { session: sessionA }, error: null });
+
+    const httpFetch = vi.fn().mockImplementation(async (): Promise<never> => {
+      const err = new Error("aborted") as Error & { name: string };
+      err.name = "AbortError";
+      throw err;
+    });
+
+    await expect(
+      sendChatMessage(
+        { message: "hi", intent: "general", history: [] },
+        {
+          apiBaseUrl: "https://chat.example.com",
+          fetchImpl: makeHttp(httpFetch),
+          getSession,
+          refreshSession,
+          signOut,
+        },
+      ),
+    ).rejects.toMatchObject({
+      kind: "unavailable",
+      diagnostics: { reason: "timeout" },
+    });
+  });
+
+  it("passes the AbortSignal into the http fetch", async () => {
+    getSession.mockResolvedValue({ data: { session: sessionA }, error: null });
+    const httpFetch = vi.fn().mockImplementation(ok({ reply: "ok" }));
+
+    await sendChatMessage(
+      { message: "hi", intent: "general", history: [] },
+      {
+        apiBaseUrl: "https://chat.example.com",
+        fetchImpl: makeHttp(httpFetch),
+        getSession,
+        refreshSession,
+        signOut,
+      },
+    );
+
+    const [, init] = httpFetch.mock.calls[0];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+});

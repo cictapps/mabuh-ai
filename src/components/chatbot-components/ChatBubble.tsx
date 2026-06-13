@@ -200,8 +200,8 @@ export const ChatBubble = ({
   return (
     <motion.div
       layout
-      className={`flex gap-4 ${
-        isAi ? "max-w-2xl" : "justify-end ml-auto max-w-2xl"
+      className={`flex w-full gap-3 sm:gap-4 ${
+        isAi ? "max-w-2xl" : "justify-end ml-auto max-w-[85%] sm:max-w-2xl"
       }`}
     >
       {/* AI avatar */}
@@ -230,7 +230,7 @@ export const ChatBubble = ({
 
       {/* Message bubble */}
       <div
-        className={`p-4 rounded-2xl text-sm transition-all ${
+        className={`min-w-0 p-3.5 rounded-2xl text-sm transition-all sm:p-4 ${
           isTyping && isMaskMode
             ? "bg-[#0b0f14] border border-white/10"
             : isAi

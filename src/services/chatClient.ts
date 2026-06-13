@@ -28,6 +28,13 @@ export type { HttpFetch } from "@/lib/http";
  */
 
 const DEFAULT_API_BASE_URL = "https://mabuh-ai-server-29h8.onrender.com";
+/**
+ * Maximum time we will wait for a chat response before giving up and
+ * surfacing a friendly error. The Render free-tier cold start can take
+ * 30-60s on first hit; 60s gives the server one full cold-start window
+ * before we cancel and let the user retry.
+ */
+const CHAT_REQUEST_TIMEOUT_MS = 60_000;
 
 export type ChatIntent =
   | "general"
@@ -205,12 +212,33 @@ export async function sendChatMessage(
 
   const url = `${apiBaseUrl}/chat`;
   const requestStartedAt = Date.now();
-  const firstAttempt = await performRequest(
-    httpFetch,
-    url,
-    body,
-    session1.data.session.access_token,
-  );
+  const firstSignal = createTimeoutSignal(CHAT_REQUEST_TIMEOUT_MS);
+  let firstAttempt: AttemptResult;
+  try {
+    firstAttempt = await performRequest(
+      httpFetch,
+      url,
+      body,
+      session1.data.session.access_token,
+      firstSignal.signal,
+    );
+  } catch (err) {
+    if (isAbortError(err)) {
+      throw new ChatError({
+        kind: "unavailable",
+        message:
+          "The chat service is taking too long to respond. Please try again in a moment.",
+        diagnostics: {
+          reason: "timeout",
+          timeoutMs: CHAT_REQUEST_TIMEOUT_MS,
+          url,
+        },
+      });
+    }
+    throw err;
+  } finally {
+    firstSignal.clear();
+  }
 
   if (firstAttempt.status !== 401) {
     return handleResponse(firstAttempt, requestStartedAt);
@@ -231,12 +259,36 @@ export async function sendChatMessage(
   }
 
   const retryStartedAt = Date.now();
-  const secondAttempt = await performRequest(
-    httpFetch,
-    url,
-    body,
-    refresh.data.session.access_token,
-  );
+  const retrySignal = createTimeoutSignal(CHAT_REQUEST_TIMEOUT_MS);
+  let secondAttempt: AttemptResult;
+  try {
+    secondAttempt = await performRequest(
+      httpFetch,
+      url,
+      body,
+      refresh.data.session.access_token,
+      retrySignal.signal,
+    );
+  } catch (err) {
+    if (isAbortError(err)) {
+      throw new ChatError({
+        kind: "unavailable",
+        message:
+          "The chat service is taking too long to respond. Please try again in a moment.",
+        status: 401,
+        requestId: firstAttempt.requestId,
+        diagnostics: {
+          reason: "timeout",
+          retried: true,
+          timeoutMs: CHAT_REQUEST_TIMEOUT_MS,
+          url,
+        },
+      });
+    }
+    throw err;
+  } finally {
+    retrySignal.clear();
+  }
 
   if (secondAttempt.status === 401) {
     await signOut().catch(() => undefined);
@@ -253,6 +305,28 @@ export async function sendChatMessage(
   return handleResponse(secondAttempt, retryStartedAt);
 }
 
+interface TimeoutHandle {
+  signal: AbortSignal;
+  clear: () => void;
+}
+
+function createTimeoutSignal(ms: number): TimeoutHandle {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return {
+    signal: controller.signal,
+    clear: () => clearTimeout(timer),
+  };
+}
+
+function isAbortError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  if ((err as { name?: unknown }).name === "AbortError") return true;
+  if ((err as { code?: unknown }).code === 20) return true; // ABORT_ERR
+  const message = (err as { message?: unknown }).message;
+  return typeof message === "string" && /abort/i.test(message);
+}
+
 interface AttemptResult {
   status: number;
   statusText: string;
@@ -265,6 +339,7 @@ async function performRequest(
   url: string,
   body: string,
   accessToken: string,
+  signal: AbortSignal,
 ): Promise<AttemptResult> {
   let res;
   try {
@@ -275,8 +350,15 @@ async function performRequest(
         Authorization: `Bearer ${accessToken}`,
       },
       body,
+      signal,
     });
   } catch (e) {
+    if (isAbortError(e)) {
+      // Re-throw as a plain Error so the outer catch can detect it.
+      const aborted = new Error("Request aborted due to timeout");
+      aborted.name = "AbortError";
+      throw aborted;
+    }
     const message = e instanceof Error ? e.message : "Network request failed";
     throw new ChatError({
       kind: "network",

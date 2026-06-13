@@ -9,6 +9,9 @@
 --   supabase/migrations/0003_auth_lifecycle.sql
 --   supabase/migrations/0004_mood_entries.sql
 --   supabase/migrations/0005_journal_entries.sql
+--   supabase/migrations/0006_journey_progress.sql
+--   supabase/migrations/0007_journey_garden_mode.sql
+--   supabase/migrations/0008_delete_user_data.sql
 --
 -- For a fresh database, the recommended path is the Supabase CLI:
 --
@@ -31,7 +34,10 @@
 --     ('0002', 'profiles'),
 --     ('0003', 'auth_lifecycle'),
 --     ('0004', 'mood_entries'),
---     ('0005', 'journal_entries');
+--     ('0005', 'journal_entries'),
+--     ('0006', 'journey_progress'),
+--     ('0007', 'journey_garden_mode'),
+--     ('0008', 'delete_user_data');
 --
 -- This file is intentionally a no-op so re-running it does nothing harmful.
 select 1;

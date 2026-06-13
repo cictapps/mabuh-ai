@@ -9,19 +9,7 @@
     />
     <meta name="theme-color" content="#121416" />
     <meta name="color-scheme" content="dark" />
-    <!--
-      Chrome / Android WebView defaults to Referrer-Policy
-      "strict-origin-when-cross-origin", which strips the path off any
-      cross-origin request. That can break the Supabase auth callback flow
-      (sign-in / password reset) and triggers a "strict-origin-when-cross-origin
-      on local testing" hint in the console.
-
-      "no-referrer-when-downgrade" sends the full URL on same-origin and
-      HTTPS->HTTPS requests, and nothing on HTTPS->HTTP downgrades — which
-      is what we want for Supabase (HTTPS) from the Tauri WebView (HTTPS in
-      release, HTTP on localhost in dev).
-    -->
-    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>Mabuh-ai</title>
     <style>
       /* Critical splash styles prevent the 1024px SVG from flashing at its

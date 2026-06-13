@@ -30,36 +30,84 @@ const NATIVE_NOTIFICATION_IDS = Array.from(
 
 const REMINDER_MESSAGES: readonly ReminderMessage[] = [
   {
-    title: "A gentle check-in",
-    body: "How are you feeling right now? A small honest check-in is enough.",
+    title: "How is your heart right now?",
+    body: "Pause for a second. You don't have to name it perfectly — just notice how today is sitting with you.",
   },
   {
-    title: "A note for you",
-    body: "You do not have to finish everything today. One steady step still counts.",
+    title: "Checking in on you",
+    body: "Hi. Before you go back to the next thing, how are you, really? A small honest answer is enough.",
   },
   {
-    title: "Pause for a moment",
-    body: "Unclench your jaw, lower your shoulders, and take one slow breath.",
+    title: "A quiet check-in",
+    body: "Take a breath in. And out. Now — what does your body need right now? A glass of water, a stretch, a pause?",
   },
   {
-    title: "How is your day going?",
-    body: "Take a quiet minute to notice what has felt heavy and what has helped.",
+    title: "How has today been, gently?",
+    body: "If you have a minute, notice one thing that felt okay today, and one thing that felt heavy. Both are allowed.",
+  },
+  {
+    title: "A soft hello",
+    body: "Hey. Just a small reminder that you're doing more than you think. What's one kind thing you can do for yourself tonight?",
+  },
+  {
+    title: "Pause and breathe",
+    body: "Unclench your jaw, drop your shoulders, and let your eyes rest for a moment. You can come back after.",
+  },
+  {
+    title: "You don't have to finish today",
+    body: "Whatever is still on your list can wait. One steady step is enough. You've already carried a lot.",
+  },
+  {
+    title: "How are you sleeping?",
+    body: "Honestly — are you resting enough? If not, that's not a failure. It's a signal. What would help tonight?",
+  },
+  {
+    title: "A small kind question",
+    body: "When did you last eat something warm, drink some water, or step outside for fresh air? No pressure — just noticing.",
+  },
+  {
+    title: "I'm here if you need me",
+    body: "Mabuh-ai is a quiet seat whenever you want it. No agenda, no streak — just a check-in when you're ready.",
+  },
+  {
+    title: "One thing at a time",
+    body: "Pick the smallest next step. Not the perfect one. The kind one. You can do small beautifully.",
+  },
+  {
+    title: "Your worth is not your output",
+    body: "You are more than grades, deadlines, and how productive today felt. That's worth saying out loud.",
   },
   {
     title: "A little encouragement",
-    body: "Your worth is not measured by grades, deadlines, or how productive today felt.",
+    body: "Whatever today has asked of you, you have already handled a lot of it. Be as gentle with yourself as you would a friend.",
   },
   {
     title: "Make room for yourself",
-    body: "Water, food, rest, or a message to someone you trust can be a good next step.",
+    body: "Water, food, rest, or a message to someone you trust — any of those counts as a real next step.",
   },
   {
-    title: "Checking in with you",
-    body: "Whatever today has been like, you can meet yourself with patience.",
+    title: "You are allowed to slow down",
+    body: "Especially when school feels loud. Rest is part of moving forward, not a break from it.",
   },
   {
-    title: "A warm reminder",
-    body: "Rest is part of moving forward, especially when school feels demanding.",
+    title: "Hello, it's me again",
+    body: "Just a small nudge. How is your mood right now — tired, okay, hopeful, somewhere in between?",
+  },
+  {
+    title: "Notice one good thing",
+    body: "Before the day ends, try to find one small thing that wasn't terrible. A sip of coffee, a song, a quiet corner.",
+  },
+  {
+    title: "Be kind to tired you",
+    body: "If you're running on empty, the next right thing might be rest, not productivity. Tomorrow you will thank you.",
+  },
+  {
+    title: "What's weighing on you?",
+    body: "If something has been sitting on your chest, even naming it to yourself can make it a little lighter.",
+  },
+  {
+    title: "A gentle nudge",
+    body: "No pressure, no score — just a soft tap on the shoulder from Mabuh-ai. How are you, really?",
   },
 ];
 

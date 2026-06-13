@@ -58,6 +58,7 @@ interface SettingsScreenProps {
   onSetReminder: (next: Partial<ReminderPreferences>) => void;
   onExportData: () => void;
   onClearAllLocalData: () => void;
+  onDeleteAllData: () => Promise<void>;
   onReplayOnboarding?: () => void;
   onBack: () => void;
 }
@@ -256,6 +257,7 @@ function ConfirmDialog({
   confirmLabel,
   destructive,
   busy,
+  error,
   onConfirm,
   onCancel,
 }: {
@@ -265,6 +267,7 @@ function ConfirmDialog({
   confirmLabel: string;
   destructive?: boolean;
   busy?: boolean;
+  error?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -355,6 +358,7 @@ function ConfirmDialog({
         >
           {description}
         </p>
+        {error && <StatusLine kind="error" message={error} />}
         <div
           style={{ display: "flex", gap: 10, marginTop: 8, justifyContent: "flex-end" }}
         >
@@ -393,6 +397,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onSetReminder,
   onExportData,
   onClearAllLocalData,
+  onDeleteAllData,
   onReplayOnboarding,
   onBack,
 }) => {
@@ -424,6 +429,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const [confirmWipeData, setConfirmWipeData] = useState(false);
+  const [wipeBusy, setWipeBusy] = useState(false);
+  const [wipeError, setWipeError] = useState<string | null>(null);
 
   const [contributorsOpen, setContributorsOpen] = useState(false);
 
@@ -531,6 +540,19 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : "Could not delete account.");
       setDeleteBusy(false);
+    }
+  }
+
+  async function handleWipeData() {
+    setWipeBusy(true);
+    setWipeError(null);
+    try {
+      await onDeleteAllData();
+      setConfirmWipeData(false);
+    } catch (err) {
+      setWipeError(err instanceof Error ? err.message : "Could not delete your data.");
+    } finally {
+      setWipeBusy(false);
     }
   }
 
@@ -917,6 +939,49 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             Export my data
           </Button>
         </div>
+
+        <div
+          style={{
+            height: 1,
+            background: "rgba(188,194,255,0.08)",
+            margin: "4px 0",
+          }}
+        />
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <p
+            style={{
+              fontSize: 12,
+              color: "rgba(255,185,84,0.85)",
+              lineHeight: 1.5,
+              margin: 0,
+            }}
+          >
+            Delete all my data — wipes every check-in, journal entry, and journey progress
+            from Mabuh-ai. Your account stays, so you can start fresh whenever you're
+            ready.
+          </p>
+          <div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setWipeError(null);
+                setConfirmWipeData(true);
+              }}
+              style={{
+                borderColor: "rgba(255,185,84,0.4)",
+                color: "rgba(255,217,154,0.95)",
+                background: "rgba(255,185,84,0.08)",
+              }}
+            >
+              <Trash2 size={14} />
+              Delete all my data
+            </Button>
+          </div>
+          {wipeError && <StatusLine kind="error" message={wipeError} />}
+        </div>
       </Section>
 
       <Section title="About" icon={<Info size={16} />}>
@@ -1202,6 +1267,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         confirmLabel="Delete forever"
         destructive
         busy={deleteBusy}
+        error={deleteError}
         onCancel={() => {
           if (deleteBusy) return;
           setConfirmDelete(false);
@@ -1210,10 +1276,23 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         onConfirm={() => void handleDeleteAccount()}
       />
 
-      <ContributorsDialog
-        open={contributorsOpen}
-        onOpenChange={setContributorsOpen}
+      <ConfirmDialog
+        open={confirmWipeData}
+        title="Delete all your data?"
+        description="This removes every check-in, journal entry, and journey progress tied to your account. Your Mabuh-ai account stays, and you can keep using the app from a clean slate. This cannot be undone."
+        confirmLabel="Delete everything"
+        destructive
+        busy={wipeBusy}
+        error={wipeError}
+        onCancel={() => {
+          if (wipeBusy) return;
+          setConfirmWipeData(false);
+          setWipeError(null);
+        }}
+        onConfirm={() => void handleWipeData()}
       />
+
+      <ContributorsDialog open={contributorsOpen} onOpenChange={setContributorsOpen} />
     </div>
   );
 };
@@ -1356,9 +1435,9 @@ function ContributorsDialog({
           </div>
           <DialogTitle>Contributors</DialogTitle>
           <DialogDescription>
-            Mabuh-ai was developed by BSIS students of WVSU — CICT as a project for
-            their Mobile App Development class. With guidance from their subject
-            teacher, each group shaped a part of the app you use today.
+            Mabuh-ai was developed by BSIS students of WVSU — CICT as a project for their
+            Mobile App Development class. With guidance from their subject teacher, each
+            group shaped a part of the app you use today.
           </DialogDescription>
         </DialogHeader>
 
@@ -1371,7 +1450,10 @@ function ContributorsDialog({
           }}
         >
           {CONTRIBUTOR_GROUPS.map((group) => (
-            <section key={group.title} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <section
+              key={group.title}
+              style={{ display: "flex", flexDirection: "column", gap: 6 }}
+            >
               <h4
                 className="font-serif"
                 style={{

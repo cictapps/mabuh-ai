@@ -91,7 +91,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
     <div
       className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
       style={{
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)",
+        paddingTop: "calc(env(safe-area-inset-top, 0px) + 4px)",
         minHeight: "100%",
       }}
     >
@@ -344,41 +344,50 @@ export const SupportHub: React.FC<SupportHubProps> = ({
               >
                 <Phone size={14} color="rgba(255,170,170,0.85)" />
                 <span className="min-w-0 flex-1">
-                  <span className="block font-semibold" style={{ color: "#f7e4e4" }}>
+                  <span
+                    className="block font-semibold"
+                    style={{ color: "#f7e4e4", paddingRight: 8 }}
+                  >
                     {h.label}
-                    {h.unverified && (
-                      <span
-                        style={{
-                          marginLeft: 6,
-                          fontSize: 9,
-                          fontWeight: 500,
-                          letterSpacing: "0.12em",
-                          textTransform: "uppercase",
-                          color: "rgba(255,200,200,0.7)",
-                        }}
-                      >
-                        unverified
-                      </span>
-                    )}
                   </span>
                   <span
                     className="mt-0.5 block text-[11px]"
-                    style={{ color: "rgba(255,200,200,0.65)" }}
+                    style={{ color: "rgba(255,200,200,0.65)", paddingRight: 8 }}
                   >
                     {h.detail}
                   </span>
                 </span>
                 <span
-                  style={{
-                    fontFamily: "Plus Jakarta Sans, sans-serif",
-                    fontVariantNumeric: "tabular-nums",
-                    fontSize: 14,
-                    fontWeight: 700,
-                    letterSpacing: "0.4px",
-                    color: "rgba(255,210,210,0.98)",
-                  }}
+                  className="flex shrink-0 flex-col items-end gap-1"
+                  style={{ minWidth: "fit-content" }}
                 >
-                  {h.number}
+                  <span
+                    style={{
+                      fontFamily: "Plus Jakarta Sans, sans-serif",
+                      fontVariantNumeric: "tabular-nums",
+                      fontSize: 14,
+                      fontWeight: 700,
+                      letterSpacing: "0.4px",
+                      color: "rgba(255,210,210,0.98)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {h.number}
+                  </span>
+                  {h.unverified && (
+                    <span
+                      style={{
+                        fontSize: 9,
+                        fontWeight: 500,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,200,200,0.7)",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      unverified
+                    </span>
+                  )}
                 </span>
               </a>
             ))}

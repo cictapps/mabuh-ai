@@ -53,4 +53,22 @@ describe("reminderMessageForDate", () => {
 
     expect(tomorrow).not.toEqual(today);
   });
+
+  it("does not use the legacy 'A note for you' title", () => {
+    for (let day = 0; day < 30; day += 1) {
+      const date = at(2025, 1, 10 + day);
+      expect(reminderMessageForDate(date).title).not.toBe("A note for you");
+    }
+  });
+
+  it("always returns a non-empty, warm body and a meaningful title", () => {
+    for (let day = 0; day < 20; day += 1) {
+      const date = at(2025, 1, 10 + day);
+      const msg = reminderMessageForDate(date);
+      expect(msg.title.length).toBeGreaterThan(3);
+      expect(msg.body.length).toBeGreaterThan(15);
+      // The pool is warm/student-centered, not clinical.
+      expect(msg.body).not.toMatch(/\b(appointment|medication|dosage)\b/i);
+    }
+  });
 });

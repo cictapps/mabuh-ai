@@ -53,6 +53,7 @@ export function SavedAffirmationDialog({
         style={{
           borderColor: `${moodColor}33`,
           boxShadow: `0 32px 80px -32px ${moodColor}55`,
+          margin: 16,
         }}
       >
         <div

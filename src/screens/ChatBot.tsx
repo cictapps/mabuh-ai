@@ -519,6 +519,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const { profile } = useAuth();
+  const hasAcceptedPolicyRef = useRef(false);
   const {
     history: moodHistory,
     journalEntries,
@@ -685,6 +686,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     const acceptedVersion = localStorage.getItem("privacy_policy_version");
 
     if (accepted === "true" && acceptedVersion === "2.2.0") {
+      hasAcceptedPolicyRef.current = true;
       setHasAcceptedPolicy(true);
       return;
     }
@@ -924,7 +926,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   return (
     <div className={shellClasses}>
       <header
-        className={`sticky top-0 z-10 flex items-center justify-between gap-3 border-b px-4 py-3 backdrop-blur-md sm:px-6 transition-all duration-300 ${
+        className={`sticky top-0 z-10 flex items-center justify-between gap-2 border-b px-3 py-2.5 backdrop-blur-md sm:gap-3 sm:px-6 sm:py-3 transition-all duration-300 ${
           isMaskMode ? "border-white/10 bg-black/70" : "border-border/60 bg-background/80"
         }`}
         style={{
@@ -955,20 +957,18 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          {hasAcceptedPolicy && (
-            <button
-              type="button"
-              onClick={() => setShowPrivacyPolicy(true)}
-              aria-label="Privacy and safety"
-              className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 ${
-                isMaskMode
-                  ? "border-white/15 bg-white/5 text-white hover:bg-white/10"
-                  : "border-border bg-surface-low text-foreground hover:border-primary/40 hover:text-primary"
-              }`}
-            >
-              <Shield size={15} />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setShowPrivacyPolicy(true)}
+            aria-label="Privacy and safety"
+            className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 ${
+              isMaskMode
+                ? "border-white/15 bg-white/5 text-white hover:bg-white/10"
+                : "border-border bg-surface-low text-foreground hover:border-primary/40 hover:text-primary"
+            }`}
+          >
+            <Shield size={15} />
+          </button>
 
           {IS_DEV && (
             <>
@@ -1080,7 +1080,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
             onClick={() => setIsMaskMode((prev) => !prev)}
             aria-pressed={isMaskMode}
             aria-label="Toggle mask mode"
-            className={`group inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 transition-all duration-300 ${
+            className={`group inline-flex shrink-0 items-center gap-2 rounded-full border px-2 py-1.5 transition-all duration-300 sm:px-2.5 ${
               isMaskMode
                 ? "border-white/15 bg-white/5 text-white"
                 : "border-border bg-surface-low text-foreground hover:border-primary/40"
@@ -1093,7 +1093,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
             >
               {isMaskMode ? <Ghost size={14} /> : <Smile size={14} />}
             </span>
-            <span className="pr-1 text-xs font-semibold tracking-wide">
+            <span className="hidden pr-1 text-xs font-semibold tracking-wide sm:inline">
               {isMaskMode ? "Mask on" : "Mask off"}
             </span>
             <span
@@ -1177,7 +1177,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="ml-14 flex flex-col gap-2"
+                  className="ml-0 flex flex-col gap-2 sm:ml-14"
                 >
                   <p className="ml-1 text-left text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                     {isMaskMode ? "Safe Actions" : "Nurturing Steps"}
@@ -1245,7 +1245,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       </main>
 
       <footer
-        className={`px-3 pt-2 transition-all duration-500 sm:px-6 ${
+        className={`px-2 pt-2 transition-all duration-500 sm:px-6 ${
           isMaskMode ? "bg-black/55 backdrop-blur-2xl" : "bg-card/70 backdrop-blur-2xl"
         }`}
         style={{
@@ -1337,14 +1337,18 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       <PrivacyPolicy
         isOpen={showPrivacyPolicy}
         onClose={() => {
-          if (!hasAcceptedPolicy) {
+          if (!hasAcceptedPolicyRef.current) {
             setShowPrivacyPolicy(true);
             return;
           }
           setShowPrivacyPolicy(false);
         }}
         onAccept={() => {
+          hasAcceptedPolicyRef.current = true;
           setHasAcceptedPolicy(true);
+          setShowPrivacyPolicy(false);
+        }}
+        onDecline={() => {
           setShowPrivacyPolicy(false);
         }}
         required={!hasAcceptedPolicy}

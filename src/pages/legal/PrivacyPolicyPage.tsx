@@ -71,6 +71,7 @@ const SECTIONS: Section[] = [
       "Access: ask for a copy of the data we hold about you.",
       "Correct: update your display name and account email at any time.",
       "Delete: remove your account and all associated data.",
+      "Wipe: from Settings → Your data → Delete all my data you can clear every check-in, journal entry, and journey progress while keeping your account, so you can start fresh without losing access.",
       "Export: download your check-ins and journal as a JSON file from Settings → Privacy → Export my data.",
     ],
   },
@@ -99,7 +100,7 @@ const SECTIONS: Section[] = [
     id: "contact",
     title: "Contact",
     body: [
-      "Questions, data requests, or concerns: please reach out to the Mabuh-ai student team through the support channels listed in the app. We are a small team and read every message.",
+      "Questions, data requests, or concerns: please email the Mabuh-ai student team at cictapps@wvsu.edu.ph. We are a small team and read every message.",
     ],
   },
 ];

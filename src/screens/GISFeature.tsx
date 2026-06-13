@@ -225,6 +225,37 @@ function estimateTime(km: number): string {
   return `~${driveMin} min drive`;
 }
 
+function createProviderPinIcon(leaflet: typeof L, color: string, letter: string) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+      <path
+        d="M18 1.5C9.16 1.5 2 8.66 2 17.5c0 11.45 13.34 23.88 14.86 25.26a1.7 1.7 0 0 0 2.28 0C20.66 41.38 34 28.95 34 17.5 34 8.66 26.84 1.5 18 1.5Z"
+        fill="${color}"
+        stroke="#ffffff"
+        stroke-opacity="0.9"
+        stroke-width="2"
+      />
+      <circle cx="18" cy="17.5" r="9.5" fill="#ffffff" fill-opacity="0.2" />
+      <text
+        x="18"
+        y="21.5"
+        text-anchor="middle"
+        font-family="Arial, sans-serif"
+        font-size="12"
+        font-weight="700"
+        fill="#121416"
+      >${letter}</text>
+    </svg>
+  `;
+
+  return leaflet.icon({
+    iconUrl: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    iconSize: [36, 44],
+    iconAnchor: [18, 42],
+    popupAnchor: [0, -40],
+  });
+}
+
 // ── Live Map ───────────────────────────────────────────────────────────────────
 function LiveMap({
   providers,
@@ -355,13 +386,7 @@ function LiveMap({
                 : p.type === "Hotline"
                   ? "S"
                   : "•";
-        const icon = L.divIcon({
-          html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#121416;box-shadow:0 2px 10px rgba(0,0,0,0.6);font-family:'Plus Jakarta Sans', system-ui, sans-serif;">${letter}</div>`,
-          className: "",
-          iconSize: [28, 28],
-          iconAnchor: [14, 14],
-          popupAnchor: [0, -16],
-        });
+        const icon = createProviderPinIcon(L, color, letter);
         const marker = L.marker([p.lat!, p.lng!], { icon }).addTo(map);
         marker.bindPopup(
           `
@@ -2342,7 +2367,6 @@ export function GISFeature() {
                 </span>
               </Button>
             )}
-
           </div>
         </header>
       </div>
@@ -2504,7 +2528,7 @@ export function GISFeature() {
                 style={{
                   position: "absolute",
                   left: 16,
-                  bottom: `calc(${SHEET_HEIGHTS[sheet]} + 12px)`,
+                  bottom: `calc(${SHEET_HEIGHTS[sheet]} + var(--find-help-bottom-clearance, 0px) + 12px)`,
                   zIndex: 1100,
                   display: "inline-flex",
                   alignItems: "center",
@@ -2571,7 +2595,7 @@ export function GISFeature() {
                 style={{
                   position: "absolute",
                   right: 16,
-                  bottom: `calc(${SHEET_HEIGHTS[sheet]} + 12px)`,
+                  bottom: `calc(${SHEET_HEIGHTS[sheet]} + var(--find-help-bottom-clearance, 0px) + 12px)`,
                   transform: "none",
                   zIndex: 1100,
                   pointerEvents: "auto",
@@ -2665,7 +2689,7 @@ export function GISFeature() {
               position: "absolute",
               left: 0,
               right: 0,
-              bottom: 0,
+              bottom: "var(--find-help-bottom-clearance, 0px)",
               zIndex: 1100,
               pointerEvents: "auto",
               display: "flex",
@@ -2773,6 +2797,7 @@ export function GISFeature() {
                 minHeight: 0,
                 overflowY: sheet === "expanded" ? "auto" : "hidden",
                 WebkitOverflowScrolling: "touch",
+                paddingBottom: "max(env(safe-area-inset-bottom, 0px), 24px)",
               }}
             >
               <RecentlyViewed

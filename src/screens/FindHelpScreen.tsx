@@ -4,7 +4,7 @@ import { GISFeature } from "./GISFeature";
 export const FindHelpScreen: React.FC = () => {
   return (
     <div
-      className="screen-enter"
+      className="find-help-screen screen-enter"
       style={{
         height: "100dvh",
         maxWidth: 430,

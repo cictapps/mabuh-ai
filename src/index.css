@@ -639,6 +639,18 @@ input[type="password"]::-ms-clear {
   animation: screenEnter 0.4s ease-out both;
 }
 
+.find-help-screen {
+  --find-help-bottom-clearance: env(safe-area-inset-bottom, 0px);
+}
+
+@media (pointer: coarse) {
+  .find-help-screen {
+    /* Some Android WebViews report a zero safe-area inset while the
+       three-button navigation bar still overlays the viewport. */
+    --find-help-bottom-clearance: max(env(safe-area-inset-bottom, 0px), 24px);
+  }
+}
+
 .bottom-nav-shell {
   position: relative;
   flex-shrink: 0;

@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import {
-  AlertTriangle,
   Cpu as CpuIcon,
   Download,
+  Info,
   KeyRound,
   LogOut,
   Mail,
@@ -14,18 +14,47 @@ import {
   Save,
   Trash2,
   User as UserIcon,
+  Users,
 } from "lucide-react";
+
+function GithubIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"
+      />
+    </svg>
+  );
+}
 import { useAuth, useAuthActions } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase";
 import type { ReminderPreferences } from "../hooks/useMoodStore";
 import { TopBarBackButton } from "../components/shared/TopBarBackButton";
 import { AiConsentSettings } from "../components/shared/AiConsentSettings";
-import { getReminderPermission } from "../lib/reminders";
+import type { ReminderStatus } from "../lib/reminders";
+import { openExternal } from "../lib/openExternal";
 
 interface SettingsScreenProps {
   reminder: ReminderPreferences;
+  reminderStatus: ReminderStatus | null;
   onSetReminder: (next: Partial<ReminderPreferences>) => void;
   onExportData: () => void;
   onClearAllLocalData: () => void;
@@ -360,6 +389,7 @@ function formatHour(hour: number, minute: number) {
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   reminder,
+  reminderStatus,
   onSetReminder,
   onExportData,
   onClearAllLocalData,
@@ -394,6 +424,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const [contributorsOpen, setContributorsOpen] = useState(false);
 
   const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -674,8 +706,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         }
       >
         <ToggleRow
-          label="Gentle check-in nudge"
-          description="We'll quietly remind you once a day. The reminder stays on this device only."
+          label="Daily care notifications"
+          description="A gentle check-in or warm note once a day. Everything stays on this device."
           checked={reminder.enabled}
           onChange={(next) => onSetReminder({ enabled: next })}
         />
@@ -685,7 +717,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             style={{
               fontSize: 11,
               color:
-                getReminderPermission() === "granted"
+                reminderStatus?.permission === "granted"
                   ? "rgba(109,186,132,0.9)"
                   : "rgba(255,185,84,0.9)",
               lineHeight: 1.5,
@@ -693,14 +725,19 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               marginTop: -4,
             }}
           >
-            {getReminderPermission() === "granted" &&
-              `Reminders will fire at ${formatHour(reminder.hour, reminder.minute)} daily in this browser. Allow notifications if you don't see one.`}
-            {getReminderPermission() === "default" &&
+            {!reminderStatus && "Preparing your daily notifications…"}
+            {reminderStatus?.permission === "granted" &&
+              reminderStatus.delivery === "native" &&
+              `Mabuh-ai will check in at ${formatHour(reminder.hour, reminder.minute)}, even when the app is closed.`}
+            {reminderStatus?.permission === "granted" &&
+              reminderStatus.delivery === "browser" &&
+              `Mabuh-ai will check in at ${formatHour(reminder.hour, reminder.minute)} while this browser is open.`}
+            {reminderStatus?.permission === "default" &&
               "Allow notifications when prompted to start receiving reminders."}
-            {getReminderPermission() === "denied" &&
-              "Notifications are blocked in this browser. Update site permissions to receive reminders."}
-            {getReminderPermission() === "unsupported" &&
-              "This browser does not support notifications. Reminders are off until you switch to a supported browser."}
+            {reminderStatus?.permission === "denied" &&
+              "Notifications are blocked. Allow Mabuh-ai notifications in your device or browser settings."}
+            {reminderStatus?.permission === "unsupported" &&
+              "Notifications are not supported here. You can keep using the rest of Mabuh-ai normally."}
           </p>
         )}
         <div
@@ -846,7 +883,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           }}
         >
           Reopen the first-time introduction whenever you'd like a refresher on what
-          MabuhAi can do. Your data and settings stay exactly as they are.
+          Mabuh-ai can do. Your data and settings stay exactly as they are.
         </p>
         <div>
           <Button
@@ -882,7 +919,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       </Section>
 
-      <Section title="About" icon={<AlertTriangle size={16} />}>
+      <Section title="About" icon={<Info size={16} />}>
         <div
           style={{
             display: "grid",
@@ -934,6 +971,28 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         >
           Mabuh-ai is a quiet space for reflection, made with care for students.
         </p>
+        <div style={{ display: "flex", gap: 8, paddingTop: 2 }}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setContributorsOpen(true)}
+            style={{ flex: 1 }}
+          >
+            <Users size={14} />
+            Contributors
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void openExternal("https://github.com/cictapps/mabuh-ai")}
+            style={{ flex: 1 }}
+          >
+            <GithubIcon size={14} />
+            GitHub
+          </Button>
+        </div>
         <p
           style={{
             fontSize: 11,
@@ -1150,6 +1209,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         }}
         onConfirm={() => void handleDeleteAccount()}
       />
+
+      <ContributorsDialog
+        open={contributorsOpen}
+        onOpenChange={setContributorsOpen}
+      />
     </div>
   );
 };
@@ -1190,6 +1254,218 @@ function InfoTile({ label, value }: { label: string; value: string }) {
       </div>
       <div style={{ fontSize: 13, color: "#e8eaf0", fontWeight: 500 }}>{value}</div>
     </div>
+  );
+}
+
+const CONTRIBUTOR_GROUPS: { title: string; members: string[] }[] = [
+  {
+    title: "Group 1: Authentication & User Access",
+    members: [
+      "Agustin, James A. Juanillo",
+      "Luces, Francine G. Sioco",
+      "Polaron, Meryll K. Abanto",
+      "Siaton, Nash E. Ana",
+      "Ssirilan, Romyl P. Mosquera Irilan",
+    ],
+  },
+  {
+    title: "Group 2: AI Chat Support & Safety",
+    members: [
+      "Bengaora, Nicole K. Dividina",
+      "Catalino, Joel I.",
+      "Dagohoy, Cherry J. Valencia",
+      "Gain, Phil A. Na",
+      "Catolin, Diether J.",
+    ],
+  },
+  {
+    title: "Group 3: Mood Tracking & Insights",
+    members: [
+      "Bulotaolo, Ashley N. Balinton",
+      "Castor, Lorraine A. Nobleza",
+      "Lombendencio, Trisha M. Cabayao",
+      "Maulas, Frederic M. Manciba",
+      "Tabiolo, Gero A. Tacayon",
+    ],
+  },
+  {
+    title: "Group 4: Mask Off Mode",
+    members: [
+      "Abordo, Aya Y. Alegario",
+      "Buncag, Katrina A. Sanchez",
+      "Delizo, Chelsea C.",
+      "Guancia, Shenna J. Bonto",
+      "Sison, Denzel K. Continente",
+    ],
+  },
+  {
+    title: "Group 5: Self-Care, Tips, and Gamification",
+    members: [
+      "Beliran, Benedict E. Penpillo",
+      "Espinosa, Franz A. Labtic",
+      "Guarnes, Shaqkiell J. Gaitan",
+      "Sorbito, Alejandro M. Balleras",
+      "Beray, Ianna Y. Concepcion",
+    ],
+  },
+  {
+    title: "Group 6: GIS, Community, and Urgent Help",
+    members: [
+      "Anes, Anton G. Torre",
+      "Bustamante",
+      "Bustamante, Mhel B.",
+      "Polong, Michael A. Febrero",
+      "Sasi, Jay A. Ogabar",
+    ],
+  },
+  {
+    title: "Group 7: Branding, Promotion, and Presentation",
+    members: [
+      "Celeste, Skye D. Saladar",
+      "Jaen, Raven C. Balbalore",
+      "Sinfuego, Japhet R. Tabares",
+      "Tacsagon, King P. Tagal",
+      "Tuvilla, Ilych J. Anila",
+    ],
+  },
+];
+
+const SUBJECT_TEACHER = "Mark Joseph J. Solidarios";
+
+function ContributorsDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (next: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#d8d4eb",
+            }}
+          >
+            Built with care
+          </div>
+          <DialogTitle>Contributors</DialogTitle>
+          <DialogDescription>
+            Mabuh-ai was developed by BSIS students of WVSU — CICT as a project for
+            their Mobile App Development class. With guidance from their subject
+            teacher, each group shaped a part of the app you use today.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+            marginTop: 4,
+          }}
+        >
+          {CONTRIBUTOR_GROUPS.map((group) => (
+            <section key={group.title} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <h4
+                className="font-serif"
+                style={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: "#eef1f6",
+                  letterSpacing: "-0.01em",
+                  margin: 0,
+                }}
+              >
+                {group.title}
+              </h4>
+              <ul
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  margin: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                }}
+              >
+                {group.members.map((member) => (
+                  <li
+                    key={member}
+                    style={{
+                      fontSize: 13,
+                      color: "rgba(216,212,235,0.75)",
+                      lineHeight: 1.55,
+                    }}
+                  >
+                    {member}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+
+          <div
+            aria-hidden
+            style={{
+              height: 1,
+              background: "rgba(188,194,255,0.10)",
+              margin: "4px 0 2px",
+            }}
+          />
+
+          <section style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <h4
+              className="font-serif"
+              style={{
+                fontSize: 14,
+                fontWeight: 500,
+                color: "#eef1f6",
+                letterSpacing: "-0.01em",
+                margin: 0,
+              }}
+            >
+              Subject Teacher
+            </h4>
+            <p
+              style={{
+                fontSize: 13,
+                color: "rgba(216,212,235,0.75)",
+                lineHeight: 1.55,
+                margin: 0,
+              }}
+            >
+              {SUBJECT_TEACHER}
+            </p>
+          </section>
+        </div>
+
+        <div
+          style={{
+            marginTop: 6,
+            paddingTop: 12,
+            borderTop: "1px solid rgba(188,194,255,0.08)",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => void openExternal("https://github.com/cictapps/mabuh-ai")}
+          >
+            <GithubIcon size={14} />
+            View on GitHub
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

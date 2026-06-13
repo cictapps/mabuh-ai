@@ -72,6 +72,31 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
+// A monotonically-increasing "session token". It bumps on:
+//  - the first mount of the screen,
+//  - whenever the tab/window returns to the foreground
+//    (visibilitychange -> visible, focus, pageshow).
+// Each bump is a new "visit" so the subline can pick a fresh variant.
+function useSessionToken() {
+  const [token, setToken] = useState(0);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const bump = () => setToken((t) => t + 1);
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") bump();
+    };
+    window.addEventListener("focus", bump);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pageshow", bump);
+    return () => {
+      window.removeEventListener("focus", bump);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pageshow", bump);
+    };
+  }, []);
+  return token;
+}
+
 function hexToRgba(hex: string, alpha: number) {
   const cleaned = hex.replace("#", "");
   const bigint = parseInt(
@@ -97,20 +122,99 @@ function timeBucket(hour: number): "morning" | "midday" | "evening" | "night" {
   return "night";
 }
 
-const IDLE_SUBLINES: Record<"morning" | "midday" | "evening" | "night", string> = {
-  morning: "Hey, glad you're here. Take it slow.",
-  midday: "Pause for a moment. How is your heart right now?",
-  evening: "Before the day closes, let's check in with you.",
-  night: "It's been a long day. Let's sit with that for a bit.",
+// Tone bank for the no-mood-selected "hello" subline, keyed by time bucket.
+// Several variants per bucket so it never feels templated; a seeded picker
+// (see `subline` useMemo below) rotates between them on each visit.
+const MOOD_HELLO: Record<"morning" | "midday" | "evening" | "night", string[]> = {
+  morning: [
+    "Good morning. Let's name how today is starting.",
+    "A small hello before the day unfolds. How is it feeling?",
+    "Morning check-in — what color is closest to home?",
+  ],
+  midday: [
+    "Midday hello. How has the day been sitting with you?",
+    "A quiet pause in the middle of things. How are you?",
+    "Take a breath. What does right now feel like?",
+  ],
+  evening: [
+    "Evening hello. How did today actually go?",
+    "Before the day ends, a small check-in.",
+    "Winding down — let's land softly together.",
+  ],
+  night: [
+    "Quiet hour. How is your heart, really?",
+    "A gentle check-in for the late hours.",
+    "Before rest, a small honest moment with yourself.",
+  ],
 };
 
-const MOOD_ACKNOWLEDGMENTS: Record<MoodType, string> = {
-  stressed: "I hear you. That sounds really heavy, and it's okay to feel it.",
-  worried: "Worry can be loud. You're not alone in this.",
-  okay: "Okay is a perfectly good place to be.",
-  calm: "I love that you're feeling this. Let it settle in.",
-  happy: "Oh, this is wonderful. Hold onto this feeling.",
+const MOOD_ACKNOWLEDGMENTS: Record<MoodType, string[]> = {
+  stressed: [
+    "I hear you. That sounds really heavy, and it's okay to feel it.",
+    "Stress has a way of filling the whole room. You're not weak for noticing it.",
+    "Take a slow breath. You don't have to solve this right now.",
+    "Carrying a lot today? Just naming it already helps.",
+  ],
+  worried: [
+    "Worry can be loud. You're not alone in this.",
+    "Anxious thoughts can spin — let's slow one down together.",
+    "It's okay to not have answers yet. You just need a soft place to land.",
+    "Your mind is working hard. Let's give it a small rest.",
+  ],
+  okay: [
+    "Okay is a perfectly good place to be.",
+    "Steady. Not every day has to be a big feeling.",
+    "Alright is allowed. A quiet middle is still a real place.",
+    "A calm, ordinary kind of day. There's good in that.",
+  ],
+  calm: [
+    "I love that you're feeling this. Let it settle in.",
+    "A soft, steady mood. Breathe into it for a moment.",
+    "This is a kind place to be. Stay with it as long as you like.",
+    "Calm is worth noticing. It's doing good work inside you.",
+  ],
+  happy: [
+    "Oh, this is wonderful. Hold onto this feeling.",
+    "A bright moment — let it land. You earned it.",
+    "This is the kind of day worth remembering later.",
+    "Lovely to see you here, feeling this way. Soak it in.",
+  ],
 };
+
+// Tiny seeded PRNG so a given (bucket, mood, session) combo always
+// resolves to the same variant, but a new session/visit yields a new line.
+function seededRandom(seed: number) {
+  // mulberry32 — small, fast, good enough for picking a message
+  let t = seed >>> 0;
+  return function next() {
+    t = (t + 0x6d2b79f5) >>> 0;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function pickVariant<T>(options: T[], seed: number): T {
+  if (options.length === 0) {
+    throw new Error("pickVariant requires at least one option");
+  }
+  const rnd = seededRandom(seed);
+  const idx = Math.floor(rnd() * options.length) % options.length;
+  return options[idx];
+}
+
+function hashSeed(parts: (string | number)[]): number {
+  // FNV-1a 32-bit
+  let h = 0x811c9dc5;
+  for (const part of parts) {
+    const s = String(part);
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+  }
+  return h >>> 0;
+}
 
 const STRESSED_MOODS: ReadonlySet<MoodType> = new Set<MoodType>(["stressed", "worried"]);
 
@@ -694,7 +798,26 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const idleSubline = IDLE_SUBLINES[timeBucket(hour)];
+  const bucket = timeBucket(hour);
+  const sessionToken = useSessionToken();
+  const dayKey = new Date().toDateString();
+
+  // Pick a variant keyed by (bucket, mood-or-neutral, day, visit-token).
+  // This is stable for a given visit but rotates on app re-entry, on tab
+  // re-focus, and on a new day — without ever feeling mechanical.
+  const subline = useMemo(() => {
+    if (showDetails) {
+      const pool = MOOD_ACKNOWLEDGMENTS[displayMood];
+      return pickVariant(
+        pool,
+        hashSeed([bucket, displayMood, dayKey, sessionToken]),
+      );
+    }
+    // No mood picked yet — use the neutral "hello" pool for the time bucket
+    // so it still rotates even before the user selects a mood.
+    const pool = MOOD_HELLO[bucket];
+    return pickVariant(pool, hashSeed([bucket, "hello", dayKey, sessionToken]));
+  }, [bucket, displayMood, showDetails, dayKey, sessionToken]);
 
   const dateLabel = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -898,6 +1021,25 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
 
     return () => ctx.revert();
   }, [meta.color, reducedMotion]);
+
+  // Soft re-fade whenever the subline text changes (visit, focus, mood).
+  // Color settles to the mood color when a mood is selected, otherwise
+  // stays at the soft neutral muted tone.
+  useEffect(() => {
+    if (reducedMotion) return;
+    if (!sublineRef.current) return;
+    gsap.fromTo(
+      sublineRef.current,
+      { y: 6, opacity: 0.45 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.45,
+        ease: "power2.out",
+        overwrite: "auto",
+      },
+    );
+  }, [subline, reducedMotion]);
 
   useEffect(() => {
     if (reducedMotion || !detailsRef.current) return;
@@ -1130,7 +1272,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
               minHeight: "1.5em",
             }}
           >
-            {showDetails ? MOOD_ACKNOWLEDGMENTS[displayMood] : idleSubline}
+            {subline}
           </p>
         </div>
       </div>
@@ -1170,7 +1312,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
             <div
               ref={arcLogoRef}
               role="img"
-              aria-label="MabuhAi logo"
+              aria-label="Mabuh-ai logo"
               aria-hidden
               style={{
                 position: "absolute",

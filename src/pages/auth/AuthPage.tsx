@@ -495,7 +495,6 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
 
   const [tab, setTab] = useState<Tab>(initialTab);
   const [showForgot, setShowForgot] = useState(false);
-  const [nativeAuthError, setNativeAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     void initialize();
@@ -510,16 +509,6 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
       navigate("/", { replace: true });
     }
   }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
-    function handleNativeAuthError(event: Event) {
-      const message = (event as CustomEvent<string>).detail;
-      if (message) setNativeAuthError(message);
-    }
-
-    window.addEventListener("mabuhai:auth-error", handleNativeAuthError);
-    return () => window.removeEventListener("mabuhai:auth-error", handleNativeAuthError);
-  }, []);
 
   function switchTab(t: Tab) {
     setTab(t);
@@ -599,12 +588,6 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
               {tab === "sign-in" ? "New here? Create an account" : "Have an account? Sign in"}
             </button>
           </div>
-
-          {nativeAuthError && (
-            <div className="mb-4">
-              <ErrorBanner message={nativeAuthError} />
-            </div>
-          )}
 
           <div
             key={tab}

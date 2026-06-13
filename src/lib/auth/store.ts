@@ -2,9 +2,7 @@ import { create } from "zustand";
 import type { Provider, Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import {
-  getNativeGoogleRedirectUrl,
-  initializeNativeAuthDeepLinks,
-  isAndroidApp,
+  isMobileApp,
   isNativeApp,
   signInWithGoogleNative,
 } from "@/lib/auth/nativeOAuth";
@@ -121,8 +119,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     authInitializationPromise = (async () => {
       try {
-        await initializeNativeAuthDeepLinks();
-
         const { data } = await supabase.auth.getSession();
         const snapshot = await getAuthSnapshot(data.session);
 
@@ -194,7 +190,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   signInWithGoogle: async (nextPath = "/") => {
     const safeNextPath = nextPath.startsWith("/") ? nextPath : "/";
 
-    if (isAndroidApp()) {
+    if (isMobileApp()) {
       await signInWithGoogleNative(safeNextPath);
       const { data: sessionData } = await supabase.auth.getSession();
       if (sessionData.session) {
@@ -206,16 +202,18 @@ export const useAuthStore = create<AuthState>((set) => ({
       return;
     }
 
+    if (isNativeApp()) {
+      throw new Error(
+        "Google sign-in is currently supported in the mobile app and web app.",
+      );
+    }
+
     const provider: Provider = "google";
-    const native = isNativeApp();
     const next = encodeURIComponent(safeNextPath);
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: native
-          ? getNativeGoogleRedirectUrl(safeNextPath)
-          : getAuthRedirectUrl(`/auth/callback?next=${next}`),
-        skipBrowserRedirect: native,
+        redirectTo: getAuthRedirectUrl(`/auth/callback?next=${next}`),
         queryParams: {
           prompt: "select_account",
         },

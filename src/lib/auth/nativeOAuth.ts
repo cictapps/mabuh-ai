@@ -1,12 +1,6 @@
 import { isTauri } from "@tauri-apps/api/core";
-import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import { signIn as nativeGoogleSignIn } from "@choochmeque/tauri-plugin-google-auth-api";
 import { supabase } from "@/lib/supabase";
-
-const NATIVE_AUTH_SCHEME = "mabuhai:";
-const NATIVE_AUTH_CALLBACK = "mabuhai://auth/callback";
-
-let deepLinkListenerPromise: Promise<void> | null = null;
 
 function getSafeNextPath(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
@@ -16,105 +10,81 @@ function getSafeNextPath(value: string | null) {
   return value;
 }
 
-function parseAuthParams(url: URL) {
-  const params = new URLSearchParams(url.search);
-  const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
-
-  for (const [key, value] of hashParams) {
-    if (!params.has(key)) params.set(key, value);
+export function getNativeGoogleErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message;
   }
-
-  return params;
+  return "Google sign-in could not be started.";
 }
 
-async function completeNativeAuth(urlValue: string) {
-  const url = new URL(urlValue);
+export function explainNativeGoogleError(error: unknown): string {
+  const message = getNativeGoogleErrorMessage(error);
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("cancel") || normalized.includes("closed by the user")) {
+    return "Google sign-in was cancelled.";
+  }
 
   if (
-    url.protocol !== NATIVE_AUTH_SCHEME ||
-    url.hostname !== "auth" ||
-    url.pathname !== "/callback"
+    normalized.includes("configuration") ||
+    normalized.includes("developer console") ||
+    normalized.includes("28444")
   ) {
-    return;
+    return (
+      "Google Sign-In is not configured for this app build. Add an Android OAuth " +
+      "client for package com.user.mabuhai with this build's SHA-1 fingerprint."
+    );
   }
 
-  const params = parseAuthParams(url);
-  const authError = params.get("error_description") ?? params.get("error");
-  if (authError) throw new Error(authError);
-
-  const code = params.get("code");
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) throw error;
-  } else {
-    const accessToken = params.get("access_token");
-    const refreshToken = params.get("refresh_token");
-
-    if (!accessToken || !refreshToken) {
-      throw new Error("Google sign-in returned without a usable session.");
-    }
-
-    const { error } = await supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
-    if (error) throw error;
+  if (normalized.includes("no google account") || normalized.includes("no credential")) {
+    return "No Google account is available on this device. Add an account and try again.";
   }
 
-  const nextPath = getSafeNextPath(params.get("next"));
-  window.history.replaceState({}, "", nextPath);
-  window.dispatchEvent(new PopStateEvent("popstate"));
-}
-
-async function handleNativeAuthUrls(urls: string[] | null) {
-  if (!urls) return;
-
-  for (const url of urls) {
-    try {
-      await completeNativeAuth(url);
-    } catch (error) {
-      console.error("native OAuth callback failed", error);
-      window.dispatchEvent(
-        new CustomEvent("mabuhai:auth-error", {
-          detail:
-            error instanceof Error ? error.message : "Could not finish Google sign-in.",
-        }),
-      );
-    }
-  }
-}
-
-export function getNativeGoogleRedirectUrl(nextPath: string) {
-  const next = encodeURIComponent(getSafeNextPath(nextPath));
-  return `${NATIVE_AUTH_CALLBACK}?next=${next}`;
+  return message;
 }
 
 export function isNativeApp() {
   return isTauri();
 }
 
-export function isAndroidApp(): boolean {
+export function isMobileApp(): boolean {
   if (!isTauri()) return false;
   if (typeof navigator === "undefined") return false;
-  return /android/i.test(navigator.userAgent);
+  return /android|iphone|ipad|ipod/i.test(navigator.userAgent);
 }
 
 export async function signInWithGoogleNative(nextPath: string) {
-  const webClientId = import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID as
-    | string
-    | undefined;
+  const isIos =
+    typeof navigator !== "undefined" && /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const clientId = isIos
+    ? (import.meta.env.VITE_GOOGLE_IOS_CLIENT_ID as string | undefined)
+    : (import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID as string | undefined);
 
-  if (!webClientId) {
+  if (!clientId) {
     throw new Error(
-      "Google sign-in is not configured: set VITE_GOOGLE_WEB_CLIENT_ID in .env.",
+      isIos
+        ? "Google sign-in is not configured: set VITE_GOOGLE_IOS_CLIENT_ID."
+        : "Google sign-in is not configured: set VITE_GOOGLE_WEB_CLIENT_ID.",
     );
   }
 
-  const tokens = await nativeGoogleSignIn({
-    clientId: webClientId,
-    scopes: ["openid", "email", "profile"],
-    flowType: "native",
-  });
+  let tokens;
+  try {
+    tokens = await nativeGoogleSignIn({
+      clientId,
+      scopes: ["openid", "email", "profile"],
+      flowType: "native",
+    });
+  } catch (error) {
+    throw new Error(explainNativeGoogleError(error));
+  }
 
   const idToken = tokens.idToken;
   if (!idToken) {
@@ -137,22 +107,4 @@ export async function signInWithGoogleNative(nextPath: string) {
   }
 
   return data;
-}
-
-export async function initializeNativeAuthDeepLinks() {
-  if (!isNativeApp()) return;
-  if (deepLinkListenerPromise) return deepLinkListenerPromise;
-
-  deepLinkListenerPromise = (async () => {
-    await onOpenUrl((urls) => {
-      void handleNativeAuthUrls(urls);
-    });
-
-    await handleNativeAuthUrls(await getCurrent());
-  })().catch((error) => {
-    deepLinkListenerPromise = null;
-    throw error;
-  });
-
-  return deepLinkListenerPromise;
 }

@@ -220,9 +220,9 @@ RLS enforces access at the database level, not only in the frontend.
 - **Google OAuth dashboard dependency:** The code path is implemented, but the
   Google provider must be enabled in Supabase before turning on
   `VITE_AUTH_GOOGLE_ENABLED`.
-- **Tauri production deep links:** OAuth and reset callbacks use normal web
-  redirects in browser/Vite dev. Production Tauri packaging should verify the
-  custom scheme and platform deep-link behavior before release.
+- **Deployment split:** Mobile Tauri builds use the native Google plugin and
+  exchange its ID token with Supabase. Browser deployments use Supabase web
+  OAuth and `/auth/callback`.
 - **Secure session storage on Tauri:** Current Supabase sessions use browser
   storage through `supabase-js`. A hardened desktop release can migrate to a
   Tauri secure-storage strategy.

@@ -352,7 +352,7 @@ Developed for **educational purposes** as part of a student collaborative projec
 
 | Purpose | Contact |
 |---|---|
-| 🔒 Privacy inquiries | privacy@mabuhai.com |
+| 🔒 Privacy inquiries | cictapps@wvsu.edu.ph |
 | 🗑️ Data deletion requests | datarequest@mabuhai.com |
 | 🚨 Crisis support | **988** (24/7) |
 

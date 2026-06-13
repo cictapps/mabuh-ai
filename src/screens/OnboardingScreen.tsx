@@ -18,6 +18,12 @@ type SlideVisual = {
   kind: "heart" | "moods" | "journal" | "support" | "ai-controls";
 };
 
+const AI_CONTEXT_PREVIEW_ROWS = [
+  "Recent moods",
+  "Journal entries",
+  "Journey progress",
+];
+
 interface OnboardingSlide {
   id: string;
   eyebrow: string;
@@ -61,7 +67,7 @@ const SLIDES: OnboardingSlide[] = [
     body:
       "Drop a quick thought, save a memory, or capture an idea. Mabuh-ai quietly turns your entries into gentle insights so the bigger picture of your wellbeing stays visible — and yours.",
     bullets: [
-      "Short notes, voice, or video entries",
+      "Write short notes and check-in reflections",
       "Mask-Off mode for the unfiltered stuff",
       "Insights that respect your pace",
     ],
@@ -126,6 +132,182 @@ function useTightViewport(): boolean {
     };
   }, []);
   return tight;
+}
+
+function AiControlsVisual() {
+  const reducedMotion = usePrefersReducedMotion();
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setPhase(0);
+      return;
+    }
+
+    const timeout = window.setTimeout(
+      () => setPhase((current) => (current + 1) % 8),
+      phase === 0 || phase === 4 ? 1_800 : 1_300,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [phase, reducedMotion]);
+
+  const isEnabled = (index: number) => {
+    if (phase >= 1 && phase <= 4) return index < Math.min(phase, 3);
+    if (phase >= 5 && phase <= 7) return index >= phase - 4;
+    return false;
+  };
+
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: "relative",
+        width: "100%",
+        padding: "14px",
+        borderRadius: 24,
+        background:
+          "linear-gradient(155deg, rgba(188,194,255,0.12), rgba(212,187,255,0.07) 55%, rgba(255,185,84,0.08))",
+        border: "1px solid rgba(188,194,255,0.10)",
+        boxShadow: "0 24px 60px -36px rgba(8,10,18,0.85)",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 10,
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            placeItems: "center",
+            width: 34,
+            height: 34,
+            borderRadius: 12,
+            background: "rgba(188,194,255,0.16)",
+            color: "#bcc2ff",
+            flexShrink: 0,
+          }}
+        >
+          <ShieldCheck size={17} strokeWidth={1.8} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 12,
+              color: "#eef1f6",
+              fontWeight: 500,
+              marginBottom: 2,
+            }}
+          >
+            AI companion context
+          </div>
+          <div
+            style={{
+              fontSize: 11,
+              color: "rgba(216,212,235,0.6)",
+              lineHeight: 1.4,
+            }}
+          >
+            You decide what can help personalize replies.
+          </div>
+        </div>
+        <Settings size={15} color="rgba(216,212,235,0.55)" />
+      </div>
+
+      {AI_CONTEXT_PREVIEW_ROWS.map((label, index) => {
+        const enabled = isEnabled(index);
+        return (
+          <div
+            key={label}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "8px 10px",
+              marginTop: 5,
+              borderRadius: 14,
+              background: enabled
+                ? "rgba(188,194,255,0.07)"
+                : "rgba(188,194,255,0.04)",
+              border: enabled
+                ? "1px solid rgba(188,194,255,0.16)"
+                : "1px solid rgba(188,194,255,0.08)",
+              transition: reducedMotion
+                ? "none"
+                : "background 0.55s ease, border-color 0.55s ease",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 12,
+                color: enabled
+                  ? "rgba(238,241,246,0.94)"
+                  : "rgba(238,241,246,0.82)",
+                fontWeight: 500,
+                flex: 1,
+                transition: reducedMotion ? "none" : "color 0.55s ease",
+              }}
+            >
+              {label}
+            </span>
+            <span
+              style={{
+                position: "relative",
+                width: 36,
+                height: 20,
+                borderRadius: 999,
+                background: enabled
+                  ? "rgba(188,194,255,0.72)"
+                  : "rgba(216,212,235,0.16)",
+                boxShadow: enabled
+                  ? "0 0 16px rgba(188,194,255,0.24)"
+                  : "none",
+                flexShrink: 0,
+                transition: reducedMotion
+                  ? "none"
+                  : "background 0.55s ease, box-shadow 0.55s ease",
+              }}
+            >
+              <span
+                style={{
+                  position: "absolute",
+                  top: 2,
+                  left: 2,
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  background: enabled ? "#121416" : "#d8d4eb",
+                  transform: enabled ? "translateX(16px)" : "translateX(0)",
+                  transition: reducedMotion
+                    ? "none"
+                    : "transform 0.55s ease, background 0.55s ease",
+                }}
+              />
+            </span>
+          </div>
+        );
+      })}
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
+          marginTop: 10,
+          color: "rgba(255,217,154,0.82)",
+          fontSize: 10.5,
+          lineHeight: 1.4,
+        }}
+      >
+        <Settings size={12} />
+        Settings → AI companion context
+      </div>
+    </div>
+  );
 }
 
 function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
@@ -532,133 +714,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
     );
   }
 
-  const contextRows = ["Recent moods", "Journal entries", "Journey progress"];
-  return (
-    <div
-      aria-hidden
-      style={{
-        position: "relative",
-        width: "100%",
-        padding: "14px",
-        borderRadius: 24,
-        background:
-          "linear-gradient(155deg, rgba(188,194,255,0.12), rgba(212,187,255,0.07) 55%, rgba(255,185,84,0.08))",
-        border: "1px solid rgba(188,194,255,0.10)",
-        boxShadow: "0 24px 60px -36px rgba(8,10,18,0.85)",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          marginBottom: 10,
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            placeItems: "center",
-            width: 34,
-            height: 34,
-            borderRadius: 12,
-            background: "rgba(188,194,255,0.16)",
-            color: "#bcc2ff",
-            flexShrink: 0,
-          }}
-        >
-          <ShieldCheck size={17} strokeWidth={1.8} />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 12,
-              color: "#eef1f6",
-              fontWeight: 500,
-              marginBottom: 2,
-            }}
-          >
-            AI companion context
-          </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: "rgba(216,212,235,0.6)",
-              lineHeight: 1.4,
-            }}
-          >
-            You decide what can help personalize replies.
-          </div>
-        </div>
-        <Settings size={15} color="rgba(216,212,235,0.55)" />
-      </div>
-
-      {contextRows.map((label) => (
-        <div
-          key={label}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "8px 10px",
-            marginTop: 5,
-            borderRadius: 14,
-            background: "rgba(188,194,255,0.04)",
-            border: "1px solid rgba(188,194,255,0.08)",
-          }}
-        >
-          <span
-            style={{
-              fontSize: 12,
-              color: "rgba(238,241,246,0.82)",
-              fontWeight: 500,
-              flex: 1,
-            }}
-          >
-            {label}
-          </span>
-          <span
-            style={{
-              position: "relative",
-              width: 36,
-              height: 20,
-              borderRadius: 999,
-              background: "rgba(216,212,235,0.16)",
-              flexShrink: 0,
-            }}
-          >
-            <span
-              style={{
-                position: "absolute",
-                top: 2,
-                left: 2,
-                width: 16,
-                height: 16,
-                borderRadius: "50%",
-                background: "#d8d4eb",
-              }}
-            />
-          </span>
-        </div>
-      ))}
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 7,
-          marginTop: 10,
-          color: "rgba(255,217,154,0.82)",
-          fontSize: 10.5,
-          lineHeight: 1.4,
-        }}
-      >
-        <Settings size={12} />
-        Settings → AI companion context
-      </div>
-    </div>
-  );
+  return <AiControlsVisual />;
 }
 
 function PaginationDots({

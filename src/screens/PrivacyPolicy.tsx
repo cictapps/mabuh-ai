@@ -304,7 +304,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
               Philippines:
             </p>
             <div className="text-sm space-y-1 text-neutral-300">
-              <p>📧 Email: privacy@mabuhai.com</p>
+              <p>📧 Email: cictapps@wvsu.edu.ph</p>
               <p>🔒 Data Requests: datarequest@mabuhai.com</p>
               <p className="mt-2 font-semibold text-neutral-200">
                 🚨 Crisis Support (Philippines):

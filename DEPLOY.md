@@ -18,7 +18,7 @@ build time — the **Supabase project** (auth + mood/journal data) and the
 
 ## 1. Environment variables (the short list)
 
-The mobile bundle reads only four `VITE_*` variables. They are inlined into
+The app bundle reads these `VITE_*` variables. They are inlined into
 the JavaScript at `npm run build` time — there is no runtime env injection
 on Android, so a rebuild is required to change them.
 
@@ -27,7 +27,8 @@ on Android, so a rebuild is required to change them.
 | `VITE_SUPABASE_URL` | Endpoint of your Supabase project | Supabase dashboard → **Settings → API** |
 | `VITE_SUPABASE_ANON_KEY` | Public, publishable client key (safe to ship) | Same page. Starts with `sb_publishable_…` |
 | `VITE_AUTH_GOOGLE_ENABLED` | `"true"` to show the "Continue with Google" button after you've enabled the provider | Boolean |
-| `VITE_GOOGLE_WEB_CLIENT_ID` | Web OAuth client ID from Google Cloud Console (required for native Google sign-in on Android) | Google Cloud Console → Credentials |
+| `VITE_GOOGLE_WEB_CLIENT_ID` | Web OAuth client ID used by web OAuth and as the native Android ID-token audience | Google Cloud Console → Credentials |
+| `VITE_GOOGLE_IOS_CLIENT_ID` | iOS OAuth client ID for native iOS builds | Google Cloud Console → Credentials |
 | `VITE_CHAT_SERVER_URL` | Public URL of the Mistral proxy server (no trailing slash) | Deploy the server (section 3), paste its URL |
 
 Everything else (the Mistral key, OpenAI keys, etc.) lives **on the chat
@@ -73,8 +74,14 @@ server**, never in the app.
         dashboard, paste the **Web** client ID and secret.
      4. Set `VITE_GOOGLE_WEB_CLIENT_ID=<web-client-id>` and
         `VITE_AUTH_GOOGLE_ENABLED=true` in `.env`.
-   - **Web/desktop** (the fallback used when the app is not on Android):
-     the Supabase redirect URLs above (step 4) are still required.
+     5. Add both signing fingerprints when testing both build types:
+        - Debug SHA-1: run
+          `keytool -list -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey`
+        - Release SHA-1: run `keytool -list -v` against the release keystore.
+        A missing fingerprint causes Credential Manager configuration errors.
+        Mobile builds use native Google Sign-In and do not fall back to web OAuth.
+   - **Web deployment:** uses Supabase browser OAuth and `/auth/callback`.
+     The Supabase redirect URLs above are required.
 
 ### Database migration note (existing projects)
 

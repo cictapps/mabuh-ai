@@ -50,10 +50,10 @@ export function SavedAffirmationDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent
         aria-describedby="saved-affirmation-description"
+        className="max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] overflow-y-auto overscroll-contain p-5 sm:p-6"
         style={{
           borderColor: `${moodColor}33`,
           boxShadow: `0 32px 80px -32px ${moodColor}55`,
-          margin: 16,
         }}
       >
         <div
@@ -79,17 +79,15 @@ export function SavedAffirmationDialog({
             }}
           />
           <AlertDialogTitle>
-            Saved with care. <span style={{ color: moodColor }}>Thank you</span>{" "}
-            for being here.
+            Saved with care. <span style={{ color: moodColor }}>Thank you</span> for being
+            here.
           </AlertDialogTitle>
           <AlertDialogDescription id="saved-affirmation-description">
             {personalization ??
               "Your check-in was kept. Take a breath — that small moment matters."}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <div
-          className="relative flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
-        >
+        <div className="relative flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
           <div className="flex items-center justify-between">
             <span
               style={{

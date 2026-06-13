@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { Provider, Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { isMobileApp, isNativeApp, signInWithGoogleNative } from "@/lib/auth/nativeOAuth";
+import { deleteUserData } from "@/lib/auth/deleteUserData";
 
 export type Profile = {
   id: string;
@@ -40,7 +41,6 @@ type AuthSnapshot = {
 
 let authInitializationPromise: Promise<void> | null = null;
 let authListenerBound = false;
-const DELETE_ALL_DATA_TIMEOUT_MS = 15_000;
 
 function getAuthRedirectUrl(path = "/auth/callback") {
   return `${window.location.origin}${path}`;
@@ -272,29 +272,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   deleteAllData: async () => {
-    const controller = new AbortController();
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    const timeout = new Promise<never>((_, reject) => {
-      timeoutId = setTimeout(() => {
-        controller.abort();
-        reject(
-          new Error(
-            "Deleting your data took too long. Check your connection and try again.",
-          ),
-        );
-      }, DELETE_ALL_DATA_TIMEOUT_MS);
-    });
-
-    try {
-      const request = supabase.rpc("delete_user_data").abortSignal(controller.signal);
-      const { error } = await Promise.race([request, timeout]);
-      if (error) throw error;
-      // The auth account stays; only the user-scoped rows are gone.
-      // Clear the cached profile (display_name was reset to null on the server).
-      set({ profile: null });
-    } finally {
-      if (timeoutId !== undefined) clearTimeout(timeoutId);
-    }
+    await deleteUserData();
+    // The auth account stays; only the user-scoped rows are gone.
+    // Clear the cached profile (display_name was reset to null on the server).
+    set({ profile: null });
   },
 
   signOut: async () => {

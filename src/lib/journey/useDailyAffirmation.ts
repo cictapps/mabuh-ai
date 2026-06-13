@@ -1,97 +1,68 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-const STORAGE_KEY = "mabuhai-daily-affirmation";
-const PRIMARY_URL = "https://www.affirmations.dev/";
-const FALLBACK_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(PRIMARY_URL)}`;
-const FALLBACK_QUOTES = [
-  "You are doing better than you think you are.",
+const LAST_THOUGHT_KEY = "mabuhai-last-kind-thought";
+
+export const KIND_THOUGHTS = [
+  "You do not have to solve the whole day at once.",
   "Small steps still move you forward.",
-  "Your feelings are valid, and they will pass.",
-  "Rest is part of the work.",
+  "Rest is part of the work, not a reward for finishing it.",
   "You are allowed to take things one breath at a time.",
-];
+  "Your pace does not need to match anyone else's.",
+  "A difficult moment does not define the rest of your day.",
+  "Showing up gently still counts as showing up.",
+  "You can begin again without judging where you paused.",
+  "One unfinished task does not erase everything you completed.",
+  "You deserve the same patience you offer other people.",
+  "It is okay if today asks for a smaller version of your plan.",
+  "Your worth is not measured by your productivity.",
+  "Taking a break can be a thoughtful decision.",
+  "You can care about your goals without being unkind to yourself.",
+  "Not knowing the next step does not mean you are stuck forever.",
+  "You have permission to make room for how you really feel.",
+  "Progress can be quiet and still be real.",
+  "You are more than one grade, deadline, or difficult week.",
+  "A slow day can still be a meaningful day.",
+  "You can ask for help before things become overwhelming.",
+  "Your feelings can be present without making every decision.",
+  "Doing what you can today is enough for today.",
+  "There is no shame in needing more time.",
+  "You can pause without losing your direction.",
+  "A gentle choice is still a strong choice.",
+  "You do not need perfect focus to make a little progress.",
+  "Even uncertain days can hold one steady moment.",
+  "You are allowed to celebrate effort, not only outcomes.",
+  "The next step can be small, simple, and yours.",
+  "You are learning how to care for yourself as you go.",
+] as const;
 
-type CachedAffirmation = { date: string; text: string };
+function pickThought(): string {
+  if (typeof window === "undefined") return KIND_THOUGHTS[0];
 
-function readCache(): CachedAffirmation | null {
-  if (typeof window === "undefined") return null;
+  let previous = "";
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<CachedAffirmation>;
-    if (typeof parsed.date === "string" && typeof parsed.text === "string") {
-      return { date: parsed.date, text: parsed.text };
-    }
-    return null;
+    previous = window.sessionStorage.getItem(LAST_THOUGHT_KEY) ?? "";
   } catch {
-    return null;
+    // Storage may be unavailable in private browsing contexts.
   }
-}
 
-function writeCache(value: CachedAffirmation): void {
-  if (typeof window === "undefined") return;
+  const choices = KIND_THOUGHTS.filter((thought) => thought !== previous);
+  const thought = choices[Math.floor(Math.random() * choices.length)] ?? KIND_THOUGHTS[0];
+
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+    window.sessionStorage.setItem(LAST_THOUGHT_KEY, thought);
   } catch {
-    // Ignore quota/private-mode errors.
+    // A fresh thought can still be shown without persistence.
   }
-}
 
-async function fetchAffirmation(url: string): Promise<string | null> {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) return null;
-    const data = (await response.json()) as {
-      affirmation?: string;
-      quote?: string;
-      content?: string;
-    };
-    return data.affirmation || data.quote || data.content || null;
-  } catch {
-    return null;
-  }
-}
-
-function pickFallback(): string {
-  const index = Math.floor(Math.random() * FALLBACK_QUOTES.length);
-  return FALLBACK_QUOTES[index];
+  return thought;
 }
 
 export function useDailyAffirmation(enabled: boolean = true) {
-  const [text, setText] = useState<string>(pickFallback());
-  const [loading, setLoading] = useState<boolean>(enabled);
-  const [date, setDate] = useState<string>("");
+  const [text] = useState(() => (enabled ? pickThought() : KIND_THOUGHTS[0]));
 
-  useEffect(() => {
-    if (!enabled) {
-      setLoading(false);
-      return;
-    }
-
-    let mounted = true;
-    const today = new Date().toISOString().slice(0, 10);
-    setDate(today);
-
-    const cached = readCache();
-    if (cached && cached.date === today) {
-      setText(cached.text);
-      setLoading(false);
-      return;
-    }
-
-    (async () => {
-      const primary = await fetchAffirmation(PRIMARY_URL);
-      const chosen = primary ?? (await fetchAffirmation(FALLBACK_URL)) ?? pickFallback();
-      if (!mounted) return;
-      setText(chosen);
-      setLoading(false);
-      writeCache({ date: today, text: chosen });
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [enabled]);
-
-  return { text, loading, date };
+  return {
+    text,
+    loading: false,
+    date: new Date().toISOString().slice(0, 10),
+  };
 }

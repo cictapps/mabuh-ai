@@ -5,7 +5,6 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import {
   AlertTriangle,
-  Bell,
   Cpu as CpuIcon,
   Download,
   KeyRound,
@@ -663,7 +662,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </p>
       </Section>
 
-      <Section title="Daily reminder" icon={<Bell size={16} />}>
+      <Section
+        title="Daily reminder"
+        icon={
+          <img
+            src="/app-logo-light.svg"
+            alt=""
+            aria-hidden="true"
+            className="size-4 object-contain"
+          />
+        }
+      >
         <ToggleRow
           label="Gentle check-in nudge"
           description="We'll quietly remind you once a day. The reminder stays on this device only."

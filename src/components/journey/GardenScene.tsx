@@ -56,6 +56,14 @@ const PLANT_LABELS: Record<GardenPlant, string> = {
   "cherry-blossom": "Cherry blossom",
 };
 
+const CLOUD_SPEED: Record<MoodType, string> = {
+  stressed: "18s",
+  worried: "24s",
+  okay: "34s",
+  calm: "52s",
+  happy: "42s",
+};
+
 function CloudTile({ offset }: { offset: number }) {
   return (
     <g transform={`translate(${offset} 0)`}>
@@ -67,14 +75,37 @@ function CloudTile({ offset }: { offset: number }) {
   );
 }
 
+const RAIN_DROPS = Array.from({ length: 26 }, (_, index) => {
+  const row = Math.floor(index / 13);
+  const column = index % 13;
+  const x = 14 + column * 27 + (row % 2) * 9;
+  const y = 52 + row * 44 + (column % 4) * 9;
+  const layer = index % 3;
+  const baseDuration = layer === 0 ? 0.78 : layer === 1 ? 1.05 : 1.4;
+  return {
+    key: index,
+    x,
+    y,
+    duration: baseDuration + ((index * 37) % 11) / 100,
+    delay: -((index * 113) % 900) / 1000,
+    opacity: layer === 0 ? 0.62 : layer === 1 ? 0.46 : 0.3,
+  };
+});
+
 function RainTile({ offset }: { offset: number }) {
   return (
     <g transform={`translate(${offset} 0)`}>
-      {Array.from({ length: 12 }, (_, index) => (
+      {RAIN_DROPS.map((drop) => (
         <path
-          key={index}
-          d={`M${18 + index * 29} ${60 + (index % 3) * 14}l-4 10h3l4-10z`}
+          key={`${offset}-${drop.key}`}
+          d={`M${drop.x} ${drop.y}h3l-6 13h-3z`}
           fill="currentColor"
+          className="garden-pixel-rain-drop"
+          opacity={drop.opacity}
+          style={{
+            animationDuration: `${drop.duration}s`,
+            animationDelay: `${drop.delay}s`,
+          }}
         />
       ))}
     </g>
@@ -186,18 +217,17 @@ export function GardenScene({ mood, plant, stage }: GardenSceneProps) {
           ) : null}
           <g
             className="garden-pixel-cloud-track"
-            style={{ color: weather.cloud }}
+            style={{
+              color: weather.cloud,
+              animationDuration: CLOUD_SPEED[mood ?? "okay"],
+            }}
             opacity="0.75"
           >
             <CloudTile offset={0} />
             <CloudTile offset={360} />
           </g>
           {isRainy ? (
-            <g
-              className="garden-pixel-rain-track"
-              style={{ color: weather.accent }}
-              opacity="0.55"
-            >
+            <g style={{ color: weather.accent }}>
               <RainTile offset={0} />
               <RainTile offset={360} />
             </g>
@@ -222,7 +252,7 @@ export function GardenScene({ mood, plant, stage }: GardenSceneProps) {
           />
           <g transform="translate(14 153)">
             <rect
-              width="136"
+              width="174"
               height="21"
               rx="8"
               fill={weather.sky}
@@ -234,9 +264,9 @@ export function GardenScene({ mood, plant, stage }: GardenSceneProps) {
               y="13.5"
               fill="#eef1f6"
               fontFamily="ui-monospace, monospace"
-              fontSize="7"
+              fontSize="6.5"
               fontWeight="700"
-              letterSpacing="1"
+              letterSpacing="0.7"
             >
               {weather.label.toUpperCase()} · STAGE {stage}/7
             </text>

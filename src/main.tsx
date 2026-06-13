@@ -9,9 +9,7 @@ import { ProtectedRoute } from "./lib/auth";
 const AuthPage = lazy(async () => import("./pages/auth/AuthPage"));
 const AuthCallback = lazy(async () => import("./pages/auth/AuthCallback"));
 const ResetPassword = lazy(async () => import("./pages/auth/ResetPassword"));
-const PrivacyPolicyPage = lazy(
-  async () => import("./pages/legal/PrivacyPolicyPage"),
-);
+const PrivacyPolicyPage = lazy(async () => import("./pages/legal/PrivacyPolicyPage"));
 const TermsAndConditionsPage = lazy(
   async () => import("./pages/legal/TermsAndConditionsPage"),
 );
@@ -86,3 +84,13 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     </BrowserRouter>
   </React.StrictMode>,
 );
+
+const protectedStartupPaths = new Set(["/", "/help", "/chatbot"]);
+
+if (!protectedStartupPaths.has(window.location.pathname)) {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.body.classList.add("app-ready");
+    });
+  });
+}

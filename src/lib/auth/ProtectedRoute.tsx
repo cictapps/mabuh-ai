@@ -17,12 +17,23 @@ export function ProtectedRoute({ children }: Props) {
     void initialize();
   }, [initialize]);
 
+  useEffect(() => {
+    if (loading) {
+      document.body.classList.remove("app-ready");
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.body.classList.add("app-ready");
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [loading]);
+
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Preparing your sanctuary...
-      </div>
-    );
+    return null;
   }
 
   if (!isAuthenticated) {
@@ -76,8 +87,16 @@ function VerifyEmailGate({ email }: { email: string }) {
           </p>
         </div>
 
-        {status && <p className="mb-4 rounded-2xl bg-tertiary/10 px-4 py-3 text-sm text-tertiary">{status}</p>}
-        {error && <p className="mb-4 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p>}
+        {status && (
+          <p className="mb-4 rounded-2xl bg-tertiary/10 px-4 py-3 text-sm text-tertiary">
+            {status}
+          </p>
+        )}
+        {error && (
+          <p className="mb-4 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {error}
+          </p>
+        )}
 
         <div className="flex flex-col gap-3">
           <Button type="button" onClick={() => void handleResend()} disabled={sending}>

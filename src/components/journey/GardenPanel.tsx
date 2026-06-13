@@ -12,13 +12,14 @@ import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 import type { GardenPhase, MoodType } from "@/types";
 import { MoodPicker } from "./MoodPicker";
 import { GardenScene } from "./GardenScene";
+import { GardenTabIcon } from "./GardenTabIcon";
 
-const PHASES: Array<{ id: GardenPhase; label: string }> = [
-  { id: "prepare", label: "Prepare" },
-  { id: "growing", label: "Grow" },
-  { id: "care", label: "Care" },
-  { id: "reflect", label: "Reflect" },
-  { id: "rest", label: "Rest" },
+const PHASES: Array<{ id: GardenPhase; label: string; icon: GardenPhase }> = [
+  { id: "prepare", label: "Prepare", icon: "prepare" },
+  { id: "growing", label: "Grow", icon: "growing" },
+  { id: "care", label: "Care", icon: "care" },
+  { id: "reflect", label: "Reflect", icon: "reflect" },
+  { id: "rest", label: "Rest", icon: "rest" },
 ];
 
 const CARE: Record<
@@ -79,24 +80,55 @@ export function GardenPanel({ onOpenSupport, locked }: GardenPanelProps) {
 
   return (
     <>
-      <div className="flex items-center gap-1 rounded-2xl border border-[rgba(109,186,132,0.14)] bg-[rgba(109,186,132,0.04)] p-1">
+      <div
+        className="flex items-stretch gap-1 rounded-2xl border border-[rgba(109,186,132,0.16)] bg-[rgba(109,186,132,0.04)] p-1"
+        role="tablist"
+        aria-label="Garden phases"
+      >
         {PHASES.map((item) => {
           const active = item.id === phase;
+          const disabled = !locked && item.id !== "prepare";
+          const activeIndex = PHASES.findIndex((entry) => entry.id === phase);
+          const itemIndex = PHASES.findIndex((entry) => entry.id === item.id);
+          const reached = itemIndex <= activeIndex;
           return (
             <button
               key={item.id}
               type="button"
+              role="tab"
+              aria-selected={active}
+              aria-label={item.label}
               onClick={() => setPhase(item.id)}
-              disabled={!locked && item.id !== "prepare"}
+              disabled={disabled}
               className={cn(
-                "min-w-0 flex-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition-colors",
+                "relative flex min-w-0 items-center justify-center rounded-xl py-2 transition-all duration-300 ease-out active:scale-[0.97]",
+                active ? "flex-[2.8] gap-2 px-2.5" : "flex-1 gap-0 px-1",
                 active
-                  ? "bg-[rgba(109,186,132,0.16)] text-[#c9f0d4]"
+                  ? "bg-gradient-to-r from-[#8fcea3] via-[#a8dfb8] to-[#8fcea3] text-[#0f121a] shadow-[0_14px_32px_-18px_rgba(109,186,132,0.85)]"
                   : "text-[rgba(216,212,235,0.55)]",
-                !locked && item.id !== "prepare" && "opacity-40",
+                disabled && "opacity-40",
               )}
             >
-              {item.label}
+              <GardenTabIcon
+                phase={item.icon}
+                className={cn(
+                  "size-[18px] shrink-0 transition-colors duration-300",
+                  active
+                    ? "text-[#132019]"
+                    : reached
+                      ? "text-[#a8dfb8]"
+                      : "text-[rgba(216,212,235,0.42)]",
+                )}
+              />
+              <span
+                aria-hidden={!active}
+                className={cn(
+                  "overflow-hidden whitespace-nowrap text-[11px] font-semibold transition-all duration-300 ease-out",
+                  active ? "max-w-[160px] opacity-100" : "max-w-0 opacity-0",
+                )}
+              >
+                {item.label}
+              </span>
             </button>
           );
         })}

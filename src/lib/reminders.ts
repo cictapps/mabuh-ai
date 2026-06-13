@@ -14,6 +14,8 @@ interface ActiveTimer {
   timeoutId: number;
 }
 
+const NOTIFICATION_ICON = "/app-logo-light.svg";
+
 let active: ActiveTimer | null = null;
 
 function isBrowserNotificationsSupported(): boolean {
@@ -66,6 +68,8 @@ function showNotification() {
     const n = new window.Notification("MabuhAi", {
       body: "Gentle check-in time. How is your day going?",
       tag: "mabuhai-daily-reminder",
+      icon: NOTIFICATION_ICON,
+      badge: NOTIFICATION_ICON,
       silent: false,
     });
     n.onclick = () => {

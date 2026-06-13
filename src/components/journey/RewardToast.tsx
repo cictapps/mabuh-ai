@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Gift, Sparkles, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 import { REWARDS } from "@/lib/journey/xp";
 
@@ -39,11 +39,12 @@ export function RewardToast() {
         />
         <div className="relative flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(255,185,84,0.15)] text-tertiary">
-            {rewards.length > 1 ? (
-              <Sparkles className="size-5" />
-            ) : (
-              <Gift className="size-5" />
-            )}
+            <img
+              src="/app-logo-light.svg"
+              alt=""
+              aria-hidden="true"
+              className="size-6 object-contain"
+            />
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-foreground">

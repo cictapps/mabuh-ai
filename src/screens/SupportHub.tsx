@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { MessageCircle, MapPin, Phone, ShieldAlert, ArrowUpRight, Info } from "lucide-react";
+import { MessageCircle, MapPin, Phone, ShieldAlert, ArrowUpRight } from "lucide-react";
 
 import { loadHotlines, summarizeDirectory, type HotlineRecord } from "../data/providers";
 
@@ -167,11 +167,11 @@ export const SupportHub: React.FC<SupportHubProps> = ({
           color: "rgba(255,225,184,0.95)",
         }}
       >
-        <Info
-          size={16}
-          color="#ffd99a"
-          style={{ marginTop: 2, flexShrink: 0 }}
-          aria-hidden
+        <img
+          src="/app-logo-light.svg"
+          alt=""
+          aria-hidden="true"
+          className="mt-0.5 size-4 shrink-0 object-contain"
         />
         <p
           style={{

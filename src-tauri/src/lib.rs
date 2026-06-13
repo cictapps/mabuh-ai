@@ -11,6 +11,7 @@ pub fn run() {
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_google_auth::init())
         .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_notification::init())
         .setup(|_app| Ok(()))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

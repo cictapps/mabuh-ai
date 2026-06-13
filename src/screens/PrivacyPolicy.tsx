@@ -46,7 +46,7 @@ const SECTIONS = [
     title: "AI model: Mistral Small (free tier)",
     content: [
       "Model: mistral-small-latest (Mistral AI).",
-      "MabuhAi uses the free tier of Mistral AI. As part of their free-tier terms, the prompts and messages you send may be used by Mistral to improve and train their models.",
+      "Mabuh-ai uses the free tier of Mistral AI. As part of their free-tier terms, the prompts and messages you send may be used by Mistral to improve and train their models.",
       "Please do not share anything you would not be comfortable being seen by an AI provider. Avoid personal names, school names, addresses, phone numbers, or anything sensitive.",
       "Encryption: TLS 1.3 in transit.",
       "Servers: Mistral infrastructure (EU region, GDPR compliant).",
@@ -65,7 +65,7 @@ const SECTIONS = [
     icon: Trash2,
     title: "Data storage & deletion",
     content: [
-      "MabuhAi is an emotional-support companion, not a clinical record. The app does not store chat history on the device or the server beyond the live request.",
+      "Mabuh-ai is an emotional-support companion, not a clinical record. The app does not store chat history on the device or the server beyond the live request.",
       "Your profile, check-ins, and journals live in your Supabase project and follow the RLS policies in supabase/schema.sql. Account deletion removes them via the public.delete_user() function.",
       "You can clear all local data from Settings → Your data.",
     ],
@@ -238,10 +238,10 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
           {/* AI free-tier disclosure callout */}
           <div className="rounded-xl p-4 bg-amber-950/20 border border-amber-500/20">
             <h4 className="text-sm font-semibold text-amber-300 mb-1.5">
-              About the AI behind MabuhAi
+              About the AI behind Mabuh-ai
             </h4>
             <p className="text-xs text-neutral-300 leading-relaxed">
-              MabuhAi runs on the free tier of Mistral AI. Because of how the free tier
+              Mabuh-ai runs on the free tier of Mistral AI. Because of how the free tier
               works, the messages you send here may be used by Mistral to train and
               improve their models. Please keep this in mind — share only what feels safe
               to share, and avoid personal details like your full name, school, address,
@@ -249,7 +249,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
             </p>
             <p className="text-[11px] text-amber-200/80 mt-2 leading-relaxed">
               This feature is optional. If you prefer not to use the AI companion, you can
-              close this dialog and continue using the rest of MabuhAi — check-ins,
+              close this dialog and continue using the rest of Mabuh-ai — check-ins,
               journal, and support resources will still be available to you.
             </p>
           </div>

@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth, useAuthActions, useAuthStore } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { Input } from "@/components/ui/input";
+import { BrandMark } from "@/components/shared/BrandMark";
 import { cn } from "@/lib/utils";
 
 type Tab = "sign-in" | "sign-up";
@@ -539,15 +540,13 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
       <section className="relative mx-auto flex min-h-dvh w-full max-w-[26rem] flex-col px-6 pb-[calc(var(--safe-bottom)+1.5rem)] pt-[calc(var(--safe-top)+2.5rem)]">
         <header className="flex flex-col items-center justify-start gap-4">
           <img
-            src="/app-logo.svg"
+            src="/app-logo-light.svg"
             alt="Mabuh-ai"
             width={72}
             height={72}
             className="size-18"
           />
-          <span className="font-serif text-4xl font-medium tracking-[-0.02em] text-foreground">
-            Mabuh<span className="text-muted-foreground">-ai</span>
-          </span>
+          <BrandMark size="xl" />
         </header>
 
         <div className="flex flex-1 flex-col justify-center py-10">

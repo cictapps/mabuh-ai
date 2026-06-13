@@ -9,6 +9,7 @@
     "opener:default",
     "google-auth:default",
     "store:default",
+    "notification:default",
     {
       "identifier": "http:default",
       "allow": [

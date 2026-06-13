@@ -20,7 +20,7 @@ interface AiConsentDialogProps {
 function buildSummary(toggles: AiContextToggles): string {
   const enabled = AI_CONTEXT_KEYS.filter((k) => toggles[k]);
   if (enabled.length === 0) {
-    return "By default, MabuhAi sends only the message you typed and a minimal context flag. No history, name, mood, or journal entries are forwarded.";
+    return "By default, Mabuh-ai sends only the message you typed and a minimal context flag. No history, name, mood, or journal entries are forwarded.";
   }
   return (
     "With your current choices, each message will include: " +

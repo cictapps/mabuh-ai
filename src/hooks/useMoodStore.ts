@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
+import type {
   ActivitySectionId,
   ActivitySelections,
   JournalEntry,
@@ -25,7 +25,7 @@ export interface ReminderPreferences {
 const REMINDER_KEY = "mabuh_reminder_prefs";
 
 const DEFAULT_REMINDER: ReminderPreferences = {
-  enabled: false,
+  enabled: true,
   hour: 20,
   minute: 0,
 };

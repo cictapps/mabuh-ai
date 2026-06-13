@@ -58,11 +58,11 @@ const OFF_TOPIC_PATTERNS: Array<{ category: string; re: RegExp }> = [
 
 const OFF_TOPIC_REPLIES: Record<string, string> = {
   coding:
-    "I'm MabuhAi, your emotional support companion — I can't help with coding or programming tasks. 💙 I'm here for your feelings, stress, or whatever's on your mind though. What's been weighing on you lately?",
+    "I'm Mabuh-ai, your emotional support companion — I can't help with coding or programming tasks. 💙 I'm here for your feelings, stress, or whatever's on your mind though. What's been weighing on you lately?",
   "homework-help":
-    "I'm MabuhAi, your emotional support companion — I can't help solve homework or assignments. 💙 But if school pressure is stressing you out, I'm all ears. Want to talk about how it's been going?",
+    "I'm Mabuh-ai, your emotional support companion — I can't help solve homework or assignments. 💙 But if school pressure is stressing you out, I'm all ears. Want to talk about how it's been going?",
   "general-knowledge":
-    "I'm MabuhAi, your emotional support companion — I can't look up facts or definitions. 💙 What I can do is listen. Is there something on your mind I can help you sit with?",
+    "I'm Mabuh-ai, your emotional support companion — I can't look up facts or definitions. 💙 What I can do is listen. Is there something on your mind I can help you sit with?",
 };
 
 function detectOffTopicMessage(text: string): string | null {
@@ -703,7 +703,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     ) : (
       <>
         <p>
-          Kamusta! I&apos;m <span className="font-bold text-primary">MabuhAi</span>, your
+          Kamusta! I&apos;m <span className="font-bold text-primary">Mabuh-ai</span>, your
           mental health companion. 🌿
         </p>
         <p className="mt-2">

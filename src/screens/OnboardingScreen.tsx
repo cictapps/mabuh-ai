@@ -4,6 +4,8 @@ import {
   BookOpen,
   Check,
   MessageCircleHeart,
+  Settings,
+  ShieldCheck,
   Sparkles,
   Sun,
 } from "lucide-react";
@@ -13,7 +15,7 @@ interface OnboardingScreenProps {
 }
 
 type SlideVisual = {
-  kind: "heart" | "moods" | "journal" | "support";
+  kind: "heart" | "moods" | "journal" | "support" | "ai-controls";
 };
 
 interface OnboardingSlide {
@@ -31,7 +33,7 @@ const SLIDES: OnboardingSlide[] = [
     eyebrow: "Welcome",
     title: "A quiet space, made for students.",
     body:
-      "MabuhAi is a soft place to land between classes, deadlines, and the rest of life. No scores, no streaks to lose — just a few minutes to notice how you're doing.",
+      "Mabuh-ai is a soft place to land between classes, deadlines, and the rest of life. No scores, no streaks to lose — just a few minutes to notice how you're doing.",
     bullets: [
       "Private by default — your entries stay yours",
       "Built for tired eyes and late nights",
@@ -57,7 +59,7 @@ const SLIDES: OnboardingSlide[] = [
     eyebrow: "Reflect & grow",
     title: "A journal that actually listens.",
     body:
-      "Drop a quick thought, save a memory, or capture an idea. MabuhAi quietly turns your entries into gentle insights so the bigger picture of your wellbeing stays visible — and yours.",
+      "Drop a quick thought, save a memory, or capture an idea. Mabuh-ai quietly turns your entries into gentle insights so the bigger picture of your wellbeing stays visible — and yours.",
     bullets: [
       "Short notes, voice, or video entries",
       "Mask-Off mode for the unfiltered stuff",
@@ -77,6 +79,19 @@ const SLIDES: OnboardingSlide[] = [
       "Urgent help button, one tap away",
     ],
     visual: { kind: "support" },
+  },
+  {
+    id: "ai-controls",
+    eyebrow: "Your choice",
+    title: "Let the AI understand only what you choose.",
+    body:
+      "In Settings, you can let the AI companion use selected parts of your Mabuh-ai activity for more relevant support. These options start off, and you can change them anytime.",
+    bullets: [
+      "Choose context such as recent moods or journals",
+      "Only enabled details are shared with the AI",
+      "Turn any AI context option off in Settings",
+    ],
+    visual: { kind: "ai-controls" },
   },
 ];
 
@@ -406,16 +421,131 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
     );
   }
 
-  // support
+  if (kind === "support") {
+    return (
+      <div
+        aria-hidden
+        style={{
+          position: "relative",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "clamp(8px, 2.4vw, 12px) clamp(10px, 3vw, 14px)",
+            borderRadius: 18,
+            background: "rgba(188,194,255,0.08)",
+            border: "1px solid rgba(188,194,255,0.10)",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              placeItems: "center",
+              width: 34,
+              height: 34,
+              borderRadius: 12,
+              background:
+                "linear-gradient(140deg, rgba(188,194,255,0.85), rgba(212,187,255,0.7))",
+              color: "#1a1c2b",
+              flexShrink: 0,
+            }}
+          >
+            <MessageCircleHeart size={16} strokeWidth={1.8} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "#eef1f6",
+                fontWeight: 500,
+                marginBottom: 2,
+              }}
+            >
+              Companion chat
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: "rgba(188,194,255,0.55)",
+                lineHeight: 1.4,
+              }}
+            >
+              Empathetic, available any hour.
+            </div>
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "clamp(8px, 2.4vw, 12px) clamp(10px, 3vw, 14px)",
+            borderRadius: 18,
+            background: "rgba(255,185,84,0.10)",
+            border: "1px solid rgba(255,185,84,0.18)",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              placeItems: "center",
+              width: 34,
+              height: 34,
+              borderRadius: 12,
+              background: "rgba(255,185,84,0.85)",
+              color: "#1a1c2b",
+              flexShrink: 0,
+            }}
+          >
+            <Sun size={16} strokeWidth={1.8} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "#eef1f6",
+                fontWeight: 500,
+                marginBottom: 2,
+              }}
+            >
+              Urgent help
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: "rgba(255,185,84,0.75)",
+                lineHeight: 1.4,
+              }}
+            >
+              One tap to crisis hotlines.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const contextRows = ["Recent moods", "Journal entries", "Journey progress"];
   return (
     <div
       aria-hidden
       style={{
         position: "relative",
         width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
+        padding: "14px",
+        borderRadius: 24,
+        background:
+          "linear-gradient(155deg, rgba(188,194,255,0.12), rgba(212,187,255,0.07) 55%, rgba(255,185,84,0.08))",
+        border: "1px solid rgba(188,194,255,0.10)",
+        boxShadow: "0 24px 60px -36px rgba(8,10,18,0.85)",
+        overflow: "hidden",
       }}
     >
       <div
@@ -423,10 +553,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
           display: "flex",
           alignItems: "center",
           gap: 10,
-          padding: "clamp(8px, 2.4vw, 12px) clamp(10px, 3vw, 14px)",
-          borderRadius: 18,
-          background: "rgba(188,194,255,0.08)",
-          border: "1px solid rgba(188,194,255,0.10)",
+          marginBottom: 10,
         }}
       >
         <div
@@ -436,13 +563,12 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             width: 34,
             height: 34,
             borderRadius: 12,
-            background:
-              "linear-gradient(140deg, rgba(188,194,255,0.85), rgba(212,187,255,0.7))",
-            color: "#1a1c2b",
+            background: "rgba(188,194,255,0.16)",
+            color: "#bcc2ff",
             flexShrink: 0,
           }}
         >
-          <MessageCircleHeart size={16} strokeWidth={1.8} />
+          <ShieldCheck size={17} strokeWidth={1.8} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
@@ -453,65 +579,83 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
               marginBottom: 2,
             }}
           >
-            Companion chat
+            AI companion context
           </div>
           <div
             style={{
               fontSize: 11,
-              color: "rgba(188,194,255,0.55)",
+              color: "rgba(216,212,235,0.6)",
               lineHeight: 1.4,
             }}
           >
-            Empathetic, available any hour.
+            You decide what can help personalize replies.
           </div>
         </div>
+        <Settings size={15} color="rgba(216,212,235,0.55)" />
       </div>
+
+      {contextRows.map((label) => (
+        <div
+          key={label}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "8px 10px",
+            marginTop: 5,
+            borderRadius: 14,
+            background: "rgba(188,194,255,0.04)",
+            border: "1px solid rgba(188,194,255,0.08)",
+          }}
+        >
+          <span
+            style={{
+              fontSize: 12,
+              color: "rgba(238,241,246,0.82)",
+              fontWeight: 500,
+              flex: 1,
+            }}
+          >
+            {label}
+          </span>
+          <span
+            style={{
+              position: "relative",
+              width: 36,
+              height: 20,
+              borderRadius: 999,
+              background: "rgba(216,212,235,0.16)",
+              flexShrink: 0,
+            }}
+          >
+            <span
+              style={{
+                position: "absolute",
+                top: 2,
+                left: 2,
+                width: 16,
+                height: 16,
+                borderRadius: "50%",
+                background: "#d8d4eb",
+              }}
+            />
+          </span>
+        </div>
+      ))}
+
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 10,
-          padding: "clamp(8px, 2.4vw, 12px) clamp(10px, 3vw, 14px)",
-          borderRadius: 18,
-          background: "rgba(255,185,84,0.10)",
-          border: "1px solid rgba(255,185,84,0.18)",
+          gap: 7,
+          marginTop: 10,
+          color: "rgba(255,217,154,0.82)",
+          fontSize: 10.5,
+          lineHeight: 1.4,
         }}
       >
-        <div
-          style={{
-            display: "grid",
-            placeItems: "center",
-            width: 34,
-            height: 34,
-            borderRadius: 12,
-            background: "rgba(255,185,84,0.85)",
-            color: "#1a1c2b",
-            flexShrink: 0,
-          }}
-        >
-          <Sun size={16} strokeWidth={1.8} />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 12,
-              color: "#eef1f6",
-              fontWeight: 500,
-              marginBottom: 2,
-            }}
-          >
-            Urgent help
-          </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: "rgba(255,185,84,0.75)",
-              lineHeight: 1.4,
-            }}
-          >
-            One tap to crisis hotlines.
-          </div>
-        </div>
+        <Settings size={12} />
+        Settings → AI companion context
       </div>
     </div>
   );
@@ -713,7 +857,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
             aria-hidden
           >
             <img
-              src="/app-logo.svg"
+              src="/app-logo-light.svg"
               alt=""
               width={32}
               height={32}
@@ -725,14 +869,14 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
               className="font-serif"
               style={{ fontSize: 16, fontWeight: 500, letterSpacing: "-0.01em" }}
             >
-              MabuhAi
+              Mabuh-ai
             </span>
             <span
               style={{
                 fontSize: 10,
                 letterSpacing: "1.4px",
                 textTransform: "uppercase",
-                color: "rgba(220,224,255,0.5)",
+                color: "rgba(216,212,235,0.55)",
                 fontWeight: 500,
               }}
             >

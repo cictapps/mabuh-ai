@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { nextFireDate } from "./reminders";
+import { nextFireDate, reminderMessageForDate } from "./reminders";
+
+function at(year: number, month: number, day: number, hour = 9, minute = 0): Date {
+  return new Date(year, month - 1, day, hour, minute, 0, 0);
+}
 
 describe("nextFireDate", () => {
-  function at(year: number, month: number, day: number, hour = 9, minute = 0): Date {
-    return new Date(year, month - 1, day, hour, minute, 0, 0);
-  }
-
   it("returns today's time when it is still in the future", () => {
     const now = at(2025, 1, 10, 8, 0);
     const fire = nextFireDate({ enabled: true, hour: 9, minute: 0 }, now);
@@ -34,5 +34,23 @@ describe("nextFireDate", () => {
     const now = at(2025, 1, 10, 9, 0);
     const fire = nextFireDate({ enabled: true, hour: 9, minute: 0 }, now);
     expect(fire.getDate()).toBe(11);
+  });
+});
+
+describe("reminderMessageForDate", () => {
+  it("returns a stable message for the same calendar day", () => {
+    const morning = at(2025, 1, 10, 8, 0);
+    const evening = at(2025, 1, 10, 20, 0);
+
+    expect(reminderMessageForDate(morning)).toEqual(
+      reminderMessageForDate(evening),
+    );
+  });
+
+  it("rotates messages across consecutive days", () => {
+    const today = reminderMessageForDate(at(2025, 1, 10));
+    const tomorrow = reminderMessageForDate(at(2025, 1, 11));
+
+    expect(tomorrow).not.toEqual(today);
   });
 });

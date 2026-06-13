@@ -1,10 +1,14 @@
 import { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspense } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ScreenId } from "./types";
+import type { ScreenId } from "./types";
 import { NAV_ITEMS } from "./data";
 import { useMoodStore } from "./hooks/useMoodStore";
 import { useOnboarding } from "./hooks/useOnboarding";
-import { scheduleReminder, cancelReminder, requestReminderPermission } from "./lib/reminders";
+import {
+  scheduleReminder,
+  cancelReminder,
+  type ReminderStatus,
+} from "./lib/reminders";
 import { useJourneyStore } from "./lib/journey/useJourneyStore";
 
 import { BottomNav } from "./components/shared/BottomNav";
@@ -86,6 +90,7 @@ export default function App({
   );
   const [activeHub, setActiveHub] = useState<ScreenId>(initialState.activeHub);
   const [supportView, setSupportView] = useState<SupportView>(initialState.supportView);
+  const [reminderStatus, setReminderStatus] = useState<ReminderStatus | null>(null);
   const previousHubRef = useRef<ScreenId>(initialState.activeHub);
   const mainRef = useRef<HTMLElement | null>(null);
   const {
@@ -195,18 +200,15 @@ export default function App({
 
   useEffect(() => {
     if (!reminder.enabled) {
-      cancelReminder();
+      void cancelReminder();
+      setReminderStatus(null);
       return;
     }
     let cancelled = false;
     (async () => {
-      const status = await requestReminderPermission();
+      const status = await scheduleReminder(reminder);
       if (cancelled) return;
-      if (status === "granted") {
-        scheduleReminder(reminder);
-      } else {
-        cancelReminder();
-      }
+      setReminderStatus(status);
     })();
     return () => {
       cancelled = true;
@@ -313,6 +315,7 @@ export default function App({
             >
               <SettingsScreen
                 reminder={reminder}
+                reminderStatus={reminderStatus}
                 onSetReminder={setReminder}
                 onExportData={exportData}
                 onClearAllLocalData={clearAllLocalData}

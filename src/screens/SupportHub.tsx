@@ -266,7 +266,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
                 Open companion chat
               </span>
               <span className="mt-0.5 block text-[12px] leading-relaxed text-[#ffd99a]">
-                Talk to MabuhAi for private, conversational support.
+                Talk to Mabuh-ai for private, conversational support.
               </span>
             </span>
             <ArrowUpRight size={16} className="text-tertiary/80" />

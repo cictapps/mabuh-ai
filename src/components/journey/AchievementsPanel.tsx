@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Award, Gift, Lock, MapPin, Sparkles, Star } from "lucide-react";
 import {
   Card,
@@ -9,6 +10,7 @@ import {
 import { Pill } from "./Pill";
 import { ProgressBar } from "./ProgressBar";
 import { ContextualHint } from "./ContextualHint";
+import { AchievementShareCard } from "./AchievementShareCard";
 import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 import {
   levelFromXp,
@@ -17,6 +19,8 @@ import {
   XP_REWARDS,
   REWARDS,
   reachedMilestones,
+  nextMilestone,
+  tierForLevel,
 } from "@/lib/journey/xp";
 
 const XP_RULES: { label: string; value: string }[] = [
@@ -60,6 +64,19 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
     pauseCount,
     bestRhythm,
   );
+  const latestMilestone = milestones[milestones.length - 1];
+  const upcomingMilestone = useMemo(
+    () =>
+      nextMilestone(
+        flightsCompleted,
+        gardenDaysCompleted,
+        journalEntryCount,
+        pauseCount,
+        bestRhythm,
+      ),
+    [bestRhythm, flightsCompleted, gardenDaysCompleted, journalEntryCount, pauseCount],
+  );
+  const tier = tierForLevel(level);
 
   return (
     <Card>
@@ -120,6 +137,16 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
             ))}
           </ul>
         </div>
+
+        <AchievementShareCard
+          level={level}
+          totalXp={totalXp}
+          streak={streak}
+          journeysCompleted={flightsCompleted + gardenDaysCompleted}
+          milestoneLabel={latestMilestone?.label}
+          tierLabel={tier}
+          nextMilestone={upcomingMilestone}
+        />
 
         {/* Rewards */}
         <div>

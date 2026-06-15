@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { LegalShell } from "@/components/shared/LegalShell";
 
 const LAST_UPDATED = "June 2026";
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 
 interface Section {
   id: string;
@@ -35,6 +35,7 @@ const SECTIONS: Section[] = [
     body: [
       "An account email address and a display name, used to sign you in and personalize the app.",
       "Your mood check-ins, journal entries, and self-care journey — these are tied to your account so you can review them across devices.",
+      "Normal companion chat messages and replies are saved locally on your current device under your signed-in account. Mask on conversations are not saved.",
       "Anonymous usage data and device information (operating system, app version) to help us improve the app.",
     ],
   },
@@ -59,9 +60,11 @@ const SECTIONS: Section[] = [
     id: "storage-and-deletion",
     title: "Storage and deletion",
     body: [
-      "Your account data is stored in Supabase (Postgres) in the EU/US region, encrypted in transit (TLS 1.3) and at rest.",
+      "On Android, check-ins and journals are stored first in app-private SQLite storage, then synchronized to Supabase when internet is available. Unsynced changes remain on the device until synchronization succeeds.",
+      "The latest 100 completed normal chat messages are stored only in local device storage. They are not cloud-synced and are not sent to the AI as conversation history when the screen is restored.",
+      "Mask on conversations remain temporary. Pull-to-refresh reloads only the normal transcript already saved on the device.",
       "Mistral AI may retain copies of the prompts and replies you sent to the companion on their own infrastructure, governed by their free-tier terms.",
-      "You can delete your account at any time from Settings → Account → Delete my account. Deletion is permanent and removes your data from our database within 30 days.",
+      "Signing out clears locally cached wellness data and the local chat transcript from that device. Deleting cloud data or the account requires internet access.",
     ],
   },
   {
@@ -213,12 +216,11 @@ export function PrivacyPolicyPage() {
             margin: 0,
           }}
         >
-          Mabuh-ai was designed and coded by BS Information Systems students
-          of the College of Information and Communications Technology at
-          West Visayas State University, as a class project for Mobile App
-          Development. It is provided free of charge and is not a commercial
-          product. If something feels off, please tell us — your feedback
-          shapes the next iteration.
+          Mabuh-ai was designed and coded by BS Information Systems students of the
+          College of Information and Communications Technology at West Visayas State
+          University, as a class project for Mobile App Development. It is provided free
+          of charge and is not a commercial product. If something feels off, please tell
+          us — your feedback shapes the next iteration.
         </p>
         <p style={{ fontSize: 13, margin: 0, marginTop: 6 }}>
           <Link

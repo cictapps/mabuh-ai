@@ -265,12 +265,27 @@ input[type="password"]::-ms-clear {
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
+    --android-title-bar-height: 0px;
+    --app-top-inset: max(var(--safe-top), var(--android-title-bar-height));
+    --app-screen-top: calc(var(--app-top-inset) + 20px);
+    --app-header-top: calc(var(--app-top-inset) + 10px);
+  }
+
+  @media (pointer: coarse) {
+    :root {
+      /* Android's status/title bar is 24dp high on the reference layout.
+         Some WebViews report a zero safe-area inset, so retain that space. */
+      --android-title-bar-height: 24px;
+    }
   }
 
   /* Common helper utilities. Use these instead of hard-coded paddings so
      status-bar / gesture-bar handling stays consistent across screens. */
   .pt-safe {
     padding-top: var(--safe-top);
+  }
+  .pt-screen {
+    padding-top: var(--app-screen-top);
   }
   .pb-safe {
     padding-bottom: var(--safe-bottom);
@@ -805,7 +820,7 @@ input[type="password"]::-ms-clear {
   display: flex;
   flex-direction: column;
   gap: clamp(14px, 4vw, 22px);
-  padding: calc(env(safe-area-inset-top, 0px) + clamp(20px, 6vw, 32px))
+  padding: var(--app-screen-top)
     clamp(16px, 5vw, 24px) calc(env(safe-area-inset-bottom, 0px) + 120px);
   position: relative;
   width: 100%;

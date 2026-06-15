@@ -3,33 +3,49 @@ import { SuggestionCard } from "../components/suggestions/SuggestionCard";
 import { SectionLabel } from "../components/shared/SectionLabel";
 import { getTrendSuggestions } from "../data/insightSuggestions";
 import { deriveInsights } from "../lib/insights";
-import { MoodEntry } from "../types";
+import type { MoodEntry } from "../types";
 
 interface InsightsScreenProps {
   refreshToken?: number | null;
+  visitToken?: number;
   history: MoodEntry[];
   loading?: boolean;
 }
 
+function createVisitRandom(seed: number) {
+  let state = seed || 1;
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+}
+
 export const InsightsScreen: React.FC<InsightsScreenProps> = ({
   refreshToken,
+  visitToken,
   history,
   loading,
 }) => {
-  const insights = useMemo(
-    () => deriveInsights(history).slice(0, 3),
-    [history, refreshToken],
-  );
+  const insights = useMemo(() => deriveInsights(history).slice(0, 3), [history]);
 
   const suggestions = useMemo(
-    () => getTrendSuggestions(history).slice(0, 3),
-    [history, refreshToken],
+    () =>
+      getTrendSuggestions(
+        history,
+        createVisitRandom((visitToken ?? 0) + (refreshToken ?? 0)),
+      ).slice(0, 3),
+    [history, refreshToken, visitToken],
   );
 
   return (
     <div
       className="screen-enter"
-      style={{ padding: "30px 22px 52px", display: "flex", flexDirection: "column", gap: 24 }}
+      style={{
+        padding: "30px 22px 52px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 24,
+      }}
     >
       <div>
         <p
@@ -82,7 +98,11 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
   );
 };
 
-function InsightRow({ insight }: { insight: { id: string; title: string; body: string; color: string } }) {
+function InsightRow({
+  insight,
+}: {
+  insight: { id: string; title: string; body: string; color: string };
+}) {
   return (
     <div
       style={{

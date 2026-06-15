@@ -276,6 +276,71 @@ export function rewardsForLevel(level: number): JourneyReward[] {
   return REWARDS.filter((r) => r.level === level);
 }
 
+const LEVEL_TIERS: { min: number; label: string }[] = [
+  { min: 1, label: "Curious newcomer" },
+  { min: 2, label: "Gentle flyer" },
+  { min: 3, label: "Steady companion" },
+  { min: 4, label: "Patient gardener" },
+  { min: 5, label: "Calm practitioner" },
+  { min: 7, label: "Soft horizon" },
+  { min: 9, label: "Quiet explorer" },
+  { min: 12, label: "Sanctuary pilot" },
+];
+
+export function tierForLevel(level: number): string {
+  let tier = LEVEL_TIERS[0].label;
+  for (const entry of LEVEL_TIERS) {
+    if (level >= entry.min) tier = entry.label;
+  }
+  return tier;
+}
+
+export interface NextMilestone {
+  label: string;
+  body: string;
+  progress: number;
+  hint: string;
+}
+
+export function nextMilestone(
+  flightsCompleted: number,
+  gardenDaysCompleted: number,
+  journalCount: number,
+  pauseCount: number,
+  bestRhythm: number,
+): NextMilestone | null {
+  const counts: Record<JourneyMilestone["type"], number> = {
+    flight: flightsCompleted,
+    plant: gardenDaysCompleted,
+    journal: journalCount,
+    pause: pauseCount,
+    rhythm: bestRhythm,
+  };
+  for (const m of MILESTONES) {
+    const current = counts[m.type];
+    if (current < m.threshold) {
+      const remaining = m.threshold - current;
+      const verb =
+        m.type === "flight"
+          ? "flight"
+          : m.type === "plant"
+            ? "garden day"
+            : m.type === "journal"
+              ? "journal entry"
+              : m.type === "pause"
+                ? "pause"
+                : "day streak";
+      return {
+        label: m.label,
+        body: m.body,
+        progress: current / m.threshold,
+        hint: `${remaining} more ${verb}${remaining === 1 ? "" : "s"}`,
+      };
+    }
+  }
+  return null;
+}
+
 export function newRewardsAtLevel(
   oldLevel: number,
   newLevel: number,

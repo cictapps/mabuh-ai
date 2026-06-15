@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ReviewTabId, MoodEntry, MoodType } from "../types";
+import type { ReviewTabId, MoodEntry, MoodType } from "../types";
 import { HistoryScreen } from "./HistoryScreen";
 import { AnalyticsScreen } from "./AnalyticsScreen";
 import { InsightsScreen } from "./InsightsScreen";
@@ -20,6 +20,7 @@ interface TrendPoint {
 }
 
 interface ReviewHubProps {
+  visitToken?: number;
   history: MoodEntry[];
   trendData: TrendPoint[];
   distribution: DistItem[];
@@ -65,9 +66,7 @@ const tabs: Array<{ id: ReviewTabId; label: string; icon: string }> = [
 
 const renderTabIcon = (iconName: string, isActive: boolean) => {
   const size = 16;
-  const className = isActive
-    ? "text-[#171a27]"
-    : "text-[rgba(188,194,255,0.34)]";
+  const className = isActive ? "text-[#171a27]" : "text-[rgba(188,194,255,0.34)]";
 
   switch (iconName) {
     case "history":
@@ -84,6 +83,7 @@ const renderTabIcon = (iconName: string, isActive: boolean) => {
 };
 
 export const ReviewHub: React.FC<ReviewHubProps> = ({
+  visitToken = 0,
   history,
   trendData,
   distribution,
@@ -99,12 +99,20 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
   error,
 }) => {
   const [activeTab, setActiveTab] = useState<ReviewTabId>("history");
+  const [insightsVisitToken, setInsightsVisitToken] = useState(0);
+
+  const handleTabChange = (tabId: ReviewTabId) => {
+    setActiveTab(tabId);
+    if (tabId === "insights") {
+      setInsightsVisitToken((token) => token + 1);
+    }
+  };
 
   return (
     <div
       className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
       style={{
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 4px)",
+        paddingTop: "var(--app-screen-top)",
         minHeight: "100%",
       }}
     >
@@ -180,7 +188,7 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
               type="button"
               role="tab"
               aria-selected={isActive}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               aria-label={tab.label}
               className={`relative flex min-w-0 items-center justify-center rounded-xl py-2.5 transition-all duration-300 ease-out active:scale-[0.97] ${
                 isActive ? "flex-[2.6] gap-1.5 px-2.5" : "flex-1 gap-0 px-1"
@@ -190,9 +198,7 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
                   ? "linear-gradient(to right, var(--primary), var(--secondary), var(--primary))"
                   : "transparent",
                 color: isActive ? "var(--primary-foreground)" : "rgba(216,212,235,0.6)",
-                boxShadow: isActive
-                  ? "0 14px 32px -18px rgba(188,194,255,0.85)"
-                  : "none",
+                boxShadow: isActive ? "0 14px 32px -18px rgba(188,194,255,0.85)" : "none",
               }}
             >
               {renderTabIcon(tab.icon, isActive)}
@@ -253,6 +259,7 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
         <div style={{ display: activeTab === "insights" ? "block" : "none" }}>
           <InsightsScreen
             refreshToken={refreshToken}
+            visitToken={visitToken + insightsVisitToken}
             history={history}
             loading={loading}
           />

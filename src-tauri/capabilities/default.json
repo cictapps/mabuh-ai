@@ -2,20 +2,37 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "deep-link:default",
     "opener:default",
     "google-auth:default",
     "store:default",
+    "sql:default",
+    "sql:allow-execute",
     "notification:default",
     {
       "identifier": "http:default",
       "allow": [
-        { "url": "https://mabuh-ai-server.onrender.com" },
-        { "url": "https://mabuh-ai-server-29h8.onrender.com" },
-        { "url": "https://*.supabase.co/*" }
+        {
+          "url": "https://mabuh-ai-server.onrender.com"
+        },
+        {
+          "url": "https://mabuh-ai-server-29h8.onrender.com"
+        },
+        {
+          "url": "https://*.supabase.co/*"
+        }
+      ]
+    },
+    "fs:default",
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        { "path": "$DOWNLOAD/mabuh-ai-quiet-win-*.png" }
       ]
     }
   ]

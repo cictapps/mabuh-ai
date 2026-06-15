@@ -3,6 +3,7 @@ import { Sparkles, AlertCircle, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useReflect, type ReflectContext } from "@/services/reflect";
+import { useConnectivity } from "@/lib/connectivity";
 
 interface ReflectWithAIPanelProps {
   /** The text to reflect on (a draft or an existing entry's content). */
@@ -25,6 +26,7 @@ export function ReflectWithAIPanel({
   onClear,
 }: ReflectWithAIPanelProps) {
   const { reply, error, busy, reflect, reset } = useReflect({ buildContext });
+  const online = useConnectivity();
   const [open, setOpen] = useState(false);
 
   async function handleClick() {
@@ -48,12 +50,12 @@ export function ReflectWithAIPanel({
         variant="outline"
         size="sm"
         onClick={() => void handleClick()}
-        disabled={busy}
+        disabled={busy || !online}
         aria-busy={busy}
         className="self-start"
       >
         <Sparkles className="size-3.5" />
-        {busy ? "Thinking with you…" : buttonLabel}
+        {busy ? "Thinking with you…" : online ? buttonLabel : "AI reflection needs internet"}
       </Button>
 
       {open && (

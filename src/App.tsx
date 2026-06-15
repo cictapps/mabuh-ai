@@ -4,13 +4,11 @@ import type { ScreenId } from "./types";
 import { NAV_ITEMS } from "./data";
 import { useMoodStore } from "./hooks/useMoodStore";
 import { useOnboarding } from "./hooks/useOnboarding";
-import { useAuthActions } from "./lib/auth";
-import {
-  scheduleReminder,
-  cancelReminder,
-  type ReminderStatus,
-} from "./lib/reminders";
+import { useAuth, useAuthActions } from "./lib/auth";
+import { scheduleReminder, cancelReminder, type ReminderStatus } from "./lib/reminders";
 import { useJourneyStore } from "./lib/journey/useJourneyStore";
+import { removeChatTranscript } from "./lib/chatStorage";
+import { RefreshCw } from "lucide-react";
 
 import { BottomNav } from "./components/shared/BottomNav";
 import { CheckInScreen } from "./screens/CheckInScreen";
@@ -83,6 +81,7 @@ export default function App({
   initialSupportView = "hub",
   showOnboarding = true,
 }: AppProps) {
+  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const initialState = readPersistedNav(
@@ -91,9 +90,16 @@ export default function App({
   );
   const [activeHub, setActiveHub] = useState<ScreenId>(initialState.activeHub);
   const [supportView, setSupportView] = useState<SupportView>(initialState.supportView);
+  const [reviewVisitToken, setReviewVisitToken] = useState(0);
   const [reminderStatus, setReminderStatus] = useState<ReminderStatus | null>(null);
   const previousHubRef = useRef<ScreenId>(initialState.activeHub);
   const mainRef = useRef<HTMLElement | null>(null);
+  const pullStartXRef = useRef<number | null>(null);
+  const pullStartYRef = useRef<number | null>(null);
+  const pullClaimedRef = useRef(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+  const [pullNotice, setPullNotice] = useState<string | null>(null);
   const {
     hasCompleted,
     complete: completeOnboarding,
@@ -133,6 +139,8 @@ export default function App({
     reminder,
     loading,
     error,
+    online,
+    syncStatus,
     selectMood,
     toggleTag,
     setJournal,
@@ -148,6 +156,7 @@ export default function App({
     saveEntry,
     removeEntry,
     updateEntry,
+    refreshData,
     setReminder,
     exportData,
     clearAllLocalData,
@@ -193,14 +202,86 @@ export default function App({
   );
 
   const { deleteAllData } = useAuthActions();
+  const handleClearAllLocalData = useCallback(() => {
+    clearAllLocalData();
+    if (user?.id) removeChatTranscript(user.id);
+  }, [clearAllLocalData, user?.id]);
+
   const handleDeleteAllData = useCallback(async () => {
     await deleteAllData();
     // The account is preserved; only user-scoped data is gone. Wipe the
     // local cache so the UI stops showing the entries the server just
     // deleted, and reset the journey progression and reminder prefs.
-    clearAllLocalData();
+    handleClearAllLocalData();
     useJourneyStore.getState().resetAll();
-  }, [deleteAllData, clearAllLocalData]);
+  }, [deleteAllData, handleClearAllLocalData]);
+
+  const canPullRefresh = activeHub === "checkin" || activeHub === "review";
+
+  const handlePullStart = useCallback(
+    (event: React.TouchEvent<HTMLElement>) => {
+      const main = mainRef.current;
+      const target = event.target as HTMLElement | null;
+      if (
+        !canPullRefresh ||
+        !main ||
+        main.scrollTop > 0 ||
+        loading ||
+        isPullRefreshing ||
+        target?.closest("[data-horizontal-swipe]")
+      ) {
+        pullStartXRef.current = null;
+        pullStartYRef.current = null;
+        pullClaimedRef.current = false;
+        return;
+      }
+      pullStartXRef.current = event.touches[0]?.clientX ?? null;
+      pullStartYRef.current = event.touches[0]?.clientY ?? null;
+      pullClaimedRef.current = false;
+    },
+    [canPullRefresh, isPullRefreshing, loading],
+  );
+
+  const handlePullMove = useCallback((event: React.TouchEvent<HTMLElement>) => {
+    if (pullStartXRef.current == null || pullStartYRef.current == null) return;
+    const currentX = event.touches[0]?.clientX;
+    const currentY = event.touches[0]?.clientY;
+    if (currentX == null || currentY == null) return;
+    const deltaX = currentX - pullStartXRef.current;
+    const deltaY = currentY - pullStartYRef.current;
+
+    if (!pullClaimedRef.current) {
+      if (Math.abs(deltaX) > 8 && Math.abs(deltaX) >= Math.abs(deltaY)) {
+        pullStartXRef.current = null;
+        pullStartYRef.current = null;
+        return;
+      }
+      if (deltaY < 8 || deltaY <= Math.abs(deltaX) * 1.25) return;
+      pullClaimedRef.current = true;
+    }
+
+    setPullDistance(Math.max(0, Math.min(88, deltaY * 0.55)));
+  }, []);
+
+  const handlePullEnd = useCallback(() => {
+    const claimed = pullClaimedRef.current;
+    pullStartXRef.current = null;
+    pullStartYRef.current = null;
+    pullClaimedRef.current = false;
+    if (!claimed || pullDistance < 64) {
+      setPullDistance(0);
+      return;
+    }
+    setPullDistance(0);
+    setIsPullRefreshing(true);
+    void refreshData().finally(() => {
+      setPullNotice(online ? "Latest entries loaded" : "Saved entries loaded");
+      window.setTimeout(() => {
+        setIsPullRefreshing(false);
+        setPullNotice(null);
+      }, 700);
+    });
+  }, [online, pullDistance, refreshData]);
 
   const todaysCount = useMemo(() => {
     const today = new Date();
@@ -211,6 +292,9 @@ export default function App({
   }, [dailySeries, lastSavedAt]);
 
   const handleNavSelect = useCallback((id: ScreenId) => {
+    if (id === "review") {
+      setReviewVisitToken((token) => token + 1);
+    }
     setActiveHub((prev) => {
       previousHubRef.current = prev;
       return id;
@@ -253,7 +337,6 @@ export default function App({
         margin: "0 auto",
         position: "relative",
         overflow: "hidden",
-        paddingTop: "env(safe-area-inset-top, 0px)",
       }}
     >
       {showOnboarding && !hasCompleted ? (
@@ -263,6 +346,10 @@ export default function App({
           {/* Scrollable content area */}
           <main
             ref={mainRef}
+            onTouchStart={handlePullStart}
+            onTouchMove={handlePullMove}
+            onTouchEnd={handlePullEnd}
+            onTouchCancel={handlePullEnd}
             style={{
               flex: 1,
               minHeight: 0,
@@ -272,9 +359,37 @@ export default function App({
               overflowY:
                 activeHub === "support" && supportView === "chat" ? "hidden" : "auto",
               overflowX: "hidden",
+              overscrollBehaviorY: "contain",
               WebkitOverflowScrolling: "touch",
             }}
           >
+            {canPullRefresh && (
+              <div
+                aria-live="polite"
+                className="pointer-events-none sticky top-0 z-30 flex items-center justify-center overflow-hidden transition-[height,opacity] duration-200"
+                style={{
+                  height: isPullRefreshing || pullNotice ? 40 : pullDistance,
+                  opacity:
+                    isPullRefreshing || pullNotice ? 1 : Math.min(1, pullDistance / 40),
+                }}
+              >
+                <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(188,194,255,0.12)] bg-card/95 px-3 py-1.5 text-[11px] font-semibold text-[#d8d4eb] shadow-lg backdrop-blur-xl">
+                  <RefreshCw
+                    size={13}
+                    className={
+                      isPullRefreshing ? "animate-spin motion-reduce:animate-none" : ""
+                    }
+                    style={{
+                      transform: isPullRefreshing
+                        ? undefined
+                        : `rotate(${Math.min(180, pullDistance * 2.5)}deg)`,
+                    }}
+                  />
+                  {pullNotice ??
+                    (pullDistance >= 64 ? "Release to refresh" : "Pull to refresh")}
+                </div>
+              </div>
+            )}
             <div style={{ display: activeHub === "checkin" ? "block" : "none" }}>
               <CheckInScreen
                 selectedMood={selectedMood}
@@ -302,6 +417,7 @@ export default function App({
             </div>
             <div style={{ display: activeHub === "review" ? "block" : "none" }}>
               <ReviewHub
+                visitToken={reviewVisitToken}
                 history={history}
                 trendData={trendData}
                 distribution={distribution}
@@ -347,10 +463,12 @@ export default function App({
                 reminderStatus={reminderStatus}
                 onSetReminder={setReminder}
                 onExportData={exportData}
-                onClearAllLocalData={clearAllLocalData}
+                onClearAllLocalData={handleClearAllLocalData}
                 onDeleteAllData={handleDeleteAllData}
                 onReplayOnboarding={resetOnboarding}
                 onBack={handleCloseSettings}
+                online={online}
+                syncStatus={syncStatus}
               />
             </div>
           </main>

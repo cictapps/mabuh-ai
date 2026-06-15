@@ -4,10 +4,14 @@ import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import {
+  Check,
+  Cloud,
+  CloudOff,
   Cpu as CpuIcon,
   Download,
   Info,
   KeyRound,
+  LoaderCircle,
   LogOut,
   Mail,
   PlayCircle,
@@ -51,6 +55,7 @@ import { TopBarBackButton } from "../components/shared/TopBarBackButton";
 import { AiConsentSettings } from "../components/shared/AiConsentSettings";
 import type { ReminderStatus } from "../lib/reminders";
 import { openExternal } from "../lib/openExternal";
+import type { SyncStatus } from "../lib/db/moodRepository";
 
 interface SettingsScreenProps {
   reminder: ReminderPreferences;
@@ -61,6 +66,8 @@ interface SettingsScreenProps {
   onDeleteAllData: () => Promise<void>;
   onReplayOnboarding?: () => void;
   onBack: () => void;
+  online: boolean;
+  syncStatus: SyncStatus;
 }
 
 const APP_VERSION = "0.1.0";
@@ -400,6 +407,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onDeleteAllData,
   onReplayOnboarding,
   onBack,
+  online,
+  syncStatus,
 }) => {
   const { user, profile } = useAuth();
   const { signOut, updateProfile, requestPasswordReset, changePassword, deleteAccount } =
@@ -463,6 +472,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   }, []);
 
   async function handleSaveName() {
+    if (!online) {
+      setNameError("Connect to the internet to update your profile.");
+      setNameStatus("error");
+      return;
+    }
     const trimmed = displayName.trim();
     if (!trimmed) {
       setNameError("Display name can't be empty.");
@@ -487,6 +501,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   }
 
   async function handleSendReset() {
+    if (!online) {
+      setResetError("Connect to the internet to request a reset link.");
+      setResetStatus("error");
+      return;
+    }
     if (!user?.email) return;
     setResetStatus("sending");
     setResetError(null);
@@ -501,6 +520,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   }
 
   async function handleChangePassword() {
+    if (!online) {
+      setPwError("Connect to the internet to change your password.");
+      setPwStatus("error");
+      return;
+    }
     if (newPassword.length < 8) {
       setPwError("Password must be at least 8 characters.");
       setPwStatus("error");
@@ -522,6 +546,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   async function handleSignOut() {
     setSignOutBusy(true);
     try {
+      onClearAllLocalData();
       await signOut();
       navigate("/login", { replace: true });
     } catch {
@@ -531,6 +556,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   }
 
   async function handleDeleteAccount() {
+    if (!online) {
+      setDeleteError("Connect to the internet to delete your account.");
+      return;
+    }
     setDeleteBusy(true);
     setDeleteError(null);
     try {
@@ -544,6 +573,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   }
 
   async function handleWipeData() {
+    if (!online) {
+      setWipeError("Connect to the internet to delete cloud data.");
+      return;
+    }
     setWipeBusy(true);
     setWipeError(null);
     try {
@@ -922,6 +955,67 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       </Section>
 
       <Section title="Your data" icon={<Download size={16} />}>
+        <div
+          aria-live="polite"
+          className="relative overflow-hidden rounded-2xl border border-[rgba(188,194,255,0.12)] bg-[rgba(188,194,255,0.04)] px-4 py-3.5"
+        >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-10 -top-14 size-28 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.14),transparent_65%)] blur-xl"
+          />
+          <div className="relative flex items-center gap-3">
+            <span
+              className={`grid size-10 shrink-0 place-items-center rounded-xl ${
+                syncStatus.error && online
+                  ? "bg-[rgba(255,123,123,0.12)] text-[rgba(255,170,170,0.95)]"
+                  : !online
+                    ? "bg-[rgba(255,185,84,0.12)] text-tertiary"
+                    : "bg-[rgba(188,194,255,0.14)] text-primary"
+              }`}
+            >
+              {syncStatus.syncing ? (
+                <LoaderCircle
+                  size={18}
+                  className="animate-spin motion-reduce:animate-none"
+                />
+              ) : !online ? (
+                <CloudOff size={18} />
+              ) : syncStatus.pendingCount > 0 || syncStatus.error ? (
+                <Cloud size={18} />
+              ) : (
+                <Check size={18} />
+              )}
+            </span>
+
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-2">
+                <span className="truncate text-sm font-semibold text-foreground">
+                  {syncStatus.syncing
+                    ? "Syncing your data"
+                    : !online
+                      ? "Saved on this device"
+                      : syncStatus.error
+                        ? "Sync paused"
+                        : "Everything is up to date"}
+                </span>
+                {syncStatus.pendingCount > 0 && (
+                  <span className="shrink-0 rounded-full bg-[rgba(255,185,84,0.14)] px-2 py-0.5 text-[10px] font-semibold text-[#ffd99a]">
+                    {syncStatus.pendingCount} pending
+                  </span>
+                )}
+              </span>
+              <span className="mt-0.5 block text-[11px] leading-relaxed text-[#d8d4eb]">
+                {syncStatus.error && online
+                  ? syncStatus.error
+                  : syncStatus.pendingCount > 0
+                    ? "Changes will upload automatically when the connection is ready."
+                    : syncStatus.lastSyncedAt
+                      ? `Last synced ${new Date(syncStatus.lastSyncedAt).toLocaleString()}.`
+                      : "Check-ins and journals save locally before cloud backup."}
+              </span>
+            </span>
+          </div>
+        </div>
         <p
           style={{
             fontSize: 13,

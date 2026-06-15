@@ -14,6 +14,7 @@ import {
   X,
   Wrench,
   RefreshCw,
+  LockKeyhole,
 } from "lucide-react";
 
 import { ChatBubble } from "../components/chatbot-components/ChatBubble";
@@ -27,6 +28,12 @@ import { buildChatContext, type ChatContextInput } from "../lib/aiContext";
 import { detectCrisis, resourceForKey, type CrisisSignal } from "../lib/crisis";
 import { CrisisResourcePanel } from "../components/shared/CrisisResourcePanel";
 import { AiConsentDialog } from "../components/shared/AiConsentDialog";
+import {
+  loadChatTranscript,
+  saveChatTranscript,
+  type StoredChatMessage,
+} from "../lib/chatStorage";
+import { useConnectivity } from "../lib/connectivity";
 
 // The Mistral API key is never shipped with the mobile app. The chat
 // proxies through a small Express server you deploy separately — the URL
@@ -204,6 +211,7 @@ interface Message {
   id: string;
   isAi: boolean;
   content: ReactNode;
+  createdAt: number;
   hasActions?: boolean;
   status?: "typing" | "done";
   errorDiagnostics?: string | null;
@@ -517,8 +525,11 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const pullStartYRef = useRef<number | null>(null);
+  const isNearBottomRef = useRef(true);
 
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const online = useConnectivity();
   const hasAcceptedPolicyRef = useRef(false);
   const {
     history: moodHistory,
@@ -616,6 +627,10 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     id: string;
   } | null>(null);
   const [devPanelOpen, setDevPanelOpen] = useState(false);
+  const [hydratedUserId, setHydratedUserId] = useState<string | null>(null);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshNotice, setRefreshNotice] = useState<string | null>(null);
   const [devTest, setDevTest] = useState<
     | { state: "idle" }
     | { state: "running" }
@@ -685,7 +700,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     const accepted = localStorage.getItem("privacy_policy_accepted");
     const acceptedVersion = localStorage.getItem("privacy_policy_version");
 
-    if (accepted === "true" && acceptedVersion === "2.2.0") {
+    if (accepted === "true" && acceptedVersion === "2.3.0") {
       hasAcceptedPolicyRef.current = true;
       setHasAcceptedPolicy(true);
       return;
@@ -697,33 +712,58 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   const getInitialMessage = (mask: boolean): Message => ({
     id: "init",
     isAi: true,
-    content: mask ? (
-      <>
-        <p>I'm here.</p>
-        <p className="mt-2">No identity. No memory. Just speak.</p>
-      </>
-    ) : (
-      <>
-        <p>
-          Kamusta! I&apos;m <span className="font-bold text-primary">Mabuh-ai</span>, your
-          mental health companion. 🌿
-        </p>
-        <p className="mt-2">
-          I&apos;m here to listen, support, and help you navigate your feelings. How are
-          you feeling today?
-        </p>
-      </>
-    ),
+    content: mask
+      ? "I'm here.\n\nNo identity. No memory. Just speak."
+      : "Kamusta! I'm **Mabuh-ai**, your mental health companion. 🌿\n\nI'm here to listen, support, and help you navigate your feelings. How are you feeling today?",
+    createdAt: Date.now(),
     hasActions: true,
     status: "done",
   });
 
   useEffect(() => {
-    setMessages([getInitialMessage(isMaskMode)]);
-  }, [isMaskMode]);
+    if (!user?.id) return;
+    const stored = loadChatTranscript(user.id);
+    setMessages(
+      stored.length > 0
+        ? stored.map((message) => ({
+            id: message.id,
+            isAi: message.role === "assistant",
+            content: message.content,
+            createdAt: message.createdAt,
+            hasActions: message.hasActions,
+            status: "done",
+          }))
+        : [getInitialMessage(false)],
+    );
+    setHydratedUserId(user.id);
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (hydratedUserId !== user?.id || isMaskMode || !user?.id) return;
+    const stored: StoredChatMessage[] = messages.flatMap((message) => {
+      if (
+        message.status !== "done" ||
+        typeof message.content !== "string" ||
+        !message.content.trim()
+      ) {
+        return [];
+      }
+      return [
+        {
+          id: message.id,
+          role: message.isAi ? "assistant" : "user",
+          content: message.content,
+          createdAt: message.createdAt,
+          hasActions: message.hasActions,
+        },
+      ];
+    });
+    saveChatTranscript(user.id, stored);
+  }, [hydratedUserId, isMaskMode, messages, user?.id]);
 
   useEffect(() => {
     if (!scrollRef.current) return;
+    if (!isNearBottomRef.current) return;
     scrollRef.current.scrollTo({
       top: scrollRef.current.scrollHeight,
       behavior: "smooth",
@@ -754,6 +794,11 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
 
   const sendMessage = async (text: string, intent: string = "general") => {
     if (!text.trim() || isLoading) return;
+    if (!online) {
+      setRefreshNotice("Chat needs an internet connection.");
+      window.setTimeout(() => setRefreshNotice(null), 2400);
+      return;
+    }
     if (!hasAcceptedPolicy) {
       setShowPrivacyPolicy(true);
       return;
@@ -765,6 +810,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       id: Date.now().toString(),
       isAi: false,
       content: text,
+      createdAt: Date.now(),
       status: "done",
     };
 
@@ -781,6 +827,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
           id: (Date.now() + 1).toString(),
           isAi: true,
           content: OFF_TOPIC_REPLIES[offTopicCategory],
+          createdAt: Date.now() + 1,
           status: "done",
         },
       ]);
@@ -804,6 +851,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
         id: aiMessageId,
         isAi: true,
         content: "",
+        createdAt: Date.now() + 1,
         status: "typing",
       },
     ]);
@@ -880,6 +928,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   };
 
   const handleSendMessage = () => {
+    isNearBottomRef.current = true;
     sendMessage(inputText, "general");
     setInputText("");
     setEmojiPickerOpen(false);
@@ -919,6 +968,79 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     setEmojiPickerOpen((prev) => !prev);
   };
 
+  const restoreSavedTranscript = useCallback(() => {
+    if (!user?.id) return;
+    const stored = loadChatTranscript(user.id);
+    setMessages(
+      stored.length > 0
+        ? stored.map((message) => ({
+            id: message.id,
+            isAi: message.role === "assistant",
+            content: message.content,
+            createdAt: message.createdAt,
+            hasActions: message.hasActions,
+            status: "done",
+          }))
+        : [getInitialMessage(false)],
+    );
+    isNearBottomRef.current = true;
+  }, [user?.id]);
+
+  const handleMaskToggle = () => {
+    const nextMaskMode = !isMaskMode;
+    setEmojiPickerOpen(false);
+    setInputText("");
+    setActiveCrisis(null);
+    setRefreshNotice(null);
+    setIsMaskMode(nextMaskMode);
+    if (nextMaskMode) {
+      setMessages([getInitialMessage(true)]);
+    } else {
+      restoreSavedTranscript();
+    }
+  };
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    isNearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+  };
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLElement>) => {
+    const el = scrollRef.current;
+    if (!el || el.scrollTop > 0 || isLoading || isRefreshing) return;
+    pullStartYRef.current = event.touches[0]?.clientY ?? null;
+  };
+
+  const handleTouchMove = (event: React.TouchEvent<HTMLElement>) => {
+    if (pullStartYRef.current == null) return;
+    const currentY = event.touches[0]?.clientY;
+    if (currentY == null) return;
+    const distance = Math.max(0, Math.min(88, (currentY - pullStartYRef.current) * 0.55));
+    setPullDistance(distance);
+  };
+
+  const handleTouchEnd = () => {
+    pullStartYRef.current = null;
+    if (pullDistance < 64) {
+      setPullDistance(0);
+      return;
+    }
+    setPullDistance(0);
+    if (isMaskMode) {
+      setRefreshNotice("Mask on chats stay only in this session.");
+      window.setTimeout(() => setRefreshNotice(null), 2200);
+      return;
+    }
+    setIsRefreshing(true);
+    restoreSavedTranscript();
+    setRefreshNotice("Saved chat reloaded");
+    window.setTimeout(() => {
+      setIsRefreshing(false);
+      setRefreshNotice(null);
+    }, 700);
+  };
+
   const shellClasses = embedded
     ? "relative flex flex-1 h-full flex-col overflow-hidden bg-card/90 text-card-foreground backdrop-blur-xl"
     : "relative flex h-full min-h-screen flex-col overflow-hidden bg-background text-foreground";
@@ -926,11 +1048,11 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   return (
     <div className={shellClasses}>
       <header
-        className={`sticky top-0 z-10 flex items-center justify-between gap-2 border-b px-3 py-2.5 backdrop-blur-md sm:gap-3 sm:px-6 sm:py-3 transition-all duration-300 ${
+        className={`relative z-20 flex shrink-0 items-center justify-between gap-2 border-b px-3 py-2.5 backdrop-blur-xl sm:gap-3 sm:px-6 sm:py-3 transition-all duration-300 ${
           isMaskMode ? "border-white/10 bg-black/70" : "border-border/60 bg-background/80"
         }`}
         style={{
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 10px)",
+          paddingTop: "var(--app-header-top)",
         }}
       >
         <div className="flex min-w-0 items-center gap-2">
@@ -1007,7 +1129,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.18, ease: "easeOut" }}
-                      className={`fixed left-3 right-3 top-[calc(env(safe-area-inset-top,0px)+72px)] z-40 max-h-[70vh] overflow-y-auto rounded-2xl border p-3 text-xs shadow-2xl sm:absolute sm:left-auto sm:right-0 sm:top-11 sm:max-h-[80vh] sm:w-80 sm:max-w-[calc(100vw-1.5rem)] ${
+                      className={`fixed left-3 right-3 top-[calc(var(--app-top-inset)+72px)] z-40 max-h-[70vh] overflow-y-auto rounded-2xl border p-3 text-xs shadow-2xl sm:absolute sm:left-auto sm:right-0 sm:top-11 sm:max-h-[80vh] sm:w-80 sm:max-w-[calc(100vw-1.5rem)] ${
                         isMaskMode
                           ? "border-white/15 bg-black/90 text-white"
                           : "border-border bg-card text-card-foreground"
@@ -1077,7 +1199,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
 
           <button
             type="button"
-            onClick={() => setIsMaskMode((prev) => !prev)}
+            onClick={handleMaskToggle}
             aria-pressed={isMaskMode}
             aria-label="Toggle mask mode"
             className={`group inline-flex shrink-0 items-center gap-2 rounded-full border px-2 py-1.5 transition-all duration-300 sm:px-2.5 ${
@@ -1115,12 +1237,48 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
 
       <main
         ref={scrollRef}
-        className={`flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-6 transition-all duration-500 ${
+        onScroll={handleScroll}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        className={`relative flex min-h-0 flex-1 touch-pan-y flex-col gap-6 overflow-y-auto overscroll-y-contain p-4 transition-all duration-500 sm:p-6 ${
           isMaskMode
             ? "bg-transparent"
             : "bg-gradient-to-b from-primary/5 via-transparent to-tertiary/10"
         }`}
       >
+        <div
+          aria-live="polite"
+          className="pointer-events-none flex shrink-0 items-center justify-center overflow-hidden transition-[height,opacity] duration-200"
+          style={{
+            height: isRefreshing || refreshNotice ? 40 : pullDistance,
+            opacity: isRefreshing || refreshNotice ? 1 : Math.min(1, pullDistance / 40),
+          }}
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(188,194,255,0.12)] bg-card/90 px-3 py-1.5 text-[11px] font-semibold text-[#d8d4eb] shadow-lg backdrop-blur-xl">
+            {isMaskMode ? (
+              <LockKeyhole size={13} />
+            ) : (
+              <RefreshCw
+                size={13}
+                className={isRefreshing ? "animate-spin motion-reduce:animate-none" : ""}
+                style={{
+                  transform: isRefreshing
+                    ? undefined
+                    : `rotate(${Math.min(180, pullDistance * 2.5)}deg)`,
+                }}
+              />
+            )}
+            {refreshNotice ??
+              (pullDistance >= 64
+                ? isMaskMode
+                  ? "Anonymous chat is not saved"
+                  : "Release to reload"
+                : "Pull to reload saved chat")}
+          </div>
+        </div>
+
         <div className="flex justify-center">
           <span className="rounded-full border border-border bg-card/70 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Today
@@ -1245,7 +1403,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       </main>
 
       <footer
-        className={`px-2 pt-2 transition-all duration-500 sm:px-6 ${
+        className={`relative z-20 shrink-0 border-t border-[rgba(188,194,255,0.08)] px-3 pt-3 transition-all duration-500 sm:px-6 ${
           isMaskMode ? "bg-black/55 backdrop-blur-2xl" : "bg-card/70 backdrop-blur-2xl"
         }`}
         style={{
@@ -1263,17 +1421,25 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
           </AnimatePresence>
 
           <div
-            className={`flex flex-1 items-end rounded-3xl border border-white/5 bg-surface-low/90 px-2 py-1.5 shadow-inner shadow-black/20 outline-none transition-shadow ${
+            className={`relative flex flex-1 items-end overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.12)] bg-card px-2 py-1.5 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl transition-all focus-within:border-[rgba(188,194,255,0.28)] focus-within:shadow-[0_24px_70px_-36px_rgba(188,194,255,0.55)] ${
               !hasAcceptedPolicy ? "opacity-60" : ""
             }`}
           >
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.12),transparent_60%)] blur-2xl"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.14),transparent_60%)] blur-2xl"
+            />
             <button
               type="button"
               onClick={handleToggleEmojiPicker}
               aria-label={emojiPickerOpen ? "Close emoji picker" : "Open emoji picker"}
               aria-expanded={emojiPickerOpen}
               disabled={!hasAcceptedPolicy}
-              className={`shrink-0 rounded-full p-2 transition-colors ${
+              className={`relative shrink-0 rounded-2xl p-2 transition-colors ${
                 emojiPickerOpen
                   ? "bg-primary/15 text-primary"
                   : "text-muted-foreground active:bg-white/5"
@@ -1300,14 +1466,16 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
                   e.currentTarget.value.length,
                 );
               }}
-              className="max-h-32 min-h-9 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-[15px] leading-snug text-foreground placeholder:text-muted-foreground/80 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none disabled:cursor-not-allowed"
+              className="relative max-h-32 min-h-10 flex-1 resize-none border-0 bg-transparent px-2 py-2.5 text-[15px] leading-snug text-foreground placeholder:text-[rgba(216,212,235,0.55)] outline-none focus:outline-none focus:ring-0 focus-visible:outline-none disabled:cursor-not-allowed"
               placeholder={
                 hasAcceptedPolicy
-                  ? "Type a message..."
+                  ? online
+                    ? "Type a message..."
+                    : "Chat is unavailable offline"
                   : "Read the privacy notice to start chatting"
               }
               rows={1}
-              disabled={isLoading || !hasAcceptedPolicy}
+              disabled={isLoading || !hasAcceptedPolicy || !online}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="sentences"
@@ -1320,8 +1488,8 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
             whileHover={hasAcceptedPolicy ? { scale: 1.05 } : undefined}
             whileTap={hasAcceptedPolicy ? { scale: 0.92 } : undefined}
             onClick={handleSendMessage}
-            disabled={!inputText.trim() || isLoading || !hasAcceptedPolicy}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary via-secondary to-tertiary text-primary-foreground shadow-md shadow-primary/25 transition-all disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed"
+            disabled={!inputText.trim() || isLoading || !hasAcceptedPolicy || !online}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_14px_32px_-18px_rgba(188,194,255,0.85)] transition-all disabled:cursor-not-allowed disabled:opacity-40 disabled:grayscale"
             type="button"
             aria-label="Send message"
           >

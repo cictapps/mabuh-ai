@@ -5,7 +5,10 @@ export function Home() {
   const { profile, user } = useAuth();
 
   return (
-    <main className="relative min-h-screen bg-background px-4 py-10 text-foreground">
+    <main
+      className="relative min-h-screen bg-background px-4 pb-10 text-foreground"
+      style={{ paddingTop: "var(--app-screen-top)" }}
+    >
       <div className="mx-auto w-full max-w-4xl space-y-6">
         <div>
           <p className="text-sm text-muted-foreground">Signed in as</p>

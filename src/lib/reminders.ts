@@ -109,6 +109,86 @@ const REMINDER_MESSAGES: readonly ReminderMessage[] = [
     title: "A gentle nudge",
     body: "No pressure, no score — just a soft tap on the shoulder from Mabuh-ai. How are you, really?",
   },
+  {
+    title: "Choose kindness when you can",
+    body: "A patient word, a sincere thank-you, or making room for someone can soften a difficult day — theirs and yours.",
+  },
+  {
+    title: "Kindness can be quiet",
+    body: "You don't need a grand gesture. Listening without rushing, checking in, or simply being gentle can mean a lot.",
+  },
+  {
+    title: "Be the safe moment",
+    body: "If someone seems overwhelmed today, a calm hello or a little patience may be the kindness they needed.",
+  },
+  {
+    title: "Pass a little warmth along",
+    body: "Share one honest compliment or thank someone for something small. Kindness often travels farther than we see.",
+  },
+  {
+    title: "Lead with understanding",
+    body: "Everyone may be carrying something unseen. When it feels safe, choose curiosity before judgment.",
+  },
+  {
+    title: "You can care without carrying it all",
+    body: "Being kind to others does not mean ignoring your limits. Support and healthy boundaries can exist together.",
+  },
+  {
+    title: "Check in with someone",
+    body: "A simple “How are you holding up?” can open a door. You do not need perfect advice — listening is already care.",
+  },
+  {
+    title: "Let kindness include you",
+    body: "Offer others patience today, and save some for yourself too. Your needs are not less important.",
+  },
+  {
+    title: "Your presence matters",
+    body: "You do not have to solve everything to be helpful. Sometimes staying, listening, and caring is enough.",
+  },
+  {
+    title: "Encourage someone gently",
+    body: "Tell a classmate, friend, or family member one thing you appreciate about their effort — not only their result.",
+  },
+  {
+    title: "Make space, not pressure",
+    body: "When someone is struggling, kindness can sound like: “Take your time. I'm here when you're ready.”",
+  },
+  {
+    title: "A softer response",
+    body: "Before reacting, take one breath. A small pause can help you respond with the kind of care you value.",
+  },
+  {
+    title: "You are still growing",
+    body: "A difficult day does not erase your progress. Learning how to care for yourself takes practice, not perfection.",
+  },
+  {
+    title: "There is strength in reaching out",
+    body: "You deserve support before things become unbearable. A trusted person may be more ready to listen than you think.",
+  },
+  {
+    title: "Your feelings can take up space",
+    body: "You do not need to minimize what hurts just because someone else may have it harder. Your experience still matters.",
+  },
+  {
+    title: "Begin again, gently",
+    body: "If today did not go as planned, you are allowed to reset without punishing yourself. The next small choice still counts.",
+  },
+  {
+    title: "Speak to yourself with care",
+    body: "Try replacing “I should be better” with “I'm having a hard time, and I'm still trying.” Notice how that feels.",
+  },
+  {
+    title: "You belong here",
+    body: "Your voice, your effort, and your presence have value — even on days when confidence feels far away.",
+  },
+  {
+    title: "Protect a little hope",
+    body: "You do not need to feel positive all the time. Just leave room for the possibility that tomorrow may feel different.",
+  },
+  {
+    title: "Rest can be an act of courage",
+    body: "Stopping before you are completely drained is not giving up. It is choosing to care for the person carrying the load.",
+  },
 ];
 
 let active: ActiveTimer | null = null;

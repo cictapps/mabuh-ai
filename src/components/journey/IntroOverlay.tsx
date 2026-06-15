@@ -50,7 +50,7 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
       aria-modal="true"
       aria-labelledby="journey-intro-title"
       style={{
-        paddingTop: "env(safe-area-inset-top, 0px)",
+        paddingTop: "var(--app-top-inset)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >

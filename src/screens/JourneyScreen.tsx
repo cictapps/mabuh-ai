@@ -59,7 +59,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
   const enterPause = useJourneyStore((s) => s.enterPause);
   const prepareNextFlight = useJourneyStore((s) => s.prepareNextFlight);
 
-  const [view, setView] = useState<JourneyView>("main");
+  const [view, setView] = useState<JourneyView>("achievements");
   const [checkpointNotes, setCheckpointNotes] = useState("");
   const [now, setNow] = useState<Date>(() => new Date());
   const [hintSeen, setHintSeen] = useState<Record<JourneyPhase, boolean>>({
@@ -106,7 +106,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
   };
 
   return (
-    <div className="relative" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+    <div className="relative" style={{ paddingTop: "var(--app-screen-top)" }}>
       <div
         aria-hidden
         className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
@@ -116,7 +116,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
         className="pointer-events-none absolute -left-20 top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.10),transparent_60%)] blur-3xl"
       />
 
-      <div className="relative space-y-4 px-4 pb-12 pt-5">
+      <div className="relative space-y-4 px-4 pb-12">
         <JourneyHeader
           totalXp={totalXp}
           streak={streak}

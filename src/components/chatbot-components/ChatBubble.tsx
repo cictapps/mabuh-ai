@@ -87,7 +87,7 @@ function parseMarkdown(text: string): React.ReactNode {
     }
 
     // Bullet: •, -, or *
-    const bulletMatch = line.match(/^[•\-\*] (.+)/);
+    const bulletMatch = line.match(/^[•*-] (.+)/);
     if (bulletMatch) {
       if (listBuffer?.type !== "bullet") {
         flushList(`list-${key}`);

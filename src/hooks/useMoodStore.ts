@@ -14,9 +14,14 @@ import {
   listJournalEntries,
   listMoodEntries,
   updateMoodEntry,
+  getSyncStatus,
+  syncWellnessData,
   type MoodEntryInput,
+  type SyncStatus,
 } from "../lib/db/moodRepository";
 import { useAuth } from "../lib/auth";
+import { useConnectivity } from "../lib/connectivity";
+import { clearLocalWellnessData } from "../lib/db/localWellnessDb";
 
 export interface ReminderPreferences {
   enabled: boolean;
@@ -74,11 +79,18 @@ function buildInteractionId() {
 export function useMoodStore() {
   const { user } = useAuth();
   const userId = user?.id ?? null;
+  const online = useConnectivity();
 
   const [history, setHistory] = useState<MoodEntry[]>([]);
   const [manualJournalEntries, setManualJournalEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>({
+    pendingCount: 0,
+    lastSyncedAt: null,
+    syncing: false,
+    error: null,
+  });
 
   const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -87,53 +99,103 @@ export function useMoodStore() {
   const [activityMinutes, setActivityMinutes] = useState(0);
   const [dayNote, setDayNote] = useState("");
   const [socialInteractions, setSocialInteractions] = useState<SocialInteraction[]>([]);
-  const [activitiesBySection, setActivitiesBySection] = useState<ActivitySelections>(
-    emptyActivities,
-  );
+  const [activitiesBySection, setActivitiesBySection] =
+    useState<ActivitySelections>(emptyActivities);
 
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [reminder, setReminderState] = useState<ReminderPreferences>(loadReminder);
 
-  // Load (or reload) when the signed-in user changes.
-  useEffect(() => {
-    let active = true;
-
+  const loadLocalData = useCallback(async (): Promise<void> => {
     if (!userId) {
       setHistory([]);
       setManualJournalEntries([]);
       setError(null);
       setLoading(false);
-      return () => {
-        active = false;
-      };
+      return;
     }
+    try {
+      const [moods, journals] = await Promise.all([
+        listMoodEntries(userId),
+        listJournalEntries(userId),
+      ]);
+      setHistory(moods);
+      setManualJournalEntries(journals);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load your entries.");
+    }
+  }, [userId]);
 
+  const runSync = useCallback(async (): Promise<SyncStatus | null> => {
+    if (!userId) return null;
+    setSyncStatus((current) => ({ ...current, syncing: true, error: null }));
+    try {
+      const status = await syncWellnessData(userId);
+      const settled = { ...status, syncing: false };
+      setSyncStatus(settled);
+      return settled;
+    } catch (err) {
+      const fallback = await getSyncStatus(userId);
+      const failed = {
+        ...fallback,
+        syncing: false,
+        error: err instanceof Error ? err.message : "Could not sync data.",
+      };
+      setSyncStatus(failed);
+      return failed;
+    }
+  }, [userId]);
+
+  const refreshData = useCallback(async (): Promise<void> => {
+    if (!userId) return;
     setLoading(true);
     setError(null);
-
-    (async () => {
-      try {
-        const [moods, journals] = await Promise.all([
-          listMoodEntries(),
-          listJournalEntries(),
-        ]);
-        if (!active) return;
-        setHistory(moods);
-        setManualJournalEntries(journals);
-      } catch (err) {
-        if (!active) return;
-        setError(
-          err instanceof Error ? err.message : "Could not load your entries.",
-        );
-      } finally {
-        if (active) setLoading(false);
+    try {
+      await loadLocalData();
+      if (online) {
+        await runSync();
+        await loadLocalData();
+      } else {
+        const status = await getSyncStatus(userId);
+        setSyncStatus({ ...status, syncing: false });
       }
-    })();
+      setLastSavedAt(Date.now());
+    } finally {
+      setLoading(false);
+    }
+  }, [loadLocalData, online, runSync, userId]);
 
-    return () => {
-      active = false;
+  // Load (or reload) when the signed-in user changes.
+  useEffect(() => {
+    void refreshData();
+  }, [refreshData]);
+
+  useEffect(() => {
+    if (!userId || !online) return;
+    const sync = () => void refreshData();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") sync();
     };
+    window.addEventListener("online", sync);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("online", sync);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [online, refreshData, userId]);
+
+  const updateSyncStatus = useCallback(async () => {
+    if (!userId) return;
+    setSyncStatus(await getSyncStatus(userId));
   }, [userId]);
+
+  const syncInBackground = useCallback(() => {
+    if (!userId) return;
+    void updateSyncStatus()
+      .catch(() => undefined)
+      .finally(() => {
+        if (online) void runSync();
+      });
+  }, [online, runSync, updateSyncStatus, userId]);
 
   const selectMood = useCallback((mood: MoodType) => {
     setSelectedMood(mood);
@@ -154,16 +216,20 @@ export function useMoodStore() {
     }
     setError(null);
     try {
-      const saved = await insertMoodEntry({
-        mood: selectedMood,
-        tags: selectedTags,
-        journal,
-        schoolLoad,
-        activityMinutes,
-        dayNote,
-        socialInteractions,
-        activities: activitiesBySection,
-      });
+      const saved = await insertMoodEntry(
+        {
+          mood: selectedMood,
+          tags: selectedTags,
+          journal,
+          schoolLoad,
+          activityMinutes,
+          dayNote,
+          socialInteractions,
+          activities: activitiesBySection,
+        },
+        new Date(),
+        userId,
+      );
       setHistory((prev) => {
         const filtered = prev.filter((e) => e.id !== saved.id);
         return [...filtered, saved].sort(
@@ -179,12 +245,22 @@ export function useMoodStore() {
       setSocialInteractions([]);
       setActivitiesBySection(emptyActivities());
       setLastSavedAt(Date.now());
+      syncInBackground();
       return true;
     } catch (err) {
       const message =
-        (typeof err === "object" && err !== null && "message" in err && (err as { message?: unknown }).message) ||
-        (typeof err === "object" && err !== null && "hint" in err && (err as { hint?: unknown }).hint) ||
-        (typeof err === "object" && err !== null && "details" in err && (err as { details?: unknown }).details) ||
+        (typeof err === "object" &&
+          err !== null &&
+          "message" in err &&
+          (err as { message?: unknown }).message) ||
+        (typeof err === "object" &&
+          err !== null &&
+          "hint" in err &&
+          (err as { hint?: unknown }).hint) ||
+        (typeof err === "object" &&
+          err !== null &&
+          "details" in err &&
+          (err as { details?: unknown }).details) ||
         (err instanceof Error ? err.message : null) ||
         (typeof err === "string" ? err : null) ||
         "Could not save your check-in.";
@@ -202,6 +278,7 @@ export function useMoodStore() {
     socialInteractions,
     activitiesBySection,
     userId,
+    syncInBackground,
   ]);
 
   const removeEntry = useCallback(
@@ -209,17 +286,16 @@ export function useMoodStore() {
       if (!userId) return false;
       setError(null);
       try {
-        await deleteMoodEntry(id);
+        await deleteMoodEntry(id, userId);
         setHistory((prev) => prev.filter((e) => e.id !== id));
+        syncInBackground();
         return true;
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Could not delete that check-in.",
-        );
+        setError(err instanceof Error ? err.message : "Could not delete that check-in.");
         return false;
       }
     },
-    [userId],
+    [syncInBackground, userId],
   );
 
   const updateEntry = useCallback(
@@ -227,22 +303,21 @@ export function useMoodStore() {
       if (!userId) return false;
       setError(null);
       try {
-        const updated = await updateMoodEntry(id, input);
+        const updated = await updateMoodEntry(id, input, userId);
         setHistory((prev) => {
           const filtered = prev.filter((e) => e.id !== updated.id);
           return [...filtered, updated].sort(
             (a, b) => a.date.localeCompare(b.date) || a.timestamp - b.timestamp,
           );
         });
+        syncInBackground();
         return true;
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Could not update that check-in.",
-        );
+        setError(err instanceof Error ? err.message : "Could not update that check-in.");
         return false;
       }
     },
-    [userId],
+    [syncInBackground, userId],
   );
 
   const addSocialInteraction = useCallback(() => {
@@ -306,13 +381,23 @@ export function useMoodStore() {
       }
       setError(null);
       try {
-        const saved = await insertJournalEntry(trimmed);
+        const saved = await insertJournalEntry(trimmed, new Date(), userId);
         setManualJournalEntries((prev) => [...prev, saved]);
+        syncInBackground();
       } catch (err) {
         const message =
-          (typeof err === "object" && err !== null && "message" in err && (err as { message?: unknown }).message) ||
-          (typeof err === "object" && err !== null && "hint" in err && (err as { hint?: unknown }).hint) ||
-          (typeof err === "object" && err !== null && "details" in err && (err as { details?: unknown }).details) ||
+          (typeof err === "object" &&
+            err !== null &&
+            "message" in err &&
+            (err as { message?: unknown }).message) ||
+          (typeof err === "object" &&
+            err !== null &&
+            "hint" in err &&
+            (err as { hint?: unknown }).hint) ||
+          (typeof err === "object" &&
+            err !== null &&
+            "details" in err &&
+            (err as { details?: unknown }).details) ||
           (err instanceof Error ? err.message : null) ||
           (typeof err === "string" ? err : null) ||
           "Could not save your journal entry.";
@@ -320,7 +405,7 @@ export function useMoodStore() {
         setError(String(message));
       }
     },
-    [userId],
+    [syncInBackground, userId],
   );
 
   const setReminder = useCallback((next: Partial<ReminderPreferences>) => {
@@ -361,7 +446,14 @@ export function useMoodStore() {
     setHistory([]);
     setManualJournalEntries([]);
     setReminderState(DEFAULT_REMINDER);
-  }, []);
+    setSyncStatus({
+      pendingCount: 0,
+      lastSyncedAt: null,
+      syncing: false,
+      error: null,
+    });
+    if (userId) void clearLocalWellnessData(userId);
+  }, [userId]);
 
   const moodScoreMap: Record<MoodType, number> = useMemo(
     () => ({
@@ -382,9 +474,7 @@ export function useMoodStore() {
       if (!m[e.date]) m[e.date] = [];
       m[e.date].push(e);
     });
-    Object.values(m).forEach((arr) =>
-      arr.sort((a, b) => a.timestamp - b.timestamp),
-    );
+    Object.values(m).forEach((arr) => arr.sort((a, b) => a.timestamp - b.timestamp));
     return m;
   }, [history]);
 
@@ -404,9 +494,8 @@ export function useMoodStore() {
         counts[e.mood] = (counts[e.mood] ?? 0) + 1;
         sum += moodScoreMap[e.mood];
       });
-      const dominant = (Object.entries(counts).sort(
-        (a, b) => b[1] - a[1],
-      )[0]?.[0] ?? "okay") as MoodType;
+      const dominant = (Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ??
+        "okay") as MoodType;
       out[date] = {
         date,
         score: sum / Math.max(entries.length, 1),
@@ -480,13 +569,9 @@ export function useMoodStore() {
   const socialStats = useMemo(() => {
     // Last 7 days, deduplicated by date — interactions are pooled across all
     // check-ins that day.
-    const last7Dates = Object.keys(dailySeries)
-      .sort()
-      .slice(-7);
+    const last7Dates = Object.keys(dailySeries).sort().slice(-7);
     const recentEntries = last7Dates.flatMap((d) => dailySeries[d] ?? []);
-    const interactions = recentEntries.flatMap(
-      (entry) => entry.socialInteractions ?? [],
-    );
+    const interactions = recentEntries.flatMap((entry) => entry.socialInteractions ?? []);
     const totalInteractions = interactions.length;
     const personCounts: Record<string, number> = {};
     const feelingCounts: Record<string, number> = {};
@@ -498,8 +583,10 @@ export function useMoodStore() {
         feelingCounts[feeling] = (feelingCounts[feeling] ?? 0) + 1;
       });
     });
-    const topPerson = Object.entries(personCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-    const topFeeling = Object.entries(feelingCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    const topPerson =
+      Object.entries(personCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    const topFeeling =
+      Object.entries(feelingCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
     return { totalInteractions, topPerson, topFeeling };
   }, [dailySeries]);
 
@@ -546,9 +633,7 @@ export function useMoodStore() {
     ): MoodEntry | null => {
       if (!day.entries.length) return null;
       return day.entries.reduce((best, current) =>
-        predicate(moodScoreMap[current.mood], moodScoreMap[best.mood])
-          ? current
-          : best,
+        predicate(moodScoreMap[current.mood], moodScoreMap[best.mood]) ? current : best,
       );
     };
     const bestDay = recentDays.reduce(
@@ -640,6 +725,8 @@ export function useMoodStore() {
     reminder,
     loading,
     error,
+    online,
+    syncStatus,
     selectMood,
     toggleTag,
     setJournal,
@@ -655,6 +742,7 @@ export function useMoodStore() {
     saveEntry,
     removeEntry,
     updateEntry,
+    refreshData,
     setReminder,
     exportData,
     clearAllLocalData,

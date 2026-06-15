@@ -3,6 +3,7 @@ import type { Provider, Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { isMobileApp, isNativeApp, signInWithGoogleNative } from "@/lib/auth/nativeOAuth";
 import { deleteUserData } from "@/lib/auth/deleteUserData";
+import { loadAuthSnapshot, saveAuthSnapshot } from "@/lib/auth/cache";
 
 export type Profile = {
   id: string;
@@ -76,6 +77,12 @@ async function getAuthSnapshot(session: Session | null): Promise<AuthSnapshot> {
   return { session, user, profile };
 }
 
+async function persistSnapshot(snapshot: AuthSnapshot): Promise<void> {
+  await saveAuthSnapshot(
+    snapshot.session ? { session: snapshot.session, profile: snapshot.profile } : null,
+  );
+}
+
 async function ensureProfile(snapshot: AuthSnapshot): Promise<AuthSnapshot> {
   if (snapshot.user && !snapshot.profile) {
     console.warn(
@@ -108,6 +115,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
 
     set({ ...snapshot, loading: false });
+    await persistSnapshot(snapshot);
   },
 
   initialize: async () => {
@@ -117,7 +125,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     authInitializationPromise = (async () => {
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
         const snapshot = await getAuthSnapshot(data.session);
 
         if (snapshot.user && !snapshot.profile) {
@@ -128,10 +137,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
 
         set({ ...snapshot, loading: false });
+        await persistSnapshot(snapshot);
 
         if (!authListenerBound) {
           authListenerBound = true;
           supabase.auth.onAuthStateChange(async (_event, newSession) => {
+            if (!newSession && !navigator.onLine) return;
             const snapshot = await getAuthSnapshot(newSession);
 
             if (snapshot.user && !snapshot.profile) {
@@ -142,13 +153,24 @@ export const useAuthStore = create<AuthState>((set) => ({
             }
 
             set({ ...snapshot, loading: false });
+            await persistSnapshot(snapshot);
           });
         }
       } catch (error) {
         authInitializationPromise = null;
+        const cached = await loadAuthSnapshot();
+        if (cached?.session?.user) {
+          set({
+            session: cached.session,
+            user: cached.session.user,
+            profile: cached.profile,
+            loading: false,
+          });
+          console.warn("auth initialize used the cached offline session", error);
+          return;
+        }
         set({ session: null, user: null, profile: null, loading: false });
         console.error("auth initialize failed", error);
-        throw error;
       }
     })();
 
@@ -161,6 +183,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     const snapshot = await ensureProfile(await getAuthSnapshot(data.session));
     set({ ...snapshot, loading: false });
+    await persistSnapshot(snapshot);
   },
 
   signUp: async (email, password, displayName) => {
@@ -177,6 +200,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (data.session) {
       const snapshot = await ensureProfile(await getAuthSnapshot(data.session));
       set({ ...snapshot, loading: false });
+      await persistSnapshot(snapshot);
     }
 
     return {
@@ -194,6 +218,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (sessionData.session) {
         const snapshot = await ensureProfile(await getAuthSnapshot(sessionData.session));
         set({ ...snapshot, loading: false });
+        await persistSnapshot(snapshot);
       }
       return;
     }
@@ -246,6 +271,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     const profile = (data as Profile) ?? null;
     if (!profile) throw new Error("Profile update returned no row.");
     set({ profile });
+    const current = useAuthStore.getState();
+    if (current.session) {
+      await saveAuthSnapshot({ session: current.session, profile });
+    }
     return profile;
   },
 
@@ -269,6 +298,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) throw error;
     await supabase.auth.signOut().catch(() => {});
     set({ session: null, user: null, profile: null, loading: false });
+    await saveAuthSnapshot(null);
   },
 
   deleteAllData: async () => {
@@ -282,6 +312,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     // Always clear local state, even if the server call fails.
     await supabase.auth.signOut().catch(() => {});
     set({ session: null, user: null, profile: null, loading: false });
+    await saveAuthSnapshot(null);
   },
 }));
 

@@ -42,9 +42,7 @@ describe("reminderMessageForDate", () => {
     const morning = at(2025, 1, 10, 8, 0);
     const evening = at(2025, 1, 10, 20, 0);
 
-    expect(reminderMessageForDate(morning)).toEqual(
-      reminderMessageForDate(evening),
-    );
+    expect(reminderMessageForDate(morning)).toEqual(reminderMessageForDate(evening));
   });
 
   it("rotates messages across consecutive days", () => {
@@ -62,7 +60,7 @@ describe("reminderMessageForDate", () => {
   });
 
   it("always returns a non-empty, warm body and a meaningful title", () => {
-    for (let day = 0; day < 20; day += 1) {
+    for (let day = 0; day < 60; day += 1) {
       const date = at(2025, 1, 10 + day);
       const msg = reminderMessageForDate(date);
       expect(msg.title.length).toBeGreaterThan(3);
@@ -70,5 +68,24 @@ describe("reminderMessageForDate", () => {
       // The pool is warm/student-centered, not clinical.
       expect(msg.body).not.toMatch(/\b(appointment|medication|dosage)\b/i);
     }
+  });
+
+  it("includes encouragement about kindness to others and healthy boundaries", () => {
+    const messages = Array.from({ length: 60 }, (_, day) =>
+      reminderMessageForDate(at(2025, 1, 10 + day)),
+    );
+
+    expect(
+      messages.some((message) =>
+        /kindness|kind to others|patient word|listening/i.test(
+          `${message.title} ${message.body}`,
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      messages.some((message) =>
+        /boundaries|limits|include you/i.test(`${message.title} ${message.body}`),
+      ),
+    ).toBe(true);
   });
 });

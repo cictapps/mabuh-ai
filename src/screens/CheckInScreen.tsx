@@ -1150,7 +1150,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
       ref={rootRef}
       className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
       style={{
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 4px)",
+        paddingTop: "var(--app-screen-top)",
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 160px)",
       }}
     >

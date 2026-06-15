@@ -1,16 +1,15 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Download, Quote, Share2, Sparkles, Sprout } from "lucide-react";
-import { isTauri } from "@tauri-apps/api/core";
-import { BaseDirectory } from "@tauri-apps/api/path";
+import { invoke, isTauri } from "@tauri-apps/api/core";
+import { BaseDirectory, downloadDir, join } from "@tauri-apps/api/path";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { Button } from "@/components/ui/button";
 import type { NextMilestone } from "@/lib/journey/xp";
+import {
+  AchievementCardError,
+  requestAchievementCard,
+} from "@/services/achievementCardClient";
+import { resolveApiBaseUrl } from "@/services/chatClient";
 
 type AchievementShareCardProps = {
   level: number;
@@ -23,9 +22,15 @@ type AchievementShareCardProps = {
   journeyDate?: Date;
 };
 
-const EXPORT_SIZE = 1080;
+const PREVIEW_MAX_SIZE = 1080;
 const MAX_LEVEL = 10;
 const XP_PER_LEVEL = 50;
+
+function isAndroidTauri() {
+  if (!isTauri()) return false;
+  if (typeof navigator === "undefined") return false;
+  return /android/i.test(navigator.userAgent);
+}
 
 function downloadBlobInBrowser(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob);
@@ -44,10 +49,33 @@ async function saveAchievementImage(blob: Blob) {
     await writeFile(fileName, new Uint8Array(await blob.arrayBuffer()), {
       baseDir: BaseDirectory.Download,
     });
-    return fileName;
+    const absolutePath = await join(await downloadDir(), fileName);
+    return { fileName, absolutePath };
   }
   downloadBlobInBrowser(blob, fileName);
-  return fileName;
+  return { fileName, absolutePath: null };
+}
+
+function describeError(err: AchievementCardError): string {
+  switch (err.kind) {
+    case "auth":
+      return "Please sign in to share your achievement.";
+    case "rate-limit":
+      return "You're rendering cards too quickly. Please try again in a minute.";
+    case "unavailable":
+      return "The card service is taking too long. Please try again in a moment.";
+    case "network":
+      return "Couldn't reach the card service. Check your connection and try again.";
+    case "parse":
+    case "invalid-image":
+      return "The card service returned an unexpected response. Please try again.";
+    case "empty":
+      return "The card service returned an empty image. Please try again.";
+    case "http":
+    case "config":
+    default:
+      return err.message || "Could not create the achievement card.";
+  }
 }
 
 type SurfaceProps = AchievementShareCardProps;
@@ -76,8 +104,8 @@ function AchievementCardSurface({
     <div
       data-achievement-surface
       style={{
-        width: EXPORT_SIZE,
-        height: EXPORT_SIZE,
+        width: PREVIEW_MAX_SIZE,
+        height: PREVIEW_MAX_SIZE,
         position: "relative",
         overflow: "hidden",
         borderRadius: 56,
@@ -556,73 +584,13 @@ function TierPill({ label }: { label: string }) {
   );
 }
 
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-    image.src = src;
-  });
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error("Could not create the achievement image."));
-    }, "image/png");
-  });
-}
-
-async function rasterizeSurfaceToBlob(node: HTMLElement): Promise<Blob> {
-  const width = EXPORT_SIZE;
-  const height = EXPORT_SIZE;
-  const styleAssets = `
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
-      * { box-sizing: border-box; }
-      [data-achievement-surface] {
-        font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
-      }
-    </style>
-  `;
-
-  const html = node.outerHTML;
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-      <foreignObject x="0" y="0" width="${width}" height="${height}">
-        ${styleAssets}
-        <div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;">
-          ${html}
-        </div>
-      </foreignObject>
-    </svg>
-  `;
-
-  const svgBlob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
-  try {
-    const image = await loadImage(url);
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Image creation is not supported on this device.");
-    ctx.drawImage(image, 0, 0, width, height);
-    return await canvasToBlob(canvas);
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
 export function AchievementShareCard(props: AchievementShareCardProps) {
   const [busy, setBusy] = useState<"download" | "share" | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const surfaceRef = useRef<HTMLDivElement | null>(null);
-  const imageBlobRef = useRef<Blob | null>(null);
-  const imagePromiseRef = useRef<Promise<Blob> | null>(null);
   const [displaySize, setDisplaySize] = useState<number>(0);
+  const inFlightRef = useRef<Promise<Blob> | null>(null);
   const {
     level,
     totalXp,
@@ -631,21 +599,9 @@ export function AchievementShareCard(props: AchievementShareCardProps) {
     milestoneLabel,
     tierLabel,
     nextMilestone,
-    journeyDate,
   } = props;
-  const imageCacheKey = [
-    level,
-    totalXp,
-    streak,
-    journeysCompleted,
-    milestoneLabel ?? "",
-    tierLabel ?? "",
-    nextMilestone?.label ?? "",
-    nextMilestone?.hint ?? "",
-    journeyDate?.toISOString() ?? "",
-  ].join("|");
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const node = wrapperRef.current;
     if (!node) return;
     const update = () => {
@@ -658,47 +614,52 @@ export function AchievementShareCard(props: AchievementShareCardProps) {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    let active = true;
-    imageBlobRef.current = null;
-    const imagePromise = (async () => {
-      const node = surfaceRef.current;
-      if (!node) throw new Error("Achievement surface is not ready yet.");
-      return await rasterizeSurfaceToBlob(node);
-    })();
-    imagePromiseRef.current = imagePromise;
-    void imagePromise
-      .then((blob) => {
-        if (!active) return;
-        imageBlobRef.current = blob;
-      })
-      .catch(() => undefined);
-    return () => {
-      active = false;
-    };
-  }, [imageCacheKey]);
+  const apiBaseUrl = resolveApiBaseUrl();
 
-  const getAchievementImage = async () => {
-    if (imageBlobRef.current) return imageBlobRef.current;
-    const blob = await (imagePromiseRef.current ??
-      (async () => {
-        const node = surfaceRef.current;
-        if (!node) throw new Error("Achievement surface is not ready yet.");
-        return await rasterizeSurfaceToBlob(node);
-      })());
-    imageBlobRef.current = blob;
-    return blob;
+  const fetchCloudImage = (): Promise<Blob> => {
+    if (inFlightRef.current) return inFlightRef.current;
+    const promise = (async () => {
+      const image = await requestAchievementCard(
+        {
+          level,
+          totalXp,
+          streak,
+          journeysCompleted,
+          milestoneLabel,
+          tierLabel,
+          nextMilestone: nextMilestone
+            ? { label: nextMilestone.label, hint: nextMilestone.hint }
+            : null,
+        },
+        { apiBaseUrl },
+      );
+      return image.blob;
+    })();
+    inFlightRef.current = promise;
+    promise.finally(() => {
+      if (inFlightRef.current === promise) inFlightRef.current = null;
+    });
+    return promise;
   };
 
   const handleDownload = async () => {
     setBusy("download");
     setNotice(null);
     try {
-      const fileName = await saveAchievementImage(await getAchievementImage());
+      const blob = await fetchCloudImage();
+      const { fileName } = await saveAchievementImage(blob);
       setNotice(
         isTauri() ? `Saved ${fileName} to Downloads.` : "Achievement card downloaded.",
       );
     } catch (error) {
+      if (error instanceof AchievementCardError) {
+        // eslint-disable-next-line no-console
+        console.error("[AchievementShareCard] download failed", error);
+        setNotice(describeError(error));
+        return;
+      }
+      // eslint-disable-next-line no-console
+      console.error("[AchievementShareCard] download failed", error);
       setNotice(
         error instanceof Error ? error.message : "Could not save the achievement card.",
       );
@@ -711,11 +672,28 @@ export function AchievementShareCard(props: AchievementShareCardProps) {
     setBusy("share");
     setNotice(null);
     try {
-      const blob = imageBlobRef.current ?? (await getAchievementImage());
+      const blob = await fetchCloudImage();
+      const shareText = `I reached Level ${level} in my Mabuh-ai wellbeing journey.`;
+
+      if (isAndroidTauri()) {
+        const { absolutePath } = await saveAchievementImage(blob);
+        if (!absolutePath) {
+          throw new Error("Could not resolve the saved file path.");
+        }
+        await invoke("share_file", {
+          path: absolutePath,
+          mimeType: "image/png",
+          title: "Share your quiet win",
+          text: shareText,
+        });
+        setNotice("Share sheet opened.");
+        return;
+      }
+
       const file = new File([blob], "mabuh-ai-quiet-win.png", { type: "image/png" });
       const shareData = {
         title: "My Mabuh-ai quiet win",
-        text: `I reached Level ${level} in my Mabuh-ai wellbeing journey.`,
+        text: shareText,
         files: [file],
       };
 
@@ -727,7 +705,7 @@ export function AchievementShareCard(props: AchievementShareCardProps) {
           return;
         }
 
-        const fileName = await saveAchievementImage(blob);
+        const { fileName } = await saveAchievementImage(blob);
         await navigator.share({
           title: "My Mabuh-ai quiet win",
           text: `${shareData.text} The square card was saved as ${fileName} so you can attach it.`,
@@ -739,7 +717,15 @@ export function AchievementShareCard(props: AchievementShareCardProps) {
       await saveAchievementImage(blob);
       setNotice("Sharing is unavailable here, so the square card was downloaded.");
     } catch (error) {
+      if (error instanceof AchievementCardError) {
+        // eslint-disable-next-line no-console
+        console.error("[AchievementShareCard] share failed", error);
+        setNotice(describeError(error));
+        return;
+      }
       if (error instanceof DOMException && error.name === "AbortError") return;
+      // eslint-disable-next-line no-console
+      console.error("[AchievementShareCard] share failed", error);
       setNotice(
         error instanceof Error ? error.message : "Could not share the achievement card.",
       );
@@ -748,7 +734,7 @@ export function AchievementShareCard(props: AchievementShareCardProps) {
     }
   };
 
-  const scale = displaySize > 0 ? displaySize / EXPORT_SIZE : 0;
+  const scale = displaySize > 0 ? displaySize / PREVIEW_MAX_SIZE : 0;
   const wrapperStyle: CSSProperties = {
     position: "relative",
     width: "100%",

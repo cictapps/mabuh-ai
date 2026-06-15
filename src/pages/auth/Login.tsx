@@ -38,7 +38,10 @@ export function Login() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12 text-foreground">
+    <main
+      className="relative flex min-h-screen items-center justify-center bg-background px-4 pb-12 text-foreground"
+      style={{ paddingTop: "var(--app-screen-top)" }}
+    >
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-20 -top-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -right-16 bottom-24 h-64 w-64 rounded-full bg-secondary/15 blur-3xl" />

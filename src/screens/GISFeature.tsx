@@ -43,6 +43,7 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { cn } from "../lib/utils";
+import { useConnectivity } from "../lib/connectivity";
 
 // Legacy aliases used throughout this file. They map 1:1 to the
 // typed registry, so the existing JSX still works. The "verified" flag
@@ -887,7 +888,9 @@ function ProviderCard({
                   .join(" · ");
                 try {
                   await navigator.clipboard.writeText(text);
-                } catch {}
+                } catch {
+                  // Clipboard access may be unavailable in the WebView.
+                }
                 const btn = ev.currentTarget as HTMLButtonElement;
                 const orig = btn.innerHTML;
                 btn.innerHTML = "Copied!";
@@ -1155,12 +1158,14 @@ function DetailScreen({
   distKm,
   userLocation,
   onFlyTo,
+  online,
 }: {
   e: Provider;
   onClose: () => void;
   distKm?: number;
   userLocation: any;
   onFlyTo: (lat: number, lng: number) => void;
+  online: boolean;
 }) {
   const [selectedLocIdx, setSelectedLocIdx] = useState(0);
   const tc = typeColor(e.type);
@@ -1574,7 +1579,9 @@ function DetailScreen({
               const text = parts.join(" · ");
               try {
                 await navigator.clipboard.writeText(text);
-              } catch {}
+              } catch {
+                // Clipboard access may be unavailable in the WebView.
+              }
               const btn = document.activeElement as HTMLButtonElement;
               if (btn) {
                 const o = btn.textContent;
@@ -1691,7 +1698,7 @@ function DetailScreen({
               No phone number — contact via walk-in or referral
             </div>
           )}
-          {activeLat && activeLng && (
+          {activeLat && activeLng && online && (
             <a
               href={`https://maps.google.com/?saddr=Current+Location&daddr=${activeLat},${activeLng}&dirflg=d`}
               target="_blank"
@@ -1718,6 +1725,11 @@ function DetailScreen({
                 </span>
               )}
             </a>
+          )}
+          {activeLat && activeLng && !online && (
+            <div className="flex h-12 items-center justify-center gap-2 rounded-xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.04)] text-sm text-[#d8d4eb]">
+              <G.directions size={16} /> Directions need internet
+            </div>
           )}
           {e.fb && (
             <a
@@ -2103,6 +2115,7 @@ const SHEET_HEIGHTS: Record<SheetState, string> = {
 
 export function GISFeature() {
   const navigate = useNavigate();
+  const online = useConnectivity();
   const [tab, setTab] = useState<TabType>("all");
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState<Set<string>>(new Set());
@@ -2129,7 +2142,8 @@ export function GISFeature() {
   const toggleSave = useCallback((id: string) => {
     setSaved((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }, []);
@@ -2247,6 +2261,7 @@ export function GISFeature() {
           onClose={() => setDetailProvider(null)}
           distKm={getDistance(detailProvider)}
           userLocation={userLocation}
+          online={online}
           onFlyTo={(lat, lng) => {
             setDetailProvider((prev) => (prev ? { ...prev, lat, lng } : prev));
             setFocusProvider((prev) => (prev ? { ...prev, lat, lng } : prev));
@@ -2265,7 +2280,7 @@ export function GISFeature() {
             alignItems: "center",
             justifyContent: "space-between",
             gap: 12,
-            padding: "calc(env(safe-area-inset-top, 0px) + 10px) 16px 12px",
+            padding: "var(--app-header-top) 16px 12px",
             background: "rgba(16,18,24,0.78)",
             backdropFilter: "blur(14px)",
             WebkitBackdropFilter: "blur(14px)",
@@ -2380,7 +2395,7 @@ export function GISFeature() {
           background: "#1a1c22",
         }}
       >
-        {tab !== "hotline" ? (
+        {tab !== "hotline" && online ? (
           <div
             style={{
               position: "absolute",
@@ -2402,14 +2417,29 @@ export function GISFeature() {
           </div>
         ) : (
           <div
-            aria-hidden
             style={{
               position: "absolute",
               inset: 0,
               background:
                 "linear-gradient(160deg, rgba(255,123,123,0.10), rgba(255,185,84,0.05))",
+              display: "grid",
+              placeItems: "center",
+              padding: 24,
             }}
-          />
+          >
+            {!online && tab !== "hotline" && (
+              <div className="max-w-xs rounded-[1.75rem] border border-[rgba(188,194,255,0.10)] bg-card p-5 text-center shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl">
+                <MapIcon className="mx-auto mb-3 text-primary" size={24} />
+                <p className="m-0 font-serif text-xl text-foreground">
+                  Map unavailable offline
+                </p>
+                <p className="mt-2 text-xs leading-relaxed text-[#d8d4eb]">
+                  Provider listings, phone numbers, and saved details are still
+                  available below.
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Floating overlays layer — sits above the map's Leaflet panes.
@@ -2516,7 +2546,7 @@ export function GISFeature() {
 
           {/* Bottom controls: Street/Satellite on the left, Show-list on the right. */}
           <AnimatePresence>
-            {sheet !== "expanded" && tab !== "hotline" && (
+            {online && sheet !== "expanded" && tab !== "hotline" && (
               <motion.div
                 key="map-type-toggle"
                 initial={reduceMotion ? false : { opacity: 0, y: 8 }}
@@ -2658,6 +2688,20 @@ export function GISFeature() {
               </motion.button>
             )}
           </AnimatePresence>
+
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: "var(--find-help-bottom-clearance, 0px)",
+              zIndex: 1099,
+              background: C.surface,
+              pointerEvents: "none",
+            }}
+          />
 
           {/* ── Draggable bottom sheet (resource list) ── */}
           <motion.div

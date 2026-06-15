@@ -22,7 +22,7 @@ interface PrivacyPolicyProps {
   required?: boolean;
 }
 
-const CURRENT_VERSION = "2.2.0";
+const CURRENT_VERSION = "2.3.0";
 
 const SUMMARY_ITEMS = [
   "Chats authenticated with your Supabase session",
@@ -39,7 +39,8 @@ const SECTIONS = [
       "A Supabase-issued access token is sent with each chat request so the server can authorize the call. Tokens are never logged by the client.",
       "By default, the message you type is the only context forwarded to the AI server. Other context (display name, recent moods, recent journals, social stats, journey stats, analytics) is opt-in and disabled until you turn it on in Settings → AI companion context.",
       "Mask Mode hides the structured context above, but the request is still authorized with your Supabase session token. There is no anonymous tier that does not authenticate the user.",
-      "Crisis-related keywords are detected on the device before any network call. Detected phrases surface local crisis resources immediately; the matching text is not stored on the device.",
+      "Normal chat messages and replies are saved locally on this device under your signed-in account so the conversation can be restored. They are not synced to Supabase.",
+      "Mask on conversations are temporary and are not saved locally. Crisis-related keywords are detected on the device before any network call and surface local crisis resources immediately.",
     ],
   },
   {
@@ -66,9 +67,11 @@ const SECTIONS = [
     icon: Trash2,
     title: "Data storage & deletion",
     content: [
-      "Mabuh-ai is an emotional-support companion, not a clinical record. The app does not store chat history on the device or the server beyond the live request.",
-      "Your profile, check-ins, and journals live in your Supabase project and follow the RLS policies in supabase/schema.sql. Account deletion removes them via the public.delete_user() function.",
-      "You can clear all local data from Settings → Your data.",
+      "Mabuh-ai is an emotional-support companion, not a clinical record. Normal chat history is stored only on this device, scoped to your signed-in account, and limited to the latest 100 completed messages.",
+      "Saved transcripts are used only to restore the screen. They are not cloud-synced or sent back to the AI as conversation history. Mask on conversations are never saved.",
+      "On Android, check-ins and journals are saved first in app-private SQLite storage. When internet is available, queued changes sync to your Supabase account for backup and multi-device access.",
+      "Signing out removes locally cached wellness data from that device. Account and cloud-data deletion require an internet connection so the server copy can be removed.",
+      "You can remove the local transcript through Settings → Your data. Deleting all data or deleting your account also removes it from this device.",
     ],
   },
   {
@@ -93,7 +96,7 @@ const SECTIONS = [
     title: "Your rights",
     content: [
       "Access: view the data we hold for you in Settings → Your data → Export my data.",
-      "Deletion: Settings → Sign out → Delete account removes your profile, check-ins, and journals from Supabase.",
+      "Deletion: Settings → Sign out → Delete account removes your profile, check-ins, and journals from Supabase. This action requires internet access.",
       "Opt-out: you can use the rest of the app without ever opening the AI companion. You can also reset all AI context toggles in Settings.",
       "Export: download your check-ins, journals, and preferences as JSON.",
     ],
@@ -210,7 +213,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
           </div>
 
           <p className="mt-1.5 ml-7 text-xs text-neutral-500">
-            Last updated January 2025 · Version {CURRENT_VERSION}
+            Last updated June 2026 · Version {CURRENT_VERSION}
           </p>
 
           <div className="flex gap-2 mt-3 ml-7 flex-wrap">

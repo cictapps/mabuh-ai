@@ -1,158 +1,147 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+// @vitest-environment jsdom
 
-const mockUpdate = vi.fn();
-const mockInsert = vi.fn();
-const mockDelete = vi.fn();
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockSingle = vi.fn();
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-let insertCallCount = 0;
+vi.mock("@tauri-apps/api/core", () => ({
+  isTauri: () => false,
+}));
 
 vi.mock("../supabase", () => ({
   supabase: {
-    from: () => ({
-      update: (...args: unknown[]) => {
-        mockUpdate(...args);
-        return {
-          eq: (...e: unknown[]) => {
-            mockEq(...e);
-            return {
-              select: (...s: unknown[]) => {
-                mockSelect(...s);
-                return {
-                  single: () => {
-                    const row = {
-                      id: "entry-1",
-                      user_id: "user-1",
-                      mood: "calm",
-                      tags: ["rested"],
-                      journal: "soft evening",
-                      school_load: 2,
-                      activity_minutes: 15,
-                      day_note: "nice day",
-                      social_interactions: [],
-                      activities: {
-                        work: [],
-                        health: [],
-                        sleep: [],
-                        food: [],
-                        hobbies: [],
-                        weather: [],
-                        sports: [],
-                      },
-                      entry_date: "2026-06-13",
-                      logged_at: "2026-06-13T20:00:00.000Z",
-                    };
-                    mockSingle();
-                    return Promise.resolve({ data: row, error: null });
-                  },
-                };
-              },
-            };
-          },
-        };
-      },
-      insert: (...args: unknown[]) => {
-        mockInsert(...args);
-        insertCallCount += 1;
-        const id = `entry-${insertCallCount}`;
-        return {
-          select: () => ({
-            single: () =>
-              Promise.resolve({
-                data: {
-                  id,
-                  user_id: "user-1",
-                  mood: "okay",
-                  tags: [],
-                  journal: "",
-                  school_load: null,
-                  activity_minutes: null,
-                  day_note: null,
-                  social_interactions: [],
-                  activities: {
-                    work: [],
-                    health: [],
-                    sleep: [],
-                    food: [],
-                    hobbies: [],
-                    weather: [],
-                    sports: [],
-                  },
-                  entry_date: "2026-06-13",
-                  logged_at: "2026-06-13T20:05:00.000Z",
-                },
-                error: null,
-              }),
-          }),
-        };
-      },
-      delete: () => {
-        mockDelete();
-        return {
-          eq: (...e: unknown[]) => {
-            mockEq(...e);
-            return Promise.resolve({ error: null });
-          },
-        };
-      },
-    }),
+    from: vi.fn(),
     auth: {
-      getUser: () =>
-        Promise.resolve({ data: { user: { id: "user-1" } } }),
+      getSession: vi.fn(),
     },
   },
 }));
 
-import { insertMoodEntry, updateMoodEntry, deleteMoodEntry } from "./moodRepository";
+import {
+  deleteMoodEntry,
+  insertJournalEntry,
+  insertMoodEntry,
+  listJournalEntries,
+  listMoodEntries,
+  getSyncStatus,
+  syncWellnessData,
+  updateMoodEntry,
+} from "./moodRepository";
+import { listPendingMutations } from "./localWellnessDb";
+import { supabase } from "../supabase";
 
-describe("moodRepository", () => {
+describe("offline-first mood repository", () => {
   beforeEach(() => {
-    mockUpdate.mockClear();
-    mockInsert.mockClear();
-    mockDelete.mockClear();
-    mockSelect.mockClear();
-    mockEq.mockClear();
-    mockSingle.mockClear();
-    insertCallCount = 0;
+    localStorage.clear();
+    vi.mocked(supabase.from).mockReset();
+    vi.useRealTimers();
   });
 
-  it("allows multiple entries on the same day with different timestamps", async () => {
+  it("saves multiple same-day entries locally with stable client IDs", async () => {
     const first = await insertMoodEntry(
       { mood: "okay", tags: [], journal: "" },
       new Date("2026-06-13T08:00:00"),
+      "user-1",
     );
     const second = await insertMoodEntry(
       { mood: "calm", tags: ["rested"], journal: "morning" },
       new Date("2026-06-13T20:00:00"),
+      "user-1",
     );
+
     expect(first.id).not.toBe(second.id);
     expect(first.date).toBe(second.date);
-    expect(mockInsert).toHaveBeenCalledTimes(2);
+    expect(await listMoodEntries("user-1")).toEqual([first, second]);
+    expect(await listPendingMutations("user-1")).toHaveLength(2);
   });
 
-  it("updateMoodEntry sends a partial update scoped by id", async () => {
-    const updated = await updateMoodEntry("entry-1", {
-      mood: "calm",
-      tags: ["rested"],
-      journal: "soft evening",
-      schoolLoad: 2,
-      activityMinutes: 15,
-      dayNote: "nice day",
-    });
-    expect(updated.id).toBe("entry-1");
+  it("updates the local record and queues an upsert", async () => {
+    const entry = await insertMoodEntry(
+      { mood: "okay", tags: [], journal: "" },
+      new Date("2026-06-13T08:00:00"),
+      "user-1",
+    );
+    const updated = await updateMoodEntry(
+      entry.id,
+      {
+        mood: "calm",
+        tags: ["rested"],
+        journal: "soft evening",
+        schoolLoad: 2,
+      },
+      "user-1",
+    );
+
     expect(updated.mood).toBe("calm");
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
-    const [payload] = mockUpdate.mock.calls[0];
-    expect(payload.mood).toBe("calm");
-    expect(payload.tags).toEqual(["rested"]);
-    expect(mockEq).toHaveBeenCalledWith("id", "entry-1");
+    expect((await listMoodEntries("user-1"))[0]?.journal).toBe("soft evening");
+    expect(await listPendingMutations("user-1")).toHaveLength(2);
   });
 
-  it("deleteMoodEntry removes by id", async () => {
-    await deleteMoodEntry("entry-1");
-    expect(mockDelete).toHaveBeenCalledTimes(1);
-    expect(mockEq).toHaveBeenCalledWith("id", "entry-1");
+  it("deletes locally and retains a durable delete mutation", async () => {
+    const entry = await insertMoodEntry(
+      { mood: "worried", tags: [], journal: "" },
+      new Date("2026-06-13T08:00:00"),
+      "user-1",
+    );
+    await deleteMoodEntry(entry.id, "user-1");
+
+    expect(await listMoodEntries("user-1")).toEqual([]);
+    const pending = await listPendingMutations("user-1");
+    expect(pending[pending.length - 1]).toMatchObject({
+      entityId: entry.id,
+      operation: "delete",
+    });
+  });
+
+  it("keeps records isolated by signed-in user", async () => {
+    await insertJournalEntry("private note", new Date("2026-06-13"), "user-1");
+    await insertJournalEntry("other note", new Date("2026-06-13"), "user-2");
+
+    expect((await listJournalEntries("user-1")).map((entry) => entry.content)).toEqual([
+      "private note",
+    ]);
+    expect((await listJournalEntries("user-2")).map((entry) => entry.content)).toEqual([
+      "other note",
+    ]);
+  });
+
+  it("times out a stalled sync, clears syncing, and allows retry", async () => {
+    vi.useFakeTimers();
+    const never = new Promise<never>(() => {});
+    vi.mocked(supabase.from).mockImplementation(
+      () =>
+        ({
+          select: () => ({
+            order: () => never,
+            then: never.then.bind(never),
+          }),
+        }) as never,
+    );
+
+    const stalledSync = syncWellnessData("user-1");
+    await vi.advanceTimersByTimeAsync(20_000);
+    const timedOut = await stalledSync;
+
+    expect(timedOut.syncing).toBe(false);
+    expect(timedOut.error).toMatch(/timed out/i);
+    expect((await getSyncStatus("user-1")).syncing).toBe(false);
+
+    vi.mocked(supabase.from).mockImplementation(
+      () =>
+        ({
+          select: () => {
+            const result = Promise.resolve({ data: [], error: null });
+            return {
+              order: () => result,
+              then: result.then.bind(result),
+            };
+          },
+        }) as never,
+    );
+
+    const retried = await syncWellnessData("user-1");
+    expect(retried).toMatchObject({
+      pendingCount: 0,
+      syncing: false,
+      error: null,
+    });
   });
 });

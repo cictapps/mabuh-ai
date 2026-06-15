@@ -526,7 +526,7 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
         }}
       />
 
-      <section className="relative mx-auto flex min-h-dvh w-full max-w-[26rem] flex-col px-6 pb-[calc(var(--safe-bottom)+1.5rem)] pt-[calc(var(--safe-top)+2.5rem)]">
+      <section className="relative mx-auto flex min-h-dvh w-full max-w-[26rem] flex-col px-6 pb-[calc(var(--safe-bottom)+1.5rem)] pt-[var(--app-screen-top)]">
         <header className="flex flex-col items-center justify-start gap-4">
           <img
             src="/app-logo-light.svg"

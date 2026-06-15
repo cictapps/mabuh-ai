@@ -375,6 +375,7 @@ const SwipeableEntry: React.FC<{
 
   return (
     <div
+      data-horizontal-swipe
       style={{
         position: "relative",
         borderRadius: 16,

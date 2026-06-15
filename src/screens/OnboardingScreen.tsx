@@ -885,8 +885,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
           alignItems: "center",
           justifyContent: "space-between",
           padding: tight
-            ? "calc(env(safe-area-inset-top, 0px) + 6px) 16px 4px"
-            : "calc(env(safe-area-inset-top, 0px) + 14px) 20px 6px",
+            ? "var(--app-header-top) 16px 4px"
+            : "var(--app-screen-top) 20px 6px",
           zIndex: 2,
           flexShrink: 0,
         }}

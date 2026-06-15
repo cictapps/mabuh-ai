@@ -74,7 +74,10 @@ function VerifyEmailGate({ email }: { email: string }) {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12 text-foreground">
+    <main
+      className="relative flex min-h-screen items-center justify-center bg-background px-4 pb-12 text-foreground"
+      style={{ paddingTop: "var(--app-screen-top)" }}
+    >
       <div className="w-full max-w-md rounded-[1.5rem] border border-white/10 bg-card/80 p-8 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)]">
         <div className="mb-6 space-y-2">
           <span className="inline-flex w-fit items-center gap-2 rounded-full bg-tertiary/15 px-3.5 py-1.5 text-sm font-medium text-tertiary">

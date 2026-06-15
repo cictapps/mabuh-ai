@@ -12,6 +12,7 @@
 --   supabase/migrations/0006_journey_progress.sql
 --   supabase/migrations/0007_journey_garden_mode.sql
 --   supabase/migrations/0008_delete_user_data.sql
+--   supabase/migrations/0009_offline_sync.sql
 --
 -- For a fresh database, the recommended path is the Supabase CLI:
 --
@@ -38,6 +39,7 @@
 --     ('0006', 'journey_progress'),
 --     ('0007', 'journey_garden_mode'),
 --     ('0008', 'delete_user_data');
+--     ('0009', 'offline_sync');
 --
 -- This file is intentionally a no-op so re-running it does nothing harmful.
 select 1;

@@ -9,7 +9,7 @@
 ╚═╝     ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝
 ```
 
-### *Your compassionate companion for emotional wellness*
+### _Your compassionate companion for emotional wellness_
 
 ---
 
@@ -18,8 +18,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Mistral AI](https://img.shields.io/badge/Powered%20by-Mistral%20AI-FF7000?style=for-the-badge)](https://mistral.ai)
 
-> *"Mabuhay"* — a Filipino word meaning **"to live"** or **"long live."**  
-> *MabuhAi* fuses that spirit of life with artificial intelligence —  
+> _"Mabuhay"_ — a Filipino word meaning **"to live"** or **"long live."**  
+> _MabuhAi_ fuses that spirit of life with artificial intelligence —  
 > a space where you are heard, never judged, always welcomed.
 
 </div>
@@ -28,12 +28,12 @@
 
 ## 🌿 What is MabuhAi?
 
-MabuhAi is a **mobile-first mental health companion app** built by a team of 40 students across 8 groups, designed to give users a warm, private, and supportive digital space. This repository contains **Group 2's contribution** — the **AI Chat Support & Safety Module**, also known as the *Digital Guardians* module.
+MabuhAi is a **mobile-first mental health companion app** built by a team of 40 students across 8 groups, designed to give users a warm, private, and supportive digital space. This repository contains **Group 2's contribution** — the **AI Chat Support & Safety Module**, also known as the _Digital Guardians_ module.
 
 At its core, MabuhAi is three things:
 
-| 💬 A Listener | 🛡️ A Guardian | 🔒 A Vault |
-|:---:|:---:|:---:|
+|                         💬 A Listener                          |                                🛡️ A Guardian                                 |                                     🔒 A Vault                                      |
+| :------------------------------------------------------------: | :--------------------------------------------------------------------------: | :---------------------------------------------------------------------------------: |
 | Empathetic AI-powered conversation with real emotional context | Real-time crisis detection, abuse prevention, and emergency resource routing | Privacy-first design with local storage, 24-hour deletion, and GDPR/CCPA compliance |
 
 ---
@@ -54,14 +54,14 @@ At its core, MabuhAi is three things:
 <details>
 <summary><strong>📝 Rich Text Formatting</strong> — click to expand</summary>
 
-| Syntax | Result |
-|--------|--------|
-| `**bold**` or `__bold__` | **Bold text** |
-| `*italic*` or `_italic_` | *Italic text* |
-| `` `code` `` | `Inline code` |
-| `- item` or `• item` | Bullet lists |
-| `1. item` | Numbered lists |
-| `## Heading` | Section headers |
+| Syntax                   | Result          |
+| ------------------------ | --------------- |
+| `**bold**` or `__bold__` | **Bold text**   |
+| `*italic*` or `_italic_` | _Italic text_   |
+| `` `code` ``             | `Inline code`   |
+| `- item` or `• item`     | Bullet lists    |
+| `1. item`                | Numbered lists  |
+| `## Heading`             | Section headers |
 
 </details>
 
@@ -191,14 +191,15 @@ npm run tauri android build
 
 ## 🔧 API Reference
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/chat` | `POST` | Send a message to the AI |
-| `/health` | `GET` | Server health check |
-| `/crisis-resources` | `GET` | Retrieve emergency resource info |
-| `/model-info` | `GET` | Get current AI model details |
+| Endpoint            | Method | Description                      |
+| ------------------- | ------ | -------------------------------- |
+| `/chat`             | `POST` | Send a message to the AI         |
+| `/health`           | `GET`  | Server health check              |
+| `/crisis-resources` | `GET`  | Retrieve emergency resource info |
+| `/model-info`       | `GET`  | Get current AI model details     |
 
 **Request**
+
 ```json
 {
   "message": "I'm feeling anxious today",
@@ -211,6 +212,7 @@ npm run tauri android build
 ```
 
 **Response**
+
 ```json
 {
   "reply": "I hear you. Anxiety can feel like a wave...",
@@ -223,7 +225,8 @@ npm run tauri android build
 
 ## 🛡️ Safety System Deep Dive
 
-### Crisis Detection Keywords *(25+ triggers)*
+### Crisis Detection Keywords _(25+ triggers)_
+
 ```
 "kill myself"    "suicide"         "end my life"      "want to die"
 "hurt myself"    "self harm"       "cut myself"       "overdose"
@@ -232,6 +235,7 @@ npm run tauri android build
 ```
 
 ### Abuse Prevention Patterns
+
 ```
 "hate you"  "stupid"  "worthless"  "useless"  "dumb"
 "shut up"   "fuck you"             ...redirected with kindness, always
@@ -240,28 +244,31 @@ npm run tauri android build
 ## 📞 Crisis Resources (Philippines / Iloilo)
 
 ### National Crisis Hotlines (Philippines)
-| Service | Contact | Availability |
-|---------|---------|--------------|
-| NCMH Crisis Hotline | **1553** (toll-free) | 24/7 |
-| NCMH (Globe/TM) | 0917-899-8727 | 24/7 |
-| NCMH (Smart/Sun) | 0998-972-8727 | 24/7 |
-| DOH Hopeline | 804-4673 | 24/7 |
-| DOH Hopeline (Globe) | 0917-558-4673 | 24/7 |
+
+| Service              | Contact              | Availability |
+| -------------------- | -------------------- | ------------ |
+| NCMH Crisis Hotline  | **1553** (toll-free) | 24/7         |
+| NCMH (Globe/TM)      | 0917-899-8727        | 24/7         |
+| NCMH (Smart/Sun)     | 0998-972-8727        | 24/7         |
+| DOH Hopeline         | 804-4673             | 24/7         |
+| DOH Hopeline (Globe) | 0917-558-4673        | 24/7         |
 
 ### Iloilo City Mental Health Resources
-| Facility | Contact | Location |
-|----------|---------|----------|
-| Western Visayas Medical Center | (033) 321-2841 | Mandurriao, Iloilo City |
-| Iloilo Mission Hospital | (033) 509-5711 | Jaro, Iloilo City |
-| St. Paul's Hospital Iloilo | (033) 337-2741 | Gen. Luna St., Iloilo City |
-| The Medical City Iloilo | (033) 327-2814 | Mandurriao, Iloilo City |
-| WVSU Psychology Department | (033) 320-0870 | La Paz, Iloilo City |
+
+| Facility                       | Contact        | Location                   |
+| ------------------------------ | -------------- | -------------------------- |
+| Western Visayas Medical Center | (033) 321-2841 | Mandurriao, Iloilo City    |
+| Iloilo Mission Hospital        | (033) 509-5711 | Jaro, Iloilo City          |
+| St. Paul's Hospital Iloilo     | (033) 337-2741 | Gen. Luna St., Iloilo City |
+| The Medical City Iloilo        | (033) 327-2814 | Mandurriao, Iloilo City    |
+| WVSU Psychology Department     | (033) 320-0870 | La Paz, Iloilo City        |
 
 ### Emergency
-| Service | Number |
-|---------|--------|
+
+| Service                    | Number     |
+| -------------------------- | ---------- |
 | Philippine National Police | 117 or 911 |
-| Emergency Hotline | 911 |
+| Emergency Hotline          | 911        |
 
 ## 🧪 Testing
 
@@ -269,29 +276,29 @@ npm run tauri android build
 npm run test
 ```
 
-| Category | Test Cases | Pass Rate |
-|---|:---:|:---:|
-| Crisis Detection | 45 | ✅ 100% |
-| Abuse Prevention | 25 | ✅ 96% |
-| API Integration | 18 | ✅ 100% |
-| UI Rendering | 30 | ✅ 100% |
-| Error Handling | 22 | ✅ 100% |
-| Privacy Compliance | 15 | ✅ 100% |
-| **TOTAL** | **155** | **🟢 99.3%** |
+| Category           | Test Cases |  Pass Rate   |
+| ------------------ | :--------: | :----------: |
+| Crisis Detection   |     45     |   ✅ 100%    |
+| Abuse Prevention   |     25     |    ✅ 96%    |
+| API Integration    |     18     |   ✅ 100%    |
+| UI Rendering       |     30     |   ✅ 100%    |
+| Error Handling     |     22     |   ✅ 100%    |
+| Privacy Compliance |     15     |   ✅ 100%    |
+| **TOTAL**          |  **155**   | **🟢 99.3%** |
 
 ---
 
 ## 👥 Group 2 — Digital Guardians
 
-> *AI Chat Support & Safety Module*
+> _AI Chat Support & Safety Module_
 
-| Role | Responsibilities |
-|---|---|
+| Role                       | Responsibilities                                     |
+| -------------------------- | ---------------------------------------------------- |
 | 👑 Team Lead / Coordinator | Task management, deadlines, integration coordination |
-| 🎨 UI/UX Designer | Chat interface design, privacy screen layout |
-| ⚛️ Frontend Developer | React components, rich text formatting |
-| ⚙️ Logic / Data Developer | API integration, state management |
-| 🔍 QA / Documentation | Testing, bug tracking, documentation |
+| 🎨 UI/UX Designer          | Chat interface design, privacy screen layout         |
+| ⚛️ Frontend Developer      | React components, rich text formatting               |
+| ⚙️ Logic / Data Developer  | API integration, state management                    |
+| 🔍 QA / Documentation      | Testing, bug tracking, documentation                 |
 
 ### Completed Deliverables
 
@@ -310,12 +317,12 @@ npm run test
 
 ## 🤖 AI Tools Used in Development
 
-| Tool | How We Used It |
-|---|---|
-| ChatGPT | Planning, brainstorming, test case generation, debugging |
-| GitHub Copilot | Code completion, API integration, error handling |
-| Claude | Markdown parsing regex, optimization suggestions |
-| Gemini | Privacy policy content generation |
+| Tool           | How We Used It                                           |
+| -------------- | -------------------------------------------------------- |
+| ChatGPT        | Planning, brainstorming, test case generation, debugging |
+| GitHub Copilot | Code completion, API integration, error handling         |
+| Claude         | Markdown parsing regex, optimization suggestions         |
+| Gemini         | Privacy policy content generation                        |
 
 ---
 
@@ -350,11 +357,11 @@ Developed for **educational purposes** as part of a student collaborative projec
 
 ## 📬 Contact
 
-| Purpose | Contact |
-|---|---|
-| 🔒 Privacy inquiries | cictapps@wvsu.edu.ph |
+| Purpose                   | Contact                 |
+| ------------------------- | ----------------------- |
+| 🔒 Privacy inquiries      | cictapps@wvsu.edu.ph    |
 | 🗑️ Data deletion requests | datarequest@mabuhai.com |
-| 🚨 Crisis support | **988** (24/7) |
+| 🚨 Crisis support         | **988** (24/7)          |
 
 ---
 
@@ -366,7 +373,7 @@ Developed for **educational purposes** as part of a student collaborative projec
 
 ---
 
-*Made with 💚 for mental health awareness and support*
+_Made with 💚 for mental health awareness and support_
 
 **MabuhAi — Your compassionate companion for emotional wellness**
 

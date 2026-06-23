@@ -24,18 +24,18 @@ All wellness, pause, crisis-support, and reflection features remain available fr
 
 Use deterministic level unlocks:
 
-| Level | Reward |
-| --- | --- |
-| 1 | Dusk sky and Trainer companion |
-| 2 | Dawn sky |
-| 3 | Cruiser companion |
-| 4 | Meadow sky |
-| 5 | "Steady Ground" affirmation pack |
-| 6 | Glider companion |
-| 7 | Warm amber card accent |
-| 8 | "Late-Night Kindness" affirmation pack |
-| 9 | Soft constellation background |
-| 10 | Custom Journey title selection |
+| Level | Reward                                 |
+| ----- | -------------------------------------- |
+| 1     | Dusk sky and Trainer companion         |
+| 2     | Dawn sky                               |
+| 3     | Cruiser companion                      |
+| 4     | Meadow sky                             |
+| 5     | "Steady Ground" affirmation pack       |
+| 6     | Glider companion                       |
+| 7     | Warm amber card accent                 |
+| 8     | "Late-Night Kindness" affirmation pack |
+| 9     | Soft constellation background          |
+| 10    | Custom Journey title selection         |
 
 - Locked cosmetics remain previewable with their level requirement.
 - Unlocks never expire and require no currency or purchase.

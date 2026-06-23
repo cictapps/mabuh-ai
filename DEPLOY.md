@@ -22,14 +22,14 @@ The app bundle reads these `VITE_*` variables. They are inlined into
 the JavaScript at `npm run build` time — there is no runtime env injection
 on Android, so a rebuild is required to change them.
 
-| Variable | What it does | Where to get it |
-|---|---|---|
-| `VITE_SUPABASE_URL` | Endpoint of your Supabase project | Supabase dashboard → **Settings → API** |
-| `VITE_SUPABASE_ANON_KEY` | Public, publishable client key (safe to ship) | Same page. Starts with `sb_publishable_…` |
-| `VITE_AUTH_GOOGLE_ENABLED` | `"true"` to show the "Continue with Google" button after you've enabled the provider | Boolean |
-| `VITE_GOOGLE_WEB_CLIENT_ID` | Web OAuth client ID used by web OAuth and as the native Android ID-token audience | Google Cloud Console → Credentials |
-| `VITE_GOOGLE_IOS_CLIENT_ID` | iOS OAuth client ID for native iOS builds | Google Cloud Console → Credentials |
-| `VITE_CHAT_SERVER_URL` | Public URL of the Mistral proxy server (no trailing slash) | Deploy the server (section 3), paste its URL |
+| Variable                    | What it does                                                                         | Where to get it                              |
+| --------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------- |
+| `VITE_SUPABASE_URL`         | Endpoint of your Supabase project                                                    | Supabase dashboard → **Settings → API**      |
+| `VITE_SUPABASE_ANON_KEY`    | Public, publishable client key (safe to ship)                                        | Same page. Starts with `sb_publishable_…`    |
+| `VITE_AUTH_GOOGLE_ENABLED`  | `"true"` to show the "Continue with Google" button after you've enabled the provider | Boolean                                      |
+| `VITE_GOOGLE_WEB_CLIENT_ID` | Web OAuth client ID used by web OAuth and as the native Android ID-token audience    | Google Cloud Console → Credentials           |
+| `VITE_GOOGLE_IOS_CLIENT_ID` | iOS OAuth client ID for native iOS builds                                            | Google Cloud Console → Credentials           |
+| `VITE_CHAT_SERVER_URL`      | Public URL of the Mistral proxy server (no trailing slash)                           | Deploy the server (section 3), paste its URL |
 
 Everything else (the Mistral key, OpenAI keys, etc.) lives **on the chat
 server**, never in the app.
@@ -65,7 +65,7 @@ server**, never in the app.
      1. **APIs & Services → Credentials → Create OAuth client ID → Android**
         with package name `com.user.mabuhai` and the SHA-1 of your release
         keystore (`keytool -list -v -keystore ~/keystores/cictappskey.keystore
-        -alias cictappskey`). Add the debug SHA-1 too if you'll run dev
+-alias cictappskey`). Add the debug SHA-1 too if you'll run dev
         builds.
      2. **APIs & Services → Credentials → Create OAuth client ID → Web
         application**. Copy the **Client ID** (not the secret — native
@@ -78,8 +78,8 @@ server**, never in the app.
         - Debug SHA-1: run
           `keytool -list -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey`
         - Release SHA-1: run `keytool -list -v` against the release keystore.
-        A missing fingerprint causes Credential Manager configuration errors.
-        Mobile builds use native Google Sign-In and do not fall back to web OAuth.
+          A missing fingerprint causes Credential Manager configuration errors.
+          Mobile builds use native Google Sign-In and do not fall back to web OAuth.
    - **Web deployment:** uses Supabase browser OAuth and `/auth/callback`.
      The Supabase redirect URLs above are required.
 
@@ -133,14 +133,14 @@ to the current student. See **§3.5 Context payload** for the full shape.
 
 **Status codes the app handles explicitly:**
 
-| Status | Client behaviour |
-|---|---|
-| 200 | Show the reply. |
-| 401 | Refresh the Supabase session once, retry once. If it still 401s, clear the session and route the user to `/login`. |
-| 429 | "You're sending messages too quickly." |
-| 503 | "The chat service is temporarily unavailable." |
-| Network failure | "I couldn't reach the chat server." |
-| Malformed JSON | Generic parser error. |
+| Status          | Client behaviour                                                                                                   |
+| --------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 200             | Show the reply.                                                                                                    |
+| 401             | Refresh the Supabase session once, retry once. If it still 401s, clear the session and route the user to `/login`. |
+| 429             | "You're sending messages too quickly."                                                                             |
+| 503             | "The chat service is temporarily unavailable."                                                                     |
+| Network failure | "I couldn't reach the chat server."                                                                                |
+| Malformed JSON  | Generic parser error.                                                                                              |
 
 ### 3.2 Minimal Express server (~30 lines)
 
@@ -289,7 +289,9 @@ if (ctx.mood?.trend?.length) {
 }
 if (ctx.journal?.recent?.length) {
   const latest = ctx.journal.recent[0];
-  sysParts.push(`Their latest journal entry (${latest.date}, ${latest.source}): "${latest.content.slice(0, 240)}"`);
+  sysParts.push(
+    `Their latest journal entry (${latest.date}, ${latest.source}): "${latest.content.slice(0, 240)}"`,
+  );
 }
 if (ctx.journey?.streak) {
   sysParts.push(`They are on a ${ctx.journey.streak}-day self-care streak.`);
@@ -321,11 +323,11 @@ short-lived and forget it after the response is sent.
 
 ### 3.3 Environment variables for the **server** (not the app)
 
-| Var | Required | Notes |
-|---|---|---|
-| `MISTRAL_API_KEY` | **Yes** | From [console.mistral.ai](https://console.mistral.ai) → API Keys |
-| `MISTRAL_MODEL` | No | Defaults to `mistral-small-latest` |
-| `PORT` | No | Defaults to `3000` |
+| Var               | Required | Notes                                                            |
+| ----------------- | -------- | ---------------------------------------------------------------- |
+| `MISTRAL_API_KEY` | **Yes**  | From [console.mistral.ai](https://console.mistral.ai) → API Keys |
+| `MISTRAL_MODEL`   | No       | Defaults to `mistral-small-latest`                               |
+| `PORT`            | No       | Defaults to `3000`                                               |
 
 Add a `server/.env` (and `.env.example` for documentation) — **never**
 commit the real key.
@@ -335,7 +337,7 @@ commit the real key.
 Any Node-friendly host works. Two free options:
 
 - **Render** — connect a GitHub repo, set the start command to `node
-  server/server.js`, add `MISTRAL_API_KEY` as a secret environment
+server/server.js`, add `MISTRAL_API_KEY` as a secret environment
   variable. Render will give you a URL like
   `https://your-app.onrender.com` — that's your
   `VITE_CHAT_SERVER_URL`.
@@ -464,12 +466,12 @@ In CI, do **not** create `key.properties` from a checked-in template. Pass
 the four values as environment variables; `build.gradle.kts` will pick them
 up automatically:
 
-| Env var | What |
-|---|---|
-| `TAURI_SIGNING_STORE_FILE` | Absolute path to the keystore on the build machine |
-| `TAURI_SIGNING_STORE_PASSWORD` | Keystore password |
-| `TAURI_SIGNING_KEY_ALIAS` | Key alias (e.g. `cictkey`) |
-| `TAURI_SIGNING_KEY_PASSWORD` | Key password |
+| Env var                        | What                                               |
+| ------------------------------ | -------------------------------------------------- |
+| `TAURI_SIGNING_STORE_FILE`     | Absolute path to the keystore on the build machine |
+| `TAURI_SIGNING_STORE_PASSWORD` | Keystore password                                  |
+| `TAURI_SIGNING_KEY_ALIAS`      | Key alias (e.g. `cictkey`)                         |
+| `TAURI_SIGNING_KEY_PASSWORD`   | Key password                                       |
 
 Example GitHub Actions step:
 
@@ -494,12 +496,12 @@ on a release device, so watch for that in CI logs.
 The Android build needs these in the build environment (in addition to
 the four Vite vars in `.env`):
 
-| Var | Why |
-|---|---|
-| `ANDROID_HOME` / `ANDROID_SDK_ROOT` | Location of the Android SDK |
-| `ANDROID_NDK_HOME` | NDK used by the Tauri Rust build |
-| `JAVA_HOME` | JDK 17+ |
-| `PATH` | Must include `$ANDROID_HOME/platform-tools` (for `adb`) and the JDK bin |
+| Var                                 | Why                                                                     |
+| ----------------------------------- | ----------------------------------------------------------------------- |
+| `ANDROID_HOME` / `ANDROID_SDK_ROOT` | Location of the Android SDK                                             |
+| `ANDROID_NDK_HOME`                  | NDK used by the Tauri Rust build                                        |
+| `JAVA_HOME`                         | JDK 17+                                                                 |
+| `PATH`                              | Must include `$ANDROID_HOME/platform-tools` (for `adb`) and the JDK bin |
 
 ---
 
@@ -524,7 +526,7 @@ A few things people often try to put in the client env. Don't.
   editing it.
 - **Mood saves return 409 conflict** → your database still has the old
   `mood_entries_user_entry_date_unique` index. Run `drop index if
-  exists public.mood_entries_user_entry_date_unique;` in the SQL editor.
+exists public.mood_entries_user_entry_date_unique;` in the SQL editor.
 - **Chat says "Network request failed"** → your `VITE_CHAT_SERVER_URL` is
   wrong, the server is down, or the server's CORS config doesn't allow
   the WebView origin. The WebView sends an `Origin` header that often

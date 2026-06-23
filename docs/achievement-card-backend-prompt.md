@@ -54,7 +54,7 @@ requestId } }` shape the chat route uses):
 - `milestoneLabel`, `tierLabel` either a non-empty string or `null` /
   omitted.
 - `nextMilestone` either `null` / omitted, or `{ label: string, hint:
-  string }`.
+string }`.
 - `xpPerLevel` defaults to `50`; `maxLevel` defaults to `10`. The client
   always sends both, so trust them only if you also want the cloud to be
   the source of truth.
@@ -114,10 +114,10 @@ change those clamps.
 
 The fixed copy strings are:
 
-| Field | Value |
-| --- | --- |
-| `quoteText` | `milestoneLabel ? "Milestone reached: " + milestoneLabel : "Small steps are still meaningful progress."` |
-| `quoteSubtext` | `"I kept showing up for myself. That is worth noticing."` |
+| Field          | Value                                                                                                       |
+| -------------- | ----------------------------------------------------------------------------------------------------------- |
+| `quoteText`    | `milestoneLabel ? "Milestone reached: " + milestoneLabel : "Small steps are still meaningful progress."`    |
+| `quoteSubtext` | `"I kept showing up for myself. That is worth noticing."`                                                   |
 | `nextStepText` | `nextMilestone ? nextMilestone.label + " — " + nextMilestone.hint : "All milestones reached — keep going."` |
 
 The brand text is `"Mabuh-ai"` (note the lowercase `ai`) followed by the
@@ -152,10 +152,10 @@ resulting PNG must match the recipe below pixel-for-pixel at 1080 × 1080.
   ~65% of its radius.
 - Primary blob bottom-left: positioned at `left: -140, bottom: -140`,
   600 × 600, `radial-gradient(circle_at_center, rgba(188,194,255,0.32),
-  transparent 65%)`, `filter: blur(50px)`.
+transparent 65%)`, `filter: blur(50px)`.
 - Fuchsia accent: positioned at `right: 200, top: 360`, 360 × 360,
   `radial-gradient(circle_at_center, rgba(212,187,255,0.18), transparent
-  70%)`, `filter: blur(40px)`.
+70%)`, `filter: blur(40px)`.
 
 All three blobs are decorative, not interactive. They are clipped to the
 rounded card and must not bleed outside it.
@@ -163,7 +163,7 @@ rounded card and must not bleed outside it.
 ### 3.3 Content padding
 
 - Outer padding inside the card: 72 on every side (`padding: 72,
-  box-sizing: border-box`).
+box-sizing: border-box`).
 - Content column: `display: flex, flex-direction: column, height: 100%`.
 - The five sections stack with these `marginTop` values (in the React
   source they are unconditional, in the export you can compute the
@@ -178,7 +178,7 @@ rounded card and must not bleed outside it.
 ### 3.4 Header row (logo + brand + rank badge)
 
 - `display: flex, align-items: flex-start, justify-content: space-between,
-  gap: 24`.
+gap: 24`.
 - Left group: `display: flex, align-items: center, gap: 22`.
   - Logo: 84 × 84, `object-fit: contain`. Source: load
     `/app-logo.svg` from the client `public/` directory at build time
@@ -188,7 +188,7 @@ rounded card and must not bleed outside it.
     cannot use a broken-image placeholder, so make sure the asset is
     reachable.
   - Brand name `Mabuh-ai`: `font-family: Newsreader, ui-serif, Georgia,
-    serif`, `font-weight: 500`, `font-size: 44`, `line-height: 1`,
+serif`, `font-weight: 500`, `font-size: 44`, `line-height: 1`,
     `letter-spacing: -0.02em`, `color: #f5f1ff`.
   - Kicker `A QUIET WIN`: `font-size: 14`, `font-weight: 600`,
     `letter-spacing: 0.32em`, `text-transform: uppercase`,
@@ -201,10 +201,10 @@ rounded card and must not bleed outside it.
 - 168 × 168 circle, `flex-shrink: 0`.
 - Outer glow: `inset: -16`, 200 × 200 (use a 200×200 circle for the
   visible glow), `radial-gradient(circle_at_center,
-  rgba(188,194,255,0.22), transparent 70%)`, `filter: blur(16px)`.
+rgba(188,194,255,0.22), transparent 70%)`, `filter: blur(16px)`.
 - Conic ring: 168 × 168, 2px stroke using a 1.5px padding + `mask`
   trick. Background: `conic-gradient(from 220deg, #bcc2ff 0deg, #d4bbff
-  160deg, #ffb954 300deg, #bcc2ff 360deg)`. Easiest implementation:
+160deg, #ffb954 300deg, #bcc2ff 360deg)`. Easiest implementation:
   draw a stroked circle with `stroke-width: 2`,
   `stroke-dasharray`/`stroke-dashoffset` is **not** used — it's a solid
   ring.
@@ -215,7 +215,7 @@ rounded card and must not bleed outside it.
     `letter-spacing: 0.32em`, `text-transform: uppercase`,
     `color: #ffd99a`.
   - Number (the level): `font-family: Newsreader, ui-serif, Georgia,
-    serif`, `font-weight: 500`, `font-size: 72`, `line-height: 1`,
+serif`, `font-weight: 500`, `font-size: 72`, `line-height: 1`,
     `letter-spacing: -0.02em`, `color: #f5f1ff`,
     `margin: 10px 0 6px`.
   - `OF 10` line: `font-size: 10`, `font-weight: 500`,
@@ -234,75 +234,75 @@ rounded card and must not bleed outside it.
   `letter-spacing: -0.035em`, `color: #f5f1ff`.
 - Tier pill: only render when `tierLabel` is truthy. Pill has
   `display: inline-flex, align-items: center, gap: 12,
-  padding: 12px 22px, border-radius: 999,
-  border: 1.5px solid rgba(188,194,255,0.32),
-  background: linear-gradient(90deg, rgba(188,194,255,0.10) 0%,
-  rgba(212,187,255,0.14) 100%)`. The leading icon is a 4-point sparkle
+padding: 12px 22px, border-radius: 999,
+border: 1.5px solid rgba(188,194,255,0.32),
+background: linear-gradient(90deg, rgba(188,194,255,0.10) 0%,
+rgba(212,187,255,0.14) 100%)`. The leading icon is a 4-point sparkle
   (`viewBox="0 0 24 24"`, path
   `M12 0l1.6 8.4L22 10l-8.4 1.6L12 20l-1.6-8.4L2 10l8.4-1.6L12 0z`),
   18 × 18, `color: rgba(188,194,255,0.95)`. The label uses
   `font-family: Newsreader, ui-serif, Georgia, serif, font-weight: 500,
-  font-size: 22, color: #d8d4eb`.
+font-size: 22, color: #d8d4eb`.
 
 ### 3.7 Progress block
 
 - A two-line header row: `display: flex, align-items: baseline,
-  justify-content: space-between, gap: 16, margin-bottom: 14`.
+justify-content: space-between, gap: 16, margin-bottom: 14`.
   - Left kicker `PROGRESS TO LEVEL N+1`: same kicker style as above
     (`font-size: 14, font-weight: 600, letter-spacing: 0.32em,
-    text-transform: uppercase, color: rgba(188,194,255,0.6)`).
+text-transform: uppercase, color: rgba(188,194,255,0.6)`).
   - Right caption `{xpRemaining} XP TO GO`: `font-size: 15,
-    font-weight: 600, letter-spacing: 0.04em, color:
-    rgba(255,217,154,0.95)`.
+font-weight: 600, letter-spacing: 0.04em, color:
+rgba(255,217,154,0.95)`.
 - Track: 18 px tall, full width, `border-radius: 999`,
   `background: rgba(188,194,255,0.12)`. Clipped with `overflow: hidden`
   so the fill does not bleed.
 - Fill: position absolute, `inset: 0`, `width: xpPct%`,
   `background: linear-gradient(90deg, #bcc2ff 0%, #d4bbff 55%, #ffb954
-  100%)`, `box-shadow: 0 10px 30px -10px rgba(188,194,255,0.6)`. The
+100%)`, `box-shadow: 0 10px 30px -10px rgba(188,194,255,0.6)`. The
   shadow is clipped to the track by the track's `overflow: hidden` — in
   the export, draw a small inner shadow on the fill itself instead.
 - Footer row: `marginTop: 10, display: flex, justify-content: space-between,
-  font-size: 14, font-weight: 500`.
+font-size: 14, font-weight: 500`.
   - Left: `{xpInto}/{xpPerLevel} XP`, `color: rgba(216,212,235,0.7)`.
   - Right: `{streak}🔥 streak · {journeysCompleted} journeys`, `color:
-    rgba(216,212,235,0.55)`. Use the actual fire emoji glyph
+rgba(216,212,235,0.55)`. Use the actual fire emoji glyph
     `\u{1F525}` followed by a single space; do **not** substitute an
     SVG.
 
 ### 3.8 Quote block
 
 - `position: relative, marginTop: auto, padding: 30px 36px 32px,
-  border-radius: 32, border: 1.5px solid rgba(188,194,255,0.20),
-  background: linear-gradient(140deg, rgba(188,194,255,0.10) 0%,
-  rgba(212,187,255,0.08) 50%, rgba(255,185,84,0.10) 100%),
-  overflow: hidden`.
+border-radius: 32, border: 1.5px solid rgba(188,194,255,0.20),
+background: linear-gradient(140deg, rgba(188,194,255,0.10) 0%,
+rgba(212,187,255,0.08) 50%, rgba(255,185,84,0.10) 100%),
+overflow: hidden`.
 - Decorative quote glyph: 64 × 64 lucide `Quote` icon (`stroke-width:
-  1`), `color: rgba(188,194,255,0.5)`, positioned `left: -4, top: -18`.
+1`), `color: rgba(188,194,255,0.5)`, positioned `left: -4, top: -18`.
   This overlaps the top-left corner of the card.
 - `quoteText`: `font-family: Newsreader, ui-serif, Georgia, serif,
-  font-weight: 500, font-size: 32, line-height: 1.25,
-  letter-spacing: -0.01em, color: #f5f1ff`.
+font-weight: 500, font-size: 32, line-height: 1.25,
+letter-spacing: -0.01em, color: #f5f1ff`.
 - `quoteSubtext`: `margin-top: 16, font-size: 16, font-weight: 400,
-  line-height: 1.5, color: rgba(216,212,235,0.7)`.
+line-height: 1.5, color: rgba(216,212,235,0.7)`.
 
 ### 3.9 Next-step row
 
 - `marginTop: 22, display: flex, align-items: center, gap: 18,
-  padding: 18px 22px, border-radius: 24, border: 1.5px solid
-  rgba(188,194,255,0.16), background: rgba(188,194,255,0.04)`.
+padding: 18px 22px, border-radius: 24, border: 1.5px solid
+rgba(188,194,255,0.16), background: rgba(188,194,255,0.04)`.
 - Icon tile: 56 × 56 circle, `background: rgba(188,194,255,0.10)`,
   centered grid. On top of it, a conic ring using the same recipe as the
   rank badge but starting at 200deg: `conic-gradient(from 200deg,
-  #bcc2ff 0deg, #d4bbff 160deg, #ffb954 320deg, #bcc2ff 360deg)` with
+#bcc2ff 0deg, #d4bbff 160deg, #ffb954 320deg, #bcc2ff 360deg)` with
   the 1.5px padding + mask trick. Inside the ring, draw a 26 × 26
   lucide `Sprout` icon (`stroke-width: default`), `color: #bcc2ff`.
 - Text column: `min-width: 0, flex: 1`.
   - Kicker `NEXT STEP`: same kicker style as above (`font-size: 12,
-    font-weight: 600, letter-spacing: 0.32em, text-transform: uppercase,
-    color: rgba(188,194,255,0.6)`).
+font-weight: 600, letter-spacing: 0.32em, text-transform: uppercase,
+color: rgba(188,194,255,0.6)`).
   - `nextStepText`: `margin-top: 6, font-size: 18, font-weight: 600,
-    line-height: 1.35, color: #f5f1ff`.
+line-height: 1.35, color: #f5f1ff`.
 
 ## 4. Renderer guidance
 
@@ -332,7 +332,7 @@ Either way:
 - Set `font-synthesis: none` so the renderer does not invent bold or
   italic weights that do not exist in the embedded font.
 - Disable subpixel antialiasing quirks: `-webkit-font-smoothing:
-  antialiased; text-rendering: geometricPrecision;`.
+antialiased; text-rendering: geometricPrecision;`.
 - Resolve the lucide icons (`Quote`, `Sprout`) by inlining the SVG
   paths from `lucide-static` (the same path data the client uses).
 - All measurements are in **logical CSS pixels** at the 1080 export

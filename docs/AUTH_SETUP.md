@@ -33,54 +33,54 @@ The app currently implements:
 
 Installed via `npm install`:
 
-| Package | Purpose |
-| --- | --- |
+| Package                 | Purpose                                      |
+| ----------------------- | -------------------------------------------- |
 | `@supabase/supabase-js` | Supabase client for auth and database access |
-| `react-router-dom` | Client-side routing and route guards |
-| `zustand` | Lightweight global store for auth state |
+| `react-router-dom`      | Client-side routing and route guards         |
+| `zustand`               | Lightweight global store for auth state      |
 
 ## 3. Important files
 
 ### Frontend
 
-| Path | Purpose |
-| --- | --- |
-| [`src/lib/supabase.ts`](../src/lib/supabase.ts) | Supabase client singleton. Reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. |
-| [`src/lib/auth/store.ts`](../src/lib/auth/store.ts) | Zustand auth store with `initialize`, `signIn`, `signUp`, `signOut`, profile fetch, `useAuth`, and `useAuthActions`. |
-| [`src/lib/auth/ProtectedRoute.tsx`](../src/lib/auth/ProtectedRoute.tsx) | Route guard. Initializes auth and redirects unauthenticated users to `/login`. |
-| [`src/lib/auth/index.ts`](../src/lib/auth/index.ts) | Barrel export for the auth module. |
-| [`src/pages/auth/AuthPage.tsx`](../src/pages/auth/AuthPage.tsx) | Current combined sign-in/sign-up screen. Includes forgot-password request modal. |
-| [`src/pages/auth/AuthCallback.tsx`](../src/pages/auth/AuthCallback.tsx) | OAuth and email-confirmation callback page. Safely redirects back into the app. |
-| [`src/pages/auth/ResetPassword.tsx`](../src/pages/auth/ResetPassword.tsx) | Password reset completion page. Lets a user save a new password after opening the recovery email link. |
-| [`src/pages/auth/Login.tsx`](../src/pages/auth/Login.tsx) | Legacy standalone sign-in screen. Not currently used by routes. |
-| [`src/pages/auth/Signup.tsx`](../src/pages/auth/Signup.tsx) | Legacy standalone sign-up screen. Not currently used by routes. |
-| [`src/pages/Home.tsx`](../src/pages/Home.tsx) | Protected home page with signed-in user information and sign-out button. |
+| Path                                                                      | Purpose                                                                                                              |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [`src/lib/supabase.ts`](../src/lib/supabase.ts)                           | Supabase client singleton. Reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.                                   |
+| [`src/lib/auth/store.ts`](../src/lib/auth/store.ts)                       | Zustand auth store with `initialize`, `signIn`, `signUp`, `signOut`, profile fetch, `useAuth`, and `useAuthActions`. |
+| [`src/lib/auth/ProtectedRoute.tsx`](../src/lib/auth/ProtectedRoute.tsx)   | Route guard. Initializes auth and redirects unauthenticated users to `/login`.                                       |
+| [`src/lib/auth/index.ts`](../src/lib/auth/index.ts)                       | Barrel export for the auth module.                                                                                   |
+| [`src/pages/auth/AuthPage.tsx`](../src/pages/auth/AuthPage.tsx)           | Current combined sign-in/sign-up screen. Includes forgot-password request modal.                                     |
+| [`src/pages/auth/AuthCallback.tsx`](../src/pages/auth/AuthCallback.tsx)   | OAuth and email-confirmation callback page. Safely redirects back into the app.                                      |
+| [`src/pages/auth/ResetPassword.tsx`](../src/pages/auth/ResetPassword.tsx) | Password reset completion page. Lets a user save a new password after opening the recovery email link.               |
+| [`src/pages/auth/Login.tsx`](../src/pages/auth/Login.tsx)                 | Legacy standalone sign-in screen. Not currently used by routes.                                                      |
+| [`src/pages/auth/Signup.tsx`](../src/pages/auth/Signup.tsx)               | Legacy standalone sign-up screen. Not currently used by routes.                                                      |
+| [`src/pages/Home.tsx`](../src/pages/Home.tsx)                             | Protected home page with signed-in user information and sign-out button.                                             |
 
 ### Backend / database
 
-| Path | Purpose |
-| --- | --- |
+| Path                                            | Purpose                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------ |
 | [`supabase/schema.sql`](../supabase/schema.sql) | SQL for `profiles`, signup trigger, RLS policies, and example future feature tables. |
-| [`supabase/README.md`](../supabase/README.md) | Step-by-step Supabase project setup guide. |
+| [`supabase/README.md`](../supabase/README.md)   | Step-by-step Supabase project setup guide.                                           |
 
 ### Config
 
-| Path | Purpose |
-| --- | --- |
+| Path                              | Purpose                                                        |
+| --------------------------------- | -------------------------------------------------------------- |
 | [`.env.example`](../.env.example) | Template for `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. |
 
 ## 4. Current route flow
 
 Routes are defined in [`src/App.tsx`](../src/App.tsx):
 
-| Route | Behavior |
-| --- | --- |
-| `/login` | Shows `AuthPage` with the sign-in tab selected. |
-| `/signup` | Shows `AuthPage` with the sign-up tab selected. |
-| `/auth/callback` | Handles OAuth and email-confirmation callbacks. |
-| `/auth/reset` | Shows the reset-password completion page for recovery email links. |
-| `/` | Protected route. Shows `Home` only when authenticated. |
-| `*` | Redirects unknown routes to `/`. |
+| Route            | Behavior                                                           |
+| ---------------- | ------------------------------------------------------------------ |
+| `/login`         | Shows `AuthPage` with the sign-in tab selected.                    |
+| `/signup`        | Shows `AuthPage` with the sign-up tab selected.                    |
+| `/auth/callback` | Handles OAuth and email-confirmation callbacks.                    |
+| `/auth/reset`    | Shows the reset-password completion page for recovery email links. |
+| `/`              | Protected route. Shows `Home` only when authenticated.             |
+| `*`              | Redirects unknown routes to `/`.                                   |
 
 Authentication initialization happens from the auth store whenever a protected,
 auth, or callback page needs it. The store reads the existing Supabase session,

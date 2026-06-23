@@ -13,15 +13,14 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
-import {
+import type {
   ActivitySelections,
   ActivitySectionId,
   MoodType,
   SocialInteraction,
 } from "../types";
 import { getMoodMeta, SUGGESTIONS } from "../data";
-import { MoodArc } from "../components/mood/MoodArc";
-import { MoodSelector } from "../components/mood/MoodSelector";
+import { MoodRingPicker } from "../components/mood/MoodRingPicker";
 import { MoodTagGroup } from "../components/mood/MoodTagGroup";
 import { JournalInput } from "../components/mood/JournalInput";
 import { SaveMoodButton } from "../components/mood/SaveMoodButton";
@@ -155,11 +154,23 @@ const MOOD_ACKNOWLEDGMENTS: Record<MoodType, string[]> = {
     "Take a slow breath. You don't have to solve this right now.",
     "Carrying a lot today? Just naming it already helps.",
   ],
+  sad: [
+    "I'm sorry you're sitting with this. It's allowed to be heavy.",
+    "Sadness deserves a place. You don't have to push through it.",
+    "Just notice it for a moment — without trying to fix anything yet.",
+    "This kind of low is real. You don't have to explain it away.",
+  ],
   worried: [
     "Worry can be loud. You're not alone in this.",
     "Anxious thoughts can spin — let's slow one down together.",
     "It's okay to not have answers yet. You just need a soft place to land.",
     "Your mind is working hard. Let's give it a small rest.",
+  ],
+  tired: [
+    "Tired is your body asking for a softer pace. Listen to it.",
+    "Low energy is not a failure — it's information.",
+    "Rest is part of showing up. Even a small pause helps.",
+    "You don't have to perform today. Quiet is enough.",
   ],
   okay: [
     "Okay is a perfectly good place to be.",
@@ -216,7 +227,11 @@ function hashSeed(parts: (string | number)[]): number {
   return h >>> 0;
 }
 
-const STRESSED_MOODS: ReadonlySet<MoodType> = new Set<MoodType>(["stressed", "worried"]);
+const SUPPORT_HINT_MOODS: ReadonlySet<MoodType> = new Set<MoodType>([
+  "stressed",
+  "sad",
+  "worried",
+]);
 
 const helperStyle: React.CSSProperties = {
   fontSize: 12,
@@ -476,138 +491,138 @@ function IdlePrompts() {
         className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(212,187,255,0.08),transparent_60%)] blur-2xl"
       />
       <div className="relative">
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 10,
-        }}
-      >
-        <span
+        <div
           style={{
-            fontSize: 10.5,
-            fontWeight: 600,
-            letterSpacing: "1.2px",
-            textTransform: "uppercase",
-            color: "rgba(188,194,255,0.55)",
-          }}
-        >
-          Just between us
-        </span>
-        <span
-          style={{
-            display: "inline-flex",
+            display: "flex",
             alignItems: "center",
-            gap: 6,
-            fontSize: 10.5,
-            color: "rgba(188,194,255,0.4)",
+            justifyContent: "space-between",
+            gap: 10,
           }}
         >
           <span
-            aria-hidden
             style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: "#bcc2ff",
-              boxShadow: "0 0 8px rgba(188,194,255,0.5)",
+              fontSize: 10.5,
+              fontWeight: 600,
+              letterSpacing: "1.2px",
+              textTransform: "uppercase",
+              color: "rgba(188,194,255,0.55)",
             }}
-          />
-          about a minute
-        </span>
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 8,
-        }}
-      >
-        {IDLE_PROMPTS.map((p, i) => (
-          <div
-            key={p.label}
+          >
+            Just between us
+          </span>
+          <span
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-              padding: "10px 8px",
-              borderRadius: 12,
-              background: "rgba(188,194,255,0.03)",
-              border: "1px solid rgba(188,194,255,0.05)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 10.5,
+              color: "rgba(188,194,255,0.4)",
             }}
           >
             <span
+              aria-hidden
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 11,
-                fontWeight: 600,
-                color: "rgba(232,236,255,0.85)",
-                letterSpacing: "0.1px",
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#bcc2ff",
+                boxShadow: "0 0 8px rgba(188,194,255,0.5)",
+              }}
+            />
+            about a minute
+          </span>
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 8,
+          }}
+        >
+          {IDLE_PROMPTS.map((p, i) => (
+            <div
+              key={p.label}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+                padding: "10px 8px",
+                borderRadius: 12,
+                background: "rgba(188,194,255,0.03)",
+                border: "1px solid rgba(188,194,255,0.05)",
               }}
             >
               <span
                 style={{
-                  display: "grid",
-                  placeItems: "center",
-                  width: 18,
-                  height: 18,
-                  borderRadius: 6,
-                  background: "rgba(188,194,255,0.10)",
-                  color: "rgba(220,224,255,0.9)",
-                  flexShrink: 0,
-                }}
-                aria-hidden
-              >
-                {p.icon}
-              </span>
-              <span
-                style={{
-                  fontSize: 9.5,
-                  color: "rgba(188,194,255,0.5)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 11,
                   fontWeight: 600,
-                  fontVariantNumeric: "tabular-nums",
+                  color: "rgba(232,236,255,0.85)",
+                  letterSpacing: "0.1px",
                 }}
               >
-                {String(i + 1).padStart(2, "0")}
+                <span
+                  style={{
+                    display: "grid",
+                    placeItems: "center",
+                    width: 18,
+                    height: 18,
+                    borderRadius: 6,
+                    background: "rgba(188,194,255,0.10)",
+                    color: "rgba(220,224,255,0.9)",
+                    flexShrink: 0,
+                  }}
+                  aria-hidden
+                >
+                  {p.icon}
+                </span>
+                <span
+                  style={{
+                    fontSize: 9.5,
+                    color: "rgba(188,194,255,0.5)",
+                    fontWeight: 600,
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
               </span>
-            </span>
-            <span
-              style={{
-                fontSize: 11.5,
-                fontWeight: 600,
-                color: "rgba(232,236,255,0.92)",
-                lineHeight: 1.3,
-              }}
-            >
-              {p.label}
-            </span>
-            <span
-              style={{
-                fontSize: 10.5,
-                color: "rgba(188,194,255,0.5)",
-                lineHeight: 1.4,
-              }}
-            >
-              {p.hint}
-            </span>
-          </div>
-        ))}
-      </div>
-      <p
-        style={{
-          fontSize: 11,
-          color: "rgba(188,194,255,0.4)",
-          textAlign: "center",
-          margin: "2px 0 0",
-          lineHeight: 1.5,
-          fontStyle: "italic",
-        }}
-      >
-        This little space is just for you. No scores, no streaks — just a quiet moment.
-      </p>
+              <span
+                style={{
+                  fontSize: 11.5,
+                  fontWeight: 600,
+                  color: "rgba(232,236,255,0.92)",
+                  lineHeight: 1.3,
+                }}
+              >
+                {p.label}
+              </span>
+              <span
+                style={{
+                  fontSize: 10.5,
+                  color: "rgba(188,194,255,0.5)",
+                  lineHeight: 1.4,
+                }}
+              >
+                {p.hint}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p
+          style={{
+            fontSize: 11,
+            color: "rgba(188,194,255,0.4)",
+            textAlign: "center",
+            margin: "2px 0 0",
+            lineHeight: 1.5,
+            fontStyle: "italic",
+          }}
+        >
+          This little space is just for you. No scores, no streaks — just a quiet moment.
+        </p>
       </div>
     </div>
   );
@@ -646,117 +661,117 @@ function CheckInDetailCard({
         className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(212,187,255,0.08),transparent_60%)] blur-2xl"
       />
       <div className="relative">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        aria-controls={`${headerId}-body`}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          width: "100%",
-          padding: "14px 16px",
-          background: "transparent",
-          border: "none",
-          outline: "none",
-          cursor: "pointer",
-          textAlign: "left",
-          fontFamily: "Plus Jakarta Sans, sans-serif",
-          color: "inherit",
-          transition: "background 0.15s ease",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "rgba(188,194,255,0.04)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "transparent";
-        }}
-      >
-        <span
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={expanded}
+          aria-controls={`${headerId}-body`}
           style={{
-            display: "grid",
-            placeItems: "center",
-            width: 30,
-            height: 30,
-            borderRadius: 9,
-            background: filled ? "rgba(188,194,255,0.16)" : "rgba(188,194,255,0.07)",
-            color: filled ? "rgba(220,224,255,0.95)" : "rgba(188,194,255,0.55)",
-            transition: "background 0.2s ease, color 0.2s ease",
-            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            width: "100%",
+            padding: "14px 16px",
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            cursor: "pointer",
+            textAlign: "left",
+            fontFamily: "Plus Jakarta Sans, sans-serif",
+            color: "inherit",
+            transition: "background 0.15s ease",
           }}
-          aria-hidden
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(188,194,255,0.04)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+          }}
         >
-          {icon}
-        </span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p
+          <span
             style={{
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: "1.1px",
-              textTransform: "uppercase",
-              color: filled ? "rgba(232,236,255,0.95)" : "rgba(220,224,255,0.75)",
-              transition: "color 0.2s ease",
-              margin: 0,
-              lineHeight: 1.2,
+              display: "grid",
+              placeItems: "center",
+              width: 30,
+              height: 30,
+              borderRadius: 9,
+              background: filled ? "rgba(188,194,255,0.16)" : "rgba(188,194,255,0.07)",
+              color: filled ? "rgba(220,224,255,0.95)" : "rgba(188,194,255,0.55)",
+              transition: "background 0.2s ease, color 0.2s ease",
+              flexShrink: 0,
             }}
+            aria-hidden
           >
-            {title}
-          </p>
+            {icon}
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "1.1px",
+                textTransform: "uppercase",
+                color: filled ? "rgba(232,236,255,0.95)" : "rgba(220,224,255,0.75)",
+                transition: "color 0.2s ease",
+                margin: 0,
+                lineHeight: 1.2,
+              }}
+            >
+              {title}
+            </p>
+            <div
+              style={{
+                marginTop: 4,
+                minHeight: 16,
+                maxHeight: 20,
+                display: "flex",
+                alignItems: "center",
+                overflow: "hidden",
+              }}
+            >
+              {summary ?? (
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "rgba(188,194,255,0.4)",
+                  }}
+                >
+                  {emptyHint ?? (filled ? "Logged" : "Optional")}
+                </span>
+              )}
+            </div>
+          </div>
+          <ChevronDown
+            size={16}
+            color="rgba(220,224,255,0.7)"
+            style={{
+              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.2s ease",
+              flexShrink: 0,
+            }}
+          />
+        </button>
+        <div
+          id={`${headerId}-body`}
+          style={{
+            maxHeight: expanded ? "3000px" : 0,
+            opacity: expanded ? 1 : 0,
+            overflow: "hidden",
+            transition: "max-height 0.32s ease, opacity 0.24s ease",
+          }}
+          aria-hidden={!expanded}
+        >
           <div
             style={{
-              marginTop: 4,
-              minHeight: 16,
-              maxHeight: 20,
+              padding: "4px 16px 16px",
               display: "flex",
-              alignItems: "center",
-              overflow: "hidden",
+              flexDirection: "column",
+              gap: 12,
             }}
           >
-            {summary ?? (
-              <span
-                style={{
-                  fontSize: 11,
-                  color: "rgba(188,194,255,0.4)",
-                }}
-              >
-                {emptyHint ?? (filled ? "Logged" : "Optional")}
-              </span>
-            )}
+            {children}
           </div>
         </div>
-        <ChevronDown
-          size={16}
-          color="rgba(220,224,255,0.7)"
-          style={{
-            transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.2s ease",
-            flexShrink: 0,
-          }}
-        />
-      </button>
-      <div
-        id={`${headerId}-body`}
-        style={{
-          maxHeight: expanded ? "3000px" : 0,
-          opacity: expanded ? 1 : 0,
-          overflow: "hidden",
-          transition: "max-height 0.32s ease, opacity 0.24s ease",
-        }}
-        aria-hidden={!expanded}
-      >
-        <div
-          style={{
-            padding: "4px 16px 16px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 12,
-          }}
-        >
-          {children}
-        </div>
-      </div>
       </div>
     </div>
   );
@@ -792,7 +807,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
     [displayMood],
   );
   const showDetails = Boolean(selectedMood);
-  const showCrisisHint = showDetails && STRESSED_MOODS.has(displayMood);
+  const showCrisisHint = showDetails && SUPPORT_HINT_MOODS.has(displayMood);
   const reducedMotion = usePrefersReducedMotion();
 
   const hour = new Date().getHours();
@@ -808,10 +823,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   const subline = useMemo(() => {
     if (showDetails) {
       const pool = MOOD_ACKNOWLEDGMENTS[displayMood];
-      return pickVariant(
-        pool,
-        hashSeed([bucket, displayMood, dayKey, sessionToken]),
-      );
+      return pickVariant(pool, hashSeed([bucket, displayMood, dayKey, sessionToken]));
     }
     // No mood picked yet — use the neutral "hello" pool for the time bucket
     // so it still rotates even before the user selects a mood.
@@ -896,21 +908,14 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [savedMood, setSavedMood] = useState<MoodType | null>(null);
   const [savedAtMs, setSavedAtMs] = useState<number | null>(null);
-  const [savedPersonalization, setSavedPersonalization] = useState<string | null>(
-    null,
-  );
+  const [savedPersonalization, setSavedPersonalization] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const breathRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const arcRef = useRef<HTMLDivElement | null>(null);
-  const selectorRef = useRef<HTMLDivElement | null>(null);
   const sublineRef = useRef<HTMLParagraphElement | null>(null);
   const detailsRef = useRef<HTMLDivElement | null>(null);
-  const arcWrapperRef = useRef<HTMLDivElement | null>(null);
-  const arcLogoRef = useRef<HTMLDivElement | null>(null);
-  const arcLogoGlowRef = useRef<HTMLDivElement | null>(null);
 
   useGSAP(
     () => {
@@ -919,61 +924,15 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
 
       tl.fromTo(
         headerRef.current,
-        { y: 18, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.55 },
+        { y: 12, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45 },
         0,
-      )
-        .fromTo(
-          arcRef.current,
-          { y: 22, opacity: 0, scale: 0.96 },
-          { y: 0, opacity: 1, scale: 1, duration: 0.7 },
-          0.08,
-        )
-        .fromTo(
-          selectorRef.current,
-          { y: 14, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.5 },
-          0.2,
-        );
-
-      if (breathRef.current) {
-        gsap.to(breathRef.current, {
-          scale: 1.18,
-          opacity: 0.85,
-          duration: 4,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1,
-        });
-      }
-
-      if (arcLogoGlowRef.current) {
-        gsap.fromTo(
-          arcLogoGlowRef.current,
-          { scale: 0.94, opacity: 0.5 },
-          {
-            scale: 1.1,
-            opacity: 0.95,
-            duration: 5,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: -1,
-          },
-        );
-        if (arcLogoRef.current) {
-          gsap.fromTo(
-            arcLogoRef.current,
-            { filter: "drop-shadow(0 0 0px rgba(255,255,255,0))" },
-            {
-              filter: `drop-shadow(0 0 16px ${hexToRgba(meta.color, 0.6)}) drop-shadow(0 0 36px ${hexToRgba(meta.color, 0.35)})`,
-              duration: 5,
-              ease: "sine.inOut",
-              yoyo: true,
-              repeat: -1,
-            },
-          );
-        }
-      }
+      ).fromTo(
+        arcRef.current,
+        { y: 14, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.55 },
+        0.08,
+      );
     },
     { scope: rootRef, dependencies: [reducedMotion] },
   );
@@ -983,27 +942,6 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
     const ctx = gsap.context(() => {}, rootRef);
 
     ctx.add(() => {
-      if (breathRef.current) {
-        gsap.to(breathRef.current, {
-          background: `radial-gradient(circle, ${hexToRgba(meta.color, 0.32)}, transparent 70%)`,
-          duration: 0.6,
-          ease: "power2.out",
-        });
-      }
-      if (arcLogoGlowRef.current) {
-        gsap.to(arcLogoGlowRef.current, {
-          background: `radial-gradient(circle, ${hexToRgba(meta.color, 0.55)}, transparent 65%)`,
-          duration: 0.6,
-          ease: "power2.out",
-        });
-      }
-      if (arcLogoRef.current) {
-        gsap.to(arcLogoRef.current, {
-          backgroundColor: meta.color,
-          duration: 0.6,
-          ease: "power2.out",
-        });
-      }
       if (sublineRef.current) {
         gsap.fromTo(
           sublineRef.current,
@@ -1070,26 +1008,6 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
     }
   }, [showDetails, reducedMotion]);
 
-  // Keep the breath circle vertically aligned with the arc center across screen sizes.
-  useEffect(() => {
-    if (reducedMotion) return;
-    const update = () => {
-      const wrap = arcWrapperRef.current;
-      if (!wrap || !breathRef.current) return;
-      const rect = wrap.getBoundingClientRect();
-      const centerY = rect.top + rect.height / 2;
-      breathRef.current.style.top = `${centerY}px`;
-    };
-    update();
-    window.addEventListener("resize", update);
-    const ro = new ResizeObserver(update);
-    if (arcWrapperRef.current) ro.observe(arcWrapperRef.current);
-    return () => {
-      window.removeEventListener("resize", update);
-      ro.disconnect();
-    };
-  }, [reducedMotion]);
-
   async function handleSave(): Promise<boolean> {
     if (!selectedMood) return false;
     setSaveState("saving");
@@ -1151,64 +1069,29 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
       className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
       style={{
         paddingTop: "var(--app-screen-top)",
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 160px)",
+        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 220px)",
       }}
     >
       {/* Page-level mood-tinted glow at the very top */}
       <div
-        className="checkin-glow"
+        aria-hidden
+        className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[120%] -translate-x-1/2 blur-3xl transition-[background] duration-500"
         style={{
-          ["--checkin-glow" as string]: hexToRgba(meta.color, 0.22),
-        }}
-        aria-hidden
-      />
-
-      {/* Decorative background blobs (matches journey aesthetic) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-20 top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.10),transparent_60%)] blur-3xl"
-      />
-
-      {/* Breath circle aligned to the arc's center, recolored to the mood */}
-      <div
-        ref={breathRef}
-        aria-hidden
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: 175,
-          width: 160,
-          height: 160,
-          transform: "translate(-50%, -50%)",
-          borderRadius: "50%",
-          background: `radial-gradient(circle, ${hexToRgba(meta.color, 0.22)}, transparent 70%)`,
-          filter: "blur(16px)",
-          pointerEvents: "none",
-          zIndex: 0,
-          willChange: "transform, opacity",
+          background: `radial-gradient(ellipse at center, ${hexToRgba(
+            meta.color,
+            0.18,
+          )}, transparent 65%)`,
         }}
       />
 
       {/* Header card */}
       <div
         ref={headerRef}
-        className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.10)] bg-card p-5 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl"
-        style={{
-          paddingRight: 72,
-          clipPath: `path('M 28 0 H calc(100% - 72px) A 52 52 0 0 1 calc(100% - 0px) 48 V calc(100% - 28px) A 28 28 0 0 1 calc(100% - 56px) calc(100% - 0px) H 28 A 28 28 0 0 1 0 calc(100% - 56px) V 28 A 28 28 0 0 1 28 0 Z')`,
-        }}
+        className="relative overflow-hidden rounded-[1.25rem] border border-[rgba(188,194,255,0.10)] bg-card p-5 shadow-[0_18px_50px_-32px_rgba(8,10,18,0.85)] backdrop-blur-xl"
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.16),transparent_60%)] blur-2xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-20 -left-12 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.16),transparent_60%)] blur-2xl"
+          className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-2xl"
         />
         <div className="relative">
           <div
@@ -1277,67 +1160,18 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         </div>
       </div>
 
-      {/* Mood arc + logo (no card — sits in the open air with the breath circle) */}
-      <div ref={arcRef} style={{ position: "relative", zIndex: 1, width: "100%" }}>
-        <div
-          ref={arcWrapperRef}
-          style={{ width: "100%", maxWidth: 420, margin: "0 auto", position: "relative" }}
-        >
-          <MoodArc selectedMood={selectedMood} onSelect={onSelectMood} />
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "70%",
-              width: 168,
-              height: 168,
-              transform: "translate(-50%, -50%)",
-              pointerEvents: "none",
-            }}
-          >
-            <div
-              ref={arcLogoGlowRef}
-              aria-hidden
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: 24,
-                background: `radial-gradient(circle, ${hexToRgba(meta.color, 0.55)}, transparent 65%)`,
-                filter: "blur(18px)",
-                willChange: "transform, opacity",
-                transformOrigin: "center",
-              }}
-            />
-            <div
-              ref={arcLogoRef}
-              role="img"
-              aria-label="Mabuh-ai logo"
-              aria-hidden
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: 24,
-                backgroundColor: meta.color,
-                WebkitMaskImage: "url(/app-logo-light.svg)",
-                maskImage: "url(/app-logo-light.svg)",
-                WebkitMaskRepeat: "no-repeat",
-                maskRepeat: "no-repeat",
-                WebkitMaskPosition: "center",
-                maskPosition: "center",
-                WebkitMaskSize: "contain",
-                maskSize: "contain",
-                transition: "background-color 0.6s ease",
-                transformOrigin: "center",
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Mood selector — just a centered text block, no card wrapper needed */}
-      <div ref={selectorRef} style={{ position: "relative", zIndex: 1 }}>
-        <MoodSelector selectedMood={selectedMood} />
+      {/* Mood ring — professional picker with the selected mood name in the centre */}
+      <div
+        ref={arcRef}
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          maxWidth: 380,
+          margin: "0 auto",
+        }}
+      >
+        <MoodRingPicker selectedMood={selectedMood} onSelect={onSelectMood} size="sm" />
       </div>
 
       {!showDetails && <IdlePrompts />}

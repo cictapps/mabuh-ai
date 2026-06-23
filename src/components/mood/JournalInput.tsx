@@ -75,9 +75,7 @@ export const JournalInput: React.FC<JournalInputProps> = ({
             justifyContent: "flex-end",
             fontSize: 11,
             fontVariantNumeric: "tabular-nums",
-            color: isOverRecommended
-              ? "rgba(255,185,84,0.95)"
-              : "rgba(216,220,230,0.6)",
+            color: isOverRecommended ? "rgba(255,185,84,0.95)" : "rgba(216,220,230,0.6)",
             transition: "color 0.2s ease",
           }}
           aria-live="polite"

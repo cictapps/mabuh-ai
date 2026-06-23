@@ -40,11 +40,7 @@ export function ReflectWithAIPanel({
   }
 
   return (
-    <div
-      className="flex flex-col gap-2"
-      data-stagger
-      style={{ position: "relative" }}
-    >
+    <div className="flex flex-col gap-2" data-stagger style={{ position: "relative" }}>
       <Button
         type="button"
         variant="outline"
@@ -55,7 +51,11 @@ export function ReflectWithAIPanel({
         className="self-start"
       >
         <Sparkles className="size-3.5" />
-        {busy ? "Thinking with you…" : online ? buttonLabel : "AI reflection needs internet"}
+        {busy
+          ? "Thinking with you…"
+          : online
+            ? buttonLabel
+            : "AI reflection needs internet"}
       </Button>
 
       {open && (
@@ -70,14 +70,11 @@ export function ReflectWithAIPanel({
               <strong className="font-medium text-foreground/85">
                 Mistral AI&apos;s free tier
               </strong>
-              . On that tier, the prompts and replies you send may be used
-              by Mistral to train and improve their models. Keep this in
-              mind — share only what feels safe, and avoid personal
-              details. Want a private alternative? Tap{" "}
-              <em className="not-italic font-medium text-foreground/75">
-                Mask Mode
-              </em>{" "}
-              or write it out by hand.
+              . On that tier, the prompts and replies you send may be used by Mistral to
+              train and improve their models. Keep this in mind — share only what feels
+              safe, and avoid personal details. Want a private alternative? Tap{" "}
+              <em className="not-italic font-medium text-foreground/75">Mask Mode</em> or
+              write it out by hand.
             </AlertDescription>
           </Alert>
 

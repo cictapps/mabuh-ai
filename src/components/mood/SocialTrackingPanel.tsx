@@ -185,7 +185,8 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
               width: 36,
               height: 36,
               borderRadius: 12,
-              background: "linear-gradient(135deg, rgba(255,185,84,0.25), rgba(188,194,255,0.15))",
+              background:
+                "linear-gradient(135deg, rgba(255,185,84,0.25), rgba(188,194,255,0.15))",
               display: "grid",
               placeItems: "center",
               color: "#f5e5b1",
@@ -227,7 +228,9 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
         >
           {interactions.length} / {limit} tracked
         </span>
-        <span style={{ fontSize: 12, color: "rgba(216,220,230,0.5)" }}>{interactionHint}</span>
+        <span style={{ fontSize: 12, color: "rgba(216,220,230,0.5)" }}>
+          {interactionHint}
+        </span>
       </div>
 
       {interactions.length === 0 && (
@@ -240,7 +243,8 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
             fontSize: 13,
           }}
         >
-          Track the people you connected with today to see how social energy shapes your mood.
+          Track the people you connected with today to see how social energy shapes your
+          mood.
         </div>
       )}
 
@@ -305,7 +309,13 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
               placeholder="Name"
             />
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                gap: 10,
+              }}
+            >
               <select
                 value={interaction.relationship}
                 onChange={(event) =>
@@ -326,7 +336,8 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
                 value={interaction.interactionType}
                 onChange={(event) =>
                   onUpdate(interaction.id, {
-                    interactionType: event.target.value as SocialInteraction["interactionType"],
+                    interactionType: event.target
+                      .value as SocialInteraction["interactionType"],
                   })
                 }
                 style={selectStyle}
@@ -346,7 +357,9 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
               value={interaction.durationMinutes ?? ""}
               onChange={(event) =>
                 onUpdate(interaction.id, {
-                  durationMinutes: event.target.value ? Number(event.target.value) : undefined,
+                  durationMinutes: event.target.value
+                    ? Number(event.target.value)
+                    : undefined,
                 })
               }
             />

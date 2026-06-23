@@ -51,8 +51,7 @@ function readWebState(): WebState {
     return {
       records: Array.isArray(parsed.records) ? parsed.records : [],
       mutations: Array.isArray(parsed.mutations) ? parsed.mutations : [],
-      nextSequence:
-        typeof parsed.nextSequence === "number" ? parsed.nextSequence : 1,
+      nextSequence: typeof parsed.nextSequence === "number" ? parsed.nextSequence : 1,
       lastSyncedAt: parsed.lastSyncedAt ?? {},
     };
   } catch {
@@ -67,9 +66,10 @@ function writeWebState(state: WebState): void {
 async function getDatabase(): Promise<SqlDatabase | null> {
   if (!isTauri()) return null;
   if (!databasePromise) {
-    databasePromise = import("@tauri-apps/plugin-sql").then(async ({ default: Database }) => {
-      const db = (await Database.load("sqlite:mabuh-offline.db")) as SqlDatabase;
-      await db.execute(`
+    databasePromise = import("@tauri-apps/plugin-sql").then(
+      async ({ default: Database }) => {
+        const db = (await Database.load("sqlite:mabuh-offline.db")) as SqlDatabase;
+        await db.execute(`
         create table if not exists wellness_records (
           user_id text not null,
           entity_type text not null,
@@ -79,7 +79,7 @@ async function getDatabase(): Promise<SqlDatabase | null> {
           primary key (user_id, entity_type, entity_id)
         )
       `);
-      await db.execute(`
+        await db.execute(`
         create table if not exists wellness_mutations (
           sequence integer primary key autoincrement,
           user_id text not null,
@@ -90,14 +90,15 @@ async function getDatabase(): Promise<SqlDatabase | null> {
           created_at text not null
         )
       `);
-      await db.execute(`
+        await db.execute(`
         create table if not exists wellness_sync_meta (
           user_id text primary key,
           last_synced_at text
         )
       `);
-      return db;
-    });
+        return db;
+      },
+    );
   }
   return databasePromise;
 }
@@ -208,11 +209,7 @@ export async function removeLocalRecord(
     const state = readWebState();
     state.records = state.records.filter(
       (item) =>
-        !(
-          item.userId === userId &&
-          item.entity === entity &&
-          item.id === entityId
-        ),
+        !(item.userId === userId && item.entity === entity && item.id === entityId),
     );
     if (queueMutation) {
       state.mutations.push({
@@ -243,13 +240,11 @@ export async function removeLocalRecord(
   }
 }
 
-export async function listPendingMutations(
-  userId: string,
-): Promise<PendingMutation[]> {
+export async function listPendingMutations(userId: string): Promise<PendingMutation[]> {
   const db = await getDatabase();
   if (!db) {
-    return readWebState().mutations
-      .filter((item) => item.userId === userId)
+    return readWebState()
+      .mutations.filter((item) => item.userId === userId)
       .sort((a, b) => a.sequence - b.sequence);
   }
   const rows = await db.select<

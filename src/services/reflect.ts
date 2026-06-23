@@ -70,9 +70,13 @@ export function useReflect({ buildContext }: UseReflectOptions) {
         setReply(replyText);
       } catch (err) {
         const message =
-          (typeof err === "object" && err !== null && "message" in err &&
+          (typeof err === "object" &&
+            err !== null &&
+            "message" in err &&
             (err as { message?: unknown }).message) ||
-          (typeof err === "object" && err !== null && "hint" in err &&
+          (typeof err === "object" &&
+            err !== null &&
+            "hint" in err &&
             (err as { hint?: unknown }).hint) ||
           (err instanceof Error ? err.message : null) ||
           "Couldn't reach the AI just now. Try again in a moment.";

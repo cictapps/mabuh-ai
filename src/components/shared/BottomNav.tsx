@@ -1,12 +1,6 @@
 import React from "react";
 import { ScreenId, NavItem } from "../../types";
-import {
-  Heart,
-  BarChart3,
-  Compass,
-  MessageCircle,
-  Settings,
-} from "lucide-react";
+import { Heart, BarChart3, Compass, MessageCircle, Settings } from "lucide-react";
 
 interface BottomNavProps {
   items: NavItem[];

@@ -1,5 +1,11 @@
 import { Flag } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SectionTitle } from "./SectionTitle";
 import { ChecklistChip } from "./ChecklistChip";
@@ -26,9 +32,7 @@ export function FinalPanel({
 }: FinalPanelProps) {
   const allChecked = finalChecks.water && finalChecks.breath && finalMood;
   const doneCount =
-    (finalChecks.water ? 1 : 0) +
-    (finalChecks.breath ? 1 : 0) +
-    (finalMood ? 1 : 0);
+    (finalChecks.water ? 1 : 0) + (finalChecks.breath ? 1 : 0) + (finalMood ? 1 : 0);
 
   return (
     <Card>
@@ -40,9 +44,7 @@ export function FinalPanel({
           </span>
         </div>
         <CardTitle className="mt-3 text-2xl">Time to land</CardTitle>
-        <CardDescription>
-          A small close-out, then rest.
-        </CardDescription>
+        <CardDescription>A small close-out, then rest.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         {showHint ? (

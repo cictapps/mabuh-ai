@@ -18,11 +18,7 @@ type SlideVisual = {
   kind: "heart" | "moods" | "journal" | "support" | "ai-controls";
 };
 
-const AI_CONTEXT_PREVIEW_ROWS = [
-  "Recent moods",
-  "Journal entries",
-  "Journey progress",
-];
+const AI_CONTEXT_PREVIEW_ROWS = ["Recent moods", "Journal entries", "Journey progress"];
 
 interface OnboardingSlide {
   id: string;
@@ -38,8 +34,7 @@ const SLIDES: OnboardingSlide[] = [
     id: "welcome",
     eyebrow: "Welcome",
     title: "A quiet space, made for students.",
-    body:
-      "Mabuh-ai is a soft place to land between classes, deadlines, and the rest of life. No scores, no streaks to lose — just a few minutes to notice how you're doing.",
+    body: "Mabuh-ai is a soft place to land between classes, deadlines, and the rest of life. No scores, no streaks to lose — just a few minutes to notice how you're doing.",
     bullets: [
       "Private by default — your entries stay yours",
       "Built for tired eyes and late nights",
@@ -51,8 +46,7 @@ const SLIDES: OnboardingSlide[] = [
     id: "checkin",
     eyebrow: "Daily check-in",
     title: "Notice, gently, every day.",
-    body:
-      "A 30-second check-in turns fuzzy feelings into something you can see. Tag what's present — sleep, school, friends, energy — and watch small shifts become clearer over time.",
+    body: "A 30-second check-in turns fuzzy feelings into something you can see. Tag what's present — sleep, school, friends, energy — and watch small shifts become clearer over time.",
     bullets: [
       "Pick a mood pebble that fits the moment",
       "Tag what shaped your day in a tap",
@@ -64,8 +58,7 @@ const SLIDES: OnboardingSlide[] = [
     id: "reflect",
     eyebrow: "Reflect & grow",
     title: "A journal that actually listens.",
-    body:
-      "Drop a quick thought, save a memory, or capture an idea. Mabuh-ai quietly turns your entries into gentle insights so the bigger picture of your wellbeing stays visible — and yours.",
+    body: "Drop a quick thought, save a memory, or capture an idea. Mabuh-ai quietly turns your entries into gentle insights so the bigger picture of your wellbeing stays visible — and yours.",
     bullets: [
       "Write short notes and check-in reflections",
       "Mask-Off mode for the unfiltered stuff",
@@ -77,8 +70,7 @@ const SLIDES: OnboardingSlide[] = [
     id: "support",
     eyebrow: "Always with you",
     title: "Support, when things feel heavy.",
-    body:
-      "Talk things through with our empathetic AI companion, find local support across the Panay region, or reach a national crisis line in one tap. Whatever you're carrying, you don't have to carry it alone.",
+    body: "Talk things through with our empathetic AI companion, find local support across the Panay region, or reach a national crisis line in one tap. Whatever you're carrying, you don't have to carry it alone.",
     bullets: [
       "Gentle AI chat, available any hour",
       "Local support locator for Panay",
@@ -90,8 +82,7 @@ const SLIDES: OnboardingSlide[] = [
     id: "ai-controls",
     eyebrow: "Your choice",
     title: "Let the AI understand only what you choose.",
-    body:
-      "In Settings, you can let the AI companion use selected parts of your Mabuh-ai activity for more relevant support. These options start off, and you can change them anytime.",
+    body: "In Settings, you can let the AI companion use selected parts of your Mabuh-ai activity for more relevant support. These options start off, and you can change them anytime.",
     bullets: [
       "Choose context such as recent moods or journals",
       "Only enabled details are shared with the AI",
@@ -230,9 +221,7 @@ function AiControlsVisual() {
               padding: "8px 10px",
               marginTop: 5,
               borderRadius: 14,
-              background: enabled
-                ? "rgba(188,194,255,0.07)"
-                : "rgba(188,194,255,0.04)",
+              background: enabled ? "rgba(188,194,255,0.07)" : "rgba(188,194,255,0.04)",
               border: enabled
                 ? "1px solid rgba(188,194,255,0.16)"
                 : "1px solid rgba(188,194,255,0.08)",
@@ -244,9 +233,7 @@ function AiControlsVisual() {
             <span
               style={{
                 fontSize: 12,
-                color: enabled
-                  ? "rgba(238,241,246,0.94)"
-                  : "rgba(238,241,246,0.82)",
+                color: enabled ? "rgba(238,241,246,0.94)" : "rgba(238,241,246,0.82)",
                 fontWeight: 500,
                 flex: 1,
                 transition: reducedMotion ? "none" : "color 0.55s ease",
@@ -260,12 +247,8 @@ function AiControlsVisual() {
                 width: 36,
                 height: 20,
                 borderRadius: 999,
-                background: enabled
-                  ? "rgba(188,194,255,0.72)"
-                  : "rgba(216,212,235,0.16)",
-                boxShadow: enabled
-                  ? "0 0 16px rgba(188,194,255,0.24)"
-                  : "none",
+                background: enabled ? "rgba(188,194,255,0.72)" : "rgba(216,212,235,0.16)",
+                boxShadow: enabled ? "0 0 16px rgba(188,194,255,0.24)" : "none",
                 flexShrink: 0,
                 transition: reducedMotion
                   ? "none"
@@ -548,8 +531,8 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
               overflowWrap: "anywhere",
             }}
           >
-            "Felt scattered before the exam, but the breathing pebble helped me
-            land. Tiny win — counting it."
+            "Felt scattered before the exam, but the breathing pebble helped me land. Tiny
+            win — counting it."
           </div>
           <div
             style={{
@@ -769,9 +752,7 @@ function PaginationDots({
   );
 }
 
-export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
-  onComplete,
-}) => {
+export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const reducedMotion = usePrefersReducedMotion();
@@ -782,7 +763,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   const isLast = index === SLIDES.length - 1;
   const [skipFuture, setSkipFuture] = useState(true);
 
-  const eyebrowLetter = useMemo(() => slide.eyebrow.charAt(0).toUpperCase(), [slide.eyebrow]);
+  const eyebrowLetter = useMemo(
+    () => slide.eyebrow.charAt(0).toUpperCase(),
+    [slide.eyebrow],
+  );
 
   const goTo = (next: number) => {
     if (next === index) return;
@@ -956,9 +940,13 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
             transition: "background 0.2s ease, color 0.2s ease",
             fontFamily: "var(--font-sans)",
           }}
-          onMouseDown={(e) => (e.currentTarget.style.background = "rgba(188,194,255,0.16)")}
+          onMouseDown={(e) =>
+            (e.currentTarget.style.background = "rgba(188,194,255,0.16)")
+          }
           onMouseUp={(e) => (e.currentTarget.style.background = "rgba(188,194,255,0.08)")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(188,194,255,0.08)")}
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.background = "rgba(188,194,255,0.08)")
+          }
         >
           Skip
         </button>
@@ -994,128 +982,128 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
             flexDirection: "column",
           }}
         >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginBottom: tight ? 8 : 14,
-          }}
-        >
-          <span
+          <div
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              width: 26,
-              height: 26,
-              borderRadius: 9,
-              background: "rgba(255,185,84,0.18)",
-              color: "rgba(255,217,154,1)",
-              fontFamily: "var(--font-serif)",
-              fontSize: 14,
-              fontWeight: 600,
-              lineHeight: 1,
-              flexShrink: 0,
+              gap: 8,
+              marginBottom: tight ? 8 : 14,
             }}
-            aria-hidden
           >
             <span
               style={{
-                display: "block",
-                lineHeight: 1,
-                transform: "translateY(0.5px)",
-              }}
-            >
-              {eyebrowLetter}
-            </span>
-          </span>
-          <span
-            style={{
-              fontSize: 11,
-              letterSpacing: "1.4px",
-              textTransform: "uppercase",
-              color: "rgba(220,224,255,0.6)",
-              fontWeight: 500,
-            }}
-          >
-            {slide.eyebrow}
-          </span>
-        </div>
-
-        <h1
-          className="font-serif"
-          style={{
-            fontSize: tight ? "clamp(22px, 6.4vw, 28px)" : "clamp(26px, 7vw, 34px)",
-            fontWeight: 500,
-            lineHeight: 1.14,
-            color: "#f5f1ff",
-            letterSpacing: "-0.025em",
-            margin: 0,
-            marginBottom: tight ? 8 : 14,
-          }}
-        >
-          {slide.title}
-        </h1>
-
-        <p
-          style={{
-            fontSize: tight ? 13.5 : 14.5,
-            lineHeight: 1.55,
-            color: "rgba(220,224,255,0.7)",
-            margin: 0,
-            marginBottom: tight ? 12 : 18,
-            maxWidth: 360,
-          }}
-        >
-          {slide.body}
-        </p>
-
-        <div style={{ marginBottom: tight ? 12 : 18 }}>{visualNode}</div>
-
-        <ul
-          style={{
-            listStyle: "none",
-            padding: 0,
-            margin: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: tight ? 7 : 10,
-            paddingBottom: tight ? 8 : 0,
-          }}
-        >
-          {slide.bullets.map((b) => (
-            <li
-              key={b}
-              style={{
                 display: "flex",
-                alignItems: "flex-start",
-                gap: 10,
-                fontSize: tight ? 12.5 : 13.5,
-                color: "rgba(238,241,246,0.85)",
-                lineHeight: 1.45,
+                alignItems: "center",
+                justifyContent: "center",
+                width: 26,
+                height: 26,
+                borderRadius: 9,
+                background: "rgba(255,185,84,0.18)",
+                color: "rgba(255,217,154,1)",
+                fontFamily: "var(--font-serif)",
+                fontSize: 14,
+                fontWeight: 600,
+                lineHeight: 1,
+                flexShrink: 0,
               }}
+              aria-hidden
             >
               <span
-                aria-hidden
                 style={{
-                  display: "grid",
-                  placeItems: "center",
-                  width: 20,
-                  height: 20,
-                  borderRadius: "50%",
-                  background: "rgba(109,186,132,0.18)",
-                  color: "rgba(141,212,164,1)",
-                  flexShrink: 0,
-                  marginTop: 1,
+                  display: "block",
+                  lineHeight: 1,
+                  transform: "translateY(0.5px)",
                 }}
               >
-                <Check size={12} strokeWidth={2.4} />
+                {eyebrowLetter}
               </span>
-              <span>{b}</span>
-            </li>
-          ))}
-        </ul>
+            </span>
+            <span
+              style={{
+                fontSize: 11,
+                letterSpacing: "1.4px",
+                textTransform: "uppercase",
+                color: "rgba(220,224,255,0.6)",
+                fontWeight: 500,
+              }}
+            >
+              {slide.eyebrow}
+            </span>
+          </div>
+
+          <h1
+            className="font-serif"
+            style={{
+              fontSize: tight ? "clamp(22px, 6.4vw, 28px)" : "clamp(26px, 7vw, 34px)",
+              fontWeight: 500,
+              lineHeight: 1.14,
+              color: "#f5f1ff",
+              letterSpacing: "-0.025em",
+              margin: 0,
+              marginBottom: tight ? 8 : 14,
+            }}
+          >
+            {slide.title}
+          </h1>
+
+          <p
+            style={{
+              fontSize: tight ? 13.5 : 14.5,
+              lineHeight: 1.55,
+              color: "rgba(220,224,255,0.7)",
+              margin: 0,
+              marginBottom: tight ? 12 : 18,
+              maxWidth: 360,
+            }}
+          >
+            {slide.body}
+          </p>
+
+          <div style={{ marginBottom: tight ? 12 : 18 }}>{visualNode}</div>
+
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: tight ? 7 : 10,
+              paddingBottom: tight ? 8 : 0,
+            }}
+          >
+            {slide.bullets.map((b) => (
+              <li
+                key={b}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 10,
+                  fontSize: tight ? 12.5 : 13.5,
+                  color: "rgba(238,241,246,0.85)",
+                  lineHeight: 1.45,
+                }}
+              >
+                <span
+                  aria-hidden
+                  style={{
+                    display: "grid",
+                    placeItems: "center",
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    background: "rgba(109,186,132,0.18)",
+                    color: "rgba(141,212,164,1)",
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                >
+                  <Check size={12} strokeWidth={2.4} />
+                </span>
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </main>
 
@@ -1132,11 +1120,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
           flexShrink: 0,
         }}
       >
-        <PaginationDots
-          total={SLIDES.length}
-          active={index}
-          onSelect={goTo}
-        />
+        <PaginationDots total={SLIDES.length} active={index} onSelect={goTo} />
 
         {isLast && (
           <label
@@ -1178,13 +1162,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
                 transition: "background 0.2s ease",
               }}
             >
-              {skipFuture && (
-                <Check
-                  size={12}
-                  strokeWidth={2.6}
-                  color="#1a1c2b"
-                />
-              )}
+              {skipFuture && <Check size={12} strokeWidth={2.6} color="#1a1c2b" />}
             </span>
             <span onClick={() => setSkipFuture((v) => !v)}>
               Don't show this welcome again

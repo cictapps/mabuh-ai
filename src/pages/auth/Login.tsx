@@ -16,7 +16,8 @@ export function Login() {
   const { signIn } = useAuthActions();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? "/";
+  const from =
+    (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? "/";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -53,7 +54,9 @@ export function Login() {
             <MoonStar className="size-4 text-secondary" />
             Welcome back
           </span>
-          <CardTitle className="text-3xl tracking-[-0.03em]">Sign in to your sanctuary</CardTitle>
+          <CardTitle className="text-3xl tracking-[-0.03em]">
+            Sign in to your sanctuary
+          </CardTitle>
           <CardDescription>Your space, your pace. We'll keep it safe.</CardDescription>
         </CardHeader>
 

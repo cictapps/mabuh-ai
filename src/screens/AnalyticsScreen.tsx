@@ -51,7 +51,9 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   loading,
 }) => {
   const domMeta = dominantMood ? getMoodMeta(dominantMood) : null;
-  const latestEntries = [...history].sort((a, b) => b.timestamp - a.timestamp).slice(0, 4);
+  const latestEntries = [...history]
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 4);
 
   const isEmpty = !loading && history.length === 0;
 
@@ -146,7 +148,14 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               <div style={{ fontSize: 16, color: "#e8eaf0", fontWeight: 600 }}>
                 {item.value}
               </div>
-              <div style={{ fontSize: 10, color: "rgba(188,194,255,0.45)", letterSpacing: "0.6px", textTransform: "uppercase" }}>
+              <div
+                style={{
+                  fontSize: 10,
+                  color: "rgba(188,194,255,0.45)",
+                  letterSpacing: "0.6px",
+                  textTransform: "uppercase",
+                }}
+              >
                 {item.label}
               </div>
             </div>
@@ -202,7 +211,9 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
                   })}
                 </span>
                 <span style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
-                  {entry.tags.length} {entry.tags.length === 1 ? "word" : "words"} · {entry.socialInteractions?.length ?? 0} connection{entry.socialInteractions?.length === 1 ? "" : "s"}
+                  {entry.tags.length} {entry.tags.length === 1 ? "word" : "words"} ·{" "}
+                  {entry.socialInteractions?.length ?? 0} connection
+                  {entry.socialInteractions?.length === 1 ? "" : "s"}
                 </span>
               </div>
             );
@@ -233,7 +244,13 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
           gap: 12,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <p
             style={{
               fontSize: 11,
@@ -263,35 +280,44 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               style={{
                 height: "100%",
                 width: `${analyticsStats.stabilityScore}%`,
-                background: "linear-gradient(90deg, rgba(255,185,84,0.8), rgba(188,194,255,0.8))",
+                background:
+                  "linear-gradient(90deg, rgba(255,185,84,0.8), rgba(188,194,255,0.8))",
               }}
             />
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <div>
-            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>Your brightest day</p>
+            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>
+              Your brightest day
+            </p>
             <p style={{ fontSize: 13, color: "#e8eaf0" }}>
               {analyticsStats.bestEntry
                 ? `${getMoodMeta(analyticsStats.bestEntry.mood).label} · ${new Date(
-                    analyticsStats.bestEntry.timestamp
+                    analyticsStats.bestEntry.timestamp,
                   ).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
                 : "--"}
             </p>
           </div>
           <div>
-            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>Your heaviest day</p>
+            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>
+              Your heaviest day
+            </p>
             <p style={{ fontSize: 13, color: "#e8eaf0" }}>
               {analyticsStats.worstEntry
                 ? `${getMoodMeta(analyticsStats.worstEntry.mood).label} · ${new Date(
-                    analyticsStats.worstEntry.timestamp
+                    analyticsStats.worstEntry.timestamp,
                   ).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
                 : "--"}
             </p>
           </div>
           <div>
-            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>Little moments noticed</p>
-            <p style={{ fontSize: 13, color: "#e8eaf0" }}>{analyticsStats.activityCount}</p>
+            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>
+              Little moments noticed
+            </p>
+            <p style={{ fontSize: 13, color: "#e8eaf0" }}>
+              {analyticsStats.activityCount}
+            </p>
           </div>
         </div>
       </div>
@@ -329,7 +355,13 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
                 border: "1px solid rgba(188,194,255,0.08)",
               }}
             >
-              <p style={{ fontSize: 11, color: "rgba(188,194,255,0.45)", textTransform: "uppercase" }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  color: "rgba(188,194,255,0.45)",
+                  textTransform: "uppercase",
+                }}
+              >
                 {item.section}
               </p>
               <p style={{ fontSize: 13, color: "#e8eaf0", marginTop: 4 }}>
@@ -391,9 +423,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             <p style={{ fontSize: 13, color: "#e8eaf0", marginBottom: 4 }}>
               {socialStats.totalInteractions}
             </p>
-            <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
-              moments shared
-            </p>
+            <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>moments shared</p>
           </div>
           <div>
             <p style={{ fontSize: 13, color: "#e8eaf0", marginBottom: 4 }}>

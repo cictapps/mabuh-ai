@@ -110,12 +110,10 @@ function AchievementCardSurface({
         overflow: "hidden",
         borderRadius: 56,
         border: "1.5px solid rgba(188,194,255,0.22)",
-        background:
-          "linear-gradient(150deg, #1a1d2c 0%, #131623 55%, #0c0f17 100%)",
+        background: "linear-gradient(150deg, #1a1d2c 0%, #131623 55%, #0c0f17 100%)",
         boxShadow: "0 32px 80px -40px rgba(8,10,18,0.95)",
         color: "#f3eef7",
-        fontFamily:
-          '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif',
+        fontFamily: '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif',
       }}
     >
       <div
@@ -423,10 +421,7 @@ function AchievementCardSurface({
                 pointerEvents: "none",
               }}
             />
-            <Sprout
-              aria-hidden
-              style={{ width: 26, height: 26, color: "#bcc2ff" }}
-            />
+            <Sprout aria-hidden style={{ width: 26, height: 26, color: "#bcc2ff" }} />
           </div>
           <div style={{ minWidth: 0, flex: 1 }}>
             <p
@@ -461,9 +456,7 @@ function AchievementCardSurface({
 
 function RankBadge({ level }: { level: number }) {
   return (
-    <div
-      style={{ position: "relative", width: 168, height: 168, flexShrink: 0 }}
-    >
+    <div style={{ position: "relative", width: 168, height: 168, flexShrink: 0 }}>
       <div
         aria-hidden
         style={{
@@ -485,8 +478,7 @@ function RankBadge({ level }: { level: number }) {
           padding: 2,
           background:
             "conic-gradient(from 220deg, #bcc2ff 0deg, #d4bbff 160deg, #ffb954 300deg, #bcc2ff 360deg)",
-          WebkitMask:
-            "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+          WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
           WebkitMaskComposite: "xor",
           maskComposite: "exclude",
         }}
@@ -793,11 +785,7 @@ export function AchievementShareCard(props: AchievementShareCardProps) {
             {busy === "download" ? "Saving…" : "Download"}
           </span>
         </Button>
-        <Button
-          type="button"
-          onClick={() => void handleShare()}
-          disabled={busy !== null}
-        >
+        <Button type="button" onClick={() => void handleShare()} disabled={busy !== null}>
           <Share2 aria-hidden />
           <span style={{ display: "inline-block", minWidth: "4.5rem" }}>
             {busy === "share" ? "Sharing…" : "Share"}

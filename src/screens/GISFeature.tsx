@@ -2434,8 +2434,8 @@ export function GISFeature() {
                   Map unavailable offline
                 </p>
                 <p className="mt-2 text-xs leading-relaxed text-[#d8d4eb]">
-                  Provider listings, phone numbers, and saved details are still
-                  available below.
+                  Provider listings, phone numbers, and saved details are still available
+                  below.
                 </p>
               </div>
             )}

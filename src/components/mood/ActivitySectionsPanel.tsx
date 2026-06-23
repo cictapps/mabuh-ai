@@ -223,7 +223,10 @@ export const ActivitySectionsPanel: React.FC<ActivitySectionsPanelProps> = ({
               ))}
             </div>
 
-            <div className="activity-add-row" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <div
+              className="activity-add-row"
+              style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
+            >
               <div style={{ flex: "1 1 160px", minWidth: 0 }}>
                 <Input
                   placeholder={`Add custom ${section.label.toLowerCase()} activity`}

@@ -32,18 +32,11 @@ const MIN_SEGMENT_PX = 6;
  * Invisible hit-target segments are laid on top of the gradient so each
  * entry remains individually clickable and screen-reader friendly.
  */
-export function MoodGradientBar({
-  entries,
-  period,
-  onEntryClick,
-}: MoodGradientBarProps) {
+export function MoodGradientBar({ entries, period, onEntryClick }: MoodGradientBarProps) {
   const height = period === "week" ? 36 : 28;
 
   const segments = useMemo(() => buildSegments(entries), [entries]);
-  const gradientStops = useMemo(
-    () => buildGradientStops(segments),
-    [segments],
-  );
+  const gradientStops = useMemo(() => buildGradientStops(segments), [segments]);
 
   if (segments.length === 0) {
     return (
@@ -72,8 +65,7 @@ export function MoodGradientBar({
           gradientStops.length > 1
             ? `linear-gradient(90deg, ${gradientStops.join(", ")})`
             : getMoodMeta(segments[0].entry.mood).color,
-        boxShadow:
-          "inset 0 0 0 1px rgba(0,0,0,0.10), 0 8px 22px -16px rgba(0,0,0,0.6)",
+        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.10), 0 8px 22px -16px rgba(0,0,0,0.6)",
       }}
       role="list"
       aria-label={`Mood check-ins for this ${period}`}

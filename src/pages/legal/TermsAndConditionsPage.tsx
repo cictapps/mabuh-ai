@@ -84,7 +84,7 @@ const SECTIONS: Section[] = [
     id: "no-warranty",
     title: "No warranty",
     body: [
-      "Mabuh-ai is provided \"as is\" and \"as available,\" without warranty of any kind, express or implied. We do not warrant that the app will be uninterrupted, error-free, or that any particular outcome will result from using it.",
+      'Mabuh-ai is provided "as is" and "as available," without warranty of any kind, express or implied. We do not warrant that the app will be uninterrupted, error-free, or that any particular outcome will result from using it.',
     ],
   },
   {
@@ -97,9 +97,7 @@ const SECTIONS: Section[] = [
   {
     id: "governing-law",
     title: "Governing law",
-    body: [
-      "These terms are governed by the laws of the Republic of the Philippines.",
-    ],
+    body: ["These terms are governed by the laws of the Republic of the Philippines."],
   },
   {
     id: "contact",
@@ -219,11 +217,10 @@ export function TermsAndConditionsPage() {
             margin: 0,
           }}
         >
-          Mabuh-ai is a class project from BS Information Systems students at
-          the College of Information and Communications Technology, West
-          Visayas State University. It is free, non-commercial, and
-          maintained as a learning project. Your feedback helps the team
-          improve it for the next cohort of students.
+          Mabuh-ai is a class project from BS Information Systems students at the College
+          of Information and Communications Technology, West Visayas State University. It
+          is free, non-commercial, and maintained as a learning project. Your feedback
+          helps the team improve it for the next cohort of students.
         </p>
         <p style={{ fontSize: 13, margin: 0, marginTop: 6 }}>
           <Link

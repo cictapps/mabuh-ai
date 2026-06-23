@@ -1,5 +1,11 @@
 import { Heart, Phone, Wind, X, LifeBuoy } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 
@@ -62,8 +68,7 @@ export function PausePanel({ onClose, onOpenSupport }: PausePanelProps) {
             className="mt-4 w-full"
             onClick={() => addDeepBreath()}
           >
-            <Wind className="size-4" />
-            I took a breath
+            <Wind className="size-4" />I took a breath
           </Button>
         </div>
 
@@ -73,7 +78,8 @@ export function PausePanel({ onClose, onOpenSupport }: PausePanelProps) {
           </p>
           {namedContacts.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-[rgba(188,194,255,0.12)] bg-[rgba(188,194,255,0.02)] p-3 text-xs leading-relaxed text-[#d8d4eb]">
-              You can save a trusted person's number in the Hangar. They'll show up here for one-tap calling whenever you need them.
+              You can save a trusted person's number in the Hangar. They'll show up here
+              for one-tap calling whenever you need them.
             </p>
           ) : (
             namedContacts.map((contact) => (
@@ -98,11 +104,7 @@ export function PausePanel({ onClose, onOpenSupport }: PausePanelProps) {
           )}
         </div>
 
-        <Button
-          size="lg"
-          className="w-full"
-          onClick={onOpenSupport}
-        >
+        <Button size="lg" className="w-full" onClick={onOpenSupport}>
           <LifeBuoy className="size-4" />
           Open support resources
         </Button>

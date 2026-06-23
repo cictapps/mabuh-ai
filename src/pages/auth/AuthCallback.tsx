@@ -57,7 +57,9 @@ export function AuthCallback() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Could not finish authentication.");
+          setError(
+            err instanceof Error ? err.message : "Could not finish authentication.",
+          );
         }
       }
     }
@@ -85,7 +87,11 @@ export function AuthCallback() {
               <h1 className="font-serif text-3xl tracking-[-0.03em]">Sign-in stopped</h1>
               <p className="text-sm text-muted-foreground">{error}</p>
             </div>
-            <Button type="button" className="w-full" onClick={() => navigate("/login", { replace: true })}>
+            <Button
+              type="button"
+              className="w-full"
+              onClick={() => navigate("/login", { replace: true })}
+            >
               Return to sign in
             </Button>
           </div>

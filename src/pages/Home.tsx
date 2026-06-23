@@ -19,9 +19,12 @@ export function Home() {
 
         <Card className="bg-card/80">
           <CardHeader>
-            <CardTitle className="text-3xl tracking-[-0.03em]">Your sanctuary awaits</CardTitle>
+            <CardTitle className="text-3xl tracking-[-0.03em]">
+              Your sanctuary awaits
+            </CardTitle>
             <CardDescription>
-              Auth is wired up. Build your first protected feature next - mood check-in or journal.
+              Auth is wired up. Build your first protected feature next - mood check-in or
+              journal.
             </CardDescription>
           </CardHeader>
         </Card>

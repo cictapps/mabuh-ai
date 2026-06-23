@@ -79,7 +79,9 @@ export function Signup() {
             <Sparkles className="size-4" />
             Begin gently
           </span>
-          <CardTitle className="text-3xl tracking-[-0.03em]">Create your account</CardTitle>
+          <CardTitle className="text-3xl tracking-[-0.03em]">
+            Create your account
+          </CardTitle>
           <CardDescription>A quiet place to reflect, at your own rhythm.</CardDescription>
         </CardHeader>
 

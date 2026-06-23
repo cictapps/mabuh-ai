@@ -20,7 +20,12 @@ export const SuggestionsScreen: React.FC<SuggestionsScreenProps> = ({
   return (
     <div
       className="screen-enter"
-      style={{ padding: "30px 22px 52px", display: "flex", flexDirection: "column", gap: 24 }}
+      style={{
+        padding: "30px 22px 52px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 24,
+      }}
     >
       <div>
         <p

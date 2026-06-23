@@ -69,7 +69,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
   const yLabels = [
     { score: 5, label: "Happy" },
     { score: 3, label: "Okay" },
-    { score: 1, label: "Stressed" },
+    { score: 1, label: "Stressed / sad" },
   ];
 
   return (
@@ -154,7 +154,10 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
             fontFamily="Plus Jakarta Sans, sans-serif"
             textAnchor="middle"
           >
-            {new Date(data[0].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            {new Date(data[0].date + "T12:00:00").toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })}
           </text>
           <text
             x={points[points.length - 1].x}
@@ -164,7 +167,10 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
             fontFamily="Plus Jakarta Sans, sans-serif"
             textAnchor="middle"
           >
-            {new Date(data[data.length - 1].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            {new Date(data[data.length - 1].date + "T12:00:00").toLocaleDateString(
+              "en-US",
+              { month: "short", day: "numeric" },
+            )}
           </text>
         </>
       )}

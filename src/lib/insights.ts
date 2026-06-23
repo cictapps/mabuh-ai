@@ -33,7 +33,9 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
   const weekdayScores: number[] = [];
   const scoreMap: Record<MoodType, number> = {
     stressed: 1,
+    sad: 1,
     worried: 2,
+    tired: 2,
     okay: 3,
     calm: 4,
     happy: 5,
@@ -45,10 +47,8 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
     else weekdayScores.push(score);
   });
   if (weekendScores.length >= WEEKEND_INSIGHT_MIN && weekdayScores.length >= 1) {
-    const avgWeekend =
-      weekendScores.reduce((s, v) => s + v, 0) / weekendScores.length;
-    const avgWeekday =
-      weekdayScores.reduce((s, v) => s + v, 0) / weekdayScores.length;
+    const avgWeekend = weekendScores.reduce((s, v) => s + v, 0) / weekendScores.length;
+    const avgWeekday = weekdayScores.reduce((s, v) => s + v, 0) / weekdayScores.length;
     if (avgWeekend - avgWeekday >= 0.5) {
       insights.push({
         id: "insight-weekend",
@@ -76,8 +76,7 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
     const avgWith =
       withJournal.reduce((s, e) => s + scoreMap[e.mood], 0) / withJournal.length;
     const avgWithout =
-      withoutJournal.reduce((s, e) => s + scoreMap[e.mood], 0) /
-      withoutJournal.length;
+      withoutJournal.reduce((s, e) => s + scoreMap[e.mood], 0) / withoutJournal.length;
     if (avgWith - avgWithout >= 0.4) {
       insights.push({
         id: "insight-journal",
@@ -109,17 +108,14 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
   }
 
   // 4. School-load correlation
-  const withLoad = history.filter(
-    (e) => typeof e.schoolLoad === "number",
-  );
+  const withLoad = history.filter((e) => typeof e.schoolLoad === "number");
   if (withLoad.length >= JOURNAL_INSIGHT_MIN) {
     const highLoad = withLoad.filter((e) => (e.schoolLoad ?? 0) >= 4);
     const lowLoad = withLoad.filter((e) => (e.schoolLoad ?? 0) <= 2);
     if (highLoad.length >= 2 && lowLoad.length >= 2) {
       const avgHigh =
         highLoad.reduce((s, e) => s + scoreMap[e.mood], 0) / highLoad.length;
-      const avgLow =
-        lowLoad.reduce((s, e) => s + scoreMap[e.mood], 0) / lowLoad.length;
+      const avgLow = lowLoad.reduce((s, e) => s + scoreMap[e.mood], 0) / lowLoad.length;
       if (avgLow - avgHigh >= 0.4) {
         insights.push({
           id: "insight-load",
@@ -137,10 +133,8 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
     const recent = sorted.slice(-7);
     const older = sorted.slice(-14, -7);
     if (older.length >= 3) {
-      const avgRecent =
-        recent.reduce((s, e) => s + scoreMap[e.mood], 0) / recent.length;
-      const avgOlder =
-        older.reduce((s, e) => s + scoreMap[e.mood], 0) / older.length;
+      const avgRecent = recent.reduce((s, e) => s + scoreMap[e.mood], 0) / recent.length;
+      const avgOlder = older.reduce((s, e) => s + scoreMap[e.mood], 0) / older.length;
       if (avgRecent - avgOlder >= 0.6) {
         insights.push({
           id: "insight-trend-up",

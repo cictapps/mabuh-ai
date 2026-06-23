@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MoodType } from "../../types";
+import { MoodType, MOOD_ORDER } from "../../types";
 import { getMoodMeta } from "../../data";
 
 interface DistItem {
@@ -12,8 +12,6 @@ interface MoodDistributionProps {
   data: DistItem[];
 }
 
-const ORDER: MoodType[] = ["happy", "calm", "okay", "worried", "stressed"];
-
 export const MoodDistribution: React.FC<MoodDistributionProps> = ({ data }) => {
   const [animated, setAnimated] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -23,7 +21,7 @@ export const MoodDistribution: React.FC<MoodDistributionProps> = ({ data }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const sorted = ORDER.map((id) => data.find((d) => d.mood === id)!).filter(Boolean);
+  const sorted = MOOD_ORDER.map((id) => data.find((d) => d.mood === id)!).filter(Boolean);
 
   return (
     <div ref={ref} style={{ display: "flex", flexDirection: "column", gap: 10 }}>

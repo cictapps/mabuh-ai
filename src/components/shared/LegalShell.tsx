@@ -115,8 +115,8 @@ export function LegalShell({
               margin: 0,
             }}
           >
-            By using Mabuh-ai you confirm that you have read and agree to
-            this document{agreementHref ? " and the " : " and the "}
+            By using Mabuh-ai you confirm that you have read and agree to this document
+            {agreementHref ? " and the " : " and the "}
             <Link
               to={agreementHref ?? "/terms"}
               state={{ from: location.pathname }}

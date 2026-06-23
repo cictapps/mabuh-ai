@@ -70,6 +70,8 @@ const MOOD_TYPES: ReadonlySet<string> = new Set([
   "okay",
   "calm",
   "happy",
+  "sad",
+  "tired",
 ]);
 
 const SYNC_TIMEOUT_MS = 20_000;
@@ -269,10 +271,7 @@ export async function updateMoodEntry(
   return updated;
 }
 
-export async function deleteMoodEntry(
-  entryId: string,
-  userId?: string,
-): Promise<void> {
+export async function deleteMoodEntry(entryId: string, userId?: string): Promise<void> {
   const id = await resolveUserId(userId);
   await removeLocalRecord(id, "mood", entryId);
 }
@@ -311,8 +310,7 @@ export async function deleteJournalEntry(
 }
 
 async function pushMutation(mutation: PendingMutation): Promise<void> {
-  const table =
-    mutation.entity === "mood" ? "mood_entries" : "journal_entries";
+  const table = mutation.entity === "mood" ? "mood_entries" : "journal_entries";
   if (mutation.operation === "delete") {
     const { error } = await supabase.from(table).delete().eq("id", mutation.entityId);
     if (error) throw error;
@@ -344,9 +342,7 @@ async function fetchRemoteSnapshot(userId: string): Promise<void> {
       .from("journal_entries")
       .select("id, user_id, body, source, entry_date, created_at, updated_at")
       .order("created_at", { ascending: true }),
-    supabase
-      .from("wellness_tombstones")
-      .select("entity_type, entity_id, deleted_at"),
+    supabase.from("wellness_tombstones").select("entity_type, entity_id, deleted_at"),
   ]);
   if (moodsResult.error) throw moodsResult.error;
   if (journalsResult.error) throw journalsResult.error;
@@ -384,12 +380,7 @@ async function fetchRemoteSnapshot(userId: string): Promise<void> {
       entity_type: "mood" | "journal";
       entity_id: string;
     };
-    await removeLocalRecord(
-      userId,
-      tombstone.entity_type,
-      tombstone.entity_id,
-      false,
-    );
+    await removeLocalRecord(userId, tombstone.entity_type, tombstone.entity_id, false);
   }
 }
 

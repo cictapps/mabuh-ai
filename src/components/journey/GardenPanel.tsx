@@ -1,4 +1,4 @@
-import { Heart, Leaf, Moon, Shield, Sparkles, Sun, Waves } from "lucide-react";
+import { CloudRain, Heart, Leaf, Moon, Shield, Sparkles, Sun, Waves } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,11 +32,23 @@ const CARE: Record<
     detail: "Give the plant and yourself a little cover while the rain passes.",
     icon: Shield,
   },
+  sad: {
+    weather: "Soft drizzle and a long quiet",
+    action: "Sit with it",
+    detail: "Some days are simply heavy. The garden waits patiently with you.",
+    icon: CloudRain,
+  },
   worried: {
     weather: "Clouds and a steady breeze",
     action: "Support the stem",
     detail: "A small support can make movement feel more manageable.",
     icon: Waves,
+  },
+  tired: {
+    weather: "Dusk, low light",
+    action: "Rest a while",
+    detail: "Water and step away. The plant grows even when you’re not watching.",
+    icon: Moon,
   },
   okay: {
     weather: "Soft overcast",

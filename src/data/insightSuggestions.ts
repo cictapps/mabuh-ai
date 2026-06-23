@@ -2,7 +2,9 @@ import type { MoodEntry, MoodType, Suggestion } from "../types";
 
 const MOOD_SCORE: Record<MoodType, number> = {
   stressed: 1,
+  sad: 1,
   worried: 2,
+  tired: 2,
   okay: 3,
   calm: 4,
   happy: 5,

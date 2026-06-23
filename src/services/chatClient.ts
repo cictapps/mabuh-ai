@@ -199,7 +199,7 @@ export async function sendChatMessage(
 
   const baseContext =
     req.context && typeof req.context === "object" && !Array.isArray(req.context)
-      ? ({ ...(req.context as Record<string, unknown>) })
+      ? { ...(req.context as Record<string, unknown>) }
       : {};
   baseContext.audience = "student";
 

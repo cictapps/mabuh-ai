@@ -1,4 +1,25 @@
-export type MoodType = "stressed" | "worried" | "okay" | "calm" | "happy";
+export type MoodType =
+  | "stressed"
+  | "worried"
+  | "okay"
+  | "calm"
+  | "happy"
+  | "sad"
+  | "tired";
+
+/**
+ * Display order for mood selectors and analytics. Most positive first.
+ * Adding a new mood only requires appending it here and to {@link MoodType}.
+ */
+export const MOOD_ORDER: ReadonlyArray<MoodType> = [
+  "happy",
+  "calm",
+  "okay",
+  "tired",
+  "worried",
+  "sad",
+  "stressed",
+];
 
 export type RelationshipType = "friend" | "family" | "partner" | "colleague" | "other";
 

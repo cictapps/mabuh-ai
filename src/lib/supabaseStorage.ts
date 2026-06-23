@@ -59,10 +59,7 @@ function makeTauriAdapter(): StorageAdapter {
         await store.delete(key);
         await store.save();
       } catch (err) {
-        console.warn(
-          "[supabaseStorage] tauri removeItem failed; cleared in-memory",
-          err,
-        );
+        console.warn("[supabaseStorage] tauri removeItem failed; cleared in-memory", err);
       }
     },
   };

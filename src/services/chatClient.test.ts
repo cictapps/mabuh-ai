@@ -478,7 +478,9 @@ describe("sendChatMessage", () => {
     const httpFetch = vi
       .fn()
       .mockImplementation(
-        httpStatus(400, { error: { code: "INVALID", message: "intent must be general or support" } }),
+        httpStatus(400, {
+          error: { code: "INVALID", message: "intent must be general or support" },
+        }),
       );
 
     await expect(

@@ -820,8 +820,8 @@ input[type="password"]::-ms-clear {
   display: flex;
   flex-direction: column;
   gap: clamp(14px, 4vw, 22px);
-  padding: var(--app-screen-top)
-    clamp(16px, 5vw, 24px) calc(env(safe-area-inset-bottom, 0px) + 120px);
+  padding: var(--app-screen-top) clamp(16px, 5vw, 24px)
+    calc(env(safe-area-inset-bottom, 0px) + 120px);
   position: relative;
   width: 100%;
   max-width: 640px;

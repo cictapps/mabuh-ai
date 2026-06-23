@@ -83,15 +83,11 @@ export function getJourneyStatus(
     }
   }
 
-  const nextDate = nextCheckpoint
-    ? parseCheckpointTime(nextCheckpoint.time, now)
-    : null;
+  const nextDate = nextCheckpoint ? parseCheckpointTime(nextCheckpoint.time, now) : null;
   const currentDate = currentCheckpoint
     ? parseCheckpointTime(currentCheckpoint.time, now)
     : null;
-  const msUntilNext = nextDate
-    ? Math.max(0, nextDate.getTime() - now.getTime())
-    : null;
+  const msUntilNext = nextDate ? Math.max(0, nextDate.getTime() - now.getTime()) : null;
 
   let progressPercent = nextCheckpoint ? 0 : 100;
 

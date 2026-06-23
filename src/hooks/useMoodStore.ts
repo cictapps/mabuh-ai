@@ -458,7 +458,9 @@ export function useMoodStore() {
   const moodScoreMap: Record<MoodType, number> = useMemo(
     () => ({
       stressed: 1,
+      sad: 1,
       worried: 2,
+      tired: 2,
       okay: 3,
       calm: 4,
       happy: 5,
@@ -533,7 +535,9 @@ export function useMoodStore() {
     // "calm". This is the more meaningful "what was your day like?" view.
     const counts: Record<MoodType, number> = {
       stressed: 0,
+      sad: 0,
       worried: 0,
+      tired: 0,
       okay: 0,
       calm: 0,
       happy: 0,

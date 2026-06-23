@@ -187,8 +187,7 @@ async function performRequest(
 }
 
 function validateRequest(req: AchievementCardRequest) {
-  const positive = (n: unknown) =>
-    typeof n === "number" && Number.isFinite(n) && n >= 0;
+  const positive = (n: unknown) => typeof n === "number" && Number.isFinite(n) && n >= 0;
   if (!positive(req.level) || req.level < 1 || req.level > MAX_LEVEL) {
     throw new AchievementCardError({
       kind: "config",
@@ -240,10 +239,7 @@ function buildPayload(req: AchievementCardRequest) {
   };
 }
 
-function parseResponse(
-  attempt: AttemptResult,
-  startedAt: number,
-): AchievementCardImage {
+function parseResponse(attempt: AttemptResult, startedAt: number): AchievementCardImage {
   if (attempt.status === 429) {
     throw new AchievementCardError({
       kind: "rate-limit",
@@ -256,7 +252,8 @@ function parseResponse(
   if (attempt.status === 503) {
     throw new AchievementCardError({
       kind: "unavailable",
-      message: "The achievement card service is temporarily unavailable. Please try again shortly.",
+      message:
+        "The achievement card service is temporarily unavailable. Please try again shortly.",
       status: 503,
       requestId: attempt.requestId,
       diagnostics: { durationMs: Date.now() - startedAt },
@@ -331,7 +328,8 @@ function parseResponse(
   try {
     bytes = base64ToUint8Array(obj.imageBase64);
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Could not decode the image payload.";
+    const message =
+      e instanceof Error ? e.message : "Could not decode the image payload.";
     throw new AchievementCardError({
       kind: "invalid-image",
       message: `The card server returned an unreadable image: ${message}`,
@@ -415,7 +413,8 @@ export async function requestAchievementCard(
     if (isAbortError(err)) {
       throw new AchievementCardError({
         kind: "unavailable",
-        message: "The card service is taking too long to respond. Please try again in a moment.",
+        message:
+          "The card service is taking too long to respond. Please try again in a moment.",
         diagnostics: { reason: "timeout", timeoutMs: REQUEST_TIMEOUT_MS, url },
       });
     }
@@ -455,7 +454,8 @@ export async function requestAchievementCard(
     if (isAbortError(err)) {
       throw new AchievementCardError({
         kind: "unavailable",
-        message: "The card service is taking too long to respond. Please try again in a moment.",
+        message:
+          "The card service is taking too long to respond. Please try again in a moment.",
         status: 401,
         requestId: firstAttempt.requestId,
         diagnostics: {

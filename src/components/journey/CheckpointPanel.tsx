@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { ChevronDown, MapPin } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SectionTitle } from "./SectionTitle";
 import { ChecklistChip } from "./ChecklistChip";
@@ -47,8 +53,7 @@ export function CheckpointPanel({
   const [location, setLocation] = useState<string | null>(null);
   const [showOptional, setShowOptional] = useState(false);
   const allChecked = checks.water && checks.breath && mood;
-  const doneCount =
-    (checks.water ? 1 : 0) + (checks.breath ? 1 : 0) + (mood ? 1 : 0);
+  const doneCount = (checks.water ? 1 : 0) + (checks.breath ? 1 : 0) + (mood ? 1 : 0);
 
   return (
     <Card>
@@ -102,10 +107,7 @@ export function CheckpointPanel({
         >
           <span>More (a note, where you are)</span>
           <ChevronDown
-            className={cn(
-              "size-3.5 transition-transform",
-              showOptional && "rotate-180",
-            )}
+            className={cn("size-3.5 transition-transform", showOptional && "rotate-180")}
             aria-hidden
           />
         </button>
@@ -117,7 +119,8 @@ export function CheckpointPanel({
                 htmlFor="checkpoint-notes"
                 className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]"
               >
-                A line for yourself <span className="normal-case opacity-70">(optional)</span>
+                A line for yourself{" "}
+                <span className="normal-case opacity-70">(optional)</span>
               </label>
               <textarea
                 id="checkpoint-notes"

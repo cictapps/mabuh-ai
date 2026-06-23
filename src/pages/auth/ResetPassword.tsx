@@ -27,7 +27,9 @@ export function ResetPassword() {
       if (sessionError) {
         setError(sessionError.message);
       } else if (!data.session) {
-        setError("This reset link is invalid or expired. Request a new password reset link.");
+        setError(
+          "This reset link is invalid or expired. Request a new password reset link.",
+        );
       } else {
         setHasRecoverySession(true);
       }
@@ -104,7 +106,10 @@ export function ResetPassword() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label htmlFor="new-password" className="text-sm font-medium text-muted-foreground">
+              <label
+                htmlFor="new-password"
+                className="text-sm font-medium text-muted-foreground"
+              >
                 New password
               </label>
               <Input

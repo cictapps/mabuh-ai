@@ -585,15 +585,13 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
               onClick={() => switchTab(tab === "sign-in" ? "sign-up" : "sign-in")}
               className="ml-auto -mb-px pb-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground/70"
             >
-              {tab === "sign-in" ? "New here? Create an account" : "Have an account? Sign in"}
+              {tab === "sign-in"
+                ? "New here? Create an account"
+                : "Have an account? Sign in"}
             </button>
           </div>
 
-          <div
-            key={tab}
-            role="tabpanel"
-            className="animate-in fade-in-0 duration-200"
-          >
+          <div key={tab} role="tabpanel" className="animate-in fade-in-0 duration-200">
             {tab === "sign-in" ? (
               <SignInForm onForgotPassword={() => setShowForgot(true)} />
             ) : (

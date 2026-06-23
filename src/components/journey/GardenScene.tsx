@@ -18,12 +18,26 @@ const WEATHER: Record<
     cloud: "#79859a",
     accent: "#bcc2ff",
   },
+  sad: {
+    label: "Soft drizzle",
+    sky: "#151b24",
+    glow: "#2a3340",
+    cloud: "#8392a8",
+    accent: "#aeb6d4",
+  },
   worried: {
     label: "Cloudy breeze",
     sky: "#171b24",
     glow: "#303441",
     cloud: "#8b91a1",
     accent: "#d4bbff",
+  },
+  tired: {
+    label: "Quiet dusk",
+    sky: "#191c24",
+    glow: "#33313c",
+    cloud: "#9a96a8",
+    accent: "#c8b8d4",
   },
   okay: {
     label: "Soft overcast",
@@ -58,7 +72,9 @@ const PLANT_LABELS: Record<GardenPlant, string> = {
 
 const CLOUD_SPEED: Record<MoodType, string> = {
   stressed: "18s",
+  sad: "20s",
   worried: "24s",
+  tired: "44s",
   okay: "34s",
   calm: "52s",
   happy: "42s",
@@ -180,7 +196,7 @@ function PlantSprite({
 export function GardenScene({ mood, plant, stage }: GardenSceneProps) {
   const instanceId = useId().replace(/:/g, "");
   const weather = WEATHER[mood ?? "okay"];
-  const isRainy = mood === "stressed";
+  const isRainy = mood === "stressed" || mood === "sad";
   const isBright = mood === "calm" || mood === "happy";
 
   return (

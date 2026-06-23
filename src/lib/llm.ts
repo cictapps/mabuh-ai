@@ -14,21 +14,21 @@ export async function chat(
   message: string,
   intent: string = "general",
   onToken: (token: string) => void,
-  onDone: () => void
+  onDone: () => void,
 ): Promise<void> {
   const unlisteners: UnlistenFn[] = [];
 
   unlisteners.push(
     await listen<string>("llm-token", (e) => {
       onToken(e.payload);
-    })
+    }),
   );
 
   unlisteners.push(
     await listen("llm-done", () => {
       unlisteners.forEach((u) => u());
       onDone();
-    })
+    }),
   );
 
   await invoke("chat", { message, intent });

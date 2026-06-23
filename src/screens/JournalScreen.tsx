@@ -23,12 +23,16 @@ interface JournalScreenProps {
   onAddEntry: (content: string) => void;
 }
 
-export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, recentMoods, onAddEntry }) => {
+export const JournalScreen: React.FC<JournalScreenProps> = ({
+  entries,
+  recentMoods,
+  onAddEntry,
+}) => {
   const [draft, setDraft] = useState("");
 
   const sortedEntries = useMemo(
     () => [...entries].sort((a, b) => b.timestamp - a.timestamp),
-    [entries]
+    [entries],
   );
 
   const stats = useMemo(() => {
@@ -59,13 +63,11 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, recentMoo
           journal: m.journal ? m.journal.slice(0, 240) : undefined,
         };
       });
-    const recentJournalSlice = sortedEntries
-      .slice(0, 2)
-      .map((e) => ({
-        date: e.date,
-        content: e.content.slice(0, 240),
-        mood: e.mood,
-      }));
+    const recentJournalSlice = sortedEntries.slice(0, 2).map((e) => ({
+      date: e.date,
+      content: e.content.slice(0, 240),
+      mood: e.mood,
+    }));
     return {
       draftText: draft.trim() || undefined,
       mood: null,
@@ -77,7 +79,12 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, recentMoo
   return (
     <div
       className="screen-enter"
-      style={{ padding: "30px 22px 52px", display: "flex", flexDirection: "column", gap: 24 }}
+      style={{
+        padding: "30px 22px 52px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 24,
+      }}
     >
       <div>
         <p
@@ -144,7 +151,13 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, recentMoo
       </div>
 
       <div className="journal-compose">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <SectionLabel>Write a little something</SectionLabel>
           <span style={{ fontSize: 11, color: "rgba(188,194,255,0.45)" }}>
             A heart note
@@ -187,14 +200,17 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, recentMoo
               color: "rgba(188,194,255,0.45)",
             }}
           >
-            <span aria-hidden style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }} />
+            <span
+              aria-hidden
+              style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }}
+            />
             <span>Or sit with what you wrote</span>
-            <span aria-hidden style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }} />
+            <span
+              aria-hidden
+              style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }}
+            />
           </div>
-          <ReflectWithAIPanel
-            text={draft}
-            buildContext={buildReflectionContext}
-          />
+          <ReflectWithAIPanel text={draft} buildContext={buildReflectionContext} />
         </div>
       </div>
 
@@ -209,7 +225,8 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({ entries, recentMoo
               fontSize: 13,
             }}
           >
-            Your page is still blank — and that's okay. Your next check-in will rest here gently.
+            Your page is still blank — and that's okay. Your next check-in will rest here
+            gently.
           </div>
         )}
         {sortedEntries.length > 0 && (
@@ -269,11 +286,7 @@ const JournalCard: React.FC<{
         </span>
       </div>
 
-      {meta && (
-        <div style={{ fontSize: 14, color: "#e8eaf0" }}>
-          {meta.label}
-        </div>
-      )}
+      {meta && <div style={{ fontSize: 14, color: "#e8eaf0" }}>{meta.label}</div>}
 
       {entry.tags && entry.tags.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -312,9 +325,7 @@ const JournalCard: React.FC<{
         compact
         buildContext={() => ({
           existingEntryId: entry.id,
-          mood: meta
-            ? { type: meta.id, label: meta.label }
-            : null,
+          mood: meta ? { type: meta.id, label: meta.label } : null,
           recentMoods: recentMoods
             .sort((a, b) => b.timestamp - a.timestamp)
             .slice(0, 3)
@@ -324,13 +335,11 @@ const JournalCard: React.FC<{
               moodLabel: getMoodMeta(m.mood)?.label ?? m.mood,
               journal: m.journal ? m.journal.slice(0, 240) : undefined,
             })),
-          recentJournal: sortedEntries
-            .slice(0, 2)
-            .map((e) => ({
-              date: e.date,
-              content: e.content.slice(0, 240),
-              mood: e.mood,
-            })),
+          recentJournal: sortedEntries.slice(0, 2).map((e) => ({
+            date: e.date,
+            content: e.content.slice(0, 240),
+            mood: e.mood,
+          })),
         })}
       />
     </div>

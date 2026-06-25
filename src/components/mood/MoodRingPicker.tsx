@@ -100,68 +100,75 @@ const MoodIcon: React.FC<{ mood: MoodType; size: number; color: string }> = Reac
   ({ mood, size, color }) => {
     const iconSize = size * 0.6;
 
-    // Custom icon mappings for each mood
+    // Custom icon mappings for each mood with unique, emoji-inspired designs
     const getIcon = () => {
       switch (mood) {
         case "happy":
+          // Smiling face with uplifted mouth corners
           return (
             <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
               <path
-                d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-3.5-9c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5s.67 1.5 1.5 1.5zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5zm2.5-8c.83 0 1.5-.67 1.5-1.5S15.33 8 14.5 8 13 8.67 13 9.5s.67 1.5 1.5 1.5z"
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-12c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm3.5 3.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"
                 fill={color}
               />
             </svg>
           );
         case "calm":
+          // Zen/peaceful symbol - a simple wave or lotus-inspired
           return (
             <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
               <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"
+                d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"
                 fill={color}
               />
             </svg>
           );
         case "okay":
+          // Neutral face with straight mouth
           return (
             <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
               <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2zm0 4h2v6h-2z"
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v2h-2zm0 4h6v2h-6z"
                 fill={color}
               />
             </svg>
           );
         case "tired":
+          // Sleeping crescent moon / closed eyes
           return (
             <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
               <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2zm0 4h2v6h-2z"
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-2-8.5c0-1.38 1.12-2.5 2.5-2.5v1c-1.38 0-2.5 1.12-2.5 2.5zm5 0c0-1.38-1.12-2.5-2.5-2.5v1c1.38 0 2.5-1.12 2.5-2.5z"
                 fill={color}
               />
             </svg>
           );
         case "worried":
+          // Worried face with frown and furrowed brows
           return (
             <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
               <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2zm0 4h2v6h-2z"
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-11h2v2h-2zm0 4h2v2h-2zm-1-3h4v1h-4z"
                 fill={color}
               />
             </svg>
           );
         case "sad":
+          // Frowning face with downcast mouth
           return (
             <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
               <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2zm0 4h2v6h-2z"
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v1h-2zm0 4h2v1h-2zm-1-3h4v2h-4z"
                 fill={color}
               />
             </svg>
           );
         case "stressed":
+          // Stressed/exploding head or tense symbol
           return (
             <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
               <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2zm0 4h2v6h-2z"
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-13h-2v6h2zm0 8h-2v2h2zm2-5h-6v1h6z"
                 fill={color}
               />
             </svg>
@@ -259,11 +266,10 @@ const OrbitalTrack: React.FC<{ size: number; radius: number }> = React.memo(
           {/* Main gradient with chromatic aberration effect */}
           <linearGradient
             id="orbit-gradient"
-            x1="0"
-            y1="0"
-            x2="1"
-            y2="1"
-            gradientUnits="userSpaceOnUse"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
             gradientTransform="rotate(45)"
           >
             {MOODS.map((m, i) => (
@@ -727,17 +733,19 @@ const MoodNode: React.FC<MoodNodeProps> = React.memo(
             }}
           />
 
-          {/* Icon container — lifts on selection */}
-          <motion.g
-            initial={false}
-            animate={{ y: isSelected ? -2 : 0 }}
-            transition={transition}
-            pointerEvents="none"
-            style={{ userSelect: "none" }}
-            transform={`translate(${x - nodeSize * 0.4} ${y - nodeSize * 0.4})`}
+          <g
+            transform={`translate(${x - (nodeSize * 0.8 * 0.6) / 2} ${y - (nodeSize * 0.8 * 0.6) / 2})`}
           >
-            <MoodIcon mood={mood.id} size={nodeSize * 0.8} color={mood.color} />
-          </motion.g>
+            <motion.g
+              initial={false}
+              animate={{ y: isSelected ? -2 : 0 }}
+              transition={transition}
+              pointerEvents="none"
+              style={{ userSelect: "none" }}
+            >
+              <MoodIcon mood={mood.id} size={nodeSize * 0.8} color={mood.color} />
+            </motion.g>
+          </g>
 
           {/* Label */}
           <motion.text
@@ -940,8 +948,9 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
       style={{
         position: "relative",
         width: "100%",
-        maxWidth: actualSize + 40,
+        maxWidth: actualSize + 100,
         margin: "0 auto",
+        overflow: "visible",
       }}
     >
       <svg
@@ -949,7 +958,7 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
         width="100%"
         style={{
           height: "auto",
-          maxWidth: actualSize,
+          maxWidth: actualSize + 60,
           margin: "0 auto",
           display: "block",
           touchAction: "manipulation",

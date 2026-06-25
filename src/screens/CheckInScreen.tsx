@@ -1075,12 +1075,12 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
       {/* Page-level mood-tinted glow at the very top */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[120%] -translate-x-1/2 blur-3xl transition-[background] duration-500"
+        className="pointer-events-none absolute top-0 left-0 right-0 h-44 overflow-hidden blur-3xl transition-[background] duration-500"
         style={{
-          background: `radial-gradient(ellipse at center, ${hexToRgba(
+          background: `radial-gradient(ellipse 100% 100% at 50% 0%, ${hexToRgba(
             meta.color,
-            0.18,
-          )}, transparent 65%)`,
+            0.24,
+          )}, transparent 85%)`,
         }}
       />
 
@@ -1167,8 +1167,9 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
           position: "relative",
           zIndex: 1,
           width: "100%",
-          maxWidth: 380,
+          maxWidth: 420,
           margin: "0 auto",
+          overflow: "visible",
         }}
       >
         <MoodRingPicker selectedMood={selectedMood} onSelect={onSelectMood} size="sm" />

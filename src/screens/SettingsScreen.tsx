@@ -1876,7 +1876,7 @@ const CONTRIBUTOR_GROUPS: { title: string; members: string[] }[] = [
       "Luces, Francine G. Sioco",
       "Polaron, Meryll K. Abanto",
       "Siaton, Nash E. Ana",
-      "Ssirilan, Romyl P. Mosquera Irilan",
+      "Sirilan, Romyl P. Mosquera Irilan",
     ],
   },
   {
@@ -1923,7 +1923,7 @@ const CONTRIBUTOR_GROUPS: { title: string; members: string[] }[] = [
     title: "Group 6: GIS, Community, and Urgent Help",
     members: [
       "Anes, Anton G. Torre",
-      "Bustamante",
+      "Gonzales, Nash",
       "Bustamante, Mhel B.",
       "Polong, Michael A. Febrero",
       "Sasi, Jay A. Ogabar",

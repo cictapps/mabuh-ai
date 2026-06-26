@@ -1128,7 +1128,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             margin: 0,
           }}
         >
-          Mabuh-ai is a quiet space for reflection, made with care for students.
+          Mabuh-ai is a quiet space for reflection — a student-made wellbeing companion,
+          built by students, for students.
         </p>
         <div style={{ display: "flex", gap: 8, paddingTop: 2 }}>
           <Button

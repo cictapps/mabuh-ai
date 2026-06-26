@@ -475,13 +475,11 @@ describe("sendChatMessage", () => {
 
   it("surfaces a structured server error message instead of an empty reply", async () => {
     getSession.mockResolvedValue({ data: { session: sessionA }, error: null });
-    const httpFetch = vi
-      .fn()
-      .mockImplementation(
-        httpStatus(400, {
-          error: { code: "INVALID", message: "intent must be general or support" },
-        }),
-      );
+    const httpFetch = vi.fn().mockImplementation(
+      httpStatus(400, {
+        error: { code: "INVALID", message: "intent must be general or support" },
+      }),
+    );
 
     await expect(
       sendChatMessage(

@@ -28,6 +28,10 @@ interface MoodArcProps {
 
 /* ── Layout constants ─────────────────────────────────────────────── */
 const SIZE = 340;
+const VIEWBOX_PAD = 36; // headroom so blurred outer glow + SVG filters aren't clipped
+const VISUAL_SIZE = SIZE + VIEWBOX_PAD * 2;
+const VIEWBOX = `${-VIEWBOX_PAD} ${-VIEWBOX_PAD} ${VISUAL_SIZE} ${VISUAL_SIZE}`;
+const SVG_MAX_WIDTH = 380 * (VISUAL_SIZE / SIZE);
 const CX = SIZE / 2;
 const CY = SIZE / 2;
 const ORBIT_RADIUS = 130; // radius of the orbital track
@@ -180,7 +184,7 @@ const ActiveArc: React.FC<{
   return (
     <>
       <defs>
-        <filter id="active-arc-glow" x="-40%" y="-40%" width="180%" height="180%">
+        <filter id="active-arc-glow" x="-50%" y="-1200%" width="200%" height="2500%">
           <feGaussianBlur stdDeviation="8" />
         </filter>
       </defs>
@@ -501,11 +505,11 @@ export const MoodArc: React.FC<MoodArcProps> = ({ selectedMood, onSelect }) => {
   return (
     <div className="mood-ring-shell" style={{ position: "relative", width: "100%" }}>
       <svg
-        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        viewBox={VIEWBOX}
         width="100%"
         style={{
           height: "auto",
-          maxWidth: 380,
+          maxWidth: SVG_MAX_WIDTH,
           margin: "0 auto",
           display: "block",
           touchAction: "manipulation",

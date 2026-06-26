@@ -61,25 +61,18 @@ server**, never in the app.
      `http://localhost:5173/auth/callback`.)
 5. **Enable Google sign-in (optional)**:
    - **Native (Android):** uses `tauri-plugin-google-auth` (Credential
-     Manager). Configure Google Cloud Console:
-     1. **APIs & Services → Credentials → Create OAuth client ID → Android**
-        with package name `com.user.mabuhai` and the SHA-1 of your release
-        keystore (`keytool -list -v -keystore ~/keystores/cictappskey.keystore
+     Manager). Configure Google Cloud Console: 1. **APIs & Services → Credentials → Create OAuth client ID → Android**
+     with package name `com.user.mabuhai` and the SHA-1 of your release
+     keystore (`keytool -list -v -keystore ~/keystores/cictappskey.keystore
 -alias cictappskey`). Add the debug SHA-1 too if you'll run dev
-        builds.
-     2. **APIs & Services → Credentials → Create OAuth client ID → Web
-        application**. Copy the **Client ID** (not the secret — native
-        flow doesn't need it).
-     3. In **Authentication → Providers → Google** in the Supabase
-        dashboard, paste the **Web** client ID and secret.
-     4. Set `VITE_GOOGLE_WEB_CLIENT_ID=<web-client-id>` and
-        `VITE_AUTH_GOOGLE_ENABLED=true` in `.env`.
-     5. Add both signing fingerprints when testing both build types:
-        - Debug SHA-1: run
-          `keytool -list -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey`
-        - Release SHA-1: run `keytool -list -v` against the release keystore.
-          A missing fingerprint causes Credential Manager configuration errors.
-          Mobile builds use native Google Sign-In and do not fall back to web OAuth.
+     builds. 2. **APIs & Services → Credentials → Create OAuth client ID → Web
+     application**. Copy the **Client ID** (not the secret — native
+     flow doesn't need it). 3. In **Authentication → Providers → Google** in the Supabase
+     dashboard, paste the **Web** client ID and secret. 4. Set `VITE_GOOGLE_WEB_CLIENT_ID=<web-client-id>` and
+     `VITE_AUTH_GOOGLE_ENABLED=true` in `.env`. 5. Add both signing fingerprints when testing both build types: - Debug SHA-1: run
+     `keytool -list -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey` - Release SHA-1: run `keytool -list -v` against the release keystore.
+     A missing fingerprint causes Credential Manager configuration errors.
+     Mobile builds use native Google Sign-In and do not fall back to web OAuth.
    - **Web deployment:** uses Supabase browser OAuth and `/auth/callback`.
      The Supabase redirect URLs above are required.
 

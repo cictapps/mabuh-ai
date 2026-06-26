@@ -535,7 +535,18 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
             height={72}
             className="size-18"
           />
-          <BrandMark size="xl" />
+          <div className="flex flex-col items-center gap-1.5">
+            <BrandMark size="xl" />
+            <span
+              className="text-[0.625rem] font-semibold uppercase"
+              style={{
+                letterSpacing: "0.24em",
+                color: "rgba(216,212,235,0.55)",
+              }}
+            >
+              By students, for students
+            </span>
+          </div>
         </header>
 
         <div className="flex flex-1 flex-col justify-center py-10">

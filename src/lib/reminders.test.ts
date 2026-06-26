@@ -1,14 +1,26 @@
 import { describe, it, expect } from "vitest";
-import { nextFireDate, reminderMessageForDate } from "./reminders";
+import type { ReminderPreferences } from "@/hooks/useMoodStore";
+import { nextFireDate, randomFireDatesForDay, reminderMessageForDate } from "./reminders";
 
 function at(year: number, month: number, day: number, hour = 9, minute = 0): Date {
   return new Date(year, month - 1, day, hour, minute, 0, 0);
 }
 
+function prefs(next: Partial<ReminderPreferences> = {}): ReminderPreferences {
+  return {
+    enabled: true,
+    hour: 9,
+    minute: 0,
+    mode: "fixed",
+    dailyCount: 2,
+    ...next,
+  };
+}
+
 describe("nextFireDate", () => {
   it("returns today's time when it is still in the future", () => {
     const now = at(2025, 1, 10, 8, 0);
-    const fire = nextFireDate({ enabled: true, hour: 9, minute: 0 }, now);
+    const fire = nextFireDate(prefs(), now);
     expect(fire.getHours()).toBe(9);
     expect(fire.getMinutes()).toBe(0);
     expect(fire.getDate()).toBe(10);
@@ -16,7 +28,7 @@ describe("nextFireDate", () => {
 
   it("rolls to tomorrow when today's time has already passed", () => {
     const now = at(2025, 1, 10, 10, 30);
-    const fire = nextFireDate({ enabled: true, hour: 9, minute: 0 }, now);
+    const fire = nextFireDate(prefs(), now);
     expect(fire.getDate()).toBe(11);
     expect(fire.getHours()).toBe(9);
     expect(fire.getMinutes()).toBe(0);
@@ -24,7 +36,7 @@ describe("nextFireDate", () => {
 
   it("respects minute precision", () => {
     const now = at(2025, 1, 10, 8, 0);
-    const fire = nextFireDate({ enabled: true, hour: 8, minute: 30 }, now);
+    const fire = nextFireDate(prefs({ hour: 8, minute: 30 }), now);
     expect(fire.getHours()).toBe(8);
     expect(fire.getMinutes()).toBe(30);
     expect(fire.getDate()).toBe(10);
@@ -32,8 +44,30 @@ describe("nextFireDate", () => {
 
   it("rolls to tomorrow at the exact match moment (== now)", () => {
     const now = at(2025, 1, 10, 9, 0);
-    const fire = nextFireDate({ enabled: true, hour: 9, minute: 0 }, now);
+    const fire = nextFireDate(prefs(), now);
     expect(fire.getDate()).toBe(11);
+  });
+
+  it("returns the next random check-in still ahead today", () => {
+    const randomPrefs = prefs({ mode: "random", dailyCount: 3 });
+    const now = at(2025, 1, 10, 7, 30);
+    const slots = randomFireDatesForDay(randomPrefs, now);
+    const fire = nextFireDate(randomPrefs, now);
+
+    expect(slots).toHaveLength(3);
+    expect(fire).toEqual(slots[0]);
+    expect(fire.getHours()).toBeGreaterThanOrEqual(8);
+    expect(fire.getHours()).toBeLessThan(22);
+  });
+
+  it("rolls random check-ins forward after today's slots pass", () => {
+    const randomPrefs = prefs({ mode: "random", dailyCount: 2 });
+    const now = at(2025, 1, 10, 23, 0);
+    const fire = nextFireDate(randomPrefs, now);
+
+    expect(fire.getDate()).toBe(11);
+    expect(fire.getHours()).toBeGreaterThanOrEqual(8);
+    expect(fire.getHours()).toBeLessThan(22);
   });
 });
 
@@ -64,7 +98,7 @@ describe("reminderMessageForDate", () => {
       const date = at(2025, 1, 10 + day);
       const msg = reminderMessageForDate(date);
       expect(msg.title.length).toBeGreaterThan(3);
-      expect(msg.body.length).toBeGreaterThan(15);
+      expect(msg.body.length).toBeGreaterThan(90);
       // The pool is warm/student-centered, not clinical.
       expect(msg.body).not.toMatch(/\b(appointment|medication|dosage)\b/i);
     }

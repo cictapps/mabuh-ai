@@ -23,8 +23,11 @@ interface ActiveTimer {
 const NOTIFICATION_ICON = "/app-logo-light.svg";
 const NATIVE_NOTIFICATION_ID_START = 840_100;
 const NATIVE_NOTIFICATION_DAYS = 14;
+const RANDOM_WINDOW_START_MINUTES = 8 * 60;
+const RANDOM_WINDOW_END_MINUTES = 22 * 60;
+const RANDOM_DAILY_MAX = 4;
 const NATIVE_NOTIFICATION_IDS = Array.from(
-  { length: NATIVE_NOTIFICATION_DAYS },
+  { length: NATIVE_NOTIFICATION_DAYS * RANDOM_DAILY_MAX },
   (_, index) => NATIVE_NOTIFICATION_ID_START + index,
 );
 
@@ -238,6 +241,10 @@ export async function requestReminderPermission(): Promise<ReminderPermission> {
  * Returns the next future occurrence of (hour:minute) local time.
  */
 export function nextFireDate(prefs: ReminderPreferences, now: Date = new Date()): Date {
+  if (prefs.mode === "random") {
+    return nextRandomFireDate(prefs, now);
+  }
+
   const candidate = new Date(now);
   candidate.setSeconds(0, 0);
   candidate.setMinutes(prefs.minute);
@@ -248,11 +255,102 @@ export function nextFireDate(prefs: ReminderPreferences, now: Date = new Date())
   return candidate;
 }
 
-export function reminderMessageForDate(date: Date): ReminderMessage {
+function dateKey(date: Date): string {
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+}
+
+function hashSeed(parts: (string | number)[]): number {
+  let h = 0x811c9dc5;
+  for (const part of parts) {
+    const s = String(part);
+    for (let i = 0; i < s.length; i += 1) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+  }
+  return h >>> 0;
+}
+
+function seededRandom(seed: number): () => number {
+  let t = seed >>> 0;
+  return function next() {
+    t = (t + 0x6d2b79f5) >>> 0;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4_294_967_296;
+  };
+}
+
+function clampDailyCount(count: number): number {
+  return Math.max(1, Math.min(RANDOM_DAILY_MAX, Math.round(count)));
+}
+
+export function randomFireDatesForDay(prefs: ReminderPreferences, day: Date): Date[] {
+  if (prefs.mode !== "random") {
+    const fixed = new Date(day);
+    fixed.setSeconds(0, 0);
+    fixed.setHours(prefs.hour, prefs.minute, 0, 0);
+    return [fixed];
+  }
+
+  const count = clampDailyCount(prefs.dailyCount);
+  const windowMinutes = RANDOM_WINDOW_END_MINUTES - RANDOM_WINDOW_START_MINUTES;
+  const segmentSize = Math.floor(windowMinutes / count);
+
+  return Array.from({ length: count }, (_, index) => {
+    const seed = hashSeed([dateKey(day), "mabuh-random-reminder", index]);
+    const rnd = seededRandom(seed);
+    const segmentStart = RANDOM_WINDOW_START_MINUTES + segmentSize * index;
+    const segmentEnd =
+      index === count - 1
+        ? RANDOM_WINDOW_END_MINUTES
+        : RANDOM_WINDOW_START_MINUTES + segmentSize * (index + 1);
+    const rawMinute =
+      segmentStart + Math.floor(rnd() * Math.max(1, segmentEnd - segmentStart));
+    const roundedMinute = Math.min(
+      RANDOM_WINDOW_END_MINUTES - 5,
+      Math.max(RANDOM_WINDOW_START_MINUTES, Math.round(rawMinute / 5) * 5),
+    );
+    const fireAt = new Date(day);
+    fireAt.setSeconds(0, 0);
+    fireAt.setHours(Math.floor(roundedMinute / 60), roundedMinute % 60, 0, 0);
+    return fireAt;
+  }).sort((a, b) => a.getTime() - b.getTime());
+}
+
+function nextRandomFireDate(prefs: ReminderPreferences, now: Date = new Date()): Date {
+  for (let offset = 0; offset < 8; offset += 1) {
+    const day = new Date(now);
+    day.setDate(day.getDate() + offset);
+    const next = randomFireDatesForDay(prefs, day).find(
+      (fireAt) => fireAt.getTime() > now.getTime(),
+    );
+    if (next) return next;
+  }
+  const fallback = new Date(now);
+  fallback.setDate(fallback.getDate() + 1);
+  return randomFireDatesForDay(prefs, fallback)[0];
+}
+
+function reminderSlotForDate(prefs: ReminderPreferences, date: Date): number {
+  if (prefs.mode !== "random") return 0;
+  const slots = randomFireDatesForDay(prefs, date);
+  return Math.max(
+    0,
+    slots.findIndex((slot) => slot.getTime() === date.getTime()),
+  );
+}
+
+export function reminderMessageForDate(date: Date, slotIndex = 0): ReminderMessage {
   const dayNumber = Math.floor(
     Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000,
   );
-  return REMINDER_MESSAGES[Math.abs(dayNumber) % REMINDER_MESSAGES.length];
+  const base =
+    REMINDER_MESSAGES[Math.abs(dayNumber + slotIndex * 11) % REMINDER_MESSAGES.length];
+  return {
+    title: base.title,
+    body: `${base.body} If you have a minute, tap in to choose a mood, write one honest sentence, or simply notice what you need next.`,
+  };
 }
 
 function clearActiveTimer() {
@@ -261,15 +359,15 @@ function clearActiveTimer() {
   active = null;
 }
 
-function showBrowserNotification(fireDate: Date) {
+function showBrowserNotification(fireDate: Date, prefs: ReminderPreferences) {
   if (!isBrowserNotificationsSupported()) return;
   if (window.Notification.permission !== "granted") return;
 
-  const message = reminderMessageForDate(fireDate);
+  const message = reminderMessageForDate(fireDate, reminderSlotForDate(prefs, fireDate));
   try {
     const notification = new window.Notification(message.title, {
       body: message.body,
-      tag: "mabuhai-daily-reminder",
+      tag: `mabuhai-daily-reminder-${fireDate.getTime()}`,
       icon: NOTIFICATION_ICON,
       badge: NOTIFICATION_ICON,
       silent: false,
@@ -296,7 +394,7 @@ function scheduleBrowserReminder(
 
   const timeoutId = window.setTimeout(
     () => {
-      showBrowserNotification(fireAt);
+      showBrowserNotification(fireAt, prefs);
       onFire?.();
       if (prefs.enabled) {
         scheduleBrowserReminder(prefs, onFire);
@@ -342,7 +440,7 @@ async function scheduleNativeReminders(
     await cancelNativeRemindersNow();
 
     const firstFireAt = nextFireDate(prefs);
-    for (let index = 0; index < NATIVE_NOTIFICATION_DAYS; index += 1) {
+    for (let dayIndex = 0; dayIndex < NATIVE_NOTIFICATION_DAYS; dayIndex += 1) {
       if (generation !== schedulingGeneration) {
         return {
           permission: "granted",
@@ -352,17 +450,20 @@ async function scheduleNativeReminders(
         };
       }
 
-      const fireAt = new Date(firstFireAt);
-      fireAt.setDate(fireAt.getDate() + index);
-      const message = reminderMessageForDate(fireAt);
-      sendNotification({
-        id: NATIVE_NOTIFICATION_IDS[index],
-        title: message.title,
-        body: message.body,
-        schedule: Schedule.at(fireAt, false, true),
-        autoCancel: true,
-        iconColor: "#bcc2ff",
-        extra: { source: "mabuhai-wellness-reminder" },
+      const day = new Date(firstFireAt);
+      day.setDate(day.getDate() + dayIndex);
+      randomFireDatesForDay(prefs, day).forEach((fireAt, slotIndex) => {
+        if (fireAt.getTime() < firstFireAt.getTime()) return;
+        const message = reminderMessageForDate(fireAt, slotIndex);
+        sendNotification({
+          id: NATIVE_NOTIFICATION_IDS[dayIndex * RANDOM_DAILY_MAX + slotIndex],
+          title: message.title,
+          body: message.body,
+          schedule: Schedule.at(fireAt, false, true),
+          autoCancel: true,
+          iconColor: "#bcc2ff",
+          extra: { source: "mabuhai-wellness-reminder" },
+        });
       });
     }
 

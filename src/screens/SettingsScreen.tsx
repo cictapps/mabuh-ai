@@ -14,7 +14,9 @@ import {
   LoaderCircle,
   LogOut,
   Mail,
+  Minus,
   PlayCircle,
+  Plus,
   Save,
   Trash2,
   User as UserIcon,
@@ -398,6 +400,492 @@ function formatHour(hour: number, minute: number) {
   return `${h}:${m} ${ampm}`;
 }
 
+const REMINDER_PRESETS = [
+  { label: "Morning", hour: 8, minute: 0 },
+  { label: "After class", hour: 16, minute: 30 },
+  { label: "Evening", hour: 20, minute: 0 },
+];
+
+function toDisplayHour(hour: number) {
+  return hour % 12 === 0 ? 12 : hour % 12;
+}
+
+function to24Hour(displayHour: number, period: "AM" | "PM") {
+  const normalized = displayHour % 12;
+  return period === "PM" ? normalized + 12 : normalized;
+}
+
+function wrapRange(value: number, min: number, max: number) {
+  if (value < min) return max;
+  if (value > max) return min;
+  return value;
+}
+
+function ReminderTimePicker({
+  reminder,
+  onSetReminder,
+}: {
+  reminder: ReminderPreferences;
+  onSetReminder: (next: Partial<ReminderPreferences>) => void;
+}) {
+  const period = reminder.hour < 12 ? "AM" : "PM";
+  const displayHour = toDisplayHour(reminder.hour);
+  const minuteLabel = reminder.minute.toString().padStart(2, "0");
+  const randomEnabled = reminder.mode === "random";
+
+  const setDisplayHour = (nextHour: number) => {
+    onSetReminder({ hour: to24Hour(wrapRange(nextHour, 1, 12), period) });
+  };
+
+  const setPeriod = (nextPeriod: "AM" | "PM") => {
+    onSetReminder({ hour: to24Hour(displayHour, nextPeriod) });
+  };
+
+  const stepMinute = (delta: number) => {
+    const next = reminder.minute + delta;
+    if (next < 0) {
+      onSetReminder({ minute: 55 });
+      return;
+    }
+    if (next > 59) {
+      onSetReminder({ minute: 0 });
+      return;
+    }
+    onSetReminder({ minute: Math.round(next / 5) * 5 });
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        opacity: reminder.enabled ? 1 : 0.45,
+        pointerEvents: reminder.enabled ? "auto" : "none",
+      }}
+    >
+      <div
+        style={{
+          borderRadius: 20,
+          border: "1px solid rgba(188,194,255,0.10)",
+          background: "rgba(188,194,255,0.035)",
+          padding: 14,
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
+      >
+        <SegmentedReminderMode reminder={reminder} onSetReminder={onSetReminder} />
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <span
+              style={{
+                display: "block",
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "rgba(216,212,235,0.55)",
+              }}
+            >
+              {randomEnabled ? "Random check-ins" : "Reminder time"}
+            </span>
+            <span
+              style={{
+                display: "block",
+                marginTop: 3,
+                fontSize: 12,
+                color: "rgba(216,212,235,0.62)",
+                lineHeight: 1.45,
+              }}
+            >
+              {randomEnabled
+                ? "Gentle nudges appear at different moments between morning and evening."
+                : "A quiet nudge for your daily check-in."}
+            </span>
+          </div>
+          <span
+            style={{
+              flexShrink: 0,
+              fontVariantNumeric: "tabular-nums",
+              fontSize: 20,
+              fontWeight: 600,
+              color: "#eef1f6",
+            }}
+          >
+            {randomEnabled
+              ? `${reminder.dailyCount}x daily`
+              : formatHour(reminder.hour, reminder.minute)}
+          </span>
+        </div>
+
+        {randomEnabled ? (
+          <ReminderCountPicker reminder={reminder} onSetReminder={onSetReminder} />
+        ) : (
+          <>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 10,
+              }}
+            >
+              <TimeStepper
+                label="Hour"
+                value={displayHour.toString()}
+                onDecrease={() => setDisplayHour(displayHour - 1)}
+                onIncrease={() => setDisplayHour(displayHour + 1)}
+              />
+              <TimeStepper
+                label="Minute"
+                value={minuteLabel}
+                onDecrease={() => stepMinute(-5)}
+                onIncrease={() => stepMinute(5)}
+              />
+            </div>
+
+            <ReminderPeriodPicker period={period} onSetPeriod={setPeriod} />
+          </>
+        )}
+      </div>
+
+      {!randomEnabled && (
+        <div
+          aria-label="Reminder presets"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            gap: 8,
+          }}
+        >
+          {REMINDER_PRESETS.map((preset) => {
+            const active =
+              reminder.hour === preset.hour && reminder.minute === preset.minute;
+            return (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() =>
+                  onSetReminder({ hour: preset.hour, minute: preset.minute })
+                }
+                style={{
+                  minHeight: 52,
+                  borderRadius: 16,
+                  border: active
+                    ? "1px solid rgba(255,185,84,0.32)"
+                    : "1px solid rgba(188,194,255,0.10)",
+                  background: active ? "rgba(255,185,84,0.10)" : "rgba(188,194,255,0.04)",
+                  color: active ? "#ffd99a" : "rgba(216,212,235,0.72)",
+                  padding: "8px 6px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 3,
+                  transition:
+                    "transform 0.2s ease, border-color 0.2s ease, background 0.2s ease",
+                }}
+              >
+                <span style={{ fontSize: 11, fontWeight: 650 }}>{preset.label}</span>
+                <span style={{ fontSize: 10, color: "rgba(216,212,235,0.55)" }}>
+                  {formatHour(preset.hour, preset.minute)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SegmentedReminderMode({
+  reminder,
+  onSetReminder,
+}: {
+  reminder: ReminderPreferences;
+  onSetReminder: (next: Partial<ReminderPreferences>) => void;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label="Reminder timing mode"
+      style={{
+        display: "flex",
+        alignItems: "stretch",
+        gap: 1,
+        borderRadius: 16,
+        border: "1px solid rgba(188,194,255,0.10)",
+        background: "rgba(188,194,255,0.03)",
+        padding: 4,
+      }}
+    >
+      {[
+        { id: "fixed", label: "Set time" },
+        { id: "random", label: "Random" },
+      ].map((option) => {
+        const active = reminder.mode === option.id;
+        return (
+          <button
+            key={option.id}
+            type="button"
+            aria-pressed={active}
+            onClick={() =>
+              onSetReminder({ mode: option.id as ReminderPreferences["mode"] })
+            }
+            style={{
+              flex: 1,
+              minHeight: 40,
+              border: "none",
+              borderRadius: 12,
+              background: active
+                ? "linear-gradient(to right, var(--primary), var(--secondary), var(--primary))"
+                : "transparent",
+              color: active ? "var(--primary-foreground)" : "rgba(216,212,235,0.6)",
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+              boxShadow: active ? "0 14px 32px -18px rgba(188,194,255,0.85)" : "none",
+              transition: "transform 0.2s ease, background 0.2s ease",
+            }}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ReminderPeriodPicker({
+  period,
+  onSetPeriod,
+}: {
+  period: "AM" | "PM";
+  onSetPeriod: (period: "AM" | "PM") => void;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label="Reminder period"
+      style={{
+        display: "flex",
+        alignItems: "stretch",
+        gap: 1,
+        borderRadius: 16,
+        border: "1px solid rgba(188,194,255,0.10)",
+        background: "rgba(188,194,255,0.03)",
+        padding: 4,
+      }}
+    >
+      {(["AM", "PM"] as const).map((option) => {
+        const active = period === option;
+        return (
+          <button
+            key={option}
+            type="button"
+            aria-pressed={active}
+            onClick={() => onSetPeriod(option)}
+            style={{
+              flex: 1,
+              minHeight: 40,
+              border: "none",
+              borderRadius: 12,
+              background: active
+                ? "linear-gradient(to right, var(--primary), var(--secondary), var(--primary))"
+                : "transparent",
+              color: active ? "var(--primary-foreground)" : "rgba(216,212,235,0.6)",
+              fontSize: 13,
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              boxShadow: active ? "0 14px 32px -18px rgba(188,194,255,0.85)" : "none",
+              transition: "transform 0.2s ease, background 0.2s ease",
+            }}
+          >
+            {option}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ReminderCountPicker({
+  reminder,
+  onSetReminder,
+}: {
+  reminder: ReminderPreferences;
+  onSetReminder: (next: Partial<ReminderPreferences>) => void;
+}) {
+  const setCount = (next: number) => {
+    onSetReminder({ dailyCount: Math.max(1, Math.min(4, next)) });
+  };
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "44px 1fr 44px",
+        alignItems: "stretch",
+        gap: 8,
+        borderRadius: 18,
+        border: "1px solid rgba(188,194,255,0.10)",
+        background: "rgba(12,14,22,0.34)",
+        padding: 8,
+      }}
+    >
+      <TimeAdjustButton
+        label="Reduce random reminders"
+        onClick={() => setCount(reminder.dailyCount - 1)}
+      >
+        <Minus size={15} />
+      </TimeAdjustButton>
+      <div
+        style={{
+          minHeight: 72,
+          display: "grid",
+          placeItems: "center",
+          textAlign: "center",
+        }}
+      >
+        <div>
+          <span
+            style={{
+              display: "block",
+              fontSize: 30,
+              lineHeight: 1,
+              fontWeight: 700,
+              color: "#eef1f6",
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
+            {reminder.dailyCount}
+          </span>
+          <span
+            style={{
+              display: "block",
+              marginTop: 5,
+              fontSize: 11,
+              fontWeight: 650,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(216,212,235,0.52)",
+            }}
+          >
+            per day
+          </span>
+        </div>
+      </div>
+      <TimeAdjustButton
+        label="Add random reminder"
+        onClick={() => setCount(reminder.dailyCount + 1)}
+      >
+        <Plus size={15} />
+      </TimeAdjustButton>
+    </div>
+  );
+}
+
+function TimeStepper({
+  label,
+  value,
+  onDecrease,
+  onIncrease,
+}: {
+  label: string;
+  value: string;
+  onDecrease: () => void;
+  onIncrease: () => void;
+}) {
+  return (
+    <div
+      style={{
+        borderRadius: 18,
+        border: "1px solid rgba(188,194,255,0.10)",
+        background: "rgba(12,14,22,0.34)",
+        padding: 8,
+        display: "grid",
+        gridTemplateColumns: "38px 1fr 38px",
+        alignItems: "center",
+        gap: 4,
+      }}
+    >
+      <TimeAdjustButton label={`Decrease ${label.toLowerCase()}`} onClick={onDecrease}>
+        <Minus size={15} />
+      </TimeAdjustButton>
+      <div style={{ textAlign: "center", minWidth: 0 }}>
+        <span
+          style={{
+            display: "block",
+            fontSize: 10,
+            fontWeight: 650,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "rgba(216,212,235,0.46)",
+            marginBottom: 2,
+          }}
+        >
+          {label}
+        </span>
+        <span
+          style={{
+            display: "block",
+            fontVariantNumeric: "tabular-nums",
+            fontSize: 26,
+            lineHeight: 1.05,
+            fontWeight: 650,
+            color: "#eef1f6",
+          }}
+        >
+          {value}
+        </span>
+      </div>
+      <TimeAdjustButton label={`Increase ${label.toLowerCase()}`} onClick={onIncrease}>
+        <Plus size={15} />
+      </TimeAdjustButton>
+    </div>
+  );
+}
+
+function TimeAdjustButton({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      style={{
+        width: 38,
+        height: 44,
+        border: "1px solid rgba(188,194,255,0.12)",
+        borderRadius: 14,
+        background: "rgba(188,194,255,0.05)",
+        color: "rgba(216,212,235,0.78)",
+        display: "grid",
+        placeItems: "center",
+        transition: "transform 0.2s ease, background 0.2s ease",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   reminder,
   reminderStatus,
@@ -762,7 +1250,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       >
         <ToggleRow
           label="Daily care notifications"
-          description="A gentle check-in or warm note once a day. Everything stays on this device."
+          description="Gentle check-ins with reflective prompts. Choose a set time or let Mabuh-ai send a few quiet nudges through the day."
           checked={reminder.enabled}
           onChange={(next) => onSetReminder({ enabled: next })}
         />
@@ -783,10 +1271,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             {!reminderStatus && "Preparing your daily notifications…"}
             {reminderStatus?.permission === "granted" &&
               reminderStatus.delivery === "native" &&
-              `Mabuh-ai will check in at ${formatHour(reminder.hour, reminder.minute)}, even when the app is closed.`}
+              (reminder.mode === "random"
+                ? `Mabuh-ai will send ${reminder.dailyCount} check-in${reminder.dailyCount === 1 ? "" : "s"} at gentle random moments today, even when the app is closed.`
+                : `Mabuh-ai will check in at ${formatHour(reminder.hour, reminder.minute)}, even when the app is closed.`)}
             {reminderStatus?.permission === "granted" &&
               reminderStatus.delivery === "browser" &&
-              `Mabuh-ai will check in at ${formatHour(reminder.hour, reminder.minute)} while this browser is open.`}
+              (reminder.mode === "random"
+                ? `Mabuh-ai will send ${reminder.dailyCount} random check-in${reminder.dailyCount === 1 ? "" : "s"} while this browser is open.`
+                : `Mabuh-ai will check in at ${formatHour(reminder.hour, reminder.minute)} while this browser is open.`)}
             {reminderStatus?.permission === "default" &&
               "Allow notifications when prompted to start receiving reminders."}
             {reminderStatus?.permission === "denied" &&
@@ -795,52 +1287,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               "Notifications are not supported here. You can keep using the rest of Mabuh-ai normally."}
           </p>
         )}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 10,
-            opacity: reminder.enabled ? 1 : 0.45,
-            pointerEvents: reminder.enabled ? "auto" : "none",
-          }}
-        >
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 14, color: "#e8eaf0", fontWeight: 500 }}>Time</span>
-            <span style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>
-              {formatHour(reminder.hour, reminder.minute)}
-            </span>
-          </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            <input
-              type="number"
-              min={0}
-              max={23}
-              value={reminder.hour}
-              onChange={(e) => {
-                const v = Math.max(0, Math.min(23, Number(e.target.value) || 0));
-                onSetReminder({ hour: v });
-              }}
-              aria-label="Reminder hour"
-              style={timeInputStyle}
-            />
-            <span style={{ color: "rgba(188,194,255,0.45)", alignSelf: "center" }}>
-              :
-            </span>
-            <input
-              type="number"
-              min={0}
-              max={59}
-              value={reminder.minute.toString().padStart(2, "0")}
-              onChange={(e) => {
-                const v = Math.max(0, Math.min(59, Number(e.target.value) || 0));
-                onSetReminder({ minute: v });
-              }}
-              aria-label="Reminder minute"
-              style={timeInputStyle}
-            />
-          </div>
-        </div>
+        <ReminderTimePicker reminder={reminder} onSetReminder={onSetReminder} />
       </Section>
 
       <Section title="Security" icon={<KeyRound size={16} />}>
@@ -1390,20 +1837,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       <ContributorsDialog open={contributorsOpen} onOpenChange={setContributorsOpen} />
     </div>
   );
-};
-
-const timeInputStyle: React.CSSProperties = {
-  width: 52,
-  height: 38,
-  textAlign: "center",
-  borderRadius: 12,
-  background: "rgba(188,194,255,0.06)",
-  border: "1px solid rgba(188,194,255,0.1)",
-  color: "#e8eaf0",
-  fontFamily: "Plus Jakarta Sans, sans-serif",
-  fontSize: 14,
-  fontVariantNumeric: "tabular-nums",
-  outline: "none",
 };
 
 function InfoTile({ label, value }: { label: string; value: string }) {

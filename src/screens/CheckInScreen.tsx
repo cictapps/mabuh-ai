@@ -149,46 +149,46 @@ const MOOD_HELLO: Record<"morning" | "midday" | "evening" | "night", string[]> =
 
 const MOOD_ACKNOWLEDGMENTS: Record<MoodType, string[]> = {
   stressed: [
-    "I hear you. That sounds really heavy, and it's okay to feel it.",
-    "Stress has a way of filling the whole room. You're not weak for noticing it.",
-    "Take a slow breath. You don't have to solve this right now.",
-    "Carrying a lot today? Just naming it already helps.",
+    "I hear you. That sounds really heavy, and it's okay to feel it without fixing everything tonight.",
+    "Stress can fill the whole room. You're not weak for noticing it and needing a softer pace.",
+    "Take one slow breath. You don't have to solve this right now; naming it is already care.",
+    "Carrying a lot today? Just naming it helps, and you can take the next part gently.",
   ],
   sad: [
-    "I'm sorry you're sitting with this. It's allowed to be heavy.",
-    "Sadness deserves a place. You don't have to push through it.",
-    "Just notice it for a moment — without trying to fix anything yet.",
-    "This kind of low is real. You don't have to explain it away.",
+    "I'm sorry you're sitting with this. It's allowed to feel heavy, even if no one else sees it.",
+    "Sadness deserves a place. You don't have to push through it or make it smaller right now.",
+    "Just notice it for a moment without trying to fix anything yet. A soft pause still counts.",
+    "This kind of low is real. You don't have to explain it away or earn a reason to rest.",
   ],
   worried: [
-    "Worry can be loud. You're not alone in this.",
-    "Anxious thoughts can spin — let's slow one down together.",
-    "It's okay to not have answers yet. You just need a soft place to land.",
-    "Your mind is working hard. Let's give it a small rest.",
+    "Worry can be loud. You're not alone in this, and you can meet it one thought at a time.",
+    "Anxious thoughts can spin. Let's slow one down together and leave the rest for later.",
+    "It's okay to not have answers yet. You just need a soft place to land for a minute.",
+    "Your mind is working hard. Let's give it a small rest before asking it for anything more.",
   ],
   tired: [
-    "Tired is your body asking for a softer pace. Listen to it.",
-    "Low energy is not a failure — it's information.",
-    "Rest is part of showing up. Even a small pause helps.",
-    "You don't have to perform today. Quiet is enough.",
+    "Tired is your body asking for a softer pace. Listen to it before the day asks for more.",
+    "Low energy is not a failure; it's information. You can move gently from here.",
+    "Rest is part of showing up. Even a small pause can help your body feel less alone.",
+    "You don't have to perform today. Quiet is enough, and doing less can still be care.",
   ],
   okay: [
-    "Okay is a perfectly good place to be.",
-    "Steady. Not every day has to be a big feeling.",
-    "Alright is allowed. A quiet middle is still a real place.",
-    "A calm, ordinary kind of day. There's good in that.",
+    "Okay is a perfectly good place to be. A steady middle still deserves to be noticed.",
+    "Steady is enough. Not every day has to be a big feeling to be worth checking in.",
+    "Alright is allowed. A quiet middle is still a real place, and it can hold you gently.",
+    "A calm, ordinary kind of day has its own good. Let the small steadiness be enough.",
   ],
   calm: [
-    "I love that you're feeling this. Let it settle in.",
-    "A soft, steady mood. Breathe into it for a moment.",
-    "This is a kind place to be. Stay with it as long as you like.",
-    "Calm is worth noticing. It's doing good work inside you.",
+    "I love that you're feeling this. Let it settle in and take up a little more space.",
+    "A soft, steady mood is here. Breathe into it for a moment and let it stay.",
+    "This is a kind place to be. Stay with it as long as you like before moving on.",
+    "Calm is worth noticing. It's doing good work inside you, even in small ways.",
   ],
   happy: [
-    "Oh, this is wonderful. Hold onto this feeling.",
-    "A bright moment — let it land. You earned it.",
-    "This is the kind of day worth remembering later.",
-    "Lovely to see you here, feeling this way. Soak it in.",
+    "Oh, this is wonderful. Hold onto this feeling and let it mark the day gently.",
+    "A bright moment is here. Let it land, because you get to enjoy this too.",
+    "This is the kind of day worth remembering later. Give the good parts a name.",
+    "Lovely to see you here, feeling this way. Soak it in and let it be real.",
   ],
 };
 
@@ -212,6 +212,22 @@ function pickVariant<T>(options: T[], seed: number): T {
   const rnd = seededRandom(seed);
   const idx = Math.floor(rnd() * options.length) % options.length;
   return options[idx];
+}
+
+function pickNonRepeatingIndex(
+  optionCount: number,
+  seed: number,
+  previousIndex: number | undefined,
+): number {
+  if (optionCount <= 0) {
+    throw new Error("pickNonRepeatingIndex requires at least one option");
+  }
+  const rnd = seededRandom(seed);
+  let idx = Math.floor(rnd() * optionCount) % optionCount;
+  if (optionCount > 1 && idx === previousIndex) {
+    idx = (idx + 1) % optionCount;
+  }
+  return idx;
 }
 
 function hashSeed(parts: (string | number)[]): number {
@@ -816,20 +832,32 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   const bucket = timeBucket(hour);
   const sessionToken = useSessionToken();
   const dayKey = new Date().toDateString();
+  const acknowledgmentStepRef = useRef(0);
+  const lastAcknowledgmentIndexByMoodRef = useRef<Partial<Record<MoodType, number>>>({});
 
-  // Pick a variant keyed by (bucket, mood-or-neutral, day, visit-token).
-  // This is stable for a given visit but rotates on app re-entry, on tab
-  // re-focus, and on a new day — without ever feeling mechanical.
-  const subline = useMemo(() => {
-    if (showDetails) {
-      const pool = MOOD_ACKNOWLEDGMENTS[displayMood];
-      return pickVariant(pool, hashSeed([bucket, displayMood, dayKey, sessionToken]));
-    }
-    // No mood picked yet — use the neutral "hello" pool for the time bucket
-    // so it still rotates even before the user selects a mood.
+  const [subline, setSubline] = useState(() => {
     const pool = MOOD_HELLO[bucket];
     return pickVariant(pool, hashSeed([bucket, "hello", dayKey, sessionToken]));
-  }, [bucket, displayMood, showDetails, dayKey, sessionToken]);
+  });
+
+  useEffect(() => {
+    if (!selectedMood) {
+      const pool = MOOD_HELLO[bucket];
+      setSubline(pickVariant(pool, hashSeed([bucket, "hello", dayKey, sessionToken])));
+      return;
+    }
+
+    const pool = MOOD_ACKNOWLEDGMENTS[selectedMood];
+    const step = acknowledgmentStepRef.current + 1;
+    acknowledgmentStepRef.current = step;
+    const idx = pickNonRepeatingIndex(
+      pool.length,
+      hashSeed([bucket, selectedMood, dayKey, sessionToken, step]),
+      lastAcknowledgmentIndexByMoodRef.current[selectedMood],
+    );
+    lastAcknowledgmentIndexByMoodRef.current[selectedMood] = idx;
+    setSubline(pool[idx]);
+  }, [bucket, dayKey, selectedMood, sessionToken]);
 
   const dateLabel = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -1072,18 +1100,6 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 220px)",
       }}
     >
-      {/* Page-level mood-tinted glow at the very top */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute top-0 left-0 right-0 h-44 overflow-hidden blur-3xl transition-[background] duration-500"
-        style={{
-          background: `radial-gradient(ellipse 100% 100% at 50% 0%, ${hexToRgba(
-            meta.color,
-            0.24,
-          )}, transparent 85%)`,
-        }}
-      />
-
       {/* Header card */}
       <div
         ref={headerRef}
@@ -1151,8 +1167,9 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
               fontSize: "clamp(14px, 4vw, 16px)",
               color: showDetails ? meta.color : "rgba(216,212,235,0.78)",
               letterSpacing: "0.2px",
+              lineHeight: 1.45,
               transition: "color 0.3s ease",
-              minHeight: "1.5em",
+              minHeight: "2.9em",
             }}
           >
             {subline}

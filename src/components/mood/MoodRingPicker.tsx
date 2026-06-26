@@ -1,34 +1,7 @@
-import React, { useCallback, useMemo, useState } from "react";
-import {
-  motion,
-  useReducedMotion,
-  AnimatePresence,
-  type Transition,
-} from "framer-motion";
+import React, { useCallback, useMemo } from "react";
+import { motion, useReducedMotion, type Transition } from "framer-motion";
 import { MOODS } from "../../data";
 import type { MoodType } from "../../types";
-
-/* ──────────────────────────────────────────────────────────────────────
- * MoodRingPicker — Professional Redesign
- *
- * A premium, highly-interactive orbital mood picker with:
- * - Elegant glassmorphic design with depth
- * - Smooth spring-driven animations with custom easing
- * - Dynamic particle glow effects on selection
- * - Ripple feedback on tap/click
- * - Pulsing center logo with mood-based color transitions
- * - Connecting beams with gradient flows
- * - Orbital track with subtle chromatic aberration
- * - Hover states with scale and glow
- * - Full keyboard accessibility
- * - Respects `prefers-reduced-motion`
- *
- * Design Philosophy:
- * - Professional yet warm aesthetic
- * - Subtle micro-interactions that feel alive
- * - Clear visual hierarchy
- * - Touch-first with desktop polish
- * ──────────────────────────────────────────────────────────────────── */
 
 interface MoodRingPickerProps {
   selectedMood: MoodType | null;
@@ -36,165 +9,32 @@ interface MoodRingPickerProps {
   size?: "sm" | "md" | "lg";
 }
 
-/* ── Layout Constants ─────────────────────────────────────────────── */
-const BASE_SIZE = 360;
-const SMALL_SIZE = 280;
-const LARGE_SIZE = 420;
+const PICKER_SIZES = {
+  sm: 292,
+  md: 340,
+  lg: 380,
+} as const;
 
-const getSize = (size: "sm" | "md" | "lg") => {
-  switch (size) {
-    case "sm":
-      return SMALL_SIZE;
-    case "lg":
-      return LARGE_SIZE;
-    default:
-      return BASE_SIZE;
-  }
-};
+const VIEWBOX_SIZE = 340;
+const CENTER = VIEWBOX_SIZE / 2;
+const TRACK_RADIUS = 114;
+const MOOD_DOT_RADIUS = 124;
+const LABEL_RADIUS = 142;
+const HAND_LENGTH = MOOD_DOT_RADIUS;
+const START_DEG = -90;
+const STEP_DEG = 360 / MOODS.length;
+const DEFAULT_MOOD: MoodType = "okay";
 
-const getOrbitRadius = (size: "sm" | "md" | "lg") => {
-  switch (size) {
-    case "sm":
-      return 110;
-    case "lg":
-      return 160;
-    default:
-      return 140;
-  }
-};
-
-const getNodeSize = (size: "sm" | "md" | "lg", isSelected: boolean) => {
-  const base = size === "sm" ? 40 : size === "lg" ? 52 : 46;
-  const selected = base + (size === "sm" ? 8 : size === "lg" ? 14 : 10);
-  return isSelected ? selected : base;
-};
-
-const getLogoSize = (size: "sm" | "md" | "lg") => {
-  switch (size) {
-    case "sm":
-      return 72;
-    case "lg":
-      return 100;
-    default:
-      return 88;
-  }
-};
-
-const getTrackWidth = (size: "sm" | "md" | "lg") => {
-  switch (size) {
-    case "sm":
-      return 24;
-    case "lg":
-      return 32;
-    default:
-      return 28;
-  }
-};
-
-const START_DEG = -90; // 12-o'clock position
-const N = MOODS.length;
-const STEP_DEG = 360 / N;
-
-/* ── Mood Icons (Custom SVG-based for professional look) ───────────── */
-const MoodIcon: React.FC<{ mood: MoodType; size: number; color: string }> = React.memo(
-  ({ mood, size, color }) => {
-    const iconSize = size * 0.6;
-
-    // Custom icon mappings for each mood with unique, emoji-inspired designs
-    const getIcon = () => {
-      switch (mood) {
-        case "happy":
-          // Smiling face with uplifted mouth corners
-          return (
-            <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-12c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm3.5 3.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"
-                fill={color}
-              />
-            </svg>
-          );
-        case "calm":
-          // Zen/peaceful symbol - a simple wave or lotus-inspired
-          return (
-            <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
-              <path
-                d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"
-                fill={color}
-              />
-            </svg>
-          );
-        case "okay":
-          // Neutral face with straight mouth
-          return (
-            <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v2h-2zm0 4h6v2h-6z"
-                fill={color}
-              />
-            </svg>
-          );
-        case "tired":
-          // Sleeping crescent moon / closed eyes
-          return (
-            <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-2-8.5c0-1.38 1.12-2.5 2.5-2.5v1c-1.38 0-2.5 1.12-2.5 2.5zm5 0c0-1.38-1.12-2.5-2.5-2.5v1c1.38 0 2.5-1.12 2.5-2.5z"
-                fill={color}
-              />
-            </svg>
-          );
-        case "worried":
-          // Worried face with frown and furrowed brows
-          return (
-            <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-11h2v2h-2zm0 4h2v2h-2zm-1-3h4v1h-4z"
-                fill={color}
-              />
-            </svg>
-          );
-        case "sad":
-          // Frowning face with downcast mouth
-          return (
-            <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v1h-2zm0 4h2v1h-2zm-1-3h4v2h-4z"
-                fill={color}
-              />
-            </svg>
-          );
-        case "stressed":
-          // Stressed/exploding head or tense symbol
-          return (
-            <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-13h-2v6h2zm0 8h-2v2h2zm2-5h-6v1h6z"
-                fill={color}
-              />
-            </svg>
-          );
-        default:
-          return (
-            <svg viewBox="0 0 24 24" width={iconSize} height={iconSize}>
-              <circle cx="12" cy="12" r="10" fill={color} />
-            </svg>
-          );
-      }
-    };
-
-    return <g style={{ pointerEvents: "none" }}>{getIcon()}</g>;
-  },
-);
-MoodIcon.displayName = "MoodIcon";
-
-/* ── Helpers ───────────────────────────────────────────────────────── */
 function toRad(deg: number): number {
   return (deg * Math.PI) / 180;
 }
 
 function pointAt(radius: number, angleDeg: number): { x: number; y: number } {
-  const a = toRad(angleDeg);
-  return { x: radius * Math.cos(a), y: radius * Math.sin(a) };
+  const angle = toRad(angleDeg);
+  return {
+    x: CENTER + radius * Math.cos(angle),
+    y: CENTER + radius * Math.sin(angle),
+  };
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -214,826 +54,324 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-function lightenHex(hex: string, amount: number): string {
-  const cleaned = hex.replace("#", "");
-  const bigint = parseInt(
-    cleaned.length === 3
-      ? cleaned
-          .split("")
-          .map((c) => c + c)
-          .join("")
-      : cleaned,
-    16,
-  );
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  const lr = Math.round(r + (255 - r) * amount);
-  const lg = Math.round(g + (255 - g) * amount);
-  const lb = Math.round(b + (255 - b) * amount);
-  return `#${lr.toString(16).padStart(2, "0")}${lg.toString(16).padStart(2, "0")}${lb.toString(16).padStart(2, "0")}`;
+function angleForIndex(index: number): number {
+  return START_DEG + index * STEP_DEG;
 }
 
-/* ── Spring Configurations ──────────────────────────────────────────── */
-const springUltraSmooth: Transition = {
-  type: "spring",
-  stiffness: 200,
-  damping: 30,
-  mass: 0.8,
-  restDelta: 0.01,
-};
-
-const springSnappy: Transition = {
-  type: "spring",
-  stiffness: 400,
-  damping: 30,
-  mass: 0.6,
-  restDelta: 0.01,
-};
-
-const instantTransition: Transition = { duration: 0 };
-
-/* ── Orbital Track (Enhanced with Chromatic Effects) ──────────────── */
-const OrbitalTrack: React.FC<{ size: number; radius: number }> = React.memo(
-  ({ size, radius }) => {
-    const cx = size / 2;
-    const cy = size / 2;
-    const trackWidth = getTrackWidth(size >= 400 ? "lg" : size <= 300 ? "sm" : "md");
+const ClockTicks: React.FC = React.memo(() => {
+  const ticks = Array.from({ length: 28 }, (_, i) => {
+    const angle = START_DEG + i * (360 / 28);
+    const isHour = i % 4 === 0;
+    const outer = pointAt(TRACK_RADIUS, angle);
+    const inner = pointAt(TRACK_RADIUS - (isHour ? 12 : 7), angle);
 
     return (
-      <>
-        <defs>
-          {/* Main gradient with chromatic aberration effect */}
-          <linearGradient
-            id="orbit-gradient"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="100%"
-            gradientTransform="rotate(45)"
-          >
-            {MOODS.map((m, i) => (
-              <stop
-                key={m.id}
-                offset={`${((i / N) * 100).toFixed(1)}%`}
-                stopColor={m.color}
-                stopOpacity={0.18}
-              />
-            ))}
-            <stop offset="100%" stopColor={MOODS[0].color} stopOpacity={0.18} />
-          </linearGradient>
-          {/* Inner glow gradient */}
-          <radialGradient
-            id="orbit-inner-glow"
-            cx="50%"
-            cy="50%"
-            r="50%"
-            fx="50%"
-            fy="50%"
-          >
-            <stop offset="0%" stopColor="#bcc2ff" stopOpacity={0.08} />
-            <stop offset="100%" stopColor="#bcc2ff" stopOpacity={0} />
-          </radialGradient>
-        </defs>
-
-        {/* Outer chromatic aberration effect (RGB split) */}
-        <circle
-          cx={cx}
-          cy={cy}
-          r={radius + 2}
-          fill="none"
-          stroke="rgba(255, 80, 80, 0.12)"
-          strokeWidth={1}
-          strokeDasharray="2,2"
-          opacity={0.3}
-          pointerEvents="none"
-        />
-        <circle
-          cx={cx}
-          cy={cy}
-          r={radius + 4}
-          fill="none"
-          stroke="rgba(80, 255, 80, 0.12)"
-          strokeWidth={1}
-          strokeDasharray="2,2"
-          strokeDashoffset="1"
-          opacity={0.3}
-          pointerEvents="none"
-        />
-        <circle
-          cx={cx}
-          cy={cy}
-          r={radius + 6}
-          fill="none"
-          stroke="rgba(80, 80, 255, 0.12)"
-          strokeWidth={1}
-          strokeDasharray="2,2"
-          strokeDashoffset="2"
-          opacity={0.3}
-          pointerEvents="none"
-        />
-
-        {/* Main orbital track with gradient */}
-        <circle
-          cx={cx}
-          cy={cy}
-          r={radius}
-          fill="none"
-          stroke="url(#orbit-gradient)"
-          strokeWidth={trackWidth}
-          opacity={0.4}
-          style={{ filter: "blur(14px)" }}
-          pointerEvents="none"
-        />
-
-        {/* Inner crisp track */}
-        <circle
-          cx={cx}
-          cy={cy}
-          r={radius}
-          fill="none"
-          stroke="rgba(216,212,235,0.06)"
-          strokeWidth={1.5}
-          pointerEvents="none"
-        />
-
-        {/* Subtle inner glow */}
-        <circle
-          cx={cx}
-          cy={cy}
-          r={radius - 10}
-          fill="url(#orbit-inner-glow)"
-          opacity={0.5}
-          pointerEvents="none"
-        />
-      </>
+      <line
+        key={i}
+        x1={inner.x}
+        y1={inner.y}
+        x2={outer.x}
+        y2={outer.y}
+        stroke={isHour ? "rgba(216,212,235,0.30)" : "rgba(216,212,235,0.14)"}
+        strokeLinecap="round"
+        strokeWidth={isHour ? 2 : 1.35}
+      />
     );
-  },
-);
-OrbitalTrack.displayName = "OrbitalTrack";
+  });
 
-/* ── Active Arc with Particle Effect ──────────────────────────────── */
-interface ActiveArcProps {
-  selectedIdx: number;
-  transition: Transition;
-  size: number;
-  radius: number;
+  return <>{ticks}</>;
+});
+ClockTicks.displayName = "ClockTicks";
+
+interface MoodStopMarksProps {
+  selectedMood: MoodType | null;
+  labelTransition: Transition;
+  reduceMotion: boolean;
 }
 
-const ActiveArc: React.FC<ActiveArcProps> = React.memo(
-  ({ selectedIdx, transition, size, radius }) => {
-    const activeMood = MOODS[selectedIdx];
-    const cx = size / 2;
-    const cy = size / 2;
+const MoodStopMarks: React.FC<MoodStopMarksProps> = React.memo(
+  ({ selectedMood, labelTransition, reduceMotion }) => (
+    <>
+      {MOODS.map((mood, index) => {
+        const angle = angleForIndex(index);
+        const dot = pointAt(MOOD_DOT_RADIUS, angle);
+        const label = pointAt(LABEL_RADIUS, angle);
+        const isActive = mood.id === selectedMood;
+        const isPreview = !selectedMood && mood.id === DEFAULT_MOOD;
+        const unitX = Math.cos(toRad(angle));
+        const unitY = Math.sin(toRad(angle));
+        const textAnchor =
+          Math.abs(unitX) < 0.22 ? "middle" : unitX > 0 ? "start" : "end";
+        const dominantSide = Math.abs(unitX) > Math.abs(unitY) ? "side" : "vertical";
 
-    // Create particle positions along the arc
-    const arcSpan = 60;
-    const halfSpan = arcSpan / 2;
-    const startAngle = START_DEG + selectedIdx * STEP_DEG - halfSpan;
-    const endAngle = START_DEG + selectedIdx * STEP_DEG + halfSpan;
-
-    const r = radius;
-    const x1 = cx + r * Math.cos(toRad(startAngle));
-    const y1 = cy + r * Math.sin(toRad(startAngle));
-    const x2 = cx + r * Math.cos(toRad(endAngle));
-    const y2 = cy + r * Math.sin(toRad(endAngle));
-
-    const d = `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
-
-    // Generate particles along the arc
-    const particles = (() => {
-      const count = 8;
-      const result = [];
-      for (let i = 0; i < count; i++) {
-        const angle = startAngle + (arcSpan * i) / (count - 1);
-        const px = cx + (r + 4) * Math.cos(toRad(angle));
-        const py = cy + (r + 4) * Math.sin(toRad(angle));
-        const delay = (i / count) * 0.3;
-        result.push({ x: px, y: py, delay, size: 2 + Math.random() * 2 });
-      }
-      return result;
-    })();
-
-    return (
-      <>
-        <defs>
-          <filter id="active-arc-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="10" />
-          </filter>
-          <linearGradient id="arc-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={activeMood.color} stopOpacity={0} />
-            <stop offset="30%" stopColor={activeMood.color} stopOpacity={0.35} />
-            <stop offset="70%" stopColor={activeMood.color} stopOpacity={0.35} />
-            <stop offset="100%" stopColor={activeMood.color} stopOpacity={0} />
-          </linearGradient>
-          <radialGradient id="particle-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor={activeMood.color} stopOpacity={0.6} />
-            <stop offset="100%" stopColor={activeMood.color} stopOpacity={0} />
-          </radialGradient>
-        </defs>
-
-        {/* Glow layer */}
-        <motion.path
-          d={d}
-          fill="none"
-          initial={false}
-          animate={{ stroke: activeMood.color }}
-          transition={transition}
-          strokeWidth={14}
-          strokeLinecap="round"
-          opacity={0.45}
-          filter="url(#active-arc-glow)"
-          pointerEvents="none"
-        />
-
-        {/* Particle glow effect */}
-        {particles.map((p, i) => (
-          <motion.circle
-            key={`particle-${selectedIdx}-${i}`}
-            cx={p.x}
-            cy={p.y}
-            r={p.size}
-            fill="url(#particle-glow)"
-            initial={{ opacity: 0, r: 0 }}
-            animate={{ opacity: [0.3, 0.8, 0.3], r: p.size }}
-            transition={{
-              delay: p.delay,
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            pointerEvents="none"
-          />
-        ))}
-
-        {/* Crisp arc with gradient */}
-        <motion.path
-          d={d}
-          fill="none"
-          initial={false}
-          animate={{ stroke: `url(#arc-gradient)` }}
-          transition={transition}
-          strokeWidth={3}
-          strokeLinecap="round"
-          opacity={0.9}
-          pointerEvents="none"
-        />
-      </>
-    );
-  },
-);
-ActiveArc.displayName = "ActiveArc";
-
-/* ── Connection Beam with Gradient Flow ───────────────────────────── */
-interface ConnectionBeamProps {
-  selectedIdx: number;
-  transition: Transition;
-  size: number;
-  orbitRadius: number;
-  logoSize: number;
-}
-
-const ConnectionBeam: React.FC<ConnectionBeamProps> = React.memo(
-  ({ selectedIdx, transition, size, orbitRadius, logoSize }) => {
-    const mood = MOODS[selectedIdx];
-    const angle = START_DEG + selectedIdx * STEP_DEG;
-    const nodePos = pointAt(orbitRadius, angle);
-    const cx = size / 2;
-    const cy = size / 2;
-
-    // Beam from logo edge to node
-    const logoEdge = pointAt(logoSize / 2 + 6, angle);
-
-    const gradId = `beam-grad-${selectedIdx}`;
-
-    return (
-      <>
-        <defs>
-          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={mood.color} stopOpacity={0} />
-            <stop offset="30%" stopColor={mood.color} stopOpacity={0.3} />
-            <stop offset="50%" stopColor={mood.color} stopOpacity={0.4} />
-            <stop offset="70%" stopColor={mood.color} stopOpacity={0.3} />
-            <stop offset="100%" stopColor={mood.color} stopOpacity={0} />
-          </linearGradient>
-          <filter id="beam-glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="3" />
-          </filter>
-        </defs>
-
-        {/* Glow beam */}
-        <motion.line
-          x1={logoEdge.x + cx}
-          y1={logoEdge.y + cy}
-          x2={nodePos.x + cx}
-          y2={nodePos.y + cy}
-          stroke={`url(#${gradId})`}
-          strokeWidth={3}
-          strokeLinecap="round"
-          initial={{ opacity: 0, strokeWidth: 0 }}
-          animate={{ opacity: 1, strokeWidth: 3 }}
-          exit={{ opacity: 0, strokeWidth: 0 }}
-          transition={{ ...transition, delay: 0.1 }}
-          filter="url(#beam-glow)"
-          pointerEvents="none"
-        />
-
-        {/* Crisp beam */}
-        <motion.line
-          x1={logoEdge.x + cx}
-          y1={logoEdge.y + cy}
-          x2={nodePos.x + cx}
-          y2={nodePos.y + cy}
-          stroke={mood.color}
-          strokeWidth={1.5}
-          strokeLinecap="round"
-          initial={{ opacity: 0, pathLength: 0 }}
-          animate={{ opacity: 1, pathLength: 1 }}
-          exit={{ opacity: 0, pathLength: 0 }}
-          transition={{ ...transition, delay: 0.15 }}
-          pointerEvents="none"
-        />
-
-        {/* Pulsing dot at node connection */}
-        <motion.circle
-          cx={nodePos.x + cx}
-          cy={nodePos.y + cy}
-          r={4}
-          fill={mood.color}
-          initial={{ opacity: 0, r: 0 }}
-          animate={{ opacity: [0.4, 0.8, 0.4], r: [2, 4, 2] }}
-          transition={{
-            delay: 0.2,
-            duration: 1.2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          pointerEvents="none"
-        />
-      </>
-    );
-  },
-);
-ConnectionBeam.displayName = "ConnectionBeam";
-
-/* ── Mood Node with Enhanced Interactivity ──────────────────────────── */
-interface MoodNodeProps {
-  mood: (typeof MOODS)[number];
-  index: number;
-  isSelected: boolean;
-  transition: Transition;
-  onClick: (id: MoodType) => void;
-  size: number;
-  orbitRadius: number;
-  nodeSize: number;
-  isHovered: boolean;
-  onHoverStart: () => void;
-  onHoverEnd: () => void;
-}
-
-const MoodNode: React.FC<MoodNodeProps> = React.memo(
-  ({
-    mood,
-    index,
-    isSelected,
-    transition,
-    onClick,
-    size,
-    orbitRadius,
-    nodeSize,
-    isHovered,
-    onHoverStart,
-    onHoverEnd,
-  }) => {
-    const angle = START_DEG + index * STEP_DEG;
-    const pos = pointAt(orbitRadius, angle);
-    const half = nodeSize / 2;
-    const cx = size / 2;
-    const cy = size / 2;
-
-    const x = pos.x + cx;
-    const y = pos.y + cy;
-
-    // Keep the click handling on a plain <g>. Applying framer-motion's
-    // `animate={{ scale }}` + `whileTap` directly to a motion.g swallows
-    // pointer events on some browsers, so the scale animation lives on
-    // an inner motion.g instead.
-    const handleSelect = () => onClick(mood.id);
-    const handleKeyDown = (e: React.KeyboardEvent<SVGGElement>) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        handleSelect();
-      }
-    };
-
-    return (
-      <g
-        role="radio"
-        aria-checked={isSelected}
-        aria-label={mood.label}
-        tabIndex={0}
-        onClick={handleSelect}
-        onPointerDown={handleSelect}
-        onKeyDown={handleKeyDown}
-        onMouseEnter={onHoverStart}
-        onMouseLeave={onHoverEnd}
-        style={{
-          cursor: "pointer",
-          outline: "none",
-          pointerEvents: "auto",
-          touchAction: "manipulation",
-        }}
-      >
-        {/* Transparent hit area — all visual children sit inside a motion.g
-            with pointerEvents="none", so the outer <g> has no hit target on
-            its own. This circle guarantees clicks/pointerdowns land on a
-            tappable surface even when the visual node is small or unselected. */}
-        <circle cx={x} cy={y} r={half + 10} fill="transparent" pointerEvents="auto" />
-        <motion.g
-          initial={false}
-          animate={{ scale: isHovered ? 1.08 : 1 }}
-          whileTap={{ scale: 0.92 }}
-          transition={springUltraSmooth}
-          style={{
-            transformOrigin: `${x}px ${y}px`,
-            transformBox: "fill-box",
-          }}
-          pointerEvents="none"
-        >
-          {/* Ripple effect on click */}
-          <AnimatePresence>
-            {isSelected && (
-              <motion.circle
-                cx={x}
-                cy={y}
-                r={0}
-                fill={mood.color}
-                initial={{ r: 0, opacity: 0.4 }}
-                animate={{ r: half * 2.5, opacity: 0 }}
-                exit={{ r: 0, opacity: 0 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                pointerEvents="none"
-                style={{ filter: "blur(8px)" }}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Outer selection ring */}
-          <AnimatePresence>
-            {isSelected && (
-              <motion.circle
-                cx={x}
-                cy={y}
-                r={half + 10}
-                fill="none"
-                stroke={mood.color}
-                strokeWidth={2}
-                initial={{ opacity: 0, r: half }}
-                animate={{ opacity: 0.6, r: half + 10 }}
-                exit={{ opacity: 0, r: half }}
-                transition={transition}
-                pointerEvents="none"
-                style={{
-                  filter: "drop-shadow(0 0 6px " + hexToRgba(mood.color, 0.4) + ")",
-                }}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Ambient glow */}
-          <motion.circle
-            cx={x}
-            cy={y}
-            fill={mood.color}
-            initial={false}
-            animate={{
-              r: isSelected ? half + 6 : isHovered ? half + 2 : half - 2,
-              opacity: isSelected ? 0.35 : isHovered ? 0.12 : 0.06,
-            }}
-            transition={transition}
-            style={{ filter: "blur(12px)" }}
-            pointerEvents="none"
-          />
-
-          {/* Glassmorphic node body */}
-          <motion.circle
-            cx={x}
-            cy={y}
-            fill={isSelected ? hexToRgba(mood.color, 0.25) : "rgba(18,20,28,0.7)"}
-            stroke={isSelected ? mood.color : "rgba(216,212,235,0.12)"}
-            strokeWidth={isSelected ? 2.5 : 1.5}
-            initial={false}
-            animate={{ r: half }}
-            transition={transition}
-            pointerEvents="none"
-            style={{
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              boxShadow: isSelected ? `0 0 20px ${hexToRgba(mood.color, 0.3)}` : "none",
-            }}
-          />
-
-          <g
-            transform={`translate(${x - (nodeSize * 0.8 * 0.6) / 2} ${y - (nodeSize * 0.8 * 0.6) / 2})`}
-          >
-            <motion.g
+        return (
+          <g key={mood.id}>
+            <motion.circle
+              cx={dot.x}
+              cy={dot.y}
+              r={isActive ? 5.25 : 4.35}
+              fill={mood.color}
               initial={false}
-              animate={{ y: isSelected ? -2 : 0 }}
-              transition={transition}
-              pointerEvents="none"
-              style={{ userSelect: "none" }}
-            >
-              <MoodIcon mood={mood.id} size={nodeSize * 0.8} color={mood.color} />
-            </motion.g>
-          </g>
-
-          {/* Label */}
-          <motion.text
-            x={x}
-            y={y + half + 16}
-            textAnchor="middle"
-            fontFamily='"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif'
-            fontSize={11}
-            fontWeight={isSelected ? 700 : 500}
-            letterSpacing="0.04em"
-            initial={false}
-            animate={{
-              fill: isSelected
-                ? mood.color
-                : isHovered
-                  ? "rgba(216,212,235,0.7)"
-                  : "rgba(216,212,235,0.4)",
-              opacity: isSelected ? 1 : isHovered ? 0.9 : 0.6,
-            }}
-            transition={transition}
-            pointerEvents="none"
-          >
-            {mood.label}
-          </motion.text>
-        </motion.g>
-      </g>
-    );
-  },
-);
-MoodNode.displayName = "MoodNode";
-
-/* ── Center Logo with Enhanced Effects ──────────────────────────────── */
-interface MoodCenterLogoProps {
-  color: string;
-  hasSelection: boolean;
-  size: number;
-  transition: Transition;
-}
-
-const MoodCenterLogo: React.FC<MoodCenterLogoProps> = React.memo(
-  ({ color, hasSelection, size, transition }) => {
-    const logoSize = size * 0.62;
-    const isRgb = color.startsWith("rgb");
-    const displayColor = isRgb ? color : lightenHex(color, 0.35);
-    const glowColor = isRgb ? color : hexToRgba(color, 0.6);
-    const ambientColor = isRgb ? color : hexToRgba(color, 0.22);
-
-    return (
-      <div
-        style={{
-          position: "relative",
-          width: size,
-          height: size,
-          display: "grid",
-          placeItems: "center",
-        }}
-      >
-        {/* Pulsing ambient ring */}
-        <motion.div
-          aria-hidden
-          initial={false}
-          animate={{
-            boxShadow: hasSelection
-              ? `0 0 50px 16px ${ambientColor}, 0 0 100px 32px ${hexToRgba(
-                  color.startsWith("rgb") ? "#bcc2ff" : color,
-                  0.08,
-                )}`
-              : "0 0 30px 8px rgba(188,194,255,0.06)",
-            scale: hasSelection ? [1, 1.05, 1] : 1,
-          }}
-          transition={{ ...transition, duration: 2, repeat: Infinity }}
-          style={{
-            position: "absolute",
-            inset: 0,
-            borderRadius: "50%",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Glassmorphic backdrop */}
-        <motion.div
-          aria-hidden
-          initial={false}
-          animate={{
-            borderColor: hasSelection
-              ? hexToRgba(color.startsWith("rgb") ? "#bcc2ff" : color, 0.22)
-              : "rgba(188,194,255,0.08)",
-            background: hasSelection
-              ? `radial-gradient(circle at center, ${hexToRgba(
-                  color.startsWith("rgb") ? "#bcc2ff" : color,
-                  0.08,
-                )}, rgba(18,20,28,0.5) 70%)`
-              : "rgba(18,20,28,0.4)",
-          }}
-          transition={transition}
-          style={{
-            position: "absolute",
-            inset: 0,
-            borderRadius: "50%",
-            border: "2px solid",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Logo with glow */}
-        <motion.div
-          aria-hidden
-          initial={false}
-          animate={{
-            backgroundColor: displayColor,
-            filter: `drop-shadow(0 0 8px ${glowColor}) drop-shadow(0 0 24px ${ambientColor})`,
-            scale: hasSelection ? [1, 1.05, 1] : 1,
-          }}
-          transition={{ ...transition, duration: hasSelection ? 1.5 : 0.5 }}
-          style={{
-            position: "relative",
-            width: logoSize,
-            height: logoSize,
-            borderRadius: 14,
-            WebkitMaskImage: "url(/app-logo-white.svg)",
-            maskImage: "url(/app-logo-white.svg)",
-            WebkitMaskRepeat: "no-repeat",
-            maskRepeat: "no-repeat",
-            WebkitMaskPosition: "center",
-            maskPosition: "center",
-            WebkitMaskSize: "contain",
-            maskSize: "contain",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Selection pulse ring */}
-        <AnimatePresence>
-          {hasSelection && (
-            <motion.div
-              aria-hidden
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1.3, opacity: 0 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
+              animate={{
+                opacity: isActive || isPreview ? 1 : 0.68,
+                scale: isActive ? [1, 1.22, 1] : 1,
+              }}
+              transition={
+                isActive && !reduceMotion
+                  ? { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+                  : labelTransition
+              }
               style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                border: `2px solid ${color}`,
-                pointerEvents: "none",
+                filter: `drop-shadow(0 0 ${isActive ? 12 : 7}px ${hexToRgba(
+                  mood.color,
+                  isActive ? 0.82 : 0.32,
+                )})`,
+                transformBox: "fill-box",
+                transformOrigin: "center",
               }}
             />
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  },
+            <motion.text
+              x={label.x}
+              y={label.y}
+              dy={dominantSide === "vertical" && unitY > 0 ? 11 : 3.5}
+              textAnchor={textAnchor}
+              fontSize="11"
+              fontWeight="600"
+              letterSpacing="0"
+              fill={
+                isActive
+                  ? "#f8f3ff"
+                  : isPreview
+                    ? "rgba(216,212,235,0.78)"
+                    : "rgba(216,212,235,0.50)"
+              }
+              initial={false}
+              animate={{
+                opacity: isActive || isPreview ? 1 : 0.72,
+              }}
+              transition={labelTransition}
+              style={{
+                textShadow: isActive ? `0 0 18px ${hexToRgba(mood.color, 0.82)}` : "none",
+              }}
+            >
+              {mood.label}
+            </motion.text>
+          </g>
+        );
+      })}
+    </>
+  ),
 );
-MoodCenterLogo.displayName = "MoodCenterLogo";
+MoodStopMarks.displayName = "MoodStopMarks";
 
-/* ── Main Component ────────────────────────────────────────────────── */
 export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
   selectedMood,
   onSelect,
-  size: sizeProp = "md",
+  size = "md",
 }) => {
-  const shouldReduceMotion = useReducedMotion();
-  const actualSize = getSize(sizeProp);
-  const orbitRadius = getOrbitRadius(sizeProp);
-  const logoSize = getLogoSize(sizeProp);
+  const reduceMotion = Boolean(useReducedMotion());
+  const activeMoodId = selectedMood ?? DEFAULT_MOOD;
+  const activeIndex = Math.max(
+    0,
+    MOODS.findIndex((mood) => mood.id === activeMoodId),
+  );
+  const activeMood = MOODS[activeIndex];
+  const activeAngle = angleForIndex(activeIndex);
+  const handRotation = activeAngle + 90;
+  const hasSelection = Boolean(selectedMood);
 
-  const selectedIdx = selectedMood ? MOODS.findIndex((m) => m.id === selectedMood) : -1;
-  const selectedMoodMeta = selectedIdx >= 0 ? MOODS[selectedIdx] : null;
+  const springTransition: Transition = useMemo(
+    () =>
+      reduceMotion
+        ? { duration: 0 }
+        : {
+            type: "spring",
+            stiffness: 180,
+            damping: 26,
+            mass: 0.8,
+          },
+    [reduceMotion],
+  );
 
-  const transition = shouldReduceMotion ? instantTransition : springUltraSmooth;
-  const snappyTransition = shouldReduceMotion ? instantTransition : springSnappy;
+  const labelTransition: Transition = useMemo(
+    () =>
+      reduceMotion
+        ? { duration: 0 }
+        : {
+            type: "spring",
+            stiffness: 320,
+            damping: 28,
+            mass: 0.65,
+          },
+    [reduceMotion],
+  );
 
-  // Track hovered node
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-  const handleClick = useCallback(
-    (id: MoodType) => {
-      onSelect(id);
+  const handleSelect = useCallback(
+    (mood: MoodType) => {
+      onSelect(mood);
     },
     [onSelect],
   );
 
-  // Sorted so the selected mood renders last (on top)
-  const sortedIndices = useMemo(() => {
-    const indices = MOODS.map((_, i) => i);
-    if (selectedIdx >= 0) {
-      const withoutSelected = indices.filter((i) => i !== selectedIdx);
-      withoutSelected.push(selectedIdx);
-      return withoutSelected;
-    }
-    return indices;
-  }, [selectedIdx]);
+  const moodStops = useMemo(
+    () =>
+      MOODS.map((mood, index) => {
+        const angle = angleForIndex(index);
+        const point = pointAt(MOOD_DOT_RADIUS, angle);
+        const isActive = mood.id === selectedMood;
+
+        return (
+          <button
+            key={mood.id}
+            type="button"
+            aria-label={`Select ${mood.label} mood`}
+            aria-pressed={isActive}
+            className="absolute size-14 -translate-x-1/2 -translate-y-1/2 rounded-2xl transition-transform duration-200 active:scale-[0.96] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+            style={{
+              left: `${(point.x / VIEWBOX_SIZE) * 100}%`,
+              top: `${(point.y / VIEWBOX_SIZE) * 100}%`,
+            }}
+            onClick={() => handleSelect(mood.id)}
+          />
+        );
+      }),
+    [handleSelect, selectedMood],
+  );
 
   return (
     <div
-      className="mood-ring-picker"
+      className="relative mx-auto w-full select-none"
       style={{
-        position: "relative",
-        width: "100%",
-        maxWidth: actualSize + 100,
-        margin: "0 auto",
-        overflow: "visible",
+        maxWidth: PICKER_SIZES[size],
       }}
     >
-      <svg
-        viewBox={`0 0 ${actualSize} ${actualSize}`}
-        width="100%"
-        style={{
-          height: "auto",
-          maxWidth: actualSize + 60,
-          margin: "0 auto",
-          display: "block",
-          touchAction: "manipulation",
-          overflow: "visible",
-        }}
-        role="radiogroup"
-        aria-label="How are you feeling right now?"
-      >
-        {/* Orbital track */}
-        <OrbitalTrack size={actualSize} radius={orbitRadius} />
-
-        {/* Active arc with particles */}
-        {selectedIdx >= 0 && (
-          <ActiveArc
-            selectedIdx={selectedIdx}
-            transition={transition}
-            size={actualSize}
-            radius={orbitRadius}
-          />
-        )}
-
-        {/* Connection beam */}
-        <AnimatePresence>
-          {selectedIdx >= 0 && (
-            <ConnectionBeam
-              key={`beam-${selectedIdx}`}
-              selectedIdx={selectedIdx}
-              transition={snappyTransition}
-              size={actualSize}
-              orbitRadius={orbitRadius}
-              logoSize={logoSize}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Mood nodes */}
-        {sortedIndices.map((i) => {
-          const nodeSize = getNodeSize(sizeProp, i === selectedIdx);
-          return (
-            <MoodNode
-              key={MOODS[i].id}
-              mood={MOODS[i]}
-              index={i}
-              isSelected={i === selectedIdx}
-              transition={transition}
-              onClick={handleClick}
-              size={actualSize}
-              orbitRadius={orbitRadius}
-              nodeSize={nodeSize}
-              isHovered={hoveredIndex === i}
-              onHoverStart={() => setHoveredIndex(i)}
-              onHoverEnd={() => setHoveredIndex(null)}
-            />
-          );
-        })}
-      </svg>
-
-      {/* Center logo overlay */}
       <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          pointerEvents: "none",
-        }}
+        className="relative mx-auto aspect-square w-full"
+        aria-label="Mood clock picker"
+        role="group"
       >
-        <MoodCenterLogo
-          color={selectedMoodMeta?.color ?? "rgba(188,194,255,0.55)"}
-          hasSelection={selectedIdx >= 0}
-          size={logoSize}
-          transition={transition}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-[12%] rounded-full"
+          animate={{
+            boxShadow: hasSelection
+              ? `0 0 58px ${hexToRgba(activeMood.color, 0.3)}`
+              : "0 0 38px rgba(188,194,255,0.12)",
+          }}
+          transition={springTransition}
         />
+
+        <svg
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
+        >
+          <defs>
+            <radialGradient id="mood-clock-face" cx="50%" cy="47%" r="62%">
+              <stop offset="0%" stopColor="rgba(188,194,255,0.10)" />
+              <stop offset="58%" stopColor="rgba(188,194,255,0.035)" />
+              <stop offset="100%" stopColor="rgba(188,194,255,0)" />
+            </radialGradient>
+            <filter
+              id="mood-clock-hand-glow"
+              x="-80%"
+              y="-80%"
+              width="260%"
+              height="260%"
+            >
+              <feDropShadow
+                dx="0"
+                dy="0"
+                stdDeviation="7"
+                floodColor={activeMood.color}
+                floodOpacity={hasSelection ? "0.65" : "0.22"}
+              />
+            </filter>
+          </defs>
+
+          <circle cx={CENTER} cy={CENTER} r={122} fill="url(#mood-clock-face)" />
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={TRACK_RADIUS}
+            fill="none"
+            stroke="rgba(216,212,235,0.12)"
+            strokeWidth="1.5"
+          />
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={82}
+            fill="none"
+            stroke="rgba(216,212,235,0.055)"
+            strokeWidth="1"
+          />
+          <ClockTicks />
+          <MoodStopMarks
+            selectedMood={selectedMood}
+            labelTransition={labelTransition}
+            reduceMotion={reduceMotion}
+          />
+
+          <motion.g
+            style={{
+              transformBox: "view-box",
+              transformOrigin: `${CENTER}px ${CENTER}px`,
+            }}
+            animate={{ rotate: handRotation }}
+            transition={springTransition}
+          >
+            <line
+              x1={CENTER}
+              y1={CENTER + 14}
+              x2={CENTER}
+              y2={CENTER - HAND_LENGTH}
+              stroke={activeMood.color}
+              strokeLinecap="round"
+              strokeWidth={hasSelection ? 4.5 : 3.5}
+              filter="url(#mood-clock-hand-glow)"
+            />
+            <circle
+              cx={CENTER}
+              cy={CENTER - HAND_LENGTH}
+              r={hasSelection ? 7 : 5.5}
+              fill={activeMood.color}
+              opacity={hasSelection ? 0.95 : 0.55}
+            />
+          </motion.g>
+
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={18}
+            fill="rgba(14,16,24,0.92)"
+            stroke={hasSelection ? activeMood.color : "rgba(216,212,235,0.20)"}
+            strokeWidth="2"
+          />
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={5}
+            fill={hasSelection ? activeMood.color : "rgba(216,212,235,0.46)"}
+          />
+        </svg>
+
+        {moodStops}
+
+        <motion.div
+          className="pointer-events-none absolute left-1/2 top-1/2 flex w-28 -translate-x-1/2 translate-y-7 flex-col items-center text-center"
+          animate={{
+            color: hasSelection ? activeMood.color : "rgba(216,212,235,0.62)",
+          }}
+          transition={springTransition}
+        >
+          <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#d8d4eb]/50">
+            {hasSelection ? "Selected" : "Start at"}
+          </span>
+          <span className="mt-1 font-serif text-[22px] font-medium leading-none tracking-[-0.03em]">
+            {activeMood.label}
+          </span>
+        </motion.div>
       </div>
     </div>
   );

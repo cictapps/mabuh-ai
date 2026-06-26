@@ -27,6 +27,8 @@ export interface ReminderPreferences {
   enabled: boolean;
   hour: number;
   minute: number;
+  mode: "fixed" | "random";
+  dailyCount: number;
 }
 
 const REMINDER_KEY = "mabuh_reminder_prefs";
@@ -35,18 +37,33 @@ const DEFAULT_REMINDER: ReminderPreferences = {
   enabled: true,
   hour: 20,
   minute: 0,
+  mode: "fixed",
+  dailyCount: 2,
 };
+
+function normalizeReminder(prefs: Partial<ReminderPreferences>): ReminderPreferences {
+  const hour = typeof prefs.hour === "number" ? prefs.hour : DEFAULT_REMINDER.hour;
+  const minute =
+    typeof prefs.minute === "number" ? prefs.minute : DEFAULT_REMINDER.minute;
+  const dailyCount =
+    typeof prefs.dailyCount === "number" ? prefs.dailyCount : DEFAULT_REMINDER.dailyCount;
+
+  return {
+    enabled:
+      typeof prefs.enabled === "boolean" ? prefs.enabled : DEFAULT_REMINDER.enabled,
+    hour: Math.max(0, Math.min(23, Math.round(hour))),
+    minute: Math.max(0, Math.min(59, Math.round(minute))),
+    mode: prefs.mode === "random" ? "random" : "fixed",
+    dailyCount: Math.max(1, Math.min(4, Math.round(dailyCount))),
+  };
+}
 
 function loadReminder(): ReminderPreferences {
   try {
     const raw = localStorage.getItem(REMINDER_KEY);
     if (!raw) return DEFAULT_REMINDER;
     const parsed = JSON.parse(raw) as Partial<ReminderPreferences>;
-    return {
-      enabled: Boolean(parsed.enabled),
-      hour: typeof parsed.hour === "number" ? parsed.hour : DEFAULT_REMINDER.hour,
-      minute: typeof parsed.minute === "number" ? parsed.minute : DEFAULT_REMINDER.minute,
-    };
+    return normalizeReminder(parsed);
   } catch {
     return DEFAULT_REMINDER;
   }
@@ -410,7 +427,7 @@ export function useMoodStore() {
 
   const setReminder = useCallback((next: Partial<ReminderPreferences>) => {
     setReminderState((prev) => {
-      const merged = { ...prev, ...next };
+      const merged = normalizeReminder({ ...prev, ...next });
       saveReminder(merged);
       return merged;
     });

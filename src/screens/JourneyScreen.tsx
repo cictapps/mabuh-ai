@@ -1,4 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  type Transition,
+} from "framer-motion";
 import { Compass } from "lucide-react";
 import { JourneyHeader } from "@/components/journey/JourneyHeader";
 import { PhaseSwitcher } from "@/components/journey/PhaseSwitcher";
@@ -26,6 +32,7 @@ type JourneyScreenProps = {
 };
 
 export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
+  const reducedMotion = useReducedMotion();
   const phase = useJourneyStore((s) => s.phase);
   const mode = useJourneyStore((s) => s.mode);
   const modeDate = useJourneyStore((s) => s.modeDate);
@@ -105,8 +112,24 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
     setView("achievements");
   };
 
+  const transitionInitial = reducedMotion
+    ? { opacity: 1 }
+    : { opacity: 0, y: 18, filter: "blur(8px)" };
+  const transitionAnimate = reducedMotion
+    ? { opacity: 1 }
+    : { opacity: 1, y: 0, filter: "blur(0px)" };
+  const transitionExit = reducedMotion
+    ? { opacity: 1 }
+    : { opacity: 0, y: -10, filter: "blur(6px)" };
+  const contentTransition: Transition = reducedMotion
+    ? { duration: 0 }
+    : { duration: 0.34, ease: "easeOut" };
+
   return (
-    <div className="relative" style={{ paddingTop: "var(--app-screen-top)" }}>
+    <div
+      className="screen-enter relative"
+      style={{ paddingTop: "var(--app-screen-top)" }}
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
@@ -130,120 +153,153 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
           workshopLabel={mode === "garden" ? "Garden Shed" : "Hangar"}
         />
 
-        {view !== "main" ? null : (
-          <>
-            <JourneyModeSelector mode={mode} locked={modeLocked} onSelect={selectMode} />
-
-            {mode === "flight" && modeLocked && phase !== "pause" ? (
-              <PhaseSwitcher active={phase} onSelect={handlePhaseSelect} />
-            ) : null}
-
-            {mode === "flight" && phase === "pause" && modeLocked ? (
-              <div
-                className="flex items-center gap-2 rounded-2xl border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.06)] px-3.5 py-2.5 text-xs text-[#ffd99a]"
-                role="status"
-                aria-live="polite"
-              >
-                <Compass className="size-3.5" aria-hidden />
-                <span className="font-semibold">Paused</span>
-                <span className="text-[#d8d4eb]">· take all the time you need</span>
-              </div>
-            ) : null}
-
-            <AffirmationCard />
-
-            {mode === "garden" ? (
-              <GardenPanel onOpenSupport={onOpenSupport} locked={modeLocked} />
-            ) : null}
-
-            {mode === "flight" && activeFlightPhase === "preflight" ? (
-              <PreflightPanel
-                preflightChecks={preflightChecks}
-                preflightMood={preflightMood}
-                onToggleCheck={togglePreflightCheck}
-                onSelectMood={setPreflightMood}
-                onTakeoff={() => {
-                  completePreflight();
-                  markHintSeen("preflight");
-                }}
-                showHint={flightsCompleted === 0 && !hintSeen.preflight}
+        <AnimatePresence mode="wait" initial={false}>
+          {view === "main" ? (
+            <motion.div
+              key={`main-${mode}-${activeFlightPhase}-${modeLocked ? "locked" : "open"}`}
+              className="space-y-4"
+              initial={transitionInitial}
+              animate={transitionAnimate}
+              exit={transitionExit}
+              transition={contentTransition}
+            >
+              <JourneyModeSelector
+                mode={mode}
+                locked={modeLocked}
+                onSelect={selectMode}
               />
-            ) : null}
 
-            {mode === "flight" && activeFlightPhase === "airborne" ? (
-              <AirbornePanel
-                onOpenCheckpoint={() => {
-                  setPhase("checkpoint");
-                  markHintSeen("airborne");
-                }}
-                onEnterFinal={() => setPhase("final")}
-                onEnterPause={() => {
-                  enterPause();
-                  markHintSeen("airborne");
-                }}
-                showHint={flightsCompleted === 0 && !hintSeen.airborne}
+              {mode === "flight" && modeLocked && phase !== "pause" ? (
+                <PhaseSwitcher active={phase} onSelect={handlePhaseSelect} />
+              ) : null}
+
+              {mode === "flight" && phase === "pause" && modeLocked ? (
+                <div
+                  className="flex items-center gap-2 rounded-2xl border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.06)] px-3.5 py-2.5 text-xs text-[#ffd99a]"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <Compass className="size-3.5" aria-hidden />
+                  <span className="font-semibold">Paused</span>
+                  <span className="text-[#d8d4eb]">· take all the time you need</span>
+                </div>
+              ) : null}
+
+              <AffirmationCard />
+
+              {mode === "garden" ? (
+                <GardenPanel onOpenSupport={onOpenSupport} locked={modeLocked} />
+              ) : null}
+
+              {mode === "flight" && activeFlightPhase === "preflight" ? (
+                <PreflightPanel
+                  preflightChecks={preflightChecks}
+                  preflightMood={preflightMood}
+                  onToggleCheck={togglePreflightCheck}
+                  onSelectMood={setPreflightMood}
+                  onTakeoff={() => {
+                    completePreflight();
+                    markHintSeen("preflight");
+                  }}
+                  showHint={flightsCompleted === 0 && !hintSeen.preflight}
+                />
+              ) : null}
+
+              {mode === "flight" && activeFlightPhase === "airborne" ? (
+                <AirbornePanel
+                  onOpenCheckpoint={() => {
+                    setPhase("checkpoint");
+                    markHintSeen("airborne");
+                  }}
+                  onEnterFinal={() => setPhase("final")}
+                  onEnterPause={() => {
+                    enterPause();
+                    markHintSeen("airborne");
+                  }}
+                  showHint={flightsCompleted === 0 && !hintSeen.airborne}
+                />
+              ) : null}
+
+              {mode === "flight" && activeFlightPhase === "checkpoint" ? (
+                <CheckpointPanel
+                  checkpointLabel={activeCheckpoint?.label ?? "A soft check-in"}
+                  checkpointTime={activeCheckpoint?.time ?? "—"}
+                  checks={checkpointChecks}
+                  mood={checkpointMood}
+                  notes={checkpointNotes}
+                  onToggleCheck={toggleCheckpointCheck}
+                  onSelectMood={setCheckpointMood}
+                  onNotesChange={setCheckpointNotes}
+                  onContinue={() => {
+                    setCheckpointNotes("");
+                    completeCheckpoint();
+                    markHintSeen("checkpoint");
+                  }}
+                  showHint={flightsCompleted === 0 && !hintSeen.checkpoint}
+                />
+              ) : null}
+
+              {mode === "flight" && activeFlightPhase === "pause" ? (
+                <PausePanel
+                  onClose={() => {
+                    setPhase("airborne");
+                    markHintSeen("pause");
+                  }}
+                  onOpenSupport={onOpenSupport}
+                />
+              ) : null}
+
+              {mode === "flight" && activeFlightPhase === "final" ? (
+                <FinalPanel
+                  finalChecks={finalChecks}
+                  finalMood={finalMood}
+                  onToggleCheck={toggleFinalCheck}
+                  onSelectMood={setFinalMood}
+                  onFinish={() => {
+                    completeFinal();
+                    markHintSeen("final");
+                  }}
+                  showHint={flightsCompleted === 0 && !hintSeen.final}
+                />
+              ) : null}
+
+              {mode === "flight" && activeFlightPhase === "rest" ? (
+                <RestPanel
+                  onPrepareNext={() => {
+                    prepareNextFlight();
+                    markHintSeen("rest");
+                  }}
+                />
+              ) : null}
+            </motion.div>
+          ) : null}
+
+          {view === "hangar" ? (
+            <motion.div
+              key={`hangar-${mode}`}
+              initial={transitionInitial}
+              animate={transitionAnimate}
+              exit={transitionExit}
+              transition={contentTransition}
+            >
+              <HangarPanel mode={mode} />
+            </motion.div>
+          ) : null}
+
+          {view === "achievements" ? (
+            <motion.div
+              key="achievements"
+              initial={transitionInitial}
+              animate={transitionAnimate}
+              exit={transitionExit}
+              transition={contentTransition}
+            >
+              <AchievementsPanel
+                showHint={flightsCompleted + gardenDaysCompleted === 0}
               />
-            ) : null}
-
-            {mode === "flight" && activeFlightPhase === "checkpoint" ? (
-              <CheckpointPanel
-                checkpointLabel={activeCheckpoint?.label ?? "A soft check-in"}
-                checkpointTime={activeCheckpoint?.time ?? "—"}
-                checks={checkpointChecks}
-                mood={checkpointMood}
-                notes={checkpointNotes}
-                onToggleCheck={toggleCheckpointCheck}
-                onSelectMood={setCheckpointMood}
-                onNotesChange={setCheckpointNotes}
-                onContinue={() => {
-                  setCheckpointNotes("");
-                  completeCheckpoint();
-                  markHintSeen("checkpoint");
-                }}
-                showHint={flightsCompleted === 0 && !hintSeen.checkpoint}
-              />
-            ) : null}
-
-            {mode === "flight" && activeFlightPhase === "pause" ? (
-              <PausePanel
-                onClose={() => {
-                  setPhase("airborne");
-                  markHintSeen("pause");
-                }}
-                onOpenSupport={onOpenSupport}
-              />
-            ) : null}
-
-            {mode === "flight" && activeFlightPhase === "final" ? (
-              <FinalPanel
-                finalChecks={finalChecks}
-                finalMood={finalMood}
-                onToggleCheck={toggleFinalCheck}
-                onSelectMood={setFinalMood}
-                onFinish={() => {
-                  completeFinal();
-                  markHintSeen("final");
-                }}
-                showHint={flightsCompleted === 0 && !hintSeen.final}
-              />
-            ) : null}
-
-            {mode === "flight" && activeFlightPhase === "rest" ? (
-              <RestPanel
-                onPrepareNext={() => {
-                  prepareNextFlight();
-                  markHintSeen("rest");
-                }}
-              />
-            ) : null}
-          </>
-        )}
-
-        {view === "hangar" ? <HangarPanel mode={mode} /> : null}
-
-        {view === "achievements" ? (
-          <AchievementsPanel showHint={flightsCompleted + gardenDaysCompleted === 0} />
-        ) : null}
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
 
       <RewardToast />

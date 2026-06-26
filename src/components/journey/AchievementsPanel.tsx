@@ -41,6 +41,8 @@ const CATEGORY_LABELS: Record<string, string> = {
   plant: "Plant variety",
 };
 
+const SHOW_ACHIEVEMENT_SHARE_CARD = false;
+
 type AchievementsPanelProps = {
   showHint: boolean;
 };
@@ -138,15 +140,17 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
           </ul>
         </div>
 
-        <AchievementShareCard
-          level={level}
-          totalXp={totalXp}
-          streak={streak}
-          journeysCompleted={flightsCompleted + gardenDaysCompleted}
-          milestoneLabel={latestMilestone?.label}
-          tierLabel={tier}
-          nextMilestone={upcomingMilestone}
-        />
+        {SHOW_ACHIEVEMENT_SHARE_CARD ? (
+          <AchievementShareCard
+            level={level}
+            totalXp={totalXp}
+            streak={streak}
+            journeysCompleted={flightsCompleted + gardenDaysCompleted}
+            milestoneLabel={latestMilestone?.label}
+            tierLabel={tier}
+            nextMilestone={upcomingMilestone}
+          />
+        ) : null}
 
         {/* Rewards */}
         <div>

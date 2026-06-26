@@ -734,7 +734,7 @@ function ReminderCountPicker({
       style={{
         display: "grid",
         gridTemplateColumns: "44px 1fr 44px",
-        alignItems: "stretch",
+        alignItems: "center",
         gap: 8,
         borderRadius: 18,
         border: "1px solid rgba(188,194,255,0.10)",
@@ -742,12 +742,14 @@ function ReminderCountPicker({
         padding: 8,
       }}
     >
-      <TimeAdjustButton
-        label="Reduce random reminders"
-        onClick={() => setCount(reminder.dailyCount - 1)}
-      >
-        <Minus size={15} />
-      </TimeAdjustButton>
+      <div style={{ display: "grid", minHeight: 72, placeItems: "center" }}>
+        <TimeAdjustButton
+          label="Reduce random reminders"
+          onClick={() => setCount(reminder.dailyCount - 1)}
+        >
+          <Minus size={15} />
+        </TimeAdjustButton>
+      </div>
       <div
         style={{
           minHeight: 72,
@@ -784,12 +786,14 @@ function ReminderCountPicker({
           </span>
         </div>
       </div>
-      <TimeAdjustButton
-        label="Add random reminder"
-        onClick={() => setCount(reminder.dailyCount + 1)}
-      >
-        <Plus size={15} />
-      </TimeAdjustButton>
+      <div style={{ display: "grid", minHeight: 72, placeItems: "center" }}>
+        <TimeAdjustButton
+          label="Add random reminder"
+          onClick={() => setCount(reminder.dailyCount + 1)}
+        >
+          <Plus size={15} />
+        </TimeAdjustButton>
+      </div>
     </div>
   );
 }

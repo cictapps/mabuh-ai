@@ -488,11 +488,12 @@ function IdlePrompts() {
         zIndex: 1,
         display: "flex",
         flexDirection: "column",
-        gap: 8,
-        padding: "18px 16px 14px",
+        gap: 12,
+        padding: "18px 16px 16px",
         borderRadius: "1.75rem",
-        background: "rgba(188,194,255,0.04)",
-        border: "1px solid rgba(188,194,255,0.10)",
+        background:
+          "linear-gradient(180deg, rgba(188,194,255,0.055), rgba(188,194,255,0.028))",
+        border: "1px solid rgba(188,194,255,0.12)",
         boxShadow: "0 28px 80px -40px rgba(8,10,18,0.85)",
         backdropFilter: "blur(24px)",
         WebkitBackdropFilter: "blur(24px)",
@@ -510,29 +511,52 @@ function IdlePrompts() {
         <div
           style={{
             display: "flex",
-            alignItems: "center",
+            alignItems: "flex-start",
             justifyContent: "space-between",
             gap: 10,
+            marginBottom: 2,
           }}
         >
-          <span
-            style={{
-              fontSize: 10.5,
-              fontWeight: 600,
-              letterSpacing: "1.2px",
-              textTransform: "uppercase",
-              color: "rgba(188,194,255,0.55)",
-            }}
-          >
-            Just between us
-          </span>
+          <div style={{ minWidth: 0 }}>
+            <span
+              style={{
+                display: "block",
+                fontSize: 10.5,
+                fontWeight: 700,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "#d8d4eb",
+              }}
+            >
+              Just between us
+            </span>
+            <span
+              className="font-serif"
+              style={{
+                display: "block",
+                marginTop: 4,
+                fontSize: 18,
+                lineHeight: 1.2,
+                fontWeight: 500,
+                letterSpacing: "-0.03em",
+                color: "#eef1f6",
+              }}
+            >
+              A tiny pause before you choose.
+            </span>
+          </div>
           <span
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
               fontSize: 10.5,
-              color: "rgba(188,194,255,0.4)",
+              flexShrink: 0,
+              padding: "6px 8px",
+              borderRadius: 999,
+              border: "1px solid rgba(188,194,255,0.10)",
+              background: "rgba(188,194,255,0.05)",
+              color: "rgba(216,212,235,0.58)",
             }}
           >
             <span
@@ -545,13 +569,13 @@ function IdlePrompts() {
                 boxShadow: "0 0 8px rgba(188,194,255,0.5)",
               }}
             />
-            about a minute
+            private
           </span>
         </div>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
+            gridTemplateColumns: "1fr",
             gap: 8,
           }}
         >
@@ -559,85 +583,94 @@ function IdlePrompts() {
             <div
               key={p.label}
               style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 4,
-                padding: "10px 8px",
-                borderRadius: 12,
-                background: "rgba(188,194,255,0.03)",
-                border: "1px solid rgba(188,194,255,0.05)",
+                display: "grid",
+                gridTemplateColumns: "34px 1fr auto",
+                alignItems: "center",
+                gap: 10,
+                minHeight: 58,
+                padding: "10px 11px",
+                borderRadius: 16,
+                background:
+                  i === 0 ? "rgba(255,185,84,0.055)" : "rgba(188,194,255,0.035)",
+                border:
+                  i === 0
+                    ? "1px solid rgba(255,185,84,0.13)"
+                    : "1px solid rgba(188,194,255,0.08)",
               }}
             >
               <span
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "rgba(232,236,255,0.85)",
-                  letterSpacing: "0.1px",
+                  display: "grid",
+                  placeItems: "center",
+                  width: 34,
+                  height: 34,
+                  borderRadius: 13,
+                  background:
+                    i === 0 ? "rgba(255,185,84,0.12)" : "rgba(188,194,255,0.10)",
+                  color: i === 0 ? "#ffd99a" : "rgba(220,224,255,0.9)",
+                  boxShadow:
+                    i === 0
+                      ? "0 16px 34px -24px rgba(255,185,84,0.65)"
+                      : "0 16px 34px -24px rgba(188,194,255,0.45)",
                 }}
+                aria-hidden
               >
+                {p.icon}
+              </span>
+              <span style={{ minWidth: 0 }}>
                 <span
                   style={{
-                    display: "grid",
-                    placeItems: "center",
-                    width: 18,
-                    height: 18,
-                    borderRadius: 6,
-                    background: "rgba(188,194,255,0.10)",
-                    color: "rgba(220,224,255,0.9)",
-                    flexShrink: 0,
-                  }}
-                  aria-hidden
-                >
-                  {p.icon}
-                </span>
-                <span
-                  style={{
-                    fontSize: 9.5,
-                    color: "rgba(188,194,255,0.5)",
+                    display: "block",
+                    fontSize: 12.5,
                     fontWeight: 600,
-                    fontVariantNumeric: "tabular-nums",
+                    color: "rgba(232,236,255,0.94)",
+                    lineHeight: 1.25,
                   }}
                 >
-                  {String(i + 1).padStart(2, "0")}
+                  {p.label}
+                </span>
+                <span
+                  style={{
+                    display: "block",
+                    marginTop: 2,
+                    fontSize: 11,
+                    color: "rgba(216,212,235,0.54)",
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {p.hint}
                 </span>
               </span>
               <span
                 style={{
-                  fontSize: 11.5,
-                  fontWeight: 600,
-                  color: "rgba(232,236,255,0.92)",
-                  lineHeight: 1.3,
+                  display: "grid",
+                  placeItems: "center",
+                  width: 24,
+                  height: 24,
+                  borderRadius: 10,
+                  border: "1px solid rgba(188,194,255,0.08)",
+                  color: "rgba(216,212,235,0.36)",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  fontVariantNumeric: "tabular-nums",
                 }}
               >
-                {p.label}
-              </span>
-              <span
-                style={{
-                  fontSize: 10.5,
-                  color: "rgba(188,194,255,0.5)",
-                  lineHeight: 1.4,
-                }}
-              >
-                {p.hint}
+                {i + 1}
               </span>
             </div>
           ))}
         </div>
         <p
           style={{
-            fontSize: 11,
-            color: "rgba(188,194,255,0.4)",
-            textAlign: "center",
-            margin: "2px 0 0",
+            fontSize: 11.5,
+            color: "rgba(216,212,235,0.52)",
+            margin: "0",
             lineHeight: 1.5,
-            fontStyle: "italic",
+            padding: "2px 2px 0",
           }}
         >
-          This little space is just for you. No scores, no streaks — just a quiet moment.
+          No scores, no streaks. This is simply a quiet place to notice what is true right
+          now.
         </p>
       </div>
     </div>

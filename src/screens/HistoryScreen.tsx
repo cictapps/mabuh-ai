@@ -32,10 +32,10 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
         <p
           style={{
             fontSize: 11,
-            fontWeight: 500,
-            letterSpacing: "1.3px",
+            fontWeight: 600,
+            letterSpacing: "0.22em",
             textTransform: "uppercase",
-            color: "rgba(188,194,255,0.3)",
+            color: "var(--text-kicker)",
             marginBottom: 10,
           }}
         >
@@ -43,11 +43,23 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
         </p>
         <h2
           className="font-serif"
-          style={{ fontSize: 26, fontWeight: 400, color: "#e8eaf0", marginBottom: 4 }}
+          style={{
+            fontSize: 26,
+            fontWeight: 500,
+            color: "var(--text-on-surface)",
+            marginBottom: 4,
+            letterSpacing: "-0.03em",
+          }}
         >
           Your days, in color
         </h2>
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--text-on-surface-muted)",
+            lineHeight: 1.55,
+          }}
+        >
           Tap any day to revisit how you felt
         </p>
       </div>
@@ -64,8 +76,8 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
           style={{
             padding: "14px 16px",
             borderRadius: 14,
-            background: "rgba(188,194,255,0.04)",
-            color: "rgba(188,194,255,0.4)",
+            background: "var(--surface-violet-low)",
+            color: "var(--text-on-surface-muted)",
             fontSize: 12,
             textAlign: "center",
           }}
@@ -77,9 +89,9 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
           style={{
             padding: "20px 18px",
             borderRadius: 16,
-            background: "rgba(188,194,255,0.04)",
-            border: "1px dashed rgba(188,194,255,0.16)",
-            color: "rgba(188,194,255,0.55)",
+            background: "var(--surface-violet-low)",
+            border: "1px dashed var(--border-violet-medium)",
+            color: "var(--text-on-surface-muted)",
             fontSize: 13,
             lineHeight: 1.6,
             textAlign: "center",
@@ -87,8 +99,10 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
         >
           Your story is just beginning. Whenever you're ready,
           <br />
-          the <strong style={{ color: "rgba(216,220,230,0.85)" }}>Check in</strong> tab is
-          waiting with a soft seat for you.
+          the <strong style={{ color: "var(--text-on-surface-strong)" }}>
+            Check in
+          </strong>{" "}
+          tab is waiting with a soft seat for you.
         </div>
       ) : null}
     </div>

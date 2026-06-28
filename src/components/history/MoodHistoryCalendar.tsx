@@ -83,8 +83,9 @@ const DayDetail: React.FC<DayDetailProps> = ({ entries, date, onEdit, onAskDelet
         style={{
           textAlign: "center",
           padding: "20px 0",
-          color: "rgba(188,194,255,0.26)",
+          color: "var(--text-on-surface-muted)",
           fontSize: 13,
+          lineHeight: 1.55,
         }}
       >
         Nothing was shared for this day — and that's okay
@@ -100,10 +101,10 @@ const DayDetail: React.FC<DayDetailProps> = ({ entries, date, onEdit, onAskDelet
       <p
         style={{
           fontSize: 11,
-          fontWeight: 500,
-          letterSpacing: "1.1px",
+          fontWeight: 600,
+          letterSpacing: "0.22em",
           textTransform: "uppercase",
-          color: "rgba(188,194,255,0.35)",
+          color: "var(--text-kicker)",
           margin: 0,
         }}
       >
@@ -164,7 +165,7 @@ const EntryCard: React.FC<{
             top: "50%",
             display: "inline-flex",
             alignItems: "center",
-            color: "rgba(216,212,235,0.28)",
+            color: "var(--text-on-surface-softest)",
             transform: "translateY(-50%)",
           }}
         >
@@ -190,13 +191,16 @@ const EntryCard: React.FC<{
               boxShadow: `0 0 0 3px ${meta.color}22`,
             }}
           />
-          <span className="font-serif" style={{ fontSize: 16, color: "#e8eaf0" }}>
+          <span
+            className="font-serif"
+            style={{ fontSize: 16, color: "var(--text-on-surface)" }}
+          >
             {meta.label}
           </span>
           <span
             style={{
               fontSize: 11,
-              color: "rgba(188,194,255,0.32)",
+              color: "var(--surface-violet-icon-hover)",
               marginLeft: "auto",
               fontVariantNumeric: "tabular-nums",
             }}
@@ -214,8 +218,8 @@ const EntryCard: React.FC<{
                   padding: "3px 10px",
                   borderRadius: 999,
                   fontSize: 11,
-                  background: "rgba(188,194,255,0.07)",
-                  color: "rgba(188,194,255,0.45)",
+                  background: "var(--surface-violet-medium)",
+                  color: "var(--surface-violet-icon-hover)",
                 }}
               >
                 {t}
@@ -228,7 +232,7 @@ const EntryCard: React.FC<{
           <p
             style={{
               fontSize: 13,
-              color: "rgba(188,194,255,0.42)",
+              color: "var(--surface-violet-icon-hover)",
               lineHeight: 1.6,
               fontStyle: "italic",
               margin: 0,
@@ -243,11 +247,11 @@ const EntryCard: React.FC<{
             style={{
               marginTop: 8,
               fontSize: 12,
-              color: "rgba(188,194,255,0.4)",
+              color: "var(--surface-violet-icon-hover)",
               lineHeight: 1.5,
             }}
           >
-            <span style={{ color: "rgba(188,194,255,0.5)", fontWeight: 600 }}>
+            <span style={{ color: "var(--surface-violet-icon-hover)", fontWeight: 600 }}>
               Day note:
             </span>{" "}
             {entry.dayNote}
@@ -264,15 +268,15 @@ const EntryCard: React.FC<{
                 style={{
                   padding: "10px 12px",
                   borderRadius: 12,
-                  background: "rgba(188,194,255,0.06)",
-                  color: "rgba(188,194,255,0.5)",
+                  background: "var(--surface-violet-medium)",
+                  color: "var(--surface-violet-icon-hover)",
                   fontSize: 12,
                 }}
               >
                 <div
                   style={{ display: "flex", justifyContent: "space-between", gap: 10 }}
                 >
-                  <span style={{ color: "#e8eaf0", fontWeight: 600 }}>
+                  <span style={{ color: "var(--text-on-surface)", fontWeight: 600 }}>
                     {interaction.name || "Unnamed"}
                   </span>
                   <span>
@@ -291,7 +295,7 @@ const EntryCard: React.FC<{
                   </div>
                 )}
                 {interaction.notes && (
-                  <div style={{ marginTop: 4, color: "rgba(220,224,255,0.7)" }}>
+                  <div style={{ marginTop: 4, color: "var(--text-on-surface-strong)" }}>
                     {interaction.notes}
                   </div>
                 )}
@@ -539,10 +543,11 @@ const WeekView: React.FC<{
     <div>
       <p
         style={{
-          fontSize: 10,
-          letterSpacing: "0.8px",
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: "0.22em",
           textTransform: "uppercase",
-          color: "rgba(188,194,255,0.35)",
+          color: "var(--text-kicker)",
           margin: "0 0 8px",
         }}
       >
@@ -575,7 +580,7 @@ const WeekView: React.FC<{
                       entries.filter((e) => e.mood === b.mood).length,
                   )[0].mood,
               ).color
-            : "rgba(188,194,255,0.18)";
+            : "var(--surface-violet-icon)";
 
           return (
             <button
@@ -603,7 +608,7 @@ const WeekView: React.FC<{
                     fontSize: 10,
                     textTransform: "uppercase",
                     letterSpacing: "0.4px",
-                    color: "rgba(220,224,255,0.7)",
+                    color: "var(--text-on-surface-strong)",
                   }}
                 >
                   {DAYS_SHORT[d.getDay()]}
@@ -611,7 +616,9 @@ const WeekView: React.FC<{
                 <span
                   style={{
                     fontSize: 14,
-                    color: isSelected ? "#e8eaf0" : "rgba(188,194,255,0.6)",
+                    color: isSelected
+                      ? "var(--text-on-surface)"
+                      : "var(--text-on-surface-muted)",
                     fontWeight: isSelected ? 600 : 500,
                   }}
                 >
@@ -624,7 +631,9 @@ const WeekView: React.FC<{
                     borderRadius: "50%",
                     background: dominantColor,
                     boxShadow: hasEntries ? `0 0 0 3px ${dominantColor}22` : "none",
-                    border: isToday ? "1px solid rgba(188,194,255,0.4)" : "none",
+                    border: isToday
+                      ? "1px solid var(--surface-violet-icon-hover)"
+                      : "none",
                     position: "relative",
                   }}
                 >
@@ -634,8 +643,8 @@ const WeekView: React.FC<{
                         position: "absolute",
                         top: -3,
                         right: -7,
-                        background: "rgba(18,20,22,0.9)",
-                        color: "#e8eaf0",
+                        background: "var(--ring-node-bg-soft)",
+                        color: "var(--text-on-surface)",
                         fontSize: 9,
                         fontWeight: 600,
                         padding: "0 4px",
@@ -725,14 +734,17 @@ const MonthView: React.FC<{
             height: 30,
             borderRadius: "50%",
             border: "none",
-            background: "rgba(188,194,255,0.06)",
-            color: "rgba(188,194,255,0.6)",
+            background: "var(--surface-violet-medium)",
+            color: "var(--text-on-surface-muted)",
             cursor: "pointer",
           }}
         >
           ‹
         </button>
-        <p className="font-serif" style={{ fontSize: 16, color: "#e8eaf0", margin: 0 }}>
+        <p
+          className="font-serif"
+          style={{ fontSize: 16, color: "var(--text-on-surface)", margin: 0 }}
+        >
           {base.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
         </p>
         <button
@@ -743,8 +755,8 @@ const MonthView: React.FC<{
             height: 30,
             borderRadius: "50%",
             border: "none",
-            background: "rgba(188,194,255,0.06)",
-            color: "rgba(188,194,255,0.6)",
+            background: "var(--surface-violet-medium)",
+            color: "var(--text-on-surface-muted)",
             cursor: "pointer",
           }}
         >
@@ -768,10 +780,11 @@ const MonthView: React.FC<{
             style={{
               textAlign: "center",
               fontSize: 10,
-              color: "rgba(188,194,255,0.35)",
+              color: "var(--text-on-surface-muted)",
               padding: "4px 0",
               textTransform: "uppercase",
               letterSpacing: "0.4px",
+              fontWeight: 600,
             }}
           >
             {d}
@@ -798,7 +811,7 @@ const MonthView: React.FC<{
                       entries.filter((e) => e.mood === b.mood).length,
                   )[0].mood,
               ).color
-            : "rgba(188,194,255,0.2)";
+            : "var(--surface-violet-icon-hover)";
 
           return (
             <button
@@ -820,7 +833,9 @@ const MonthView: React.FC<{
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 6,
-                  color: isSelected ? "#e8eaf0" : "rgba(188,194,255,0.5)",
+                  color: isSelected
+                    ? "var(--text-on-surface)"
+                    : "var(--text-on-surface-muted)",
                   fontSize: 12,
                   fontWeight: isSelected ? 600 : 500,
                   position: "relative",
@@ -834,7 +849,9 @@ const MonthView: React.FC<{
                     borderRadius: "50%",
                     background: dominantColor,
                     boxShadow: hasEntries ? `0 0 0 3px ${dominantColor}22` : "none",
-                    outline: isToday ? "1px solid rgba(188,194,255,0.4)" : "none",
+                    outline: isToday
+                      ? "1px solid var(--surface-violet-icon-hover)"
+                      : "none",
                     position: "relative",
                   }}
                 >
@@ -844,8 +861,8 @@ const MonthView: React.FC<{
                         position: "absolute",
                         top: -3,
                         right: -7,
-                        background: "rgba(18,20,22,0.9)",
-                        color: "#e8eaf0",
+                        background: "var(--ring-node-bg-soft)",
+                        color: "var(--text-on-surface)",
                         fontSize: 9,
                         fontWeight: 600,
                         padding: "0 4px",
@@ -956,11 +973,14 @@ export const MoodHistoryCalendar: React.FC<MoodHistoryCalendarProps> = ({
               border: "none",
               outline: "none",
               fontSize: 12,
-              fontWeight: 500,
+              fontWeight: 600,
               fontFamily: "Plus Jakarta Sans, sans-serif",
               cursor: "pointer",
-              background: view === v ? "rgba(255,255,255,0.08)" : "transparent",
-              color: view === v ? "#e8eaf0" : "rgba(188,194,255,0.45)",
+              background: view === v ? "rgba(120,110,200,0.12)" : "transparent",
+              color:
+                view === v
+                  ? "var(--text-on-surface-strong)"
+                  : "var(--text-on-surface-muted)",
               transition: "all 0.2s ease",
             }}
           >

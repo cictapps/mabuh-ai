@@ -95,32 +95,8 @@ export const SupportHub: React.FC<SupportHubProps> = ({
         minHeight: "100%",
       }}
     >
-      {/* Decorative background blobs (matches journey aesthetic) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-20 top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.10),transparent_60%)] blur-3xl"
-      />
-
-      {/* Header card */}
-      <div
-        className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.10)] bg-card p-5 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl"
-        style={{
-          paddingRight: 72,
-          clipPath: `path('M 28 0 H calc(100% - 72px) A 52 52 0 0 1 calc(100% - 0px) 48 V calc(100% - 28px) A 28 28 0 0 1 calc(100% - 56px) calc(100% - 0px) H 28 A 28 28 0 0 1 0 calc(100% - 56px) V 28 A 28 28 0 0 1 28 0 Z')`,
-        }}
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.16),transparent_60%)] blur-2xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-20 -left-12 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.16),transparent_60%)] blur-2xl"
-        />
+      {/* Header */}
+      <div className="relative" style={{ paddingRight: 0 }}>
         <div className="relative">
           <p
             style={{
@@ -128,7 +104,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
               fontWeight: 600,
               letterSpacing: "0.22em",
               textTransform: "uppercase",
-              color: "#d8d4eb",
+              color: "var(--text-kicker)",
               marginBottom: 10,
             }}
           >
@@ -140,14 +116,20 @@ export const SupportHub: React.FC<SupportHubProps> = ({
               fontSize: 30,
               fontWeight: 500,
               lineHeight: 1.15,
-              color: "#eef1f6",
+              color: "var(--text-on-surface)",
               marginBottom: 4,
               letterSpacing: "-0.03em",
             }}
           >
             Support
           </h2>
-          <p style={{ fontSize: 13, color: "rgba(216,212,235,0.7)", lineHeight: 1.55 }}>
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--text-on-surface-strong)",
+              lineHeight: 1.55,
+            }}
+          >
             Find help resources or open the companion chat without leaving the app
           </p>
         </div>
@@ -160,11 +142,8 @@ export const SupportHub: React.FC<SupportHubProps> = ({
           display: "flex",
           alignItems: "flex-start",
           gap: 10,
-          padding: "12px 14px",
-          borderRadius: 18,
-          background: "rgba(255,185,84,0.08)",
-          border: "1px solid rgba(255,185,84,0.18)",
-          color: "rgba(255,225,184,0.95)",
+          padding: 0,
+          color: "var(--text-warn-soft)",
         }}
       >
         <img
@@ -186,20 +165,9 @@ export const SupportHub: React.FC<SupportHubProps> = ({
         </p>
       </div>
 
-      {/* Quick actions card — primary entry points come first. */}
-      <section
-        aria-label="Quick actions"
-        className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.10)] bg-card p-5 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl"
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(109,186,132,0.16),transparent_60%)] blur-2xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.14),transparent_60%)] blur-2xl"
-        />
-        <div className="relative flex flex-col gap-4">
+      {/* Quick actions — primary entry points come first. */}
+      <section aria-label="Quick actions" className="relative">
+        <div className="flex flex-col gap-5">
           <div>
             <p
               style={{
@@ -207,7 +175,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
                 fontWeight: 600,
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
-                color: "#d8d4eb",
+                color: "var(--text-kicker)",
                 marginBottom: 6,
               }}
             >
@@ -218,7 +186,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
               style={{
                 fontSize: 20,
                 fontWeight: 500,
-                color: "#f5f1ff",
+                color: "var(--text-on-surface)",
                 lineHeight: 1.25,
               }}
             >
@@ -229,11 +197,11 @@ export const SupportHub: React.FC<SupportHubProps> = ({
           <button
             type="button"
             onClick={() => navigate("/help")}
-            className="flex items-center gap-3 rounded-2xl border border-[rgba(188,194,255,0.12)] bg-[rgba(188,194,255,0.04)] px-4 py-3 text-left transition-all duration-200 hover:border-[rgba(188,194,255,0.22)] hover:bg-[rgba(188,194,255,0.07)] active:scale-[0.98]"
-            style={{ color: "#f5f1ff", cursor: "pointer" }}
+            className="flex items-center gap-3 rounded-2xl px-2 py-2 text-left transition-all duration-200 hover:bg-[var(--surface-violet-medium)] active:scale-[0.98]"
+            style={{ color: "var(--text-on-surface)", cursor: "pointer" }}
           >
             <span
-              className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(188,194,255,0.16)] text-primary"
+              className="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--surface-violet-icon)] text-primary"
               aria-hidden
             >
               <MapPin size={18} />
@@ -242,18 +210,18 @@ export const SupportHub: React.FC<SupportHubProps> = ({
               <span className="block text-sm font-semibold text-foreground">
                 Find help nearby
               </span>
-              <span className="mt-0.5 block text-[12px] leading-relaxed text-[#d8d4eb]">
+              <span className="mt-0.5 block text-[12px] leading-relaxed text-[color:var(--text-kicker)]">
                 Verified clinics, hotlines, and nearby resources.
               </span>
             </span>
-            <ArrowUpRight size={16} className="text-[#d8d4eb]" />
+            <ArrowUpRight size={16} className="text-[color:var(--text-kicker)]" />
           </button>
 
           <button
             type="button"
             onClick={onOpenChat}
-            className="flex items-center gap-3 rounded-2xl border border-[rgba(255,185,84,0.22)] bg-[rgba(255,185,84,0.10)] px-4 py-3 text-left transition-all duration-200 hover:border-[rgba(255,185,84,0.32)] hover:bg-[rgba(255,185,84,0.16)] active:scale-[0.98]"
-            style={{ color: "#f5f1ff", cursor: "pointer" }}
+            className="flex items-center gap-3 rounded-2xl px-2 py-2 text-left transition-all duration-200 hover:bg-[rgba(255,185,84,0.10)] active:scale-[0.98]"
+            style={{ color: "var(--text-on-surface)", cursor: "pointer" }}
           >
             <span
               className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(255,185,84,0.18)] text-tertiary"
@@ -265,7 +233,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
               <span className="block text-sm font-semibold text-foreground">
                 Open companion chat
               </span>
-              <span className="mt-0.5 block text-[12px] leading-relaxed text-[#ffd99a]">
+              <span className="mt-0.5 block text-[12px] leading-relaxed text-[color:var(--tertiary)]">
                 Talk to Mabuh-ai for private, conversational support.
               </span>
             </span>
@@ -274,29 +242,13 @@ export const SupportHub: React.FC<SupportHubProps> = ({
         </div>
       </section>
 
-      {/* Crisis safety card — high visibility, comes after the primary actions. */}
-      <section
-        aria-label="Crisis safety"
-        className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(255,123,123,0.22)] p-5 backdrop-blur-xl"
-        style={{
-          background:
-            "linear-gradient(160deg, rgba(255,123,123,0.10), rgba(255,185,84,0.06))",
-          boxShadow: "0 28px 80px -40px rgba(255,123,123,0.45)",
-        }}
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,123,123,0.20),transparent_60%)] blur-2xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.16),transparent_60%)] blur-2xl"
-        />
-        <div className="relative flex flex-col gap-3">
+      {/* Crisis safety — high visibility, comes after the primary actions. */}
+      <section aria-label="Crisis safety" className="relative">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <span
               className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(255,123,123,0.18)]"
-              style={{ color: "rgba(255,170,170,0.95)" }}
+              style={{ color: "var(--icon-rose)" }}
               aria-hidden
             >
               <ShieldAlert size={18} />
@@ -306,7 +258,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
                 style={{
                   fontSize: 14,
                   fontWeight: 700,
-                  color: "rgba(255,210,210,0.98)",
+                  color: "var(--text-danger-strong)",
                   lineHeight: 1.2,
                   margin: 0,
                 }}
@@ -316,7 +268,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
               <p
                 style={{
                   fontSize: 12,
-                  color: "rgba(255,200,200,0.75)",
+                  color: "var(--text-danger-soft)",
                   lineHeight: 1.45,
                   marginTop: 2,
                 }}
@@ -326,7 +278,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {HOTLINES.map((h) => (
               <a
                 key={h.key}
@@ -334,25 +286,24 @@ export const SupportHub: React.FC<SupportHubProps> = ({
                 onClick={(e) => {
                   if (h.tel === "#") e.preventDefault();
                 }}
-                className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/5 px-3 py-2.5 text-[13px] transition-colors duration-200 hover:bg-white/10"
+                className="flex items-center gap-3 rounded-2xl px-2 py-2 text-[13px] transition-colors duration-200 hover:bg-[rgba(255,123,123,0.06)]"
                 style={{
-                  borderColor: "rgba(255,255,255,0.08)",
-                  color: "#f5e5e5",
+                  color: "var(--text-on-surface)",
                   textDecoration: "none",
                   opacity: h.unverified ? 0.85 : 1,
                 }}
               >
-                <Phone size={14} color="rgba(255,170,170,0.85)" />
+                <Phone size={14} color="var(--icon-rose)" />
                 <span className="min-w-0 flex-1">
                   <span
                     className="block font-semibold"
-                    style={{ color: "#f7e4e4", paddingRight: 8 }}
+                    style={{ color: "var(--text-danger-strong)", paddingRight: 8 }}
                   >
                     {h.label}
                   </span>
                   <span
                     className="mt-0.5 block text-[11px]"
-                    style={{ color: "rgba(255,200,200,0.65)", paddingRight: 8 }}
+                    style={{ color: "var(--text-danger-muted)", paddingRight: 8 }}
                   >
                     {h.detail}
                   </span>
@@ -368,7 +319,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
                       fontSize: 14,
                       fontWeight: 700,
                       letterSpacing: "0.4px",
-                      color: "rgba(255,210,210,0.98)",
+                      color: "var(--text-danger-strong)",
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -381,7 +332,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
                         fontWeight: 500,
                         letterSpacing: "0.12em",
                         textTransform: "uppercase",
-                        color: "rgba(255,200,200,0.7)",
+                        color: "var(--text-danger-muted)",
                         whiteSpace: "nowrap",
                       }}
                     >

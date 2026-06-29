@@ -39,33 +39,150 @@
 
 :root {
   --radius: 1rem;
-  --background: #121416;
-  --foreground: #f5f1ff;
-  --card: rgb(27 30 39 / 88%);
-  --card-foreground: #f8f4ff;
-  --popover: #181b22;
-  --popover-foreground: #f8f4ff;
-  --primary: #bcc2ff;
-  --primary-foreground: #171a27;
-  --secondary: #d4bbff;
-  --secondary-foreground: #211931;
-  --tertiary: #ffb954;
+  --background: #f5efe6;
+  --foreground: #1f1a2c;
+  --card: rgb(255 252 248 / 88%);
+  --card-foreground: #1f1a2c;
+  --popover: rgb(252 248 240 / 96%);
+  --popover-foreground: #1f1a2c;
+  --primary: #5e5aa0;
+  --primary-foreground: #f8f4ff;
+  --secondary: #7d4ea8;
+  --secondary-foreground: #1f1731;
+  --tertiary: #8c5e1f;
   --tertiary-foreground: #2a1d07;
-  --muted: #1b1f28;
-  --muted-foreground: #beb8d3;
-  --accent: #262b36;
-  --accent-foreground: #f5f1ff;
-  --destructive: #ff7b7b;
-  --destructive-foreground: #22090b;
-  --success: #6dba84;
-  --success-foreground: #0f121a;
-  --success-soft: rgba(109, 186, 132, 0.18);
-  --border: rgb(245 241 255 / 8%);
-  --input: rgb(245 241 255 / 14%);
-  --ring: rgb(255 185 84 / 45%);
-  --surface-low: rgb(29 33 43 / 72%);
-  --surface-high: rgb(36 40 52 / 82%);
-  --surface-highest: rgb(44 49 63 / 92%);
+  --muted: #ebe5dd;
+  --muted-foreground: #4a3c63;
+  --accent: #e3dccf;
+  --accent-foreground: #1f1a2c;
+  --destructive: #a04444;
+  --destructive-foreground: #fdf2f2;
+  --success: #356c48;
+  --success-foreground: #f5f1e8;
+  --success-soft: rgba(74, 148, 102, 0.16);
+  --border: rgba(74, 60, 90, 0.62);
+  --input: rgba(74, 60, 90, 0.72);
+  --ring: rgba(140, 94, 31, 0.75);
+  --surface-low: rgb(255 252 248 / 72%);
+  --surface-high: rgb(252 248 240 / 84%);
+  --surface-highest: rgb(248 244 234 / 94%);
+
+  /* CheckIn screen tokens — light mode.
+     Paired with .dark equivalents below so the same var(--token)
+     reference works in either theme without per-component branching.
+     Text tokens use solid hexes (not rgba) so contrast against the
+     cream background --background: #f5efe6 hits WCAG AA (≥4.5:1)
+     for body copy and AAA (≥7:1) for primary text. */
+  --text-on-surface: #1f1a2c;
+  --text-on-surface-strong: #14101f;
+  --text-on-surface-muted: #4a3c63;
+  --text-on-surface-soft: #5a4870;
+  --text-on-surface-softer: #6a5a80;
+  --text-on-surface-softest: #6e5e84;
+  --text-on-surface-faint: #746486;
+  --text-on-surface-ghost: #a094b0;
+  --text-kicker: #4a3c63;
+
+  /* Accent text + icon tokens. These are the theme-aware equivalents of
+     the dark-mode-only rgba() values that used to be inlined in screens
+     like SupportHub, Settings, Onboarding, ReviewHub, and Analytics.
+     Light values are deep, AA-grade colours that sit on --background
+     (#f5efe6). Dark values are the soft warm/rose/sage tones previously
+     hard-coded for the twilight surface. */
+  --text-warn: #6b4514;
+  --text-warn-strong: #3a2810;
+  --text-warn-soft: #8c5e1f;
+  --text-warn-quote: #6b4514;
+
+  --text-danger: #a04444;
+  --text-danger-strong: #4a1f1f;
+  --text-danger-soft: #5a2a2a;
+  --text-danger-muted: #7a3a3a;
+
+  --text-success-strong: #2c5a3a;
+
+  --icon-warm: #8c5e1f;
+  --icon-rose: #a04444;
+  --icon-success: #2c5a3a;
+
+  --surface-violet-low: rgba(120, 110, 200, 0.06);
+  --surface-violet-medium: rgba(120, 110, 200, 0.1);
+  --surface-violet-high: rgba(120, 110, 200, 0.14);
+  --surface-violet-higher: rgba(120, 110, 200, 0.18);
+  --surface-violet-icon: rgba(120, 110, 200, 0.18);
+  --surface-violet-icon-hover: rgba(120, 110, 200, 0.28);
+
+  --border-violet-faint: rgba(74, 60, 90, 0.58);
+  --border-violet-soft: rgba(74, 60, 90, 0.65);
+  --border-violet-medium: rgba(74, 60, 90, 0.75);
+  --border-violet-high: rgba(74, 60, 90, 0.85);
+  --border-violet-active: rgba(74, 60, 90, 0.95);
+
+  --surface-fuchsia-low: rgba(168, 125, 204, 0.1);
+  --surface-fuchsia-medium: rgba(168, 125, 204, 0.16);
+  --surface-fuchsia-text: #7d4ea8;
+
+  /* Warm / amber-tinted notification panel tokens.
+     Light uses deep amber-brown for AA-grade readability on cream;
+     dark uses the soft warm amber already used in dark surfaces. */
+  --surface-warm-low: rgba(255, 185, 84, 0.18);
+  --surface-warm-medium: rgba(255, 185, 84, 0.28);
+  --border-warm: rgba(140, 94, 31, 0.55);
+  --border-warm-strong: rgba(140, 94, 31, 0.8);
+  --text-on-warm: #6b4514;
+  --text-on-warm-strong: #3a2810;
+  --icon-warm: #8c5e1f;
+
+  /* Crisis panel — light mode. Uses its own dark-amber background so
+     the panel reads as a distinct, attention-grabbing surface
+     regardless of the page theme. */
+  --crisis-concern-bg: linear-gradient(
+    160deg,
+    rgba(255, 185, 84, 0.32),
+    rgba(140, 94, 31, 0.18)
+  );
+  --crisis-concern-border: rgba(140, 94, 31, 0.55);
+  --crisis-concern-title: #3a2810;
+  --crisis-concern-note: #4a3014;
+  --crisis-concern-icon-bg: rgba(255, 185, 84, 0.45);
+  --crisis-concern-icon: #6b4514;
+  --crisis-imminent-bg: linear-gradient(
+    160deg,
+    rgba(201, 90, 90, 0.28),
+    rgba(255, 123, 123, 0.22)
+  );
+  --crisis-imminent-border: rgba(160, 68, 68, 0.55);
+  --crisis-imminent-title: #4a1f1f;
+  --crisis-imminent-note: #5a2a2a;
+  --crisis-imminent-icon-bg: rgba(255, 123, 123, 0.35);
+  --crisis-imminent-icon: #a04444;
+  --crisis-text: #1f1a2c;
+  --crisis-dismiss: #6b4514;
+  --crisis-line-bg: rgba(255, 252, 248, 0.7);
+  --crisis-line-border: rgba(140, 94, 31, 0.3);
+  --crisis-line-text: #1f1a2c;
+  --crisis-line-meta: #5a3a10;
+  --crisis-footnote: #5a4870;
+  --shadow-crisis-concern: 0 24px 60px -36px rgba(140, 94, 31, 0.4);
+  --shadow-crisis-imminent: 0 28px 80px -36px rgba(160, 68, 68, 0.45);
+
+  --ring-track: rgba(74, 60, 90, 0.22);
+  --ring-track-inner: rgba(74, 60, 90, 0.14);
+  --ring-tick-strong: rgba(74, 60, 90, 0.45);
+  --ring-tick-soft: rgba(74, 60, 90, 0.22);
+  --ring-center-fill: rgb(255 252 248 / 96%);
+  --ring-node-bg-strong: rgb(255 252 248 / 92%);
+  --ring-node-bg-soft: rgb(255 252 248 / 78%);
+
+  --shadow-card: 0 24px 60px -32px rgba(74, 60, 90, 0.28);
+  --shadow-card-soft: 0 18px 50px -32px rgba(74, 60, 90, 0.22);
+  --shadow-glow-active: 0 14px 32px -18px rgba(120, 110, 200, 0.55);
+
+  --sticky-save-fade: linear-gradient(
+    to top,
+    rgb(245 239 230 / 0.98) 60%,
+    rgb(245 239 230 / 0) 100%
+  );
 }
 
 .dark {
@@ -90,15 +207,120 @@
   --success: #6dba84;
   --success-foreground: #0f121a;
   --success-soft: rgba(109, 186, 132, 0.18);
-  --border: rgb(245 241 255 / 8%);
-  --input: rgb(245 241 255 / 14%);
-  --ring: rgb(255 185 84 / 45%);
+  --border: rgb(245 241 255 / 35%);
+  --input: rgb(245 241 255 / 45%);
+  --ring: rgb(255 185 84 / 65%);
   --surface-low: rgb(29 33 43 / 72%);
   --surface-high: rgb(36 40 52 / 82%);
   --surface-highest: rgb(44 49 63 / 92%);
+
+  /* CheckIn screen tokens — dark mode (mirrors the light values above). */
+  --text-on-surface: #eef1f6;
+  --text-on-surface-strong: #f8f4ff;
+  --text-on-surface-muted: #bebad0;
+  --text-on-surface-soft: #a8a4b8;
+  --text-on-surface-softer: #8a8698;
+  --text-on-surface-softest: #888494;
+  --text-on-surface-faint: #847892;
+  --text-on-surface-ghost: #3a3645;
+  --text-kicker: #d8d4eb;
+
+  /* Dark-mode counterparts of the accent text tokens defined in :root. */
+  --text-warn: rgba(255, 217, 154, 0.95);
+  --text-warn-strong: #fff0c8;
+  --text-warn-soft: rgba(255, 225, 184, 0.85);
+  --text-warn-quote: rgba(255, 217, 154, 0.82);
+
+  --text-danger: rgba(255, 170, 170, 0.95);
+  --text-danger-strong: rgba(255, 210, 210, 0.98);
+  --text-danger-soft: rgba(255, 200, 200, 0.78);
+  --text-danger-muted: rgba(255, 200, 200, 0.65);
+
+  --text-success-strong: rgba(141, 212, 164, 1);
+
+  --icon-warm: rgba(255, 185, 84, 0.9);
+  --icon-rose: rgba(255, 170, 170, 0.95);
+  --icon-success: rgba(141, 212, 164, 1);
+
+  --surface-violet-low: rgba(188, 194, 255, 0.04);
+  --surface-violet-medium: rgba(188, 194, 255, 0.07);
+  --surface-violet-high: rgba(188, 194, 255, 0.1);
+  --surface-violet-higher: rgba(188, 194, 255, 0.12);
+  --surface-violet-icon: rgba(188, 194, 255, 0.16);
+  --surface-violet-icon-hover: rgba(188, 194, 255, 0.24);
+
+  --border-violet-faint: rgba(188, 194, 255, 0.45);
+  --border-violet-soft: rgba(188, 194, 255, 0.52);
+  --border-violet-medium: rgba(188, 194, 255, 0.62);
+  --border-violet-high: rgba(188, 194, 255, 0.75);
+  --border-violet-active: rgba(188, 194, 255, 0.9);
+
+  --surface-fuchsia-low: rgba(212, 187, 255, 0.12);
+  --surface-fuchsia-medium: rgba(212, 187, 255, 0.2);
+  --surface-fuchsia-text: #d4bbff;
+
+  /* Warm / amber notification panel tokens (dark mode). */
+  --surface-warm-low: rgba(255, 185, 84, 0.08);
+  --surface-warm-medium: rgba(255, 185, 84, 0.14);
+  --border-warm: rgba(255, 185, 84, 0.28);
+  --border-warm-strong: rgba(255, 185, 84, 0.45);
+  --text-on-warm: rgba(255, 225, 170, 0.95);
+  --text-on-warm-strong: #fff0c8;
+  --icon-warm: rgba(255, 185, 84, 0.9);
+
+  /* Crisis panel — dark mode. */
+  --crisis-concern-bg: linear-gradient(
+    160deg,
+    rgba(255, 123, 123, 0.18),
+    rgba(255, 185, 84, 0.1)
+  );
+  --crisis-concern-border: rgba(255, 185, 84, 0.32);
+  --crisis-concern-title: rgba(255, 225, 184, 1);
+  --crisis-concern-note: rgba(255, 225, 184, 0.85);
+  --crisis-concern-icon-bg: rgba(255, 185, 84, 0.22);
+  --crisis-concern-icon: rgba(255, 217, 154, 1);
+  --crisis-imminent-bg: linear-gradient(
+    160deg,
+    rgba(255, 123, 123, 0.2),
+    rgba(255, 185, 84, 0.1)
+  );
+  --crisis-imminent-border: rgba(255, 123, 123, 0.36);
+  --crisis-imminent-title: rgba(255, 210, 210, 1);
+  --crisis-imminent-note: rgba(255, 200, 200, 0.85);
+  --crisis-imminent-icon-bg: rgba(255, 123, 123, 0.22);
+  --crisis-imminent-icon: rgba(255, 170, 170, 1);
+  --crisis-text: #f5e5e5;
+  --crisis-dismiss: rgba(255, 255, 255, 0.55);
+  --crisis-line-bg: rgba(255, 255, 255, 0.06);
+  --crisis-line-border: rgba(255, 255, 255, 0.08);
+  --crisis-line-text: #f7eaea;
+  --crisis-line-meta: rgba(255, 255, 255, 0.65);
+  --crisis-footnote: rgba(255, 255, 255, 0.5);
+  --shadow-crisis-concern: 0 24px 60px -40px rgba(255, 185, 84, 0.4);
+  --shadow-crisis-imminent: 0 28px 80px -40px rgba(255, 123, 123, 0.45);
+
+  --ring-track: rgba(216, 212, 235, 0.22);
+  --ring-track-inner: rgba(216, 212, 235, 0.12);
+  --ring-tick-strong: rgba(216, 212, 235, 0.5);
+  --ring-tick-soft: rgba(216, 212, 235, 0.25);
+  --ring-center-fill: rgba(14, 16, 24, 0.92);
+
+  --shadow-card: 0 28px 80px -40px rgba(8, 10, 18, 0.85);
+  --shadow-card-soft: 0 18px 50px -32px rgba(8, 10, 18, 0.85);
+
+  --sticky-save-fade: linear-gradient(
+    to top,
+    rgba(18, 20, 22, 0.98) 60%,
+    rgba(18, 20, 22, 0) 100%
+  );
 }
 
 ::selection {
+  background: rgb(120 110 200 / 30%);
+  color: #1a1530;
+}
+
+.dark ::selection {
   background: rgb(188 194 255 / 35%);
   color: #0f121a;
 }
@@ -130,6 +352,10 @@ input[type="password"]::-ms-clear {
   }
 
   html {
+    color-scheme: light;
+  }
+
+  html.dark {
     color-scheme: dark;
   }
 
@@ -137,11 +363,21 @@ input[type="password"]::-ms-clear {
     @apply min-h-screen bg-background text-foreground antialiased;
     font-family: var(--font-sans);
     background-image:
+      radial-gradient(circle at top left, rgb(120 110 200 / 14%), transparent 45%),
+      radial-gradient(circle at top right, rgb(170 130 200 / 10%), transparent 40%),
+      radial-gradient(circle at bottom center, rgb(212 154 60 / 10%), transparent 35%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  html.dark body {
+    background-image:
       radial-gradient(circle at top left, rgb(188 194 255 / 18%), transparent 45%),
       radial-gradient(circle at top right, rgb(212 187 255 / 12%), transparent 40%),
       radial-gradient(circle at bottom center, rgb(255 185 84 / 10%), transparent 35%);
-    background-attachment: fixed;
-    overflow-x: hidden;
   }
 
   #root {
@@ -163,15 +399,23 @@ input[type="password"]::-ms-clear {
     padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
       max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
     overflow: hidden;
-    background-color: #121416;
+    background-color: var(--background);
+    background-image:
+      radial-gradient(circle at top left, rgb(120 110 200 / 14%), transparent 45%),
+      radial-gradient(circle at top right, rgb(170 130 200 / 10%), transparent 40%),
+      radial-gradient(circle at bottom center, rgb(212 154 60 / 10%), transparent 35%);
+    background-attachment: fixed;
+    transition:
+      opacity 480ms ease,
+      visibility 0s linear 480ms,
+      background-color 0.3s ease;
+  }
+
+  html.dark #splash {
     background-image:
       radial-gradient(circle at top left, rgb(188 194 255 / 18%), transparent 45%),
       radial-gradient(circle at top right, rgb(212 187 255 / 12%), transparent 40%),
       radial-gradient(circle at bottom center, rgb(255 185 84 / 10%), transparent 35%);
-    background-attachment: fixed;
-    transition:
-      opacity 480ms ease,
-      visibility 0s linear 480ms;
   }
 
   #splash .splash-glow {
@@ -187,6 +431,10 @@ input[type="password"]::-ms-clear {
     height: 18rem;
     top: -4rem;
     right: -4rem;
+    background: radial-gradient(circle, rgba(212, 154, 60, 0.16), transparent 65%);
+  }
+
+  html.dark #splash .splash-glow--amber {
     background: radial-gradient(circle, rgba(255, 185, 84, 0.18), transparent 65%);
   }
 
@@ -195,6 +443,10 @@ input[type="password"]::-ms-clear {
     height: 20rem;
     bottom: -6rem;
     left: -6rem;
+    background: radial-gradient(circle, rgba(120, 110, 200, 0.18), transparent 65%);
+  }
+
+  html.dark #splash .splash-glow--lilac {
     background: radial-gradient(circle, rgba(188, 194, 255, 0.2), transparent 65%);
   }
 
@@ -215,14 +467,14 @@ input[type="password"]::-ms-clear {
     font-weight: 500;
     letter-spacing: -0.015em;
     line-height: 1.2;
-    color: rgba(238, 241, 246, 0.95);
+    color: var(--foreground);
     background-image: linear-gradient(
       90deg,
-      rgba(188, 194, 255, 0.55) 0%,
-      rgba(238, 241, 246, 1) 30%,
-      rgba(255, 220, 180, 0.95) 50%,
-      rgba(212, 187, 255, 1) 70%,
-      rgba(188, 194, 255, 0.55) 100%
+      rgba(120, 110, 200, 0.55) 0%,
+      rgba(42, 36, 56, 1) 30%,
+      rgba(212, 154, 60, 0.95) 50%,
+      rgba(168, 125, 204, 1) 70%,
+      rgba(120, 110, 200, 0.55) 100%
     );
     background-size: 220% 100%;
     background-position: 100% 50%;
@@ -234,6 +486,18 @@ input[type="password"]::-ms-clear {
     will-change: background-position;
   }
 
+  html.dark #splash .splash-wordmark {
+    color: rgba(238, 241, 246, 0.95);
+    background-image: linear-gradient(
+      90deg,
+      rgba(188, 194, 255, 0.55) 0%,
+      rgba(238, 241, 246, 1) 30%,
+      rgba(255, 220, 180, 0.95) 50%,
+      rgba(212, 187, 255, 1) 70%,
+      rgba(188, 194, 255, 0.55) 100%
+    );
+  }
+
   #splash .splash-status {
     position: relative;
     margin: 0.25rem 0 0;
@@ -243,11 +507,15 @@ input[type="password"]::-ms-clear {
     line-height: 1.2;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(216, 212, 235, 0.6);
+    color: rgba(74, 60, 90, 0.65);
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     animation: splash-status-breathe 2.2s ease-in-out infinite;
+  }
+
+  html.dark #splash .splash-status {
+    color: rgba(216, 212, 235, 0.6);
   }
 
   #splash .splash-dots {
@@ -260,8 +528,12 @@ input[type="password"]::-ms-clear {
     width: 3px;
     height: 3px;
     border-radius: 50%;
-    background: rgba(188, 194, 255, 0.85);
+    background: rgba(120, 110, 200, 0.85);
     animation: splash-dot 1.2s ease-in-out infinite;
+  }
+
+  html.dark #splash .splash-dots span {
+    background: rgba(188, 194, 255, 0.85);
   }
 
   #splash .splash-dots span:nth-child(2) {
@@ -278,6 +550,22 @@ input[type="password"]::-ms-clear {
   }
 
   @keyframes splash-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      filter: drop-shadow(0 18px 36px rgba(120, 110, 200, 0.16));
+    }
+    50% {
+      transform: scale(1.05);
+      filter: drop-shadow(0 22px 48px rgba(120, 110, 200, 0.28));
+    }
+  }
+
+  html.dark #splash .splash-logo {
+    animation-name: splash-pulse-dark;
+  }
+
+  @keyframes splash-pulse-dark {
     0%,
     100% {
       transform: scale(1);
@@ -774,15 +1062,23 @@ input[type="password"]::-ms-clear {
 .bottom-nav__surface {
   position: absolute;
   inset: 0;
-  border: 1px solid rgba(188 194 255 / 0.12);
+  border: 1px solid rgba(74 60 90 / 0.18);
   border-radius: inherit;
-  background: rgba(18 20 24 / 0.94);
+  background: var(--card);
   box-shadow:
-    inset 0 1px 0 rgba(255 255 255 / 0.025),
-    0 12px 30px -20px rgba(4 6 14 / 0.9);
+    inset 0 1px 0 rgba(255 255 255 / 0.6),
+    0 18px 40px -22px rgba(74 60 90 / 0.35);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   z-index: 0;
+}
+
+html.dark .bottom-nav__surface {
+  border-color: rgba(188 194 255 / 0.14);
+  background: var(--card);
+  box-shadow:
+    inset 0 1px 0 rgba(255 255 255 / 0.04),
+    0 18px 40px -22px rgba(0 0 0 / 0.7);
 }
 
 .bottom-nav__items {
@@ -797,7 +1093,7 @@ input[type="password"]::-ms-clear {
   appearance: none;
   border: 0;
   background: transparent;
-  color: rgba(216 212 235 / 0.78);
+  color: rgba(74 60 90 / 0.72);
   cursor: pointer;
   display: flex;
   flex: 1 1 0;
@@ -829,18 +1125,32 @@ input[type="password"]::-ms-clear {
   transform: scale(0.93);
 }
 
-.bottom-nav__item--active {
+html.dark .bottom-nav__item {
+  color: rgba(216 212 235 / 0.78);
+}
+
+.bottom-nav__item--active,
+html.dark .bottom-nav__item--active {
   flex-grow: 2.35;
   color: var(--primary-foreground);
   background: linear-gradient(
     90deg,
-    rgb(188 194 255) 0%,
-    rgb(204 188 255) 52%,
-    rgb(188 194 255) 100%
+    var(--primary) 0%,
+    var(--secondary) 52%,
+    var(--primary) 100%
   );
+}
+
+.bottom-nav__item--active {
+  box-shadow:
+    inset 0 1px 0 rgba(255 255 255 / 0.32),
+    0 8px 20px -14px rgba(120 110 200 / 0.9);
+}
+
+html.dark .bottom-nav__item--active {
   box-shadow:
     inset 0 1px 0 rgba(255 255 255 / 0.24),
-    0 8px 20px -14px rgba(188 194 255 / 0.9);
+    0 8px 20px -14px rgba(188 194 255 / 0.85);
 }
 
 .bottom-nav__icon {
@@ -900,7 +1210,11 @@ input[type="password"]::-ms-clear {
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .bottom-nav__surface {
-    background: rgb(18 20 24);
+    background: rgb(255 252 248);
+  }
+
+  html.dark .bottom-nav__surface {
+    background: rgb(27 30 39);
   }
 }
 
@@ -954,12 +1268,22 @@ input[type="password"]::-ms-clear {
     transform 0.2s ease,
     box-shadow 0.2s ease,
     border-color 0.2s ease;
-  border: 1px solid rgba(188, 194, 255, 0.08);
+  border: 1px solid rgba(74 60 90 / 0.1);
+  box-shadow: 0 18px 50px -30px rgba(74 60 90 / 0.18);
+}
+
+html.dark .interaction-card {
+  border-color: rgba(188, 194, 255, 0.08);
   box-shadow: 0 18px 50px -30px rgba(8, 10, 18, 0.8);
 }
 
 .interaction-card:hover {
   transform: translateY(-2px);
+  border-color: rgba(212, 154, 60, 0.3);
+  box-shadow: 0 22px 60px -32px rgba(212, 154, 60, 0.3);
+}
+
+html.dark .interaction-card:hover {
   border-color: rgba(255, 185, 84, 0.2);
   box-shadow: 0 22px 60px -32px rgba(255, 185, 84, 0.35);
 }
@@ -972,10 +1296,20 @@ input[type="password"]::-ms-clear {
   border-radius: 20px;
   background: linear-gradient(
     135deg,
+    rgba(120, 110, 200, 0.18),
+    rgba(212, 154, 60, 0.14)
+  );
+  border: 1px solid rgba(74 60 90 / 0.08);
+  box-shadow: 0 24px 60px -40px rgba(74 60 90 / 0.2);
+}
+
+html.dark .journal-hero {
+  background: linear-gradient(
+    135deg,
     rgba(188, 194, 255, 0.22),
     rgba(255, 185, 84, 0.16)
   );
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 24px 60px -40px rgba(15, 18, 26, 0.85);
 }
 
@@ -983,12 +1317,19 @@ input[type="password"]::-ms-clear {
   padding: 18px 20px;
   border-radius: 20px;
   background:
-    radial-gradient(circle at top right, rgba(255, 185, 84, 0.12), transparent 55%),
-    rgba(188, 194, 255, 0.05);
-  border: 1px solid rgba(188, 194, 255, 0.1);
+    radial-gradient(circle at top right, rgba(212, 154, 60, 0.12), transparent 55%),
+    rgba(120, 110, 200, 0.05);
+  border: 1px solid rgba(74 60 90 / 0.12);
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+html.dark .journal-compose {
+  background:
+    radial-gradient(circle at top right, rgba(255, 185, 84, 0.12), transparent 55%),
+    rgba(188, 194, 255, 0.05);
+  border-color: rgba(188, 194, 255, 0.1);
 }
 
 .journal-timeline {
@@ -1005,6 +1346,10 @@ input[type="password"]::-ms-clear {
   top: 8px;
   bottom: 8px;
   width: 1px;
+  background: linear-gradient(180deg, rgba(120, 110, 200, 0.4), transparent 85%);
+}
+
+html.dark .journal-timeline::before {
   background: linear-gradient(180deg, rgba(188, 194, 255, 0.4), transparent 85%);
 }
 
@@ -1020,6 +1365,11 @@ input[type="password"]::-ms-clear {
   height: 12px;
   border-radius: 50%;
   margin-top: 12px;
+  background: rgba(212, 154, 60, 0.8);
+  box-shadow: 0 0 0 4px rgba(212, 154, 60, 0.15);
+}
+
+html.dark .journal-dot {
   background: rgba(255, 185, 84, 0.8);
   box-shadow: 0 0 0 4px rgba(255, 185, 84, 0.15);
 }
@@ -1027,10 +1377,15 @@ input[type="password"]::-ms-clear {
 .journal-card {
   padding: 14px 16px;
   border-radius: 16px;
-  background: rgba(188, 194, 255, 0.04);
-  border: 1px solid rgba(188, 194, 255, 0.08);
+  background: rgba(120, 110, 200, 0.04);
+  border: 1px solid rgba(74 60 90 / 0.1);
   display: flex;
   flex-direction: column;
   gap: 8px;
   animation: floatUp 0.35s ease-out;
+}
+
+html.dark .journal-card {
+  background: rgba(188, 194, 255, 0.04);
+  border-color: rgba(188, 194, 255, 0.08);
 }

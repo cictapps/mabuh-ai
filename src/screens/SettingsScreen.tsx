@@ -15,9 +15,12 @@ import {
   LogOut,
   Mail,
   Minus,
+  Monitor,
+  Moon,
   PlayCircle,
   Plus,
   Save,
+  Sun,
   Trash2,
   User as UserIcon,
   Users,
@@ -58,6 +61,8 @@ import { AiConsentSettings } from "../components/shared/AiConsentSettings";
 import type { ReminderStatus } from "../lib/reminders";
 import { openExternal } from "../lib/openExternal";
 import type { SyncStatus } from "../lib/db/moodRepository";
+import { useThemePreference } from "../hooks/useThemePreference";
+import type { ThemePreference } from "../lib/theme";
 
 interface SettingsScreenProps {
   reminder: ReminderPreferences;
@@ -129,7 +134,7 @@ function ToggleRow({
           style={{
             display: "block",
             fontSize: 14,
-            color: "#e8eaf0",
+            color: "var(--text-on-surface)",
             fontWeight: 500,
           }}
         >
@@ -140,7 +145,7 @@ function ToggleRow({
             style={{
               display: "block",
               fontSize: 12,
-              color: "rgba(220,224,255,0.7)",
+              color: "var(--text-on-surface-strong)",
               marginTop: 2,
               lineHeight: 1.5,
             }}
@@ -156,7 +161,7 @@ function ToggleRow({
           width: 42,
           height: 24,
           borderRadius: 999,
-          background: checked ? "rgba(255,185,84,0.85)" : "rgba(188,194,255,0.18)",
+          background: checked ? "rgba(255,185,84,0.85)" : "var(--surface-violet-icon)",
           transition: "background 0.2s ease",
           flexShrink: 0,
         }}
@@ -169,7 +174,7 @@ function ToggleRow({
             width: 20,
             height: 20,
             borderRadius: "50%",
-            background: checked ? "#121416" : "#e8eaf0",
+            background: checked ? "var(--background)" : "var(--text-on-surface)",
             transition: "left 0.2s ease, background 0.2s ease",
             boxShadow: "0 4px 10px -4px rgba(0,0,0,0.5)",
           }}
@@ -197,12 +202,10 @@ function Section({
       style={{
         position: "relative",
         zIndex: 1,
-        padding: "18px 20px",
-        borderRadius: 20,
-        background: "rgba(188,194,255,0.04)",
+        padding: 0,
         display: "flex",
         flexDirection: "column",
-        gap: 12,
+        gap: 14,
       }}
     >
       <header
@@ -220,8 +223,7 @@ function Section({
             width: 32,
             height: 32,
             borderRadius: 12,
-            background: "rgba(255,185,84,0.16)",
-            color: "#ffd99a",
+            color: "var(--tertiary)",
           }}
         >
           {icon}
@@ -230,7 +232,7 @@ function Section({
           className="font-serif"
           style={{
             fontSize: 18,
-            color: "#eef1f6",
+            color: "var(--text-on-surface)",
             fontWeight: 500,
             letterSpacing: "-0.01em",
           }}
@@ -330,7 +332,7 @@ function ConfirmDialog({
         alignItems: "center",
         justifyContent: "center",
         padding: 16,
-        background: "rgba(8,10,18,0.78)",
+        background: "rgba(74, 60, 90, 0.28)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
         overscrollBehavior: "contain",
@@ -343,7 +345,7 @@ function ConfirmDialog({
           padding: "22px 22px 18px",
           borderRadius: 20,
           background: "rgba(27,30,39,0.98)",
-          border: "1px solid rgba(188,194,255,0.10)",
+          border: "1px solid var(--border-violet-soft)",
           display: "flex",
           flexDirection: "column",
           gap: 12,
@@ -353,14 +355,14 @@ function ConfirmDialog({
       >
         <h3
           className="font-serif"
-          style={{ fontSize: 20, color: "#eef1f6", fontWeight: 500 }}
+          style={{ fontSize: 20, color: "var(--text-on-surface)", fontWeight: 500 }}
         >
           {title}
         </h3>
         <p
           style={{
             fontSize: 13,
-            color: "rgba(188,194,255,0.6)",
+            color: "var(--surface-violet-icon-hover)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -466,10 +468,6 @@ function ReminderTimePicker({
     >
       <div
         style={{
-          borderRadius: 20,
-          border: "1px solid rgba(188,194,255,0.10)",
-          background: "rgba(188,194,255,0.035)",
-          padding: 14,
           display: "flex",
           flexDirection: "column",
           gap: 12,
@@ -493,7 +491,7 @@ function ReminderTimePicker({
                 fontWeight: 600,
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "rgba(216,212,235,0.55)",
+                color: "var(--text-on-surface-strong)",
               }}
             >
               {randomEnabled ? "Random check-ins" : "Reminder time"}
@@ -503,7 +501,7 @@ function ReminderTimePicker({
                 display: "block",
                 marginTop: 3,
                 fontSize: 12,
-                color: "rgba(216,212,235,0.62)",
+                color: "var(--text-on-surface-strong)",
                 lineHeight: 1.45,
               }}
             >
@@ -518,7 +516,7 @@ function ReminderTimePicker({
               fontVariantNumeric: "tabular-nums",
               fontSize: 20,
               fontWeight: 600,
-              color: "#eef1f6",
+              color: "var(--text-on-surface)",
             }}
           >
             {randomEnabled
@@ -581,9 +579,11 @@ function ReminderTimePicker({
                   borderRadius: 16,
                   border: active
                     ? "1px solid rgba(255,185,84,0.32)"
-                    : "1px solid rgba(188,194,255,0.10)",
-                  background: active ? "rgba(255,185,84,0.10)" : "rgba(188,194,255,0.04)",
-                  color: active ? "#ffd99a" : "rgba(216,212,235,0.72)",
+                    : "1px solid var(--surface-violet-medium)",
+                  background: active
+                    ? "rgba(255,185,84,0.10)"
+                    : "var(--surface-violet-low)",
+                  color: active ? "var(--tertiary)" : "var(--text-on-surface-strong)",
                   padding: "8px 6px",
                   display: "flex",
                   flexDirection: "column",
@@ -595,7 +595,7 @@ function ReminderTimePicker({
                 }}
               >
                 <span style={{ fontSize: 11, fontWeight: 650 }}>{preset.label}</span>
-                <span style={{ fontSize: 10, color: "rgba(216,212,235,0.55)" }}>
+                <span style={{ fontSize: 10, color: "var(--text-on-surface-strong)" }}>
                   {formatHour(preset.hour, preset.minute)}
                 </span>
               </button>
@@ -623,8 +623,8 @@ function SegmentedReminderMode({
         alignItems: "stretch",
         gap: 1,
         borderRadius: 16,
-        border: "1px solid rgba(188,194,255,0.10)",
-        background: "rgba(188,194,255,0.03)",
+        border: "1px solid var(--border-violet-soft)",
+        background: "var(--surface-violet-low)",
         padding: 4,
       }}
     >
@@ -649,11 +649,15 @@ function SegmentedReminderMode({
               background: active
                 ? "linear-gradient(to right, var(--primary), var(--secondary), var(--primary))"
                 : "transparent",
-              color: active ? "var(--primary-foreground)" : "rgba(216,212,235,0.6)",
+              color: active
+                ? "var(--primary-foreground)"
+                : "var(--text-on-surface-strong)",
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: "0.04em",
-              boxShadow: active ? "0 14px 32px -18px rgba(188,194,255,0.85)" : "none",
+              boxShadow: active
+                ? "0 14px 32px -18px var(--surface-violet-icon-hover)"
+                : "none",
               transition: "transform 0.2s ease, background 0.2s ease",
             }}
           >
@@ -681,8 +685,8 @@ function ReminderPeriodPicker({
         alignItems: "stretch",
         gap: 1,
         borderRadius: 16,
-        border: "1px solid rgba(188,194,255,0.10)",
-        background: "rgba(188,194,255,0.03)",
+        border: "1px solid var(--border-violet-soft)",
+        background: "var(--surface-violet-low)",
         padding: 4,
       }}
     >
@@ -702,11 +706,15 @@ function ReminderPeriodPicker({
               background: active
                 ? "linear-gradient(to right, var(--primary), var(--secondary), var(--primary))"
                 : "transparent",
-              color: active ? "var(--primary-foreground)" : "rgba(216,212,235,0.6)",
+              color: active
+                ? "var(--primary-foreground)"
+                : "var(--text-on-surface-strong)",
               fontSize: 13,
               fontWeight: 700,
               letterSpacing: "0.08em",
-              boxShadow: active ? "0 14px 32px -18px rgba(188,194,255,0.85)" : "none",
+              boxShadow: active
+                ? "0 14px 32px -18px var(--surface-violet-icon-hover)"
+                : "none",
               transition: "transform 0.2s ease, background 0.2s ease",
             }}
           >
@@ -736,10 +744,7 @@ function ReminderCountPicker({
         gridTemplateColumns: "44px 1fr 44px",
         alignItems: "center",
         gap: 8,
-        borderRadius: 18,
-        border: "1px solid rgba(188,194,255,0.10)",
-        background: "rgba(12,14,22,0.34)",
-        padding: 8,
+        padding: 0,
       }}
     >
       <div style={{ display: "grid", minHeight: 72, placeItems: "center" }}>
@@ -765,7 +770,7 @@ function ReminderCountPicker({
               fontSize: 30,
               lineHeight: 1,
               fontWeight: 700,
-              color: "#eef1f6",
+              color: "var(--text-on-surface)",
               fontVariantNumeric: "tabular-nums",
             }}
           >
@@ -779,7 +784,7 @@ function ReminderCountPicker({
               fontWeight: 650,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              color: "rgba(216,212,235,0.52)",
+              color: "var(--text-on-surface-muted)",
             }}
           >
             per day
@@ -812,10 +817,7 @@ function TimeStepper({
   return (
     <div
       style={{
-        borderRadius: 18,
-        border: "1px solid rgba(188,194,255,0.10)",
-        background: "rgba(12,14,22,0.34)",
-        padding: 8,
+        padding: 0,
         display: "grid",
         gridTemplateColumns: "38px 1fr 38px",
         alignItems: "center",
@@ -833,7 +835,7 @@ function TimeStepper({
             fontWeight: 650,
             letterSpacing: "0.16em",
             textTransform: "uppercase",
-            color: "rgba(216,212,235,0.46)",
+            color: "var(--text-on-surface-muted)",
             marginBottom: 2,
           }}
         >
@@ -846,7 +848,7 @@ function TimeStepper({
             fontSize: 26,
             lineHeight: 1.05,
             fontWeight: 650,
-            color: "#eef1f6",
+            color: "var(--text-on-surface)",
           }}
         >
           {value}
@@ -876,10 +878,10 @@ function TimeAdjustButton({
       style={{
         width: 38,
         height: 44,
-        border: "1px solid rgba(188,194,255,0.12)",
+        border: "1px solid var(--border-violet-medium)",
         borderRadius: 14,
-        background: "rgba(188,194,255,0.05)",
-        color: "rgba(216,212,235,0.78)",
+        background: "var(--surface-violet-low)",
+        color: "var(--text-on-surface-strong)",
         display: "grid",
         placeItems: "center",
         transition: "transform 0.2s ease, background 0.2s ease",
@@ -887,6 +889,133 @@ function TimeAdjustButton({
     >
       {children}
     </button>
+  );
+}
+
+const APPEARANCE_OPTIONS: ReadonlyArray<{
+  id: ThemePreference;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+}> = [
+  {
+    id: "system",
+    label: "System",
+    description: "Match this device",
+    icon: <Monitor size={15} />,
+  },
+  {
+    id: "light",
+    label: "Light",
+    description: "Soft daytime",
+    icon: <Sun size={15} />,
+  },
+  {
+    id: "dark",
+    label: "Dark",
+    description: "Twilight",
+    icon: <Moon size={15} />,
+  },
+];
+
+function AppearanceSegmentedControl({
+  preference,
+  onChange,
+}: {
+  preference: ThemePreference;
+  onChange: (next: ThemePreference) => void;
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Appearance"
+      style={{
+        display: "flex",
+        alignItems: "stretch",
+        gap: 4,
+        borderRadius: 16,
+        border: "1px solid var(--border-violet-soft)",
+        background: "var(--surface-violet-low)",
+        padding: 4,
+      }}
+    >
+      {APPEARANCE_OPTIONS.map((option) => {
+        const active = preference === option.id;
+        return (
+          <button
+            key={option.id}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(option.id)}
+            style={{
+              flex: 1,
+              minWidth: 0,
+              minHeight: 64,
+              padding: "8px 6px",
+              border: "none",
+              borderRadius: 12,
+              background: active
+                ? "linear-gradient(to right, var(--primary), var(--secondary), var(--primary))"
+                : "transparent",
+              color: active
+                ? "var(--primary-foreground)"
+                : "var(--text-on-surface-strong)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+              cursor: "pointer",
+              fontFamily: "var(--font-sans)",
+              transition: "transform 0.2s ease, background 0.2s ease, color 0.2s ease",
+              boxShadow: active
+                ? "0 14px 32px -18px var(--surface-violet-icon-hover)"
+                : "none",
+            }}
+          >
+            <span style={{ display: "inline-flex", alignItems: "center" }}>
+              {option.icon}
+            </span>
+            <span style={{ fontSize: 12, fontWeight: 700 }}>{option.label}</span>
+            <span
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.06em",
+                opacity: active ? 0.9 : 0.7,
+              }}
+            >
+              {option.description}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function AppearanceSection({
+  preference,
+  onChange,
+}: {
+  preference: ThemePreference;
+  onChange: (next: ThemePreference) => void;
+}) {
+  return (
+    <Section title="Appearance" icon={<Monitor size={16} />}>
+      <p
+        style={{
+          fontSize: 12,
+          color: "var(--surface-violet-icon-hover)",
+          lineHeight: 1.5,
+          margin: 0,
+        }}
+      >
+        Choose how Mabuh-ai looks. Dark stays close to the Twilight feel. Light is softer
+        for bright environments.
+      </p>
+      <AppearanceSegmentedControl preference={preference} onChange={onChange} />
+    </Section>
   );
 }
 
@@ -908,6 +1037,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const navigate = useNavigate();
   const reducedMotion = usePrefersReducedMotion();
   const useIso = useIsoLayoutEffect();
+  const { preference: themePreference, setPreference: setThemePreference } =
+    useThemePreference();
 
   const [displayName, setDisplayName] = useState(profile?.display_name ?? "");
   const [nameStatus, setNameStatus] = useState<"idle" | "saving" | "saved" | "error">(
@@ -1106,7 +1237,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             fontSize: "clamp(18px, 4.6vw, 20px)",
             fontWeight: 500,
             lineHeight: 1.2,
-            color: "#eef1f6",
+            color: "var(--text-on-surface)",
             letterSpacing: "-0.02em",
             margin: 0,
             textAlign: "left",
@@ -1129,7 +1260,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           className="font-serif"
           style={{
             fontSize: "clamp(14px, 4vw, 16px)",
-            color: "rgba(188,194,255,0.55)",
+            color: "var(--surface-violet-icon-hover)",
             letterSpacing: "0.2px",
             margin: 0,
           }}
@@ -1137,6 +1268,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           Tune the space to feel like yours.
         </p>
       </div>
+
+      <AppearanceSection preference={themePreference} onChange={setThemePreference} />
 
       <Section title="Profile" icon={<UserIcon size={16} />}>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -1146,7 +1279,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               fontWeight: 500,
               letterSpacing: "1.1px",
               textTransform: "uppercase",
-              color: "rgba(220,224,255,0.7)",
+              color: "var(--text-on-surface-strong)",
             }}
           >
             Display name
@@ -1192,12 +1325,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             display: "flex",
             alignItems: "center",
             gap: 10,
-            padding: "10px 14px",
-            borderRadius: 14,
-            background: "rgba(188,194,255,0.03)",
+            padding: 0,
           }}
         >
-          <Mail size={14} style={{ color: "rgba(188,194,255,0.5)" }} />
+          <Mail size={14} style={{ color: "var(--surface-violet-icon-hover)" }} />
           <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
             <span
               style={{
@@ -1205,7 +1336,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 fontWeight: 500,
                 letterSpacing: "1.1px",
                 textTransform: "uppercase",
-                color: "rgba(220,224,255,0.7)",
+                color: "var(--text-on-surface-strong)",
               }}
             >
               Email
@@ -1213,7 +1344,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <span
               style={{
                 fontSize: 13,
-                color: "#e8eaf0",
+                color: "var(--text-on-surface)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -1230,7 +1361,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 11,
-            color: "rgba(216,212,235,0.5)",
+            color: "var(--text-on-surface-muted)",
             lineHeight: 1.55,
             margin: 0,
             marginTop: 4,
@@ -1299,7 +1430,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <p
             style={{
               fontSize: 12,
-              color: "rgba(188,194,255,0.5)",
+              color: "var(--surface-violet-icon-hover)",
               lineHeight: 1.5,
               margin: 0,
             }}
@@ -1328,7 +1459,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <div
           style={{
             height: 1,
-            background: "rgba(188,194,255,0.08)",
+            background: "var(--surface-violet-medium)",
             margin: "4px 0",
           }}
         />
@@ -1340,7 +1471,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               fontWeight: 500,
               letterSpacing: "1.1px",
               textTransform: "uppercase",
-              color: "rgba(220,224,255,0.7)",
+              color: "var(--text-on-surface-strong)",
             }}
           >
             Change password
@@ -1383,7 +1514,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 13,
-            color: "rgba(188,194,255,0.55)",
+            color: "var(--surface-violet-icon-hover)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -1406,14 +1537,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       </Section>
 
       <Section title="Your data" icon={<Download size={16} />}>
-        <div
-          aria-live="polite"
-          className="relative overflow-hidden rounded-2xl border border-[rgba(188,194,255,0.12)] bg-[rgba(188,194,255,0.04)] px-4 py-3.5"
-        >
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-10 -top-14 size-28 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.14),transparent_65%)] blur-xl"
-          />
+        <div aria-live="polite" className="relative rounded-2xl px-1 py-2">
           <div className="relative flex items-center gap-3">
             <span
               className={`grid size-10 shrink-0 place-items-center rounded-xl ${
@@ -1421,7 +1545,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   ? "bg-[rgba(255,123,123,0.12)] text-[rgba(255,170,170,0.95)]"
                   : !online
                     ? "bg-[rgba(255,185,84,0.12)] text-tertiary"
-                    : "bg-[rgba(188,194,255,0.14)] text-primary"
+                    : "bg-[var(--surface-violet-high)] text-primary"
               }`}
             >
               {syncStatus.syncing ? (
@@ -1450,12 +1574,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                         : "Everything is up to date"}
                 </span>
                 {syncStatus.pendingCount > 0 && (
-                  <span className="shrink-0 rounded-full bg-[rgba(255,185,84,0.14)] px-2 py-0.5 text-[10px] font-semibold text-[#ffd99a]">
+                  <span className="shrink-0 rounded-full bg-[rgba(255,185,84,0.14)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--tertiary)]">
                     {syncStatus.pendingCount} pending
                   </span>
                 )}
               </span>
-              <span className="mt-0.5 block text-[11px] leading-relaxed text-[#d8d4eb]">
+              <span className="mt-0.5 block text-[11px] leading-relaxed text-[color:var(--text-kicker)]">
                 {syncStatus.error && online
                   ? syncStatus.error
                   : syncStatus.pendingCount > 0
@@ -1470,7 +1594,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 13,
-            color: "rgba(188,194,255,0.55)",
+            color: "var(--surface-violet-icon-hover)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -1488,7 +1612,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <div
           style={{
             height: 1,
-            background: "rgba(188,194,255,0.08)",
+            background: "var(--surface-violet-medium)",
             margin: "4px 0",
           }}
         />
@@ -1497,7 +1621,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <p
             style={{
               fontSize: 12,
-              color: "rgba(255,185,84,0.85)",
+              color: "var(--text-warn-soft)",
               lineHeight: 1.5,
               margin: 0,
             }}
@@ -1517,7 +1641,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               }}
               style={{
                 borderColor: "rgba(255,185,84,0.4)",
-                color: "rgba(255,217,154,0.95)",
+                color: "var(--text-warn-strong)",
                 background: "rgba(255,185,84,0.08)",
               }}
             >
@@ -1546,10 +1670,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             alignItems: "center",
             justifyContent: "center",
             gap: 18,
-            padding: "14px 12px",
-            borderRadius: 14,
-            background: "rgba(188,194,255,0.04)",
-            border: "1px solid rgba(188,194,255,0.06)",
+            padding: 0,
           }}
         >
           <img
@@ -1562,7 +1683,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             style={{
               width: 1,
               height: 40,
-              background: "rgba(188,194,255,0.12)",
+              background: "var(--surface-violet-high)",
             }}
           />
           <img
@@ -1574,7 +1695,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 11,
-            color: "rgba(188,194,255,0.35)",
+            color: "var(--surface-violet-icon-hover)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -1607,7 +1728,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 11,
-            color: "rgba(188,194,255,0.45)",
+            color: "var(--surface-violet-icon-hover)",
             lineHeight: 1.6,
             margin: 0,
             textAlign: "center",
@@ -1635,17 +1756,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               fontSize: 11,
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: "rgba(216,212,235,0.55)",
+              color: "var(--text-on-surface-strong)",
             }}
           >
             <span
               aria-hidden
-              style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }}
+              style={{ flex: 1, height: 1, background: "var(--surface-violet-medium)" }}
             />
             <span>Legal</span>
             <span
               aria-hidden
-              style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }}
+              style={{ flex: 1, height: 1, background: "var(--surface-violet-medium)" }}
             />
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -1658,9 +1779,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 cursor: "pointer",
                 padding: "10px 12px",
                 borderRadius: 12,
-                background: "rgba(188,194,255,0.06)",
-                border: "0.5px solid rgba(188,194,255,0.12)",
-                color: "#eef1f6",
+                color: "var(--text-on-surface)",
                 fontSize: 13,
                 fontWeight: 500,
                 fontFamily: "var(--font-sans)",
@@ -1678,9 +1797,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 cursor: "pointer",
                 padding: "10px 12px",
                 borderRadius: 12,
-                background: "rgba(188,194,255,0.06)",
-                border: "0.5px solid rgba(188,194,255,0.12)",
-                color: "#eef1f6",
+                color: "var(--text-on-surface)",
                 fontSize: 13,
                 fontWeight: 500,
                 fontFamily: "var(--font-sans)",
@@ -1698,12 +1815,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         style={{
           position: "relative",
           zIndex: 1,
-          padding: "18px 20px",
-          borderRadius: 20,
-          background: "rgba(255,123,123,0.06)",
+          padding: 0,
           display: "flex",
           flexDirection: "column",
-          gap: 12,
+          gap: 14,
         }}
       >
         <header
@@ -1721,8 +1836,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               width: 32,
               height: 32,
               borderRadius: 12,
-              background: "rgba(255,123,123,0.15)",
-              color: "rgba(255,123,123,0.95)",
+              color: "var(--icon-rose)",
             }}
           >
             <LogOut size={16} />
@@ -1731,7 +1845,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             className="font-serif"
             style={{
               fontSize: 18,
-              color: "#eef1f6",
+              color: "var(--text-on-surface)",
               fontWeight: 500,
               letterSpacing: "-0.01em",
             }}
@@ -1742,7 +1856,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 13,
-            color: "rgba(188,194,255,0.5)",
+            color: "var(--surface-violet-icon-hover)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -1769,7 +1883,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <p
             style={{
               fontSize: 12,
-              color: "rgba(255,123,123,0.85)",
+              color: "var(--text-danger-soft)",
               lineHeight: 1.5,
               margin: 0,
             }}
@@ -1784,7 +1898,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               onClick={() => setConfirmDelete(true)}
               style={{
                 borderColor: "rgba(255,123,123,0.4)",
-                color: "rgba(255,123,123,0.95)",
+                color: "var(--text-danger-strong)",
                 background: "rgba(255,123,123,0.08)",
               }}
             >
@@ -1847,9 +1961,7 @@ function InfoTile({ label, value }: { label: string; value: string }) {
   return (
     <div
       style={{
-        padding: "10px 12px",
-        borderRadius: 12,
-        background: "rgba(188,194,255,0.04)",
+        padding: 0,
       }}
     >
       <div
@@ -1857,13 +1969,15 @@ function InfoTile({ label, value }: { label: string; value: string }) {
           fontSize: 10,
           letterSpacing: "1.1px",
           textTransform: "uppercase",
-          color: "rgba(220,224,255,0.7)",
+          color: "var(--text-on-surface-strong)",
           marginBottom: 2,
         }}
       >
         {label}
       </div>
-      <div style={{ fontSize: 13, color: "#e8eaf0", fontWeight: 500 }}>{value}</div>
+      <div style={{ fontSize: 13, color: "var(--text-on-surface)", fontWeight: 500 }}>
+        {value}
+      </div>
     </div>
   );
 }
@@ -1960,7 +2074,7 @@ function ContributorsDialog({
               fontWeight: 600,
               letterSpacing: "0.22em",
               textTransform: "uppercase",
-              color: "#d8d4eb",
+              color: "var(--text-kicker)",
             }}
           >
             Built with care
@@ -1991,7 +2105,7 @@ function ContributorsDialog({
                 style={{
                   fontSize: 14,
                   fontWeight: 500,
-                  color: "#eef1f6",
+                  color: "var(--text-on-surface)",
                   letterSpacing: "-0.01em",
                   margin: 0,
                 }}
@@ -2013,7 +2127,7 @@ function ContributorsDialog({
                     key={member}
                     style={{
                       fontSize: 13,
-                      color: "rgba(216,212,235,0.75)",
+                      color: "var(--text-on-surface-strong)",
                       lineHeight: 1.55,
                     }}
                   >
@@ -2028,7 +2142,7 @@ function ContributorsDialog({
             aria-hidden
             style={{
               height: 1,
-              background: "rgba(188,194,255,0.10)",
+              background: "var(--surface-violet-medium)",
               margin: "4px 0 2px",
             }}
           />
@@ -2039,7 +2153,7 @@ function ContributorsDialog({
               style={{
                 fontSize: 14,
                 fontWeight: 500,
-                color: "#eef1f6",
+                color: "var(--text-on-surface)",
                 letterSpacing: "-0.01em",
                 margin: 0,
               }}
@@ -2049,7 +2163,7 @@ function ContributorsDialog({
             <p
               style={{
                 fontSize: 13,
-                color: "rgba(216,212,235,0.75)",
+                color: "var(--text-on-surface-strong)",
                 lineHeight: 1.55,
                 margin: 0,
               }}
@@ -2063,7 +2177,7 @@ function ContributorsDialog({
           style={{
             marginTop: 6,
             paddingTop: 12,
-            borderTop: "1px solid rgba(188,194,255,0.08)",
+            borderTop: "1px solid var(--surface-violet-medium)",
             display: "flex",
             justifyContent: "flex-end",
           }}

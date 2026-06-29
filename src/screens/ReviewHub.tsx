@@ -66,7 +66,9 @@ const tabs: Array<{ id: ReviewTabId; label: string; icon: string }> = [
 
 const renderTabIcon = (iconName: string, isActive: boolean) => {
   const size = 16;
-  const className = isActive ? "text-[#171a27]" : "text-[rgba(188,194,255,0.34)]";
+  const className = isActive
+    ? "text-[color:var(--text-on-surface-strong)]"
+    : "text-[var(--surface-violet-icon-hover)]";
 
   switch (iconName) {
     case "history":
@@ -116,32 +118,8 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
         minHeight: "100%",
       }}
     >
-      {/* Decorative background blobs (matches journey aesthetic) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-20 top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.10),transparent_60%)] blur-3xl"
-      />
-
-      {/* Header card */}
-      <div
-        className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.10)] bg-card p-5 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl"
-        style={{
-          paddingRight: 72,
-          clipPath: `path('M 28 0 H calc(100% - 72px) A 52 52 0 0 1 calc(100% - 0px) 48 V calc(100% - 28px) A 28 28 0 0 1 calc(100% - 56px) calc(100% - 0px) H 28 A 28 28 0 0 1 0 calc(100% - 56px) V 28 A 28 28 0 0 1 28 0 Z')`,
-        }}
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.16),transparent_60%)] blur-2xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-20 -left-12 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.16),transparent_60%)] blur-2xl"
-        />
+      {/* Header */}
+      <div className="relative" style={{ paddingRight: 0 }}>
         <div className="relative">
           <p
             style={{
@@ -149,7 +127,7 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
               fontWeight: 600,
               letterSpacing: "0.22em",
               textTransform: "uppercase",
-              color: "#d8d4eb",
+              color: "var(--text-kicker)",
               marginBottom: 10,
             }}
           >
@@ -161,14 +139,20 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
               fontSize: 30,
               fontWeight: 500,
               lineHeight: 1.15,
-              color: "#eef1f6",
+              color: "var(--text-on-surface)",
               marginBottom: 4,
               letterSpacing: "-0.03em",
             }}
           >
             Your story so far
           </h2>
-          <p style={{ fontSize: 13, color: "rgba(216,212,235,0.7)", lineHeight: 1.55 }}>
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--text-on-surface-strong)",
+              lineHeight: 1.55,
+            }}
+          >
             Your history, gentle patterns, and words — all in one safe place
           </p>
         </div>
@@ -176,7 +160,7 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
 
       {/* Tab switcher (journey pill style — icon-only when inactive) */}
       <div
-        className="flex items-stretch gap-1 rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] p-1"
+        className="flex items-stretch gap-1 rounded-2xl border border-[var(--border-violet-soft)] bg-[var(--surface-violet-low)] p-1"
         role="tablist"
         aria-label="Review views"
       >
@@ -197,8 +181,12 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
                 background: isActive
                   ? "linear-gradient(to right, var(--primary), var(--secondary), var(--primary))"
                   : "transparent",
-                color: isActive ? "var(--primary-foreground)" : "rgba(216,212,235,0.6)",
-                boxShadow: isActive ? "0 14px 32px -18px rgba(188,194,255,0.85)" : "none",
+                color: isActive
+                  ? "var(--primary-foreground)"
+                  : "var(--text-on-surface-strong)",
+                boxShadow: isActive
+                  ? "0 14px 32px -18px var(--surface-violet-icon-hover)"
+                  : "none",
               }}
             >
               {renderTabIcon(tab.icon, isActive)}
@@ -221,11 +209,8 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
           <div
             style={{
               margin: "0 0 14px",
-              padding: "12px 14px",
-              borderRadius: 16,
-              background: "rgba(255,123,123,0.08)",
-              border: "1px solid rgba(255,123,123,0.18)",
-              color: "rgba(255,123,123,0.95)",
+              padding: "10px 0",
+              color: "var(--text-danger)",
               fontSize: 12,
               lineHeight: 1.55,
             }}

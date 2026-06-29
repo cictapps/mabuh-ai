@@ -1025,7 +1025,7 @@ export const MoodHistoryCalendar: React.FC<MoodHistoryCalendarProps> = ({
               className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full"
               style={{
                 background: "rgba(255,123,123,0.10)",
-                color: "rgba(255,170,170,0.95)",
+                color: "var(--icon-rose)",
               }}
             >
               <AlertTriangle size={18} />

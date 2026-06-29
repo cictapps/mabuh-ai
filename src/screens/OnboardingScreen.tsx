@@ -157,9 +157,9 @@ function AiControlsVisual() {
         padding: "14px",
         borderRadius: 24,
         background:
-          "linear-gradient(155deg, rgba(188,194,255,0.12), rgba(212,187,255,0.07) 55%, rgba(255,185,84,0.08))",
-        border: "1px solid rgba(188,194,255,0.10)",
-        boxShadow: "0 24px 60px -36px rgba(8,10,18,0.85)",
+          "linear-gradient(155deg, var(--surface-violet-high), var(--surface-fuchsia-low) 55%, rgba(255,185,84,0.08))",
+        border: "1px solid var(--border-violet-soft)",
+        boxShadow: "0 24px 60px -36px rgba(74, 60, 90, 0.28)",
         overflow: "hidden",
       }}
     >
@@ -178,8 +178,8 @@ function AiControlsVisual() {
             width: 34,
             height: 34,
             borderRadius: 12,
-            background: "rgba(188,194,255,0.16)",
-            color: "#bcc2ff",
+            background: "var(--surface-violet-icon)",
+            color: "var(--primary)",
             flexShrink: 0,
           }}
         >
@@ -189,7 +189,7 @@ function AiControlsVisual() {
           <div
             style={{
               fontSize: 12,
-              color: "#eef1f6",
+              color: "var(--text-on-surface)",
               fontWeight: 500,
               marginBottom: 2,
             }}
@@ -199,14 +199,14 @@ function AiControlsVisual() {
           <div
             style={{
               fontSize: 11,
-              color: "rgba(216,212,235,0.6)",
+              color: "var(--text-on-surface-strong)",
               lineHeight: 1.4,
             }}
           >
             You decide what can help personalize replies.
           </div>
         </div>
-        <Settings size={15} color="rgba(216,212,235,0.55)" />
+        <Settings size={15} color="var(--text-on-surface-strong)" />
       </div>
 
       {AI_CONTEXT_PREVIEW_ROWS.map((label, index) => {
@@ -221,10 +221,12 @@ function AiControlsVisual() {
               padding: "8px 10px",
               marginTop: 5,
               borderRadius: 14,
-              background: enabled ? "rgba(188,194,255,0.07)" : "rgba(188,194,255,0.04)",
+              background: enabled
+                ? "var(--surface-violet-medium)"
+                : "var(--surface-violet-low)",
               border: enabled
-                ? "1px solid rgba(188,194,255,0.16)"
-                : "1px solid rgba(188,194,255,0.08)",
+                ? "1px solid var(--surface-violet-icon)"
+                : "1px solid var(--surface-violet-medium)",
               transition: reducedMotion
                 ? "none"
                 : "background 0.55s ease, border-color 0.55s ease",
@@ -247,8 +249,10 @@ function AiControlsVisual() {
                 width: 36,
                 height: 20,
                 borderRadius: 999,
-                background: enabled ? "rgba(188,194,255,0.72)" : "rgba(216,212,235,0.16)",
-                boxShadow: enabled ? "0 0 16px rgba(188,194,255,0.24)" : "none",
+                background: enabled
+                  ? "var(--surface-violet-icon-hover)"
+                  : "var(--text-on-surface-faint)",
+                boxShadow: enabled ? "0 0 16px var(--surface-violet-icon-hover)" : "none",
                 flexShrink: 0,
                 transition: reducedMotion
                   ? "none"
@@ -263,7 +267,7 @@ function AiControlsVisual() {
                   width: 16,
                   height: 16,
                   borderRadius: "50%",
-                  background: enabled ? "#121416" : "#d8d4eb",
+                  background: enabled ? "var(--background)" : "var(--text-kicker)",
                   transform: enabled ? "translateX(16px)" : "translateX(0)",
                   transition: reducedMotion
                     ? "none"
@@ -281,7 +285,7 @@ function AiControlsVisual() {
           alignItems: "center",
           gap: 7,
           marginTop: 10,
-          color: "rgba(255,217,154,0.82)",
+          color: "var(--text-warn-quote)",
           fontSize: 10.5,
           lineHeight: 1.4,
         }}
@@ -314,7 +318,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             height: "clamp(150px, 52vw, 220px)",
             borderRadius: "50%",
             background:
-              "radial-gradient(circle at 50% 40%, rgba(255,185,84,0.32), rgba(188,194,255,0.16) 55%, transparent 75%)",
+              "radial-gradient(circle at 50% 40%, rgba(255,185,84,0.32), var(--surface-violet-icon) 55%, transparent 75%)",
             filter: "blur(8px)",
             animation: "onb-pulse 6s ease-in-out infinite",
           }}
@@ -326,9 +330,9 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             height: "clamp(96px, 28vw, 132px)",
             borderRadius: "50%",
             background:
-              "linear-gradient(160deg, rgba(188,194,255,0.92), rgba(212,187,255,0.7) 60%, rgba(255,185,84,0.55))",
+              "linear-gradient(160deg, var(--surface-violet-icon-hover), var(--surface-fuchsia-medium) 60%, rgba(255,185,84,0.55))",
             boxShadow:
-              "0 28px 60px -28px rgba(188,194,255,0.55), 0 0 48px -8px rgba(212,187,255,0.35)",
+              "0 28px 60px -28px var(--surface-violet-icon-hover), 0 0 48px -8px var(--surface-fuchsia-medium)",
             display: "grid",
             placeItems: "center",
             color: "#1a1c2b",
@@ -345,7 +349,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
               width: "clamp(54px, 15vw, 72px)",
               height: "clamp(54px, 15vw, 72px)",
               filter:
-                "drop-shadow(0 0 6px rgba(255,255,255,0.6)) drop-shadow(0 0 16px rgba(212,187,255,0.55)) drop-shadow(0 0 28px rgba(188,194,255,0.4))",
+                "drop-shadow(0 0 6px rgba(255,255,255,0.6)) drop-shadow(0 0 16px var(--surface-fuchsia-medium)) drop-shadow(0 0 28px var(--surface-violet-icon-hover))",
             }}
           />
         </div>
@@ -370,8 +374,8 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             width: 8,
             height: 8,
             borderRadius: "50%",
-            background: "rgba(212,187,255,0.7)",
-            boxShadow: "0 0 14px rgba(212,187,255,0.4)",
+            background: "var(--surface-fuchsia-medium)",
+            boxShadow: "0 0 14px var(--surface-fuchsia-medium)",
             animation: "onb-twinkle 3.2s ease-in-out infinite",
             animationDelay: "1.6s",
           }}
@@ -399,9 +403,9 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
           marginBottom: 4,
           borderRadius: 28,
           background:
-            "linear-gradient(160deg, rgba(188,194,255,0.12), rgba(255,185,84,0.08) 60%, rgba(212,187,255,0.10))",
-          border: "1px solid rgba(188,194,255,0.08)",
-          boxShadow: "0 24px 60px -36px rgba(8,10,18,0.85)",
+            "linear-gradient(160deg, var(--surface-violet-high), rgba(255,185,84,0.08) 60%, var(--surface-fuchsia-low))",
+          border: "1px solid var(--border-violet-soft)",
+          boxShadow: "0 24px 60px -36px rgba(74, 60, 90, 0.28)",
           overflow: "hidden",
         }}
       >
@@ -433,10 +437,10 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
                 gap: 6,
                 padding: "7px 13px 7px 9px",
                 borderRadius: 999,
-                background: "rgba(18,20,22,0.72)",
+                background: "var(--ring-node-bg-soft)",
                 backdropFilter: "blur(8px)",
                 WebkitBackdropFilter: "blur(8px)",
-                border: "1px solid rgba(188,194,255,0.10)",
+                border: "1px solid var(--border-violet-soft)",
                 boxShadow: "0 10px 24px -16px rgba(0,0,0,0.7)",
               }}
             >
@@ -454,7 +458,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
               <span
                 style={{
                   fontSize: 11,
-                  color: "#eef1f6",
+                  color: "var(--text-on-surface)",
                   fontWeight: 500,
                   letterSpacing: "0.01em",
                 }}
@@ -493,9 +497,9 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             padding: "18px 56px 16px 18px",
             borderRadius: 22,
             background:
-              "linear-gradient(160deg, rgba(188,194,255,0.14), rgba(255,185,84,0.10) 65%, rgba(212,187,255,0.10))",
-            border: "1px solid rgba(188,194,255,0.10)",
-            boxShadow: "0 24px 60px -36px rgba(8,10,18,0.85)",
+              "linear-gradient(160deg, var(--surface-violet-high), rgba(255,185,84,0.10) 65%, var(--surface-fuchsia-low))",
+            border: "1px solid var(--border-violet-soft)",
+            boxShadow: "0 24px 60px -36px rgba(74, 60, 90, 0.28)",
             overflow: "hidden",
           }}
         >
@@ -513,7 +517,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
                 fontSize: 11,
                 letterSpacing: "1.2px",
                 textTransform: "uppercase",
-                color: "rgba(220,224,255,0.6)",
+                color: "var(--text-on-surface-strong)",
                 fontWeight: 500,
               }}
             >
@@ -525,7 +529,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
               fontFamily: "var(--font-serif)",
               fontSize: 15,
               lineHeight: 1.55,
-              color: "rgba(238,241,246,0.85)",
+              color: "var(--text-on-surface)",
               fontStyle: "italic",
               wordBreak: "break-word",
               overflowWrap: "anywhere",
@@ -549,8 +553,8 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
                 style={{
                   padding: "4px 10px",
                   borderRadius: 999,
-                  background: "rgba(188,194,255,0.10)",
-                  color: "rgba(220,224,255,0.75)",
+                  background: "var(--surface-violet-medium)",
+                  color: "var(--text-on-surface-strong)",
                   fontSize: 10.5,
                   letterSpacing: "0.02em",
                   whiteSpace: "nowrap",
@@ -573,7 +577,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             height: 36,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle at 30% 30%, rgba(255,185,84,0.7), rgba(188,194,255,0.4))",
+              "radial-gradient(circle at 30% 30%, rgba(255,185,84,0.7), var(--surface-violet-icon-hover))",
             boxShadow: "0 14px 30px -16px rgba(255,185,84,0.55)",
             color: "#1a1c2b",
             flexShrink: 0,
@@ -605,8 +609,8 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             gap: 10,
             padding: "clamp(8px, 2.4vw, 12px) clamp(10px, 3vw, 14px)",
             borderRadius: 18,
-            background: "rgba(188,194,255,0.08)",
-            border: "1px solid rgba(188,194,255,0.10)",
+            background: "var(--surface-violet-medium)",
+            border: "1px solid var(--border-violet-soft)",
           }}
         >
           <div
@@ -617,7 +621,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
               height: 34,
               borderRadius: 12,
               background:
-                "linear-gradient(140deg, rgba(188,194,255,0.85), rgba(212,187,255,0.7))",
+                "linear-gradient(140deg, var(--surface-violet-icon-hover), var(--surface-fuchsia-medium))",
               color: "#1a1c2b",
               flexShrink: 0,
             }}
@@ -628,7 +632,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             <div
               style={{
                 fontSize: 12,
-                color: "#eef1f6",
+                color: "var(--text-on-surface)",
                 fontWeight: 500,
                 marginBottom: 2,
               }}
@@ -638,7 +642,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             <div
               style={{
                 fontSize: 11,
-                color: "rgba(188,194,255,0.55)",
+                color: "var(--surface-violet-icon-hover)",
                 lineHeight: 1.4,
               }}
             >
@@ -675,7 +679,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             <div
               style={{
                 fontSize: 12,
-                color: "#eef1f6",
+                color: "var(--text-on-surface)",
                 fontWeight: 500,
                 marginBottom: 2,
               }}
@@ -685,7 +689,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
             <div
               style={{
                 fontSize: 11,
-                color: "rgba(255,185,84,0.75)",
+                color: "var(--text-warn)",
                 lineHeight: 1.4,
               }}
             >
@@ -741,8 +745,8 @@ function PaginationDots({
               height: 8,
               borderRadius: 999,
               backgroundColor: isActive
-                ? "rgba(188,194,255,0.95)"
-                : "rgba(188,194,255,0.22)",
+                ? "var(--surface-violet-icon-hover)"
+                : "var(--surface-violet-icon-hover)",
               transition: "width 0.3s ease, background-color 0.3s ease",
             }}
           />
@@ -845,9 +849,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
         display: "flex",
         flexDirection: "column",
         background:
-          "radial-gradient(circle at 20% 0%, rgba(188,194,255,0.18), transparent 55%), radial-gradient(circle at 100% 100%, rgba(255,185,84,0.14), transparent 50%), #121416",
+          "radial-gradient(circle at 20% 0%, var(--surface-violet-icon), transparent 55%), radial-gradient(circle at 100% 100%, rgba(255,185,84,0.14), transparent 50%), var(--background)",
         overflow: "hidden",
-        color: "#eef1f6",
+        color: "var(--text-on-surface)",
         fontFamily: "var(--font-sans)",
       }}
     >
@@ -857,7 +861,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "radial-gradient(circle at 50% 110%, rgba(212,187,255,0.10), transparent 60%)",
+            "radial-gradient(circle at 50% 110%, var(--surface-fuchsia-low), transparent 60%)",
           pointerEvents: "none",
         }}
       />
@@ -891,7 +895,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               height: 32,
               borderRadius: 10,
               overflow: "hidden",
-              boxShadow: "0 14px 30px -16px rgba(188,194,255,0.5)",
+              boxShadow: "0 14px 30px -16px var(--surface-violet-icon-hover)",
               flexShrink: 0,
             }}
             aria-hidden
@@ -916,7 +920,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 fontSize: 10,
                 letterSpacing: "1.4px",
                 textTransform: "uppercase",
-                color: "rgba(216,212,235,0.55)",
+                color: "var(--text-on-surface-strong)",
                 fontWeight: 500,
               }}
             >
@@ -930,8 +934,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           style={{
             appearance: "none",
             border: "none",
-            background: "rgba(188,194,255,0.08)",
-            color: "rgba(220,224,255,0.75)",
+            background: "var(--surface-violet-medium)",
+            color: "var(--text-on-surface-strong)",
             fontSize: 12.5,
             fontWeight: 500,
             padding: "8px 14px",
@@ -941,11 +945,13 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             fontFamily: "var(--font-sans)",
           }}
           onMouseDown={(e) =>
-            (e.currentTarget.style.background = "rgba(188,194,255,0.16)")
+            (e.currentTarget.style.background = "var(--surface-violet-icon)")
           }
-          onMouseUp={(e) => (e.currentTarget.style.background = "rgba(188,194,255,0.08)")}
+          onMouseUp={(e) =>
+            (e.currentTarget.style.background = "var(--surface-violet-medium)")
+          }
           onMouseLeave={(e) =>
-            (e.currentTarget.style.background = "rgba(188,194,255,0.08)")
+            (e.currentTarget.style.background = "var(--surface-violet-medium)")
           }
         >
           Skip
@@ -999,7 +1005,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 height: 26,
                 borderRadius: 9,
                 background: "rgba(255,185,84,0.18)",
-                color: "rgba(255,217,154,1)",
+                color: "var(--icon-warm)",
                 fontFamily: "var(--font-serif)",
                 fontSize: 14,
                 fontWeight: 600,
@@ -1023,7 +1029,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 fontSize: 11,
                 letterSpacing: "1.4px",
                 textTransform: "uppercase",
-                color: "rgba(220,224,255,0.6)",
+                color: "var(--text-on-surface-strong)",
                 fontWeight: 500,
               }}
             >
@@ -1037,7 +1043,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               fontSize: tight ? "clamp(22px, 6.4vw, 28px)" : "clamp(26px, 7vw, 34px)",
               fontWeight: 500,
               lineHeight: 1.14,
-              color: "#f5f1ff",
+              color: "var(--text-on-surface)",
               letterSpacing: "-0.025em",
               margin: 0,
               marginBottom: tight ? 8 : 14,
@@ -1050,7 +1056,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             style={{
               fontSize: tight ? 13.5 : 14.5,
               lineHeight: 1.55,
-              color: "rgba(220,224,255,0.7)",
+              color: "var(--text-on-surface-strong)",
               margin: 0,
               marginBottom: tight ? 12 : 18,
               maxWidth: 360,
@@ -1080,7 +1086,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                   alignItems: "flex-start",
                   gap: 10,
                   fontSize: tight ? 12.5 : 13.5,
-                  color: "rgba(238,241,246,0.85)",
+                  color: "var(--text-on-surface-muted)",
                   lineHeight: 1.45,
                 }}
               >
@@ -1093,7 +1099,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                     height: 20,
                     borderRadius: "50%",
                     background: "rgba(109,186,132,0.18)",
-                    color: "rgba(141,212,164,1)",
+                    color: "var(--icon-success)",
                     flexShrink: 0,
                     marginTop: 1,
                   }}
@@ -1129,7 +1135,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               alignItems: "center",
               gap: 10,
               fontSize: 12.5,
-              color: "rgba(220,224,255,0.7)",
+              color: "var(--text-on-surface-strong)",
               cursor: "pointer",
               userSelect: "none",
               padding: "4px 4px",
@@ -1152,9 +1158,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 height: 18,
                 borderRadius: 6,
                 background: skipFuture
-                  ? "linear-gradient(140deg, rgba(188,194,255,0.95), rgba(212,187,255,0.85))"
-                  : "rgba(188,194,255,0.10)",
-                border: "1px solid rgba(188,194,255,0.20)",
+                  ? "linear-gradient(140deg, var(--surface-violet-icon-hover), var(--surface-fuchsia-medium))"
+                  : "var(--surface-violet-medium)",
+                border: "1px solid var(--border-violet-high)",
                 display: "grid",
                 placeItems: "center",
                 flexShrink: 0,
@@ -1177,9 +1183,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               onClick={prev}
               style={{
                 appearance: "none",
-                border: "1px solid rgba(188,194,255,0.14)",
-                background: "rgba(188,194,255,0.06)",
-                color: "rgba(220,224,255,0.85)",
+                border: "1px solid var(--border-violet-medium)",
+                background: "var(--surface-violet-medium)",
+                color: "var(--text-on-surface-strong)",
                 borderRadius: 999,
                 padding: "0 18px",
                 height: 48,
@@ -1206,11 +1212,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               fontSize: 14,
               fontWeight: 600,
               letterSpacing: "0.01em",
-              color: "#171a27",
+              color: "var(--primary-foreground)",
               background:
                 "linear-gradient(120deg, #bcc2ff 0%, #d4bbff 55%, #ffb954 130%)",
               boxShadow:
-                "0 22px 50px -22px rgba(188,194,255,0.7), inset 0 1px 0 rgba(255,255,255,0.25)",
+                "0 22px 50px -22px var(--surface-violet-icon-hover), inset 0 1px 0 rgba(255,255,255,0.25)",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",

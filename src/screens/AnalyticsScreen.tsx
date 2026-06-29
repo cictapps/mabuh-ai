@@ -3,7 +3,6 @@ import { MoodEntry, MoodType } from "../types";
 import { getMoodMeta } from "../data";
 import { MoodTrendChart } from "../components/analytics/MoodTrendChart";
 import { MoodDistribution } from "../components/analytics/MoodDistribution";
-import { ChartCard } from "../components/shared/ChartCard";
 import { Divider } from "../components/shared/Divider";
 
 interface DistItem {
@@ -65,48 +64,48 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   return (
     <div
       className="screen-enter"
-      style={{ padding: "30px 22px 52px", display: "flex", flexDirection: "column" }}
+      style={{
+        padding: "30px 22px 52px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 32,
+      }}
     >
       {loading ? (
-        <div
+        <p
           style={{
-            marginBottom: 24,
-            padding: "14px 18px",
-            borderRadius: 14,
-            background: "rgba(188,194,255,0.04)",
-            color: "rgba(220,224,255,0.7)",
+            margin: 0,
+            padding: "16px 0",
+            color: "var(--text-on-surface-strong)",
             fontSize: 12,
             textAlign: "center",
           }}
         >
           Gathering your patterns…
-        </div>
+        </p>
       ) : isEmpty ? (
-        <div
+        <p
           style={{
-            marginBottom: 24,
-            padding: "22px 20px",
-            borderRadius: 16,
-            background: "rgba(188,194,255,0.04)",
-            border: "1px dashed rgba(188,194,255,0.16)",
-            color: "rgba(188,194,255,0.6)",
+            margin: 0,
+            padding: "16px 0",
+            color: "var(--surface-violet-icon-hover)",
             fontSize: 13,
-            lineHeight: 1.6,
+            lineHeight: 1.7,
             textAlign: "center",
           }}
         >
           Your patterns will begin to appear here once you share your first few check-ins.
-        </div>
+        </p>
       ) : null}
 
-      <div style={{ marginBottom: 28 }}>
+      <div>
         <p
           style={{
             fontSize: 11,
             fontWeight: 500,
             letterSpacing: "1.3px",
             textTransform: "uppercase",
-            color: "rgba(220,224,255,0.65)",
+            color: "var(--text-on-surface-strong)",
             marginBottom: 10,
           }}
         >
@@ -114,20 +113,25 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         </p>
         <h2
           className="font-serif"
-          style={{ fontSize: 26, fontWeight: 400, color: "#e8eaf0", marginBottom: 4 }}
+          style={{
+            fontSize: 26,
+            fontWeight: 400,
+            color: "var(--text-on-surface)",
+            marginBottom: 4,
+          }}
         >
           Your patterns, in soft light
         </h2>
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
+        <p style={{ fontSize: 13, color: "var(--surface-violet-icon-hover)" }}>
           A gentle look across the past 30 days
         </p>
 
         <div
           style={{
-            marginTop: 16,
+            marginTop: 20,
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 10,
+            gap: 16,
           }}
         >
           {[
@@ -135,25 +139,19 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             { label: "Days in a row", value: analyticsStats.currentStreak },
             { label: "Days with us", value: analyticsStats.lifetimeDays },
           ].map((item) => (
-            <div
-              key={item.label}
-              style={{
-                padding: "10px 12px",
-                borderRadius: 14,
-                background: "rgba(188,194,255,0.06)",
-                border: "1px solid rgba(188,194,255,0.08)",
-                textAlign: "center",
-              }}
-            >
-              <div style={{ fontSize: 16, color: "#e8eaf0", fontWeight: 600 }}>
+            <div key={item.label} style={{ textAlign: "center" }}>
+              <div
+                style={{ fontSize: 18, color: "var(--text-on-surface)", fontWeight: 600 }}
+              >
                 {item.value}
               </div>
               <div
                 style={{
                   fontSize: 10,
-                  color: "rgba(188,194,255,0.45)",
+                  color: "var(--surface-violet-icon-hover)",
                   letterSpacing: "0.6px",
                   textTransform: "uppercase",
+                  marginTop: 4,
                 }}
               >
                 {item.label}
@@ -163,33 +161,29 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         </div>
       </div>
 
-      <div style={{ marginBottom: 24 }}>
+      <div>
         <p
           style={{
             fontSize: 11,
             fontWeight: 500,
             letterSpacing: "1.1px",
             textTransform: "uppercase",
-            color: "rgba(188,194,255,0.35)",
-            marginBottom: 10,
+            color: "var(--surface-violet-icon-hover)",
+            marginBottom: 14,
           }}
         >
           A few recent days
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20 }}>
           {latestEntries.map((entry) => {
             const meta = getMoodMeta(entry.mood);
             return (
               <div
                 key={entry.id}
                 style={{
-                  padding: "12px 14px",
-                  borderRadius: 14,
-                  background: "rgba(188,194,255,0.05)",
-                  border: "1px solid rgba(188,194,255,0.08)",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 6,
+                  gap: 8,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -202,15 +196,17 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
                       boxShadow: `0 0 6px ${meta.color}66`,
                     }}
                   />
-                  <span style={{ fontSize: 12, color: "#e8eaf0" }}>{meta.label}</span>
+                  <span style={{ fontSize: 12, color: "var(--text-on-surface)" }}>
+                    {meta.label}
+                  </span>
                 </div>
-                <span style={{ fontSize: 11, color: "rgba(188,194,255,0.45)" }}>
+                <span style={{ fontSize: 11, color: "var(--surface-violet-icon-hover)" }}>
                   {new Date(entry.timestamp).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
                   })}
                 </span>
-                <span style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
+                <span style={{ fontSize: 11, color: "var(--text-on-surface-strong)" }}>
                   {entry.tags.length} {entry.tags.length === 1 ? "word" : "words"} ·{" "}
                   {entry.socialInteractions?.length ?? 0} connection
                   {entry.socialInteractions?.length === 1 ? "" : "s"}
@@ -222,33 +218,46 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       </div>
 
       {/* Trend */}
-      <ChartCard label="The last 14 days, gently traced">
+      <div>
+        <p
+          style={{
+            fontSize: 11,
+            letterSpacing: "0.9px",
+            textTransform: "uppercase",
+            color: "var(--surface-violet-icon-hover)",
+            marginBottom: 16,
+          }}
+        >
+          The last 14 days, gently traced
+        </p>
         <MoodTrendChart data={trendData} />
-      </ChartCard>
+      </div>
 
       {/* Distribution */}
-      <ChartCard label="How your colors have been showing up">
+      <div>
+        <p
+          style={{
+            fontSize: 11,
+            letterSpacing: "0.9px",
+            textTransform: "uppercase",
+            color: "var(--surface-violet-icon-hover)",
+            marginBottom: 16,
+          }}
+        >
+          How your colors have been showing up
+        </p>
         <MoodDistribution data={distribution} />
-      </ChartCard>
+      </div>
 
       <Divider />
 
-      <div
-        style={{
-          marginBottom: 22,
-          padding: "16px 18px",
-          borderRadius: 16,
-          background: "rgba(188,194,255,0.05)",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-        }}
-      >
+      <div>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            marginBottom: 16,
           }}
         >
           <p
@@ -257,12 +266,15 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               fontWeight: 500,
               letterSpacing: "1.1px",
               textTransform: "uppercase",
-              color: "rgba(188,194,255,0.35)",
+              color: "var(--surface-violet-icon-hover)",
+              margin: 0,
             }}
           >
             A steady heart
           </p>
-          <span style={{ fontSize: 14, color: "#e8eaf0", fontWeight: 600 }}>
+          <span
+            style={{ fontSize: 14, color: "var(--text-on-surface)", fontWeight: 600 }}
+          >
             {analyticsStats.stabilityScore}/100
           </span>
         </div>
@@ -272,7 +284,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               flex: 1,
               height: 8,
               borderRadius: 999,
-              background: "rgba(188,194,255,0.1)",
+              background: "var(--surface-violet-medium)",
               overflow: "hidden",
             }}
           >
@@ -281,17 +293,24 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
                 height: "100%",
                 width: `${analyticsStats.stabilityScore}%`,
                 background:
-                  "linear-gradient(90deg, rgba(255,185,84,0.8), rgba(188,194,255,0.8))",
+                  "linear-gradient(90deg, rgba(255,185,84,0.8), var(--surface-violet-icon-hover))",
               }}
             />
           </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 18,
+            marginTop: 22,
+          }}
+        >
           <div>
-            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>
+            <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
               Your brightest day
             </p>
-            <p style={{ fontSize: 13, color: "#e8eaf0" }}>
+            <p style={{ fontSize: 13, color: "var(--text-on-surface)", marginTop: 4 }}>
               {analyticsStats.bestEntry
                 ? `${getMoodMeta(analyticsStats.bestEntry.mood).label} · ${new Date(
                     analyticsStats.bestEntry.timestamp,
@@ -300,10 +319,10 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             </p>
           </div>
           <div>
-            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>
+            <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
               Your heaviest day
             </p>
-            <p style={{ fontSize: 13, color: "#e8eaf0" }}>
+            <p style={{ fontSize: 13, color: "var(--text-on-surface)", marginTop: 4 }}>
               {analyticsStats.worstEntry
                 ? `${getMoodMeta(analyticsStats.worstEntry.mood).label} · ${new Date(
                     analyticsStats.worstEntry.timestamp,
@@ -312,62 +331,52 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             </p>
           </div>
           <div>
-            <p style={{ fontSize: 12, color: "rgba(188,194,255,0.45)" }}>
+            <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
               Little moments noticed
             </p>
-            <p style={{ fontSize: 13, color: "#e8eaf0" }}>
+            <p style={{ fontSize: 13, color: "var(--text-on-surface)", marginTop: 4 }}>
               {analyticsStats.activityCount}
             </p>
           </div>
         </div>
       </div>
 
-      <div
-        style={{
-          marginBottom: 22,
-          padding: "16px 18px",
-          borderRadius: 16,
-          background: "rgba(188,194,255,0.05)",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-        }}
-      >
+      <div>
         <p
           style={{
             fontSize: 11,
             fontWeight: 500,
             letterSpacing: "1.1px",
             textTransform: "uppercase",
-            color: "rgba(188,194,255,0.35)",
+            color: "var(--surface-violet-icon-hover)",
+            marginBottom: 16,
           }}
         >
           Moments that mattered
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20 }}>
           {analyticsStats.activityHighlights.map((item) => (
-            <div
-              key={item.section}
-              style={{
-                padding: "10px 12px",
-                borderRadius: 14,
-                background: "rgba(188,194,255,0.06)",
-                border: "1px solid rgba(188,194,255,0.08)",
-              }}
-            >
+            <div key={item.section}>
               <p
                 style={{
                   fontSize: 11,
-                  color: "rgba(188,194,255,0.45)",
+                  color: "var(--surface-violet-icon-hover)",
                   textTransform: "uppercase",
+                  margin: 0,
                 }}
               >
                 {item.section}
               </p>
-              <p style={{ fontSize: 13, color: "#e8eaf0", marginTop: 4 }}>
+              <p style={{ fontSize: 13, color: "var(--text-on-surface)", marginTop: 6 }}>
                 {item.label ?? "--"}
               </p>
-              <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  color: "var(--text-on-surface-strong)",
+                  marginTop: 4,
+                }}
+              >
                 {item.count === 1 ? "captured once" : `captured ${item.count} times`}
               </p>
             </div>
@@ -376,68 +385,54 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       </div>
 
       {/* Weekly insight quote */}
-      <div
+      <p
+        className="font-serif"
         style={{
-          padding: "18px 20px",
-          borderLeft: "2px solid rgba(255,185,84,0.35)",
-          background: "rgba(255,185,84,0.04)",
+          fontSize: 15,
+          lineHeight: 1.7,
+          color: "var(--text-warn-quote)",
+          fontStyle: "italic",
+          margin: 0,
         }}
       >
-        <p
-          className="font-serif"
-          style={{
-            fontSize: 15,
-            lineHeight: 1.65,
-            color: "rgba(255,185,84,0.78)",
-            fontStyle: "italic",
-          }}
-        >
-          "{weeklyInsight}"
-        </p>
-      </div>
+        "{weeklyInsight}"
+      </p>
 
-      <div
-        style={{
-          marginTop: 20,
-          padding: "16px 18px",
-          borderRadius: 16,
-          background: "rgba(188,194,255,0.05)",
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-        }}
-      >
+      <div>
         <p
           style={{
             fontSize: 11,
             fontWeight: 500,
             letterSpacing: "1.1px",
             textTransform: "uppercase",
-            color: "rgba(188,194,255,0.35)",
+            color: "var(--surface-violet-icon-hover)",
+            marginBottom: 16,
           }}
         >
           Your kind connections (last 7 days)
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
           <div>
-            <p style={{ fontSize: 13, color: "#e8eaf0", marginBottom: 4 }}>
+            <p style={{ fontSize: 13, color: "var(--text-on-surface)", marginBottom: 4 }}>
               {socialStats.totalInteractions}
             </p>
-            <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>moments shared</p>
+            <p style={{ fontSize: 11, color: "var(--text-on-surface-strong)" }}>
+              moments shared
+            </p>
           </div>
           <div>
-            <p style={{ fontSize: 13, color: "#e8eaf0", marginBottom: 4 }}>
+            <p style={{ fontSize: 13, color: "var(--text-on-surface)", marginBottom: 4 }}>
               {socialStats.topPerson ?? "--"}
             </p>
-            <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
+            <p style={{ fontSize: 11, color: "var(--text-on-surface-strong)" }}>
               warmest presence
             </p>
           </div>
           <div>
-            <p style={{ fontSize: 13, color: "#e8eaf0", marginBottom: 4 }}>
+            <p style={{ fontSize: 13, color: "var(--text-on-surface)", marginBottom: 4 }}>
               {socialStats.topFeeling ?? "--"}
             </p>
-            <p style={{ fontSize: 11, color: "rgba(220,224,255,0.7)" }}>
+            <p style={{ fontSize: 11, color: "var(--text-on-surface-strong)" }}>
               feeling that lingered
             </p>
           </div>

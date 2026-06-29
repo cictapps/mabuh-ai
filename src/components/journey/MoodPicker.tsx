@@ -28,10 +28,10 @@ export function MoodPicker({ value, onChange, size = "md", className }: MoodPick
             aria-pressed={selected}
             aria-label={mood.label}
             className={cn(
-              "flex flex-col items-center gap-1 rounded-2xl border px-2 py-2.5 text-[11px] font-semibold transition-all",
+              "flex flex-col items-center gap-1 rounded-2xl px-2 py-2.5 text-[11px] font-semibold transition-all",
               selected
-                ? "border-transparent text-foreground shadow-[0_18px_44px_-28px_rgba(8,10,18,0.9)]"
-                : "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.04)] text-[#d8d4eb] hover:bg-[rgba(188,194,255,0.07)] hover:text-foreground",
+                ? "text-foreground shadow-[0_18px_44px_-28px_rgba(74, 60, 90, 0.28)]"
+                : "text-[color:var(--text-kicker)] hover:bg-[var(--surface-violet-low)] hover:text-foreground",
             )}
             style={
               selected
@@ -66,7 +66,7 @@ export function MoodChip({ mood, tone }: { mood: MoodType; tone: "filled" | "sof
           ? {
               backgroundColor: `${meta.color}26`,
               borderColor: `${meta.color}55`,
-              color: "#f5f1ff",
+              color: "var(--foreground)",
             }
           : {
               backgroundColor: "transparent",

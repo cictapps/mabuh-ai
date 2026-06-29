@@ -92,9 +92,9 @@ export function ReflectWithAIPanel({
             <div
               className="relative rounded-2xl border p-4 text-sm leading-relaxed"
               style={{
-                background: "rgba(212,187,255,0.06)",
-                borderColor: "rgba(212,187,255,0.18)",
-                color: "rgba(238,241,246,0.88)",
+                background: "var(--surface-fuchsia-low)",
+                borderColor: "var(--surface-fuchsia-medium)",
+                color: "var(--text-on-surface)",
               }}
             >
               <button
@@ -111,7 +111,7 @@ export function ReflectWithAIPanel({
               </button>
               <p
                 className="mb-2 text-[0.65rem] uppercase tracking-[0.22em]"
-                style={{ color: "rgba(212,187,255,0.6)" }}
+                style={{ color: "var(--surface-fuchsia-medium)" }}
               >
                 Mistral reflection
               </p>

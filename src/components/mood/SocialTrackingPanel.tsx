@@ -79,10 +79,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
       return (
         <div
           style={{
-            padding: "12px 14px",
-            borderRadius: 14,
-            background: "rgba(188,194,255,0.04)",
-            color: "rgba(220,224,255,0.7)",
+            color: "var(--text-on-surface-muted)",
             fontSize: 12,
             lineHeight: 1.55,
           }}
@@ -118,7 +115,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
               <span
                 style={{
                   fontSize: 12,
-                  color: "rgba(216,220,230,0.85)",
+                  color: "var(--text-on-surface-strong)",
                   fontWeight: 500,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -131,7 +128,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
               <span
                 style={{
                   fontSize: 11,
-                  color: "rgba(220,224,255,0.7)",
+                  color: "var(--text-on-surface-muted)",
                   flexShrink: 0,
                 }}
               >
@@ -145,7 +142,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
           <span
             style={{
               fontSize: 11,
-              color: "rgba(220,224,255,0.6)",
+              color: "var(--text-on-surface-soft)",
               paddingLeft: 14,
             }}
           >
@@ -155,7 +152,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
         <span
           style={{
             fontSize: 11,
-            color: "rgba(220,224,255,0.6)",
+            color: "var(--text-on-surface-soft)",
             marginTop: 2,
           }}
         >
@@ -186,10 +183,10 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
               height: 36,
               borderRadius: 12,
               background:
-                "linear-gradient(135deg, rgba(255,185,84,0.25), rgba(188,194,255,0.15))",
+                "linear-gradient(135deg, rgba(255,185,84,0.25), var(--surface-violet-icon))",
               display: "grid",
               placeItems: "center",
-              color: "#f5e5b1",
+              color: "var(--icon-warm)",
               fontSize: 16,
               boxShadow: "0 10px 24px -16px rgba(255,185,84,0.6)",
             }}
@@ -198,7 +195,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
           </div>
           <div>
             <SectionLabel>Social tracking</SectionLabel>
-            <p style={{ fontSize: 12, color: "rgba(216,220,230,0.5)" }}>
+            <p style={{ fontSize: 12, color: "var(--text-on-surface-softer)" }}>
               Who energized your day?
             </p>
           </div>
@@ -222,13 +219,13 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
             fontSize: 11,
             letterSpacing: "0.4px",
             textTransform: "uppercase",
-            color: "rgba(255,185,84,0.8)",
+            color: "var(--text-warn)",
             background: "rgba(255,185,84,0.12)",
           }}
         >
           {interactions.length} / {limit} tracked
         </span>
-        <span style={{ fontSize: 12, color: "rgba(216,220,230,0.5)" }}>
+        <span style={{ fontSize: 12, color: "var(--text-on-surface-softer)" }}>
           {interactionHint}
         </span>
       </div>
@@ -236,10 +233,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
       {interactions.length === 0 && (
         <div
           style={{
-            padding: "14px 16px",
-            borderRadius: 14,
-            background: "rgba(188,194,255,0.04)",
-            color: "rgba(188,194,255,0.35)",
+            color: "var(--text-on-surface-faint)",
             fontSize: 13,
           }}
         >
@@ -253,9 +247,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
           key={interaction.id}
           className="interaction-card"
           style={{
-            borderRadius: 16,
-            padding: 16,
-            background: "rgba(188,194,255,0.05)",
+            padding: "4px 0",
             display: "flex",
             flexDirection: "column",
             gap: 12,
@@ -268,7 +260,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
                 fontWeight: 600,
                 letterSpacing: "0.6px",
                 textTransform: "uppercase",
-                color: "rgba(188,194,255,0.5)",
+                color: "var(--text-on-surface-softer)",
               }}
             >
               Person {index + 1}
@@ -279,8 +271,8 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
                   padding: "3px 8px",
                   borderRadius: 999,
                   fontSize: 10,
-                  color: "rgba(188,194,255,0.6)",
-                  background: "rgba(188,194,255,0.08)",
+                  color: "var(--text-on-surface-soft)",
+                  background: "var(--surface-violet-high)",
                 }}
               >
                 {interaction.feelings.length} vibes
@@ -293,7 +285,7 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
                 marginLeft: "auto",
                 border: "none",
                 background: "transparent",
-                color: "rgba(255,123,123,0.7)",
+                color: "var(--text-danger)",
                 fontSize: 12,
                 cursor: "pointer",
               }}
@@ -424,22 +416,22 @@ export const SocialTrackingPanel: React.FC<SocialTrackingPanelProps> = ({
             rows={2}
             style={{
               width: "100%",
-              background: "rgba(188,194,255,0.04)",
+              background: "var(--surface-violet-low)",
               border: "none",
               outline: "none",
               borderRadius: 12,
               padding: "12px 14px",
-              color: "#e8eaf0",
+              color: "var(--text-on-surface)",
               fontFamily: "Plus Jakarta Sans, sans-serif",
               fontSize: 13,
               lineHeight: 1.6,
               resize: "none",
             }}
             onFocus={(event) => {
-              event.currentTarget.style.background = "rgba(188,194,255,0.07)";
+              event.currentTarget.style.background = "var(--surface-violet-medium)";
             }}
             onBlur={(event) => {
-              event.currentTarget.style.background = "rgba(188,194,255,0.04)";
+              event.currentTarget.style.background = "var(--surface-violet-low)";
             }}
           />
         </div>
@@ -453,17 +445,17 @@ const labelStyle: React.CSSProperties = {
   fontWeight: 500,
   letterSpacing: "1.1px",
   textTransform: "uppercase",
-  color: "rgba(220,224,255,0.7)",
+  color: "var(--text-on-surface-muted)",
 };
 
 const selectStyle: React.CSSProperties = {
   width: "100%",
-  background: "rgba(22, 24, 32, 0.92)",
-  border: "none",
+  background: "var(--surface-violet-low)",
+  border: "1px solid var(--border-violet-soft)",
   outline: "none",
   borderRadius: 14,
   padding: "12px 14px",
-  color: "#e8eaf0",
+  color: "var(--text-on-surface)",
   fontFamily: "Plus Jakarta Sans, sans-serif",
   fontSize: 13,
   appearance: "none",

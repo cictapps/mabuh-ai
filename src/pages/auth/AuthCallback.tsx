@@ -76,7 +76,7 @@ export function AuthCallback() {
       className="relative flex min-h-screen items-center justify-center bg-background px-4 pb-12 text-foreground"
       style={{ paddingTop: "var(--app-screen-top)" }}
     >
-      <div className="w-full max-w-md rounded-[1.5rem] border border-white/10 bg-card/80 p-8 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)]">
+      <div className="w-full max-w-md rounded-[1.5rem] border border-white/10 bg-card/80 p-8 shadow-[0_28px_80px_-40px_rgba(74, 60, 90, 0.28)]">
         {error ? (
           <div className="space-y-5">
             <div className="space-y-2">

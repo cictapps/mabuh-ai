@@ -83,7 +83,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
         padding: "30px 22px 52px",
         display: "flex",
         flexDirection: "column",
-        gap: 24,
+        gap: 32,
       }}
     >
       <div>
@@ -93,7 +93,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
             fontWeight: 500,
             letterSpacing: "1.3px",
             textTransform: "uppercase",
-            color: "rgba(188,194,255,0.3)",
+            color: "var(--surface-violet-icon-hover)",
             marginBottom: 10,
           }}
         >
@@ -101,31 +101,43 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
         </p>
         <h2
           className="font-serif"
-          style={{ fontSize: 26, fontWeight: 400, color: "#e8eaf0", marginBottom: 4 }}
+          style={{
+            fontSize: 26,
+            fontWeight: 400,
+            color: "var(--text-on-surface)",
+            marginBottom: 4,
+          }}
         >
           A page for your words
         </h2>
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
+        <p style={{ fontSize: 13, color: "var(--surface-violet-icon-hover)" }}>
           Your check-ins and your quiet little notes, held together
         </p>
       </div>
 
-      <div className="journal-hero">
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 18,
+          padding: "4px 0",
+        }}
+      >
         <div>
           <p
             style={{
-              fontSize: 12,
+              fontSize: 11,
               letterSpacing: "1.1px",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.6)",
-              marginBottom: 8,
+              color: "var(--surface-violet-icon-hover)",
+              marginBottom: 10,
             }}
           >
             Your gentle rhythm
           </p>
           <div
             className="font-serif"
-            style={{ fontSize: 22, color: "#f8f4ff", marginBottom: 6 }}
+            style={{ fontSize: 22, color: "var(--text-on-surface)", marginBottom: 8 }}
           >
             {stats.weekCount === 0
               ? "A quiet week so far"
@@ -133,24 +145,72 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
                 ? "1 little moment this week"
                 : `${stats.weekCount} little moments this week`}
           </div>
-          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
+          <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
             Your last words{" "}
             {stats.latest ? formatDateTime(stats.latest) : "will live here soon"}
           </p>
         </div>
-        <div style={{ display: "grid", gap: 8 }}>
-          <div style={statPillStyle}>
-            <span style={statValueStyle}>{stats.checkins}</span>
-            <span style={statLabelStyle}>check-in moments</span>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: 18,
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 600,
+                color: "var(--text-on-surface)",
+              }}
+            >
+              {stats.checkins}
+            </div>
+            <div
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.6px",
+                textTransform: "uppercase",
+                color: "var(--surface-violet-icon-hover)",
+                marginTop: 4,
+              }}
+            >
+              check-in moments
+            </div>
           </div>
-          <div style={statPillStyle}>
-            <span style={statValueStyle}>{stats.manual}</span>
-            <span style={statLabelStyle}>heart notes</span>
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 600,
+                color: "var(--text-on-surface)",
+              }}
+            >
+              {stats.manual}
+            </div>
+            <div
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.6px",
+                textTransform: "uppercase",
+                color: "var(--surface-violet-icon-hover)",
+                marginTop: 4,
+              }}
+            >
+              heart notes
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="journal-compose">
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+        }}
+      >
         <div
           style={{
             display: "flex",
@@ -159,7 +219,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
           }}
         >
           <SectionLabel>Write a little something</SectionLabel>
-          <span style={{ fontSize: 11, color: "rgba(188,194,255,0.45)" }}>
+          <span style={{ fontSize: 11, color: "var(--surface-violet-icon-hover)" }}>
             A heart note
           </span>
         </div>
@@ -183,7 +243,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
           >
             Keep this note
           </Button>
-          <p style={{ fontSize: 12, color: "rgba(188,194,255,0.4)" }}>
+          <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
             Check-ins already find their way here on their own.
           </p>
         </div>
@@ -197,37 +257,37 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
               fontSize: 10.5,
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: "rgba(188,194,255,0.45)",
+              color: "var(--surface-violet-icon-hover)",
             }}
           >
             <span
               aria-hidden
-              style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }}
+              style={{ flex: 1, height: 1, background: "var(--surface-violet-medium)" }}
             />
             <span>Or sit with what you wrote</span>
             <span
               aria-hidden
-              style={{ flex: 1, height: 1, background: "rgba(188,194,255,0.10)" }}
+              style={{ flex: 1, height: 1, background: "var(--surface-violet-medium)" }}
             />
           </div>
           <ReflectWithAIPanel text={draft} buildContext={buildReflectionContext} />
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         {sortedEntries.length === 0 && (
-          <div
+          <p
             style={{
-              padding: "14px 16px",
-              borderRadius: 14,
-              background: "rgba(188,194,255,0.04)",
-              color: "rgba(188,194,255,0.35)",
+              margin: 0,
+              padding: "16px 0",
+              color: "var(--surface-violet-icon-hover)",
               fontSize: 13,
+              lineHeight: 1.7,
             }}
           >
             Your page is still blank — and that's okay. Your next check-in will rest here
             gently.
-          </div>
+          </p>
         )}
         {sortedEntries.length > 0 && (
           <div className="journal-timeline">
@@ -257,7 +317,14 @@ const JournalCard: React.FC<{
   const meta = entry.mood ? getMoodMeta(entry.mood as MoodType) : null;
 
   return (
-    <div className="journal-card">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        padding: "4px 0",
+      }}
+    >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         {meta && (
           <span
@@ -270,7 +337,7 @@ const JournalCard: React.FC<{
             }}
           />
         )}
-        <span style={{ fontSize: 12, color: "rgba(188,194,255,0.5)" }}>
+        <span style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
           {formatDateTime(entry.timestamp)}
         </span>
         <span
@@ -279,42 +346,53 @@ const JournalCard: React.FC<{
             fontSize: 10,
             letterSpacing: "0.6px",
             textTransform: "uppercase",
-            color: isCheckIn ? "rgba(255,185,84,0.7)" : "rgba(188,194,255,0.45)",
+            color: isCheckIn
+              ? "rgba(255,185,84,0.7)"
+              : "var(--surface-violet-icon-hover)",
           }}
         >
           {isCheckIn ? "From a check-in" : "Heart note"}
         </span>
       </div>
 
-      {meta && <div style={{ fontSize: 14, color: "#e8eaf0" }}>{meta.label}</div>}
+      {meta && (
+        <div style={{ fontSize: 14, color: "var(--text-on-surface)" }}>{meta.label}</div>
+      )}
 
       {entry.tags && entry.tags.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          {entry.tags.map((tag) => (
-            <span
-              key={tag}
-              style={{
-                padding: "3px 10px",
-                borderRadius: 999,
-                fontSize: 11,
-                background: "rgba(188,194,255,0.07)",
-                color: "rgba(188,194,255,0.45)",
-              }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        <p
+          style={{
+            fontSize: 11,
+            color: "var(--surface-violet-icon-hover)",
+            margin: 0,
+          }}
+        >
+          {entry.tags.join(" · ")}
+        </p>
       )}
 
       {entry.content && (
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.5)", lineHeight: 1.6 }}>
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--surface-violet-icon-hover)",
+            lineHeight: 1.6,
+            margin: 0,
+          }}
+        >
           {entry.content}
         </p>
       )}
 
       {!entry.content && (
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.35)", lineHeight: 1.6 }}>
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--surface-violet-icon-hover)",
+            lineHeight: 1.6,
+            margin: 0,
+          }}
+        >
           A quiet check-in with no words — that's perfectly okay too.
         </p>
       )}
@@ -344,27 +422,4 @@ const JournalCard: React.FC<{
       />
     </div>
   );
-};
-
-const statPillStyle: React.CSSProperties = {
-  padding: "10px 12px",
-  borderRadius: 14,
-  background: "rgba(255,255,255,0.12)",
-  color: "#f8f4ff",
-  display: "flex",
-  flexDirection: "column",
-  gap: 2,
-  textAlign: "center",
-};
-
-const statValueStyle: React.CSSProperties = {
-  fontSize: 16,
-  fontWeight: 600,
-};
-
-const statLabelStyle: React.CSSProperties = {
-  fontSize: 10,
-  letterSpacing: "0.6px",
-  textTransform: "uppercase",
-  color: "rgba(255,255,255,0.7)",
 };

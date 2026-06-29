@@ -251,16 +251,13 @@ const SUPPORT_HINT_MOODS: ReadonlySet<MoodType> = new Set<MoodType>([
 
 const helperStyle: React.CSSProperties = {
   fontSize: 12,
-  color: "rgba(188,194,255,0.45)",
+  color: "var(--text-on-surface-muted)",
   lineHeight: 1.55,
   margin: 0,
 };
 
 const sectionCardStyle: React.CSSProperties = {
-  padding: 14,
-  borderRadius: 16,
-  background: "rgba(188,194,255,0.04)",
-  border: "1px solid rgba(188,194,255,0.06)",
+  padding: "14px 0",
   display: "flex",
   flexDirection: "column",
   gap: 12,
@@ -301,10 +298,7 @@ function Stepper({
         display: "flex",
         alignItems: "center",
         gap: 8,
-        padding: "6px 6px 6px 12px",
-        borderRadius: 14,
-        background: "rgba(188,194,255,0.05)",
-        border: "1px solid rgba(188,194,255,0.08)",
+        padding: "6px 0",
         opacity: disabled ? 0.5 : 1,
       }}
     >
@@ -314,14 +308,16 @@ function Stepper({
           fontVariantNumeric: "tabular-nums",
           fontSize: 14,
           fontWeight: 600,
-          color: "#e8eaf0",
+          color: "var(--text-on-surface)",
           flex: 1,
           minWidth: 0,
         }}
       >
         {value}
         {unit ? (
-          <span style={{ color: "rgba(188,194,255,0.5)", marginLeft: 4, fontSize: 12 }}>
+          <span
+            style={{ color: "var(--text-on-surface-muted)", marginLeft: 4, fontSize: 12 }}
+          >
             {unit}
           </span>
         ) : null}
@@ -337,7 +333,7 @@ function Stepper({
           borderRadius: 8,
           border: "none",
           background: "rgba(188,194,255,0.10)",
-          color: "rgba(216,220,230,0.9)",
+          color: "var(--text-on-surface)",
           cursor: value <= min ? "not-allowed" : "pointer",
           fontSize: 14,
           fontWeight: 700,
@@ -365,7 +361,7 @@ function Stepper({
           borderRadius: 8,
           border: "none",
           background: "rgba(188,194,255,0.10)",
-          color: "rgba(216,220,230,0.9)",
+          color: "var(--text-on-surface)",
           cursor: value >= max ? "not-allowed" : "pointer",
           fontSize: 14,
           fontWeight: 700,
@@ -437,7 +433,7 @@ function LoadMeter({
       <span
         style={{
           fontSize: 11,
-          color: "rgba(188,194,255,0.55)",
+          color: "var(--text-on-surface-muted)",
           fontVariantNumeric: "tabular-nums",
           flexShrink: 0,
           minWidth: 32,
@@ -483,20 +479,12 @@ function IdlePrompts() {
   return (
     <div
       aria-hidden={false}
-      className="relative overflow-hidden"
+      className="relative"
       style={{
         zIndex: 1,
         display: "flex",
         flexDirection: "column",
         gap: 12,
-        padding: "18px 16px 16px",
-        borderRadius: "1.75rem",
-        background:
-          "linear-gradient(180deg, rgba(188,194,255,0.055), rgba(188,194,255,0.028))",
-        border: "1px solid rgba(188,194,255,0.12)",
-        boxShadow: "0 28px 80px -40px rgba(8,10,18,0.85)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
       }}
     >
       <div
@@ -525,7 +513,7 @@ function IdlePrompts() {
                 fontWeight: 700,
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
-                color: "#d8d4eb",
+                color: "var(--text-kicker)",
               }}
             >
               Just between us
@@ -539,7 +527,7 @@ function IdlePrompts() {
                 lineHeight: 1.2,
                 fontWeight: 500,
                 letterSpacing: "-0.03em",
-                color: "#eef1f6",
+                color: "var(--text-on-surface)",
               }}
             >
               A tiny pause before you choose.
@@ -556,7 +544,7 @@ function IdlePrompts() {
               borderRadius: 999,
               border: "1px solid rgba(188,194,255,0.10)",
               background: "rgba(188,194,255,0.05)",
-              color: "rgba(216,212,235,0.58)",
+              color: "var(--text-on-surface-muted)",
             }}
           >
             <span
@@ -588,14 +576,7 @@ function IdlePrompts() {
                 alignItems: "center",
                 gap: 10,
                 minHeight: 58,
-                padding: "10px 11px",
-                borderRadius: 16,
-                background:
-                  i === 0 ? "rgba(255,185,84,0.055)" : "rgba(188,194,255,0.035)",
-                border:
-                  i === 0
-                    ? "1px solid rgba(255,185,84,0.13)"
-                    : "1px solid rgba(188,194,255,0.08)",
+                padding: "10px 0",
               }}
             >
               <span
@@ -604,14 +585,7 @@ function IdlePrompts() {
                   placeItems: "center",
                   width: 34,
                   height: 34,
-                  borderRadius: 13,
-                  background:
-                    i === 0 ? "rgba(255,185,84,0.12)" : "rgba(188,194,255,0.10)",
-                  color: i === 0 ? "#ffd99a" : "rgba(220,224,255,0.9)",
-                  boxShadow:
-                    i === 0
-                      ? "0 16px 34px -24px rgba(255,185,84,0.65)"
-                      : "0 16px 34px -24px rgba(188,194,255,0.45)",
+                  color: i === 0 ? "var(--icon-warm)" : "var(--text-kicker)",
                 }}
                 aria-hidden
               >
@@ -623,7 +597,7 @@ function IdlePrompts() {
                     display: "block",
                     fontSize: 12.5,
                     fontWeight: 600,
-                    color: "rgba(232,236,255,0.94)",
+                    color: "var(--text-on-surface-strong)",
                     lineHeight: 1.25,
                   }}
                 >
@@ -634,7 +608,7 @@ function IdlePrompts() {
                     display: "block",
                     marginTop: 2,
                     fontSize: 11,
-                    color: "rgba(216,212,235,0.54)",
+                    color: "var(--text-on-surface-muted)",
                     lineHeight: 1.35,
                   }}
                 >
@@ -649,7 +623,7 @@ function IdlePrompts() {
                   height: 24,
                   borderRadius: 10,
                   border: "1px solid rgba(188,194,255,0.08)",
-                  color: "rgba(216,212,235,0.36)",
+                  color: "var(--text-on-surface-softest)",
                   fontSize: 10,
                   fontWeight: 700,
                   fontVariantNumeric: "tabular-nums",
@@ -663,7 +637,7 @@ function IdlePrompts() {
         <p
           style={{
             fontSize: 11.5,
-            color: "rgba(216,212,235,0.52)",
+            color: "var(--text-on-surface-muted)",
             margin: "0",
             lineHeight: 1.5,
             padding: "2px 2px 0",
@@ -689,18 +663,7 @@ function CheckInDetailCard({
 }: CheckInDetailCardProps) {
   const headerId = `checkin-card-${title.toLowerCase().replace(/\s+/g, "-")}`;
   return (
-    <div
-      className="relative overflow-hidden"
-      style={{
-        borderRadius: "1.75rem",
-        background: "rgba(188,194,255,0.04)",
-        border: "1px solid rgba(188,194,255,0.10)",
-        boxShadow: "0 28px 80px -40px rgba(8,10,18,0.85)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        transition: "background 0.2s ease, border-color 0.2s ease",
-      }}
-    >
+    <div className="relative">
       <div
         aria-hidden
         className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.12),transparent_60%)] blur-2xl"
@@ -745,7 +708,7 @@ function CheckInDetailCard({
               height: 30,
               borderRadius: 9,
               background: filled ? "rgba(188,194,255,0.16)" : "rgba(188,194,255,0.07)",
-              color: filled ? "rgba(220,224,255,0.95)" : "rgba(188,194,255,0.55)",
+              color: filled ? "var(--text-on-surface)" : "var(--text-on-surface-soft)",
               transition: "background 0.2s ease, color 0.2s ease",
               flexShrink: 0,
             }}
@@ -760,7 +723,9 @@ function CheckInDetailCard({
                 fontWeight: 600,
                 letterSpacing: "1.1px",
                 textTransform: "uppercase",
-                color: filled ? "rgba(232,236,255,0.95)" : "rgba(220,224,255,0.75)",
+                color: filled
+                  ? "var(--text-on-surface-strong)"
+                  : "var(--text-on-surface)",
                 transition: "color 0.2s ease",
                 margin: 0,
                 lineHeight: 1.2,
@@ -782,7 +747,7 @@ function CheckInDetailCard({
                 <span
                   style={{
                     fontSize: 11,
-                    color: "rgba(188,194,255,0.4)",
+                    color: "var(--text-on-surface-softest)",
                   }}
                 >
                   {emptyHint ?? (filled ? "Logged" : "Optional")}
@@ -792,7 +757,7 @@ function CheckInDetailCard({
           </div>
           <ChevronDown
             size={16}
-            color="rgba(220,224,255,0.7)"
+            color="var(--text-on-surface-soft)"
             style={{
               transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
               transition: "transform 0.2s ease",
@@ -1127,17 +1092,14 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   return (
     <div
       ref={rootRef}
-      className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
+      className="screen-enter relative flex w-full flex-col gap-5 px-4 pb-12 pt-5"
       style={{
         paddingTop: "var(--app-screen-top)",
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 220px)",
       }}
     >
-      {/* Header card */}
-      <div
-        ref={headerRef}
-        className="relative overflow-hidden rounded-[1.25rem] border border-[rgba(188,194,255,0.10)] bg-card p-5 shadow-[0_18px_50px_-32px_rgba(8,10,18,0.85)] backdrop-blur-xl"
-      >
+      {/* Header section */}
+      <div ref={headerRef} className="relative">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-2xl"
@@ -1158,7 +1120,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 fontWeight: 600,
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
-                color: "#d8d4eb",
+                color: "var(--text-kicker)",
                 margin: 0,
               }}
             >
@@ -1173,7 +1135,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                   padding: "2px 8px",
                   borderRadius: 999,
                   background: "rgba(188,194,255,0.08)",
-                  color: "rgba(188,194,255,0.7)",
+                  color: "var(--text-kicker)",
                 }}
               >
                 {todayCountLabel}
@@ -1186,7 +1148,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
               fontSize: "clamp(24px, 6.5vw, 30px)",
               fontWeight: 500,
               lineHeight: 1.15,
-              color: "#eef1f6",
+              color: "var(--text-on-surface)",
               marginBottom: 4,
               letterSpacing: "-0.03em",
             }}
@@ -1198,7 +1160,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
             className="font-serif"
             style={{
               fontSize: "clamp(14px, 4vw, 16px)",
-              color: showDetails ? meta.color : "rgba(216,212,235,0.78)",
+              color: showDetails ? meta.color : "var(--text-on-surface-soft)",
               letterSpacing: "0.2px",
               lineHeight: 1.45,
               transition: "color 0.3s ease",
@@ -1235,28 +1197,22 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 data-stagger
                 role="note"
                 style={{
-                  padding: "12px 14px",
-                  borderRadius: 14,
-                  background: "rgba(255,185,84,0.06)",
-                  border: "1px solid rgba(255,185,84,0.14)",
+                  padding: "12px 0",
                   display: "flex",
                   alignItems: "center",
                   gap: 10,
-                  color: "rgba(255,225,170,0.88)",
+                  color: "var(--text-on-warm)",
                   fontSize: 12,
                   lineHeight: 1.55,
                   position: "relative",
                   zIndex: 1,
                 }}
               >
-                <Heart
-                  size={14}
-                  style={{ flexShrink: 0, color: "rgba(255,185,84,0.85)" }}
-                />
+                <Heart size={14} style={{ flexShrink: 0, color: "var(--icon-warm)" }} />
                 <span>
                   You don't have to carry this alone. The{" "}
-                  <strong style={{ color: "rgba(255,225,170,0.95)" }}>Support</strong> tab
-                  is here whenever you'd like someone to talk to.
+                  <strong style={{ color: "var(--text-warn-strong)" }}>Support</strong>{" "}
+                  tab is here whenever you'd like someone to talk to.
                 </span>
               </div>
             )}
@@ -1305,7 +1261,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                           fontWeight: 600,
                           letterSpacing: "0.6px",
                           textTransform: "uppercase",
-                          color: "rgba(188,194,255,0.55)",
+                          color: "var(--text-kicker)",
                           display: "flex",
                           alignItems: "center",
                           gap: 6,
@@ -1316,7 +1272,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                       <span
                         style={{
                           fontSize: 11,
-                          color: "rgba(188,194,255,0.45)",
+                          color: "var(--text-on-surface-muted)",
                           fontVariantNumeric: "tabular-nums",
                         }}
                       >
@@ -1347,7 +1303,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                           fontWeight: 600,
                           letterSpacing: "0.6px",
                           textTransform: "uppercase",
-                          color: "rgba(188,194,255,0.55)",
+                          color: "var(--text-kicker)",
                           display: "flex",
                           alignItems: "center",
                           gap: 6,
@@ -1358,7 +1314,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                       <span
                         style={{
                           fontSize: 11,
-                          color: "rgba(188,194,255,0.45)",
+                          color: "var(--text-on-surface-muted)",
                           fontVariantNumeric: "tabular-nums",
                         }}
                       >
@@ -1368,7 +1324,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                     <div
                       style={{
                         fontSize: 11,
-                        color: "rgba(188,194,255,0.5)",
+                        color: "var(--text-on-surface-muted)",
                         lineHeight: 1.45,
                         minHeight: 16,
                       }}
@@ -1397,13 +1353,10 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                     display: "flex",
                     alignItems: "center",
                     gap: 10,
-                    padding: "10px 12px",
-                    borderRadius: 14,
-                    background: "rgba(188,194,255,0.04)",
-                    border: "1px solid rgba(188,194,255,0.06)",
+                    padding: "10px 0",
                   }}
                 >
-                  <PenLine size={14} color="rgba(188,194,255,0.55)" />
+                  <PenLine size={14} color="var(--text-on-surface-soft)" />
                   <input
                     type="text"
                     value={dayNote}
@@ -1416,10 +1369,10 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                       background: "transparent",
                       border: "none",
                       outline: "none",
-                      color: "#eef1f6",
+                      color: "var(--text-on-surface)",
                       fontFamily: "Plus Jakarta Sans, sans-serif",
                       fontSize: 13,
-                      caretColor: "#bcc2ff",
+                      caretColor: "var(--text-on-surface-soft)",
                     }}
                   />
                   {dayNote.trim().length > 0 && (
@@ -1430,7 +1383,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                       style={{
                         border: "none",
                         background: "transparent",
-                        color: "rgba(188,194,255,0.45)",
+                        color: "var(--text-on-surface-muted)",
                         cursor: "pointer",
                         padding: 4,
                         borderRadius: 6,
@@ -1570,7 +1523,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                     <span
                       style={{
                         fontSize: 11,
-                        color: "rgba(188,194,255,0.4)",
+                        color: "var(--text-on-surface-softest)",
                         textAlign: "center",
                         marginTop: 2,
                       }}
@@ -1630,11 +1583,11 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 <span
                   style={{
                     fontSize: 12,
-                    color: "rgba(188,194,255,0.55)",
+                    color: "var(--text-on-surface-soft)",
                     fontWeight: 500,
                   }}
                 >
-                  <span style={{ color: "rgba(216,220,230,0.85)" }}>{meta.label}</span>
+                  <span style={{ color: "var(--text-on-surface)" }}>{meta.label}</span>
                   {" · "}
                   <span style={{ fontVariantNumeric: "tabular-nums" }}>
                     {filledCount}/{detailSections.length}
@@ -1652,7 +1605,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                   gap: 4,
                   border: "none",
                   background: "transparent",
-                  color: "rgba(188,194,255,0.5)",
+                  color: "var(--text-on-surface-muted)",
                   fontSize: 11,
                   fontWeight: 500,
                   cursor: "pointer",
@@ -1693,7 +1646,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
               style={{
                 textAlign: "center",
                 fontSize: 11,
-                color: "rgba(188,194,255,0.32)",
+                color: "var(--text-on-surface-softest)",
                 letterSpacing: "0.4px",
                 lineHeight: 1.5,
                 minHeight: 16,
@@ -1716,7 +1669,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 borderRadius: 14,
                 background: "rgba(188,194,255,0.04)",
                 border: "1px dashed rgba(188,194,255,0.10)",
-                color: "rgba(188,194,255,0.55)",
+                color: "var(--text-on-surface-muted)",
                 fontSize: 11.5,
                 lineHeight: 1.55,
               }}

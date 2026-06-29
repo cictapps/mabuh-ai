@@ -16,7 +16,7 @@ const WEATHER: Record<
     sky: "#121a24",
     glow: "#26384c",
     cloud: "#79859a",
-    accent: "#bcc2ff",
+    accent: "var(--primary)",
   },
   sad: {
     label: "Soft drizzle",
@@ -51,7 +51,7 @@ const WEATHER: Record<
     sky: "#1d2420",
     glow: "#4b4933",
     cloud: "#a8afa2",
-    accent: "#ffd99a",
+    accent: "var(--tertiary)",
   },
   happy: {
     label: "Bright sun",
@@ -278,7 +278,7 @@ export function GardenScene({ mood, plant, stage }: GardenSceneProps) {
             <text
               x="23"
               y="13.5"
-              fill="#eef1f6"
+              fill="var(--text-on-surface)"
               fontFamily="ui-monospace, monospace"
               fontSize="6.5"
               fontWeight="700"
@@ -289,7 +289,7 @@ export function GardenScene({ mood, plant, stage }: GardenSceneProps) {
           </g>
         </svg>
       </div>
-      <figcaption className="mt-2.5 text-center font-mono text-[10px] leading-relaxed tracking-[0.04em] text-[rgba(216,212,235,0.58)]">
+      <figcaption className="mt-2.5 text-center font-mono text-[10px] leading-relaxed tracking-[0.04em] text-[var(--text-on-surface-strong)]">
         Every kind of weather can be part of growing.
       </figcaption>
     </figure>

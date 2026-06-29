@@ -76,7 +76,7 @@ export function AirbornePanel({
           <span className="mt-0.5 block font-mono text-xs">{timeLabel}</span>
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-6">
         {showHint ? (
           <ContextualHint text="This is your between-time view. The countdown tells you when your next waypoint is near — no alarms, just a soft nudge." />
         ) : null}
@@ -126,7 +126,7 @@ export function AirbornePanel({
           </div>
         )}
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Button
             size="lg"
             className="w-full"

@@ -35,7 +35,7 @@ function ToggleRow({
         outline: "none",
         cursor: "pointer",
         textAlign: "left",
-        color: "#eef1f6",
+        color: "var(--text-on-surface)",
       }}
     >
       <span style={{ flex: 1, minWidth: 0 }}>
@@ -44,7 +44,7 @@ function ToggleRow({
           style={{
             display: "block",
             fontSize: 12,
-            color: "rgba(216,212,235,0.6)",
+            color: "var(--text-on-surface-strong)",
             marginTop: 2,
             lineHeight: 1.45,
           }}
@@ -59,7 +59,9 @@ function ToggleRow({
           width: 38,
           height: 22,
           borderRadius: 999,
-          background: checked ? "rgba(188,194,255,0.55)" : "rgba(216,212,235,0.18)",
+          background: checked
+            ? "var(--surface-violet-icon-hover)"
+            : "var(--text-on-surface-faint)",
           transition: "background 0.2s ease",
           flexShrink: 0,
         }}
@@ -72,7 +74,7 @@ function ToggleRow({
             width: 18,
             height: 18,
             borderRadius: "50%",
-            background: checked ? "#121416" : "#eef1f6",
+            background: checked ? "var(--background)" : "var(--text-on-surface)",
             transition: "left 0.2s ease",
           }}
         />
@@ -110,7 +112,7 @@ export const AiConsentSettings: React.FC<{ compact?: boolean }> = ({
           background: "transparent",
           border: "none",
           cursor: "pointer",
-          color: "#eef1f6",
+          color: "var(--text-on-surface)",
           textAlign: "left",
         }}
       >
@@ -122,8 +124,8 @@ export const AiConsentSettings: React.FC<{ compact?: boolean }> = ({
             width: 28,
             height: 28,
             borderRadius: 10,
-            background: "rgba(188,194,255,0.16)",
-            color: "#bcc2ff",
+            background: "var(--surface-violet-icon)",
+            color: "var(--primary)",
             flexShrink: 0,
           }}
         >
@@ -137,7 +139,7 @@ export const AiConsentSettings: React.FC<{ compact?: boolean }> = ({
             style={{
               display: "block",
               fontSize: 12,
-              color: "rgba(216,212,235,0.6)",
+              color: "var(--text-on-surface-strong)",
               marginTop: 2,
             }}
           >
@@ -148,7 +150,7 @@ export const AiConsentSettings: React.FC<{ compact?: boolean }> = ({
         </span>
         <ChevronDown
           size={16}
-          color="rgba(216,212,235,0.55)"
+          color="var(--text-on-surface-strong)"
           style={{
             transition: "transform 0.2s ease",
             transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
@@ -180,7 +182,7 @@ export const AiConsentSettings: React.FC<{ compact?: boolean }> = ({
           <p
             style={{
               fontSize: 11,
-              color: "rgba(216,212,235,0.5)",
+              color: "var(--text-on-surface-muted)",
               lineHeight: 1.5,
               marginTop: 4,
               marginBottom: 0,

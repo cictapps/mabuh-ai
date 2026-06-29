@@ -31,7 +31,7 @@ export const JournalInput: React.FC<JournalInputProps> = ({
             fontWeight: 600,
             letterSpacing: "1.1px",
             textTransform: "uppercase",
-            color: "rgba(216,220,230,0.65)",
+            color: "var(--text-on-surface-soft)",
           }}
         >
           {label}
@@ -44,28 +44,28 @@ export const JournalInput: React.FC<JournalInputProps> = ({
         rows={rows}
         style={{
           width: "100%",
-          background: "rgba(188,194,255,0.04)",
+          background: "var(--surface-violet-low)",
           border: "none",
           outline: "none",
           borderRadius: 16,
           padding: "16px 18px",
-          color: "#eef1f6",
+          color: "var(--text-on-surface)",
           fontFamily: "Plus Jakarta Sans, sans-serif",
           fontSize: 15,
           lineHeight: 1.65,
           resize: "none",
-          caretColor: "#bcc2ff",
+          caretColor: "var(--primary)",
           minHeight: 96,
-          boxShadow: "inset 0 0 0 1px rgba(188,194,255,0.05)",
+          boxShadow: "inset 0 0 0 1px var(--border-violet-soft)",
           transition: "background 0.2s ease, box-shadow 0.2s ease",
         }}
         onFocus={(e) => {
-          e.currentTarget.style.background = "rgba(188,194,255,0.07)";
+          e.currentTarget.style.background = "var(--surface-violet-medium)";
           e.currentTarget.style.boxShadow = "inset 0 0 0 1px rgba(255,185,84,0.22)";
         }}
         onBlur={(e) => {
-          e.currentTarget.style.background = "rgba(188,194,255,0.04)";
-          e.currentTarget.style.boxShadow = "inset 0 0 0 1px rgba(188,194,255,0.05)";
+          e.currentTarget.style.background = "var(--surface-violet-low)";
+          e.currentTarget.style.boxShadow = "inset 0 0 0 1px var(--border-violet-soft)";
         }}
       />
       {showCount && (
@@ -75,7 +75,7 @@ export const JournalInput: React.FC<JournalInputProps> = ({
             justifyContent: "flex-end",
             fontSize: 11,
             fontVariantNumeric: "tabular-nums",
-            color: isOverRecommended ? "rgba(255,185,84,0.95)" : "rgba(216,220,230,0.6)",
+            color: isOverRecommended ? "var(--text-warn)" : "var(--text-on-surface-soft)",
             transition: "color 0.2s ease",
           }}
           aria-live="polite"

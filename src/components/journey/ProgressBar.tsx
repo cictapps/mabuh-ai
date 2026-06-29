@@ -27,7 +27,7 @@ export function ProgressBar({
         aria-valuenow={clamped}
         aria-valuemin={0}
         aria-valuemax={100}
-        className="h-2 w-full overflow-hidden rounded-full bg-[rgba(188,194,255,0.08)]"
+        className="h-2 w-full overflow-hidden rounded-full bg-[var(--surface-violet-medium)]"
       >
         <div
           className={cn(
@@ -38,7 +38,7 @@ export function ProgressBar({
         />
       </div>
       {label && !hideLabel ? (
-        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#d8d4eb]">
+        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
           {label}
         </p>
       ) : null}

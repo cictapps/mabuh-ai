@@ -25,7 +25,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
         padding: "30px 22px 52px",
         display: "flex",
         flexDirection: "column",
-        gap: 24,
+        gap: 32,
       }}
     >
       <div>
@@ -72,28 +72,25 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
       />
 
       {loading ? (
-        <div
+        <p
           style={{
-            padding: "14px 16px",
-            borderRadius: 14,
-            background: "var(--surface-violet-low)",
+            margin: 0,
+            padding: "16px 0",
             color: "var(--text-on-surface-muted)",
             fontSize: 12,
             textAlign: "center",
           }}
         >
           Gathering your days…
-        </div>
+        </p>
       ) : isEmpty ? (
-        <div
+        <p
           style={{
-            padding: "20px 18px",
-            borderRadius: 16,
-            background: "var(--surface-violet-low)",
-            border: "1px dashed var(--border-violet-medium)",
+            margin: "12px 0 0",
+            padding: "16px 0",
             color: "var(--text-on-surface-muted)",
             fontSize: 13,
-            lineHeight: 1.6,
+            lineHeight: 1.7,
             textAlign: "center",
           }}
         >
@@ -103,7 +100,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
             Check in
           </strong>{" "}
           tab is waiting with a soft seat for you.
-        </div>
+        </p>
       ) : null}
     </div>
   );

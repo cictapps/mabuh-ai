@@ -46,16 +46,16 @@ export function FinalPanel({
         <CardTitle className="mt-3 text-2xl">Time to land</CardTitle>
         <CardDescription>A small close-out, then rest.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-6">
         {showHint ? (
           <ContextualHint text="Three soft things, in any order. Tomorrow is always a new flight." />
         ) : null}
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
             Wind down
           </p>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <ChecklistChip
               emoji="💧"
               label="A sip of water"

@@ -46,7 +46,7 @@ export function MoodGradientBar({ entries, period, onEntryClick }: MoodGradientB
           height,
           borderRadius: 999,
           background:
-            "linear-gradient(90deg, rgba(188,194,255,0.04), rgba(188,194,255,0.06), rgba(188,194,255,0.04))",
+            "linear-gradient(90deg, var(--surface-violet-low), var(--surface-violet-medium), var(--surface-violet-low))",
         }}
         aria-label={`No check-ins yet for this ${period}`}
       />

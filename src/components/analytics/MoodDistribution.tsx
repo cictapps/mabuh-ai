@@ -32,7 +32,7 @@ export const MoodDistribution: React.FC<MoodDistributionProps> = ({ data }) => {
             <span
               style={{
                 fontSize: 12,
-                color: "rgba(188,194,255,0.45)",
+                color: "var(--surface-violet-icon-hover)",
                 width: 60,
                 flexShrink: 0,
               }}
@@ -42,7 +42,7 @@ export const MoodDistribution: React.FC<MoodDistributionProps> = ({ data }) => {
             <div
               style={{
                 flex: 1,
-                background: "rgba(188,194,255,0.06)",
+                background: "var(--surface-violet-medium)",
                 borderRadius: 4,
                 height: 6,
                 overflow: "hidden",
@@ -61,7 +61,7 @@ export const MoodDistribution: React.FC<MoodDistributionProps> = ({ data }) => {
             <span
               style={{
                 fontSize: 11,
-                color: "rgba(188,194,255,0.32)",
+                color: "var(--surface-violet-icon-hover)",
                 width: 32,
                 textAlign: "right",
               }}

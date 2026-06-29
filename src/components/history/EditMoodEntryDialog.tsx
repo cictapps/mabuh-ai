@@ -161,7 +161,7 @@ export const EditMoodEntryDialog: React.FC<EditMoodEntryDialogProps> = ({
             onSubmit={handleSubmit}
             className="flex-1 overflow-y-auto px-6 py-5"
           >
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-6">
               <section>
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
                   How is it now?

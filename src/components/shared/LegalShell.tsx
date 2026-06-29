@@ -37,7 +37,7 @@ export function LegalShell({
 
   return (
     <main
-      className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
+      className="screen-enter relative flex w-full flex-col gap-5 px-4 pb-12 pt-5"
       style={{
         paddingTop: "var(--app-screen-top)",
         minHeight: "100%",
@@ -68,7 +68,7 @@ export function LegalShell({
         )}
       </header>
 
-      <section className="relative z-10 mt-2 flex flex-col gap-2 text-left">
+      <section className="relative z-10 mt-2 flex flex-col gap-3 text-left">
         <h1
           className="font-serif"
           style={{
@@ -93,7 +93,7 @@ export function LegalShell({
       </section>
 
       <article
-        className="relative z-10 flex flex-col gap-5 text-left"
+        className="relative z-10 flex flex-col gap-6 text-left"
         style={{ color: "rgba(216,212,235,0.85)" }}
       >
         {children}

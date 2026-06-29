@@ -91,16 +91,16 @@ export function PreflightPanel({
         <CardTitle className="mt-3 text-2xl">A gentle start</CardTitle>
         <CardDescription>A small moment to land before the day moves.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-6">
         {showHint ? (
           <ContextualHint text="Three soft things, in any order. Skip what doesn't fit — the button is always ready." />
         ) : null}
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
             Land softly
           </p>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <ChecklistChip
               emoji="💧"
               label="A sip of water"

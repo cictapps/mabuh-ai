@@ -205,7 +205,7 @@ function Section({
         padding: 0,
         display: "flex",
         flexDirection: "column",
-        gap: 14,
+        gap: 18,
       }}
     >
       <header
@@ -1006,7 +1006,7 @@ function AppearanceSection({
       <p
         style={{
           fontSize: 12,
-          color: "var(--surface-violet-icon-hover)",
+          color: "var(--text-on-surface-muted)",
           lineHeight: 1.5,
           margin: 0,
         }}
@@ -1260,7 +1260,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           className="font-serif"
           style={{
             fontSize: "clamp(14px, 4vw, 16px)",
-            color: "var(--surface-violet-icon-hover)",
+            color: "var(--text-on-surface-muted)",
             letterSpacing: "0.2px",
             margin: 0,
           }}
@@ -1328,7 +1328,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             padding: 0,
           }}
         >
-          <Mail size={14} style={{ color: "var(--surface-violet-icon-hover)" }} />
+          <Mail size={14} style={{ color: "var(--text-on-surface-muted)" }} />
           <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
             <span
               style={{
@@ -1430,7 +1430,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <p
             style={{
               fontSize: 12,
-              color: "var(--surface-violet-icon-hover)",
+              color: "var(--text-on-surface-muted)",
               lineHeight: 1.5,
               margin: 0,
             }}
@@ -1514,7 +1514,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 13,
-            color: "var(--surface-violet-icon-hover)",
+            color: "var(--text-on-surface-muted)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -1594,7 +1594,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 13,
-            color: "var(--surface-violet-icon-hover)",
+            color: "var(--text-on-surface-muted)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -1695,7 +1695,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 11,
-            color: "var(--surface-violet-icon-hover)",
+            color: "var(--text-on-surface-muted)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -1728,7 +1728,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 11,
-            color: "var(--surface-violet-icon-hover)",
+            color: "var(--text-on-surface-muted)",
             lineHeight: 1.6,
             margin: 0,
             textAlign: "center",
@@ -1856,7 +1856,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p
           style={{
             fontSize: 13,
-            color: "var(--surface-violet-icon-hover)",
+            color: "var(--text-on-surface-muted)",
             lineHeight: 1.55,
             margin: 0,
           }}

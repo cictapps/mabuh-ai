@@ -1222,7 +1222,7 @@ html.dark .bottom-nav__item--active {
 .checkin-root {
   display: flex;
   flex-direction: column;
-  gap: clamp(14px, 4vw, 22px);
+  gap: clamp(18px, 5vw, 26px);
   padding: var(--app-screen-top) clamp(16px, 5vw, 24px)
     calc(env(safe-area-inset-bottom, 0px) + 120px);
   position: relative;
@@ -1251,7 +1251,7 @@ html.dark .bottom-nav__item--active {
 
 @media (max-width: 380px) {
   .checkin-root {
-    gap: 14px;
+    gap: 18px;
     padding-left: 14px;
     padding-right: 14px;
   }

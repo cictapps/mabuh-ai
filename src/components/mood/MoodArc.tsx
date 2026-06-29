@@ -152,7 +152,7 @@ const OrbitTrack: React.FC = React.memo(() => {
         cy={CY}
         r={ORBIT_RADIUS}
         fill="none"
-        stroke="rgba(216,212,235,0.08)"
+        stroke="var(--text-on-surface-faint)"
         strokeWidth={1.5}
       />
     </>
@@ -287,8 +287,10 @@ const MoodNode: React.FC<MoodNodeProps> = React.memo(
         <motion.circle
           cx={pos.x}
           cy={pos.y}
-          fill={isSelected ? hexToRgba(mood.color, 0.22) : "rgba(18,20,28,0.65)"}
-          stroke={isSelected ? hexToRgba(mood.color, 0.55) : "rgba(216,212,235,0.10)"}
+          fill={isSelected ? hexToRgba(mood.color, 0.22) : "var(--ring-node-bg-soft)"}
+          stroke={
+            isSelected ? hexToRgba(mood.color, 0.55) : "var(--text-on-surface-faint)"
+          }
           strokeWidth={isSelected ? 2 : 1}
           initial={false}
           animate={{ r: half }}
@@ -326,7 +328,7 @@ const MoodNode: React.FC<MoodNodeProps> = React.memo(
           letterSpacing="0.04em"
           initial={false}
           animate={{
-            fill: isSelected ? mood.color : "rgba(216,212,235,0.45)",
+            fill: isSelected ? mood.color : "var(--text-on-surface-muted)",
             opacity: isSelected ? 1 : 0.7,
           }}
           transition={transition}
@@ -367,8 +369,8 @@ const MoodCenterLogo: React.FC<{ color: string; hasSelection: boolean }> = React
           initial={false}
           animate={{
             boxShadow: hasSelection
-              ? `0 0 40px 12px ${ambientColor}, 0 0 80px 24px ${hexToRgba(color.startsWith("rgb") ? "#bcc2ff" : color, 0.08)}`
-              : "0 0 30px 8px rgba(188,194,255,0.06)",
+              ? `0 0 40px 12px ${ambientColor}, 0 0 80px 24px ${hexToRgba(color.startsWith("rgb") ? "var(--primary)" : color, 0.08)}`
+              : "0 0 30px 8px var(--surface-violet-medium)",
           }}
           transition={t}
           style={{
@@ -385,11 +387,11 @@ const MoodCenterLogo: React.FC<{ color: string; hasSelection: boolean }> = React
           initial={false}
           animate={{
             borderColor: hasSelection
-              ? hexToRgba(color.startsWith("rgb") ? "#bcc2ff" : color, 0.18)
-              : "rgba(188,194,255,0.08)",
+              ? hexToRgba(color.startsWith("rgb") ? "var(--primary)" : color, 0.18)
+              : "var(--surface-violet-medium)",
             background: hasSelection
-              ? `radial-gradient(circle at center, ${hexToRgba(color.startsWith("rgb") ? "#bcc2ff" : color, 0.06)}, rgba(18,20,28,0.45) 70%)`
-              : "rgba(18,20,28,0.35)",
+              ? `radial-gradient(circle at center, ${hexToRgba(color.startsWith("rgb") ? "var(--primary)" : color, 0.06)}, var(--ring-node-bg-soft) 70%)`
+              : "var(--ring-node-bg-soft)",
           }}
           transition={t}
           style={{
@@ -563,7 +565,7 @@ export const MoodArc: React.FC<MoodArcProps> = ({ selectedMood, onSelect }) => {
         }}
       >
         <MoodCenterLogo
-          color={selectedMoodMeta?.color ?? "rgba(188,194,255,0.55)"}
+          color={selectedMoodMeta?.color ?? "var(--surface-violet-icon-hover)"}
           hasSelection={selectedIdx >= 0}
         />
       </div>

@@ -34,7 +34,7 @@ export const SuggestionsScreen: React.FC<SuggestionsScreenProps> = ({
             fontWeight: 500,
             letterSpacing: "1.3px",
             textTransform: "uppercase",
-            color: "rgba(188,194,255,0.3)",
+            color: "var(--surface-violet-icon-hover)",
             marginBottom: 10,
           }}
         >
@@ -42,11 +42,16 @@ export const SuggestionsScreen: React.FC<SuggestionsScreenProps> = ({
         </p>
         <h2
           className="font-serif"
-          style={{ fontSize: 26, fontWeight: 400, color: "#e8eaf0", marginBottom: 4 }}
+          style={{
+            fontSize: 26,
+            fontWeight: 400,
+            color: "var(--text-on-surface)",
+            marginBottom: 4,
+          }}
         >
           Gentle guidance
         </h2>
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
+        <p style={{ fontSize: 13, color: "var(--surface-violet-icon-hover)" }}>
           Based on your recent emotional pattern
         </p>
       </div>
@@ -72,11 +77,18 @@ export const SuggestionsScreen: React.FC<SuggestionsScreenProps> = ({
           }}
         />
         <div>
-          <p style={{ fontSize: 13, fontWeight: 500, color: "#e8eaf0", marginBottom: 2 }}>
+          <p
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              color: "var(--text-on-surface)",
+              marginBottom: 2,
+            }}
+          >
             Based on your recent mood:{" "}
             <span style={{ color: meta.color }}>{meta.label}</span>
           </p>
-          <p style={{ fontSize: 12, color: "rgba(188,194,255,0.38)" }}>
+          <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
             {meta.definition}
           </p>
         </div>
@@ -85,7 +97,7 @@ export const SuggestionsScreen: React.FC<SuggestionsScreenProps> = ({
       {/* Suggestions */}
       <div>
         {suggestions.length === 0 ? (
-          <p style={{ fontSize: 12, color: "rgba(188,194,255,0.4)" }}>
+          <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
             Log a few check-ins to see suggestions tailored to your mood.
           </p>
         ) : (

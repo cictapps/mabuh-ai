@@ -373,7 +373,7 @@ export default function App({
                     isPullRefreshing || pullNotice ? 1 : Math.min(1, pullDistance / 40),
                 }}
               >
-                <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(188,194,255,0.12)] bg-card/95 px-3 py-1.5 text-[11px] font-semibold text-[#d8d4eb] shadow-lg backdrop-blur-xl">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-violet-medium)] bg-card/95 px-3 py-1.5 text-[11px] font-semibold text-[color:var(--text-kicker)] shadow-lg backdrop-blur-xl">
                   <RefreshCw
                     size={13}
                     className={

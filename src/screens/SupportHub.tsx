@@ -89,7 +89,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
 
   return (
     <div
-      className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
+      className="screen-enter relative flex w-full flex-col gap-5 px-4 pb-12 pt-5"
       style={{
         paddingTop: "var(--app-screen-top)",
         minHeight: "100%",
@@ -167,7 +167,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
 
       {/* Quick actions — primary entry points come first. */}
       <section aria-label="Quick actions" className="relative">
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-6">
           <div>
             <p
               style={{
@@ -244,7 +244,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
 
       {/* Crisis safety — high visibility, comes after the primary actions. */}
       <section aria-label="Crisis safety" className="relative">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           <div className="flex items-center gap-3">
             <span
               className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(255,123,123,0.18)]"
@@ -278,7 +278,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {HOTLINES.map((h) => (
               <a
                 key={h.key}

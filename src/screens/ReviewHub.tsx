@@ -66,9 +66,7 @@ const tabs: Array<{ id: ReviewTabId; label: string; icon: string }> = [
 
 const renderTabIcon = (iconName: string, isActive: boolean) => {
   const size = 16;
-  const className = isActive
-    ? "text-[color:var(--text-on-surface-strong)]"
-    : "text-[var(--surface-violet-icon-hover)]";
+  const className = isActive ? "text-current" : "text-[color:var(--text-kicker)]";
 
   switch (iconName) {
     case "history":
@@ -112,7 +110,7 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
 
   return (
     <div
-      className="screen-enter relative flex w-full flex-col gap-4 px-4 pb-12 pt-5"
+      className="screen-enter relative flex w-full flex-col gap-5 px-4 pb-12 pt-5"
       style={{
         paddingTop: "var(--app-screen-top)",
         minHeight: "100%",
@@ -181,9 +179,7 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
                 background: isActive
                   ? "linear-gradient(to right, var(--primary), var(--secondary), var(--primary))"
                   : "transparent",
-                color: isActive
-                  ? "var(--primary-foreground)"
-                  : "var(--text-on-surface-strong)",
+                color: isActive ? "var(--primary-foreground)" : "var(--text-kicker)",
                 boxShadow: isActive
                   ? "0 14px 32px -18px var(--surface-violet-icon-hover)"
                   : "none",

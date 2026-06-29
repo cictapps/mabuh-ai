@@ -7,12 +7,12 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-card/80 text-card-foreground border-white/10",
+        default: "bg-card/80 text-card-foreground border-border",
         success:
-          "border-[rgba(109,186,132,0.25)] bg-[rgba(109,186,132,0.08)] text-foreground",
-        info: "border-white/10 bg-card/80 text-card-foreground",
+          "border-[color:var(--success-soft)] bg-[color:var(--success-soft)] text-foreground",
+        info: "border-border bg-card/80 text-card-foreground",
         warning:
-          "border-[rgba(255,185,84,0.25)] bg-[rgba(255,185,84,0.08)] text-foreground",
+          "border-[color:var(--border-warm)] bg-[color:var(--surface-warm-low)] text-[color:var(--text-on-warm)]",
         destructive: "border-destructive/30 bg-destructive/10 text-destructive",
       },
     },

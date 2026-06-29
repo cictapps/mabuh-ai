@@ -87,7 +87,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
           <span className="grid size-9 place-items-center rounded-2xl border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.10)] text-tertiary">
             <Award className="size-4" />
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
             Achievements
           </span>
         </div>
@@ -96,7 +96,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
           Small XP for small steps. There are no penalties for pausing.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-6">
         {showHint ? (
           <ContextualHint text="XP grows from gentle moments — there are no streaks to break. Use the milestones as a soft map, not a scoreboard." />
         ) : null}
@@ -112,7 +112,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
         </div>
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
             Progress to level {level + 1}
           </p>
           <ProgressBar
@@ -123,17 +123,19 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
         </div>
 
         <div>
-          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
             <Sparkles className="size-3" />
             How XP grows
           </p>
-          <ul className="space-y-1.5">
+          <ul className="space-y-2">
             {XP_RULES.map((rule) => (
               <li
                 key={rule.label}
                 className="flex items-center justify-between rounded-xl border border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] px-3 py-2 text-xs"
               >
-                <span className="text-[#d8d4eb]">{rule.label}</span>
+                <span className="text-[color:var(--text-on-surface-muted)]">
+                  {rule.label}
+                </span>
                 <span className="font-mono text-foreground">{rule.value}</span>
               </li>
             ))}
@@ -154,11 +156,11 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
 
         {/* Rewards */}
         <div>
-          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
             <Gift className="size-3" />
             Level rewards
           </p>
-          <ul className="space-y-1.5">
+          <ul className="space-y-2">
             {REWARDS.map((reward) => {
               const unlocked = unlockedRewards.includes(reward.id);
               const locked = reward.level > level;
@@ -170,8 +172,8 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
                     (unlocked
                       ? "border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.08)] text-foreground"
                       : locked
-                        ? "border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] text-[#d8d4eb]/50"
-                        : "border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] text-[#d8d4eb]")
+                        ? "border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] text-[color:var(--text-on-surface-softest)]"
+                        : "border-[rgba(188,194,255,0.06)] bg-[rgba(188,194,255,0.02)] text-[color:var(--text-on-surface-muted)]")
                   }
                 >
                   <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(188,194,255,0.08)]">
@@ -189,7 +191,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
                           Unlocked
                         </span>
                       ) : locked ? (
-                        <span className="ml-1.5 text-[10px] text-[#d8d4eb]/40">
+                        <span className="ml-1.5 text-[10px] text-[color:var(--text-on-surface-softest)]">
                           Level {reward.level}
                         </span>
                       ) : null}
@@ -198,7 +200,7 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
                       {reward.description}
                     </span>
                   </span>
-                  <span className="shrink-0 text-right text-[10px] capitalize text-[#d8d4eb]/60">
+                  <span className="shrink-0 text-right text-[10px] capitalize text-[color:var(--text-on-surface-softest)]">
                     {CATEGORY_LABELS[reward.category] ?? reward.category}
                   </span>
                 </li>
@@ -209,13 +211,13 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
 
         {/* Milestones */}
         <div>
-          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
             <MapPin className="size-3" />
             Milestones
           </p>
-          <ul className="space-y-1.5">
+          <ul className="space-y-2">
             {milestones.length === 0 ? (
-              <li className="rounded-xl border border-dashed border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.02)] px-3 py-3 text-xs text-[#d8d4eb]">
+              <li className="rounded-xl border border-dashed border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.02)] px-3 py-3 text-xs text-[color:var(--text-on-surface-muted)]">
                 Complete your first Flight, Garden day, journal entry, or pause to earn a
                 milestone.
               </li>

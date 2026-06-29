@@ -8,7 +8,7 @@ interface ChartCardProps {
 export const ChartCard: React.FC<ChartCardProps> = ({ label, children }) => (
   <div
     style={{
-      background: "rgba(188,194,255,0.03)",
+      background: "var(--surface-violet-low)",
       borderRadius: 16,
       padding: "18px 18px 14px",
       marginBottom: 22,
@@ -19,7 +19,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({ label, children }) => (
         fontSize: 11,
         letterSpacing: "0.9px",
         textTransform: "uppercase",
-        color: "rgba(188,194,255,0.28)",
+        color: "var(--surface-violet-icon-hover)",
         marginBottom: 14,
       }}
     >

@@ -67,16 +67,16 @@ export function CheckpointPanel({
         <CardTitle className="mt-3 text-2xl">{checkpointLabel}</CardTitle>
         <CardDescription>{checkpointTime} · a small pause.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-6">
         {showHint ? (
           <ContextualHint text="Recenter, name a feeling, and keep going. There's nothing to fix here." />
         ) : null}
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
             Recenter
           </p>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <ChecklistChip
               emoji="💧"
               label="A sip of water"
@@ -113,7 +113,7 @@ export function CheckpointPanel({
         </button>
 
         {showOptional ? (
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
               <label
                 htmlFor="checkpoint-notes"

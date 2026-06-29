@@ -9,17 +9,17 @@ type PillProps = {
 };
 
 const TONE_STYLES: Record<NonNullable<PillProps["tone"]>, string> = {
-  default: "border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.04)] text-foreground",
-  warm: "border-[rgba(255,185,84,0.30)] bg-[rgba(255,185,84,0.10)] text-[#ffd99a]",
-  calm: "border-[rgba(188,194,255,0.22)] bg-[rgba(188,194,255,0.10)] text-foreground",
-  soft: "border-[rgba(188,194,255,0.08)] bg-[rgba(188,194,255,0.02)] text-[#d8d4eb]",
+  default: "text-foreground",
+  warm: "text-[color:var(--tertiary)]",
+  calm: "text-foreground",
+  soft: "text-[color:var(--text-kicker)]",
 };
 
 export function Pill({ label, value, tone = "default", className }: PillProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-end gap-0.5 rounded-2xl border px-3 py-1.5 leading-none",
+        "flex flex-col items-end gap-0.5 rounded-2xl px-2 py-1.5 leading-none",
         TONE_STYLES[tone],
         className,
       )}
@@ -27,7 +27,7 @@ export function Pill({ label, value, tone = "default", className }: PillProps) {
       <span className="flex items-center gap-1 text-sm font-semibold tracking-tight text-foreground">
         {value}
       </span>
-      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
         {label}
       </span>
     </div>

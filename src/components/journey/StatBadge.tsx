@@ -13,20 +13,14 @@ type StatBadgeProps = {
   className?: string;
 };
 
-const TONE_STYLES: Record<StatBadgeTone, string> = {
-  warm: "border-[rgba(255,185,84,0.30)] bg-[rgba(255,185,84,0.10)]",
-  calm: "border-[rgba(188,194,255,0.22)] bg-[rgba(188,194,255,0.10)]",
-  soft: "border-[rgba(188,194,255,0.12)] bg-[rgba(188,194,255,0.04)]",
-};
-
 const ICON_TONE: Record<StatBadgeTone, string> = {
-  warm: "bg-[rgba(255,185,84,0.18)] text-tertiary",
-  calm: "bg-[rgba(188,194,255,0.16)] text-primary",
-  soft: "bg-[rgba(188,194,255,0.08)] text-foreground",
+  warm: "text-tertiary",
+  calm: "text-primary",
+  soft: "text-foreground",
 };
 
 const VALUE_TONE: Record<StatBadgeTone, string> = {
-  warm: "text-[#ffd99a]",
+  warm: "text-[color:var(--tertiary)]",
   calm: "text-foreground",
   soft: "text-foreground",
 };
@@ -60,7 +54,7 @@ export function StatBadge({
         >
           {value}
         </span>
-        <span className="mt-1 block text-[9px] font-semibold uppercase leading-tight tracking-[0.14em] text-[#d8d4eb]">
+        <span className="mt-1 block text-[9px] font-semibold uppercase leading-tight tracking-[0.14em] text-[color:var(--text-kicker)]">
           {label}
         </span>
       </span>
@@ -68,11 +62,10 @@ export function StatBadge({
   );
 
   const baseClasses = cn(
-    "flex rounded-2xl border transition-all duration-200 active:scale-[0.98]",
+    "flex rounded-2xl transition-all duration-200 active:scale-[0.98]",
     layout === "stacked"
       ? "min-h-[88px] flex-col items-start justify-between gap-2.5 p-3"
-      : "items-center gap-3 px-3 py-2.5",
-    TONE_STYLES[tone],
+      : "items-center gap-3 px-2 py-2.5",
     className,
   );
 
@@ -84,7 +77,7 @@ export function StatBadge({
         aria-label={`${label}: ${String(value)}. Open wins`}
         className={cn(
           baseClasses,
-          "w-full text-left hover:border-[rgba(188,194,255,0.28)] hover:bg-[rgba(188,194,255,0.08)]",
+          "w-full text-left hover:bg-[var(--surface-violet-low)]",
         )}
       >
         {content}

@@ -14,17 +14,13 @@ type RestPanelProps = {
 
 export function RestPanel({ onPrepareNext }: RestPanelProps) {
   return (
-    <Card className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.20),transparent_60%)] blur-2xl"
-      />
+    <Card className="relative">
       <CardHeader className="relative">
         <div className="flex items-center justify-between gap-3">
-          <span className="grid size-9 place-items-center rounded-2xl border border-[rgba(188,194,255,0.18)] bg-[rgba(188,194,255,0.06)] text-foreground">
+          <span className="grid size-9 place-items-center rounded-2xl text-foreground">
             <Moon className="size-4" />
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
             Rest
           </span>
         </div>

@@ -33,7 +33,7 @@ export const InsightCard: React.FC<InsightCardProps> = ({ insight, offset = fals
       <p
         style={{
           fontSize: 13,
-          color: "rgba(188,194,255,0.45)",
+          color: "var(--surface-violet-icon-hover)",
           lineHeight: 1.65,
         }}
       >

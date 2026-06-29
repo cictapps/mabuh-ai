@@ -11,7 +11,7 @@ export const FindHelpScreen: React.FC = () => {
         margin: "0 auto",
         position: "relative",
         overflow: "hidden",
-        background: "#121416",
+        background: "var(--background)",
         display: "flex",
         flexDirection: "column",
         fontFamily: "Plus Jakarta Sans, system-ui, sans-serif",

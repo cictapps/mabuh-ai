@@ -44,7 +44,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
         padding: "30px 22px 52px",
         display: "flex",
         flexDirection: "column",
-        gap: 24,
+        gap: 32,
       }}
     >
       <div>
@@ -54,7 +54,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
             fontWeight: 500,
             letterSpacing: "1.3px",
             textTransform: "uppercase",
-            color: "rgba(188,194,255,0.3)",
+            color: "var(--surface-violet-icon-hover)",
             marginBottom: 10,
           }}
         >
@@ -62,30 +62,35 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
         </p>
         <h2
           className="font-serif"
-          style={{ fontSize: 26, fontWeight: 400, color: "#e8eaf0", marginBottom: 4 }}
+          style={{
+            fontSize: 26,
+            fontWeight: 400,
+            color: "var(--text-on-surface)",
+            marginBottom: 4,
+          }}
         >
           Gentle reflections
         </h2>
-        <p style={{ fontSize: 13, color: "rgba(188,194,255,0.36)" }}>
+        <p style={{ fontSize: 13, color: "var(--surface-violet-icon-hover)" }}>
           Soft little things we noticed from your recent days
         </p>
       </div>
 
-      <div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {insights.map((insight) => (
           <InsightRow key={insight.id} insight={insight} />
         ))}
       </div>
 
       {/* Suggestions based on recent mood trend. */}
-      <div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <SectionLabel>Little ideas to hold onto</SectionLabel>
         {loading && history.length === 0 ? (
-          <p style={{ fontSize: 12, color: "rgba(188,194,255,0.4)" }}>
+          <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
             Gathering your trends…
           </p>
         ) : suggestions.length === 0 ? (
-          <p style={{ fontSize: 12, color: "rgba(188,194,255,0.4)" }}>
+          <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
             Share a few more check-ins and a soft idea will appear here.
           </p>
         ) : (
@@ -104,21 +109,14 @@ function InsightRow({
   insight: { id: string; title: string; body: string; color: string };
 }) {
   return (
-    <div
-      style={{
-        borderRadius: 16,
-        padding: "18px 20px",
-        background: `${insight.color}0d`,
-        marginBottom: 10,
-      }}
-    >
+    <div>
       <p
         className="font-serif"
         style={{
           fontSize: 16,
           fontWeight: 400,
           color: insight.color,
-          marginBottom: 6,
+          marginBottom: 8,
           lineHeight: 1.3,
         }}
       >
@@ -127,8 +125,8 @@ function InsightRow({
       <p
         style={{
           fontSize: 13,
-          color: "rgba(188,194,255,0.45)",
-          lineHeight: 1.65,
+          color: "var(--surface-violet-icon-hover)",
+          lineHeight: 1.7,
         }}
       >
         {insight.body}

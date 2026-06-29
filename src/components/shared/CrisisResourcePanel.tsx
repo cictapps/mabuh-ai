@@ -17,10 +17,13 @@ export const CrisisResourcePanel: React.FC<CrisisResourcePanelProps> = ({
   if (!expanded) return null;
 
   const isImminent = level === "imminent";
-  const accentBg = isImminent
-    ? "linear-gradient(160deg, rgba(255,123,123,0.18), rgba(255,185,84,0.10))"
-    : "linear-gradient(160deg, rgba(255,185,84,0.14), rgba(188,194,255,0.10))";
-  const borderColor = isImminent ? "rgba(255,123,123,0.32)" : "rgba(255,185,84,0.28)";
+  const accentBg = isImminent ? "var(--crisis-imminent-bg)" : "var(--crisis-concern-bg)";
+  const borderColor = isImminent
+    ? "var(--crisis-imminent-border)"
+    : "var(--crisis-concern-border)";
+  const accentShadow = isImminent
+    ? "var(--shadow-crisis-imminent)"
+    : "var(--shadow-crisis-concern)";
 
   return (
     <div
@@ -32,13 +35,11 @@ export const CrisisResourcePanel: React.FC<CrisisResourcePanelProps> = ({
         padding: "16px 16px 14px",
         border: `1px solid ${borderColor}`,
         background: accentBg,
-        color: "#f5e5e5",
+        color: "var(--crisis-text)",
         display: "flex",
         flexDirection: "column",
         gap: 10,
-        boxShadow: isImminent
-          ? "0 28px 80px -40px rgba(255,123,123,0.45)"
-          : "0 24px 60px -40px rgba(255,185,84,0.40)",
+        boxShadow: accentShadow,
       }}
     >
       <header
@@ -65,8 +66,12 @@ export const CrisisResourcePanel: React.FC<CrisisResourcePanelProps> = ({
               width: 32,
               height: 32,
               borderRadius: 12,
-              background: isImminent ? "rgba(255,123,123,0.22)" : "rgba(255,185,84,0.22)",
-              color: isImminent ? "rgba(255,170,170,1)" : "rgba(255,217,154,1)",
+              background: isImminent
+                ? "var(--crisis-imminent-icon-bg)"
+                : "var(--crisis-concern-icon-bg)",
+              color: isImminent
+                ? "var(--crisis-imminent-icon)"
+                : "var(--crisis-concern-icon)",
               flexShrink: 0,
             }}
           >
@@ -78,7 +83,9 @@ export const CrisisResourcePanel: React.FC<CrisisResourcePanelProps> = ({
               fontSize: 14,
               fontWeight: 700,
               lineHeight: 1.25,
-              color: isImminent ? "rgba(255,210,210,1)" : "rgba(255,225,184,1)",
+              color: isImminent
+                ? "var(--crisis-imminent-title)"
+                : "var(--crisis-concern-title)",
             }}
           >
             {isImminent ? "You don't have to face this alone" : resource.title}
@@ -95,7 +102,7 @@ export const CrisisResourcePanel: React.FC<CrisisResourcePanelProps> = ({
             style={{
               background: "transparent",
               border: "none",
-              color: "rgba(255,255,255,0.55)",
+              color: "var(--crisis-dismiss)",
               padding: 4,
               borderRadius: 8,
               cursor: "pointer",
@@ -129,15 +136,19 @@ export const CrisisResourcePanel: React.FC<CrisisResourcePanelProps> = ({
                 gap: 10,
                 padding: "8px 12px",
                 borderRadius: 14,
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "#f7eaea",
+                background: "var(--crisis-line-bg)",
+                border: "1px solid var(--crisis-line-border)",
+                color: "var(--crisis-line-text)",
                 textDecoration: "none",
               }}
             >
               <Phone
                 size={14}
-                color={isImminent ? "rgba(255,170,170,0.95)" : "rgba(255,217,154,0.95)"}
+                color={
+                  isImminent
+                    ? "var(--crisis-imminent-icon)"
+                    : "var(--crisis-concern-icon)"
+                }
                 aria-hidden
               />
               <span style={{ flex: 1, minWidth: 0 }}>
@@ -155,7 +166,7 @@ export const CrisisResourcePanel: React.FC<CrisisResourcePanelProps> = ({
                   style={{
                     display: "block",
                     fontSize: 12,
-                    color: "rgba(255,255,255,0.65)",
+                    color: "var(--crisis-line-meta)",
                     lineHeight: 1.3,
                     marginTop: 2,
                   }}
@@ -172,7 +183,9 @@ export const CrisisResourcePanel: React.FC<CrisisResourcePanelProps> = ({
         style={{
           margin: 0,
           fontSize: 12,
-          color: isImminent ? "rgba(255,200,200,0.85)" : "rgba(255,225,184,0.85)",
+          color: isImminent
+            ? "var(--crisis-imminent-note)"
+            : "var(--crisis-concern-note)",
           lineHeight: 1.5,
         }}
       >
@@ -184,7 +197,7 @@ export const CrisisResourcePanel: React.FC<CrisisResourcePanelProps> = ({
           style={{
             margin: 0,
             fontSize: 11,
-            color: "rgba(255,255,255,0.5)",
+            color: "var(--crisis-footnote)",
             lineHeight: 1.45,
           }}
         >

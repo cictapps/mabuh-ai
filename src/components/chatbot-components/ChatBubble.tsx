@@ -242,10 +242,10 @@ export const ChatBubble = ({
             : isAi
               ? isMaskMode
                 ? "bg-[#0b0f14] border border-white/10 text-white rounded-tl-none shadow-none"
-                : "bg-card border border-border text-card-foreground rounded-tl-none shadow-[0_18px_48px_-34px_rgba(8,10,18,0.9)]"
+                : "bg-card border border-border text-card-foreground rounded-tl-none shadow-[0_18px_48px_-34px_rgba(74, 60, 90, 0.28)]"
               : isMaskMode
                 ? "bg-white/10 text-white rounded-tr-none border border-white/10"
-                : "bg-gradient-to-br from-primary via-secondary to-tertiary text-primary-foreground rounded-tr-none shadow-[0_18px_48px_-28px_rgba(188,194,255,0.6)]"
+                : "bg-gradient-to-br from-primary via-secondary to-tertiary text-primary-foreground rounded-tr-none shadow-[0_18px_48px_-28px_var(--surface-violet-icon-hover)]"
         }`}
       >
         {isTyping ? <TypingDots isMaskMode={isMaskMode} /> : rendered}

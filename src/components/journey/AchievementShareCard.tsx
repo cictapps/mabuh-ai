@@ -109,9 +109,9 @@ function AchievementCardSurface({
         position: "relative",
         overflow: "hidden",
         borderRadius: 56,
-        border: "1.5px solid rgba(188,194,255,0.22)",
+        border: "1.5px solid var(--surface-violet-icon-hover)",
         background: "linear-gradient(150deg, #1a1d2c 0%, #131623 55%, #0c0f17 100%)",
-        boxShadow: "0 32px 80px -40px rgba(8,10,18,0.95)",
+        boxShadow: "0 32px 80px -40px rgba(74, 60, 90, 0.28)",
         color: "#f3eef7",
         fontFamily: '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif',
       }}
@@ -141,7 +141,7 @@ function AchievementCardSurface({
           height: 600,
           borderRadius: "50%",
           background:
-            "radial-gradient(circle_at_center, rgba(188,194,255,0.32), transparent 65%)",
+            "radial-gradient(circle_at_center, var(--surface-violet-icon-hover), transparent 65%)",
           filter: "blur(50px)",
           pointerEvents: "none",
         }}
@@ -156,7 +156,7 @@ function AchievementCardSurface({
           height: 360,
           borderRadius: "50%",
           background:
-            "radial-gradient(circle_at_center, rgba(212,187,255,0.18), transparent 70%)",
+            "radial-gradient(circle_at_center, var(--surface-fuchsia-medium), transparent 70%)",
           filter: "blur(40px)",
           pointerEvents: "none",
         }}
@@ -207,7 +207,7 @@ function AchievementCardSurface({
                   fontWeight: 600,
                   letterSpacing: "0.32em",
                   textTransform: "uppercase",
-                  color: "rgba(188,194,255,0.65)",
+                  color: "var(--surface-violet-icon-hover)",
                 }}
               >
                 A quiet win
@@ -225,7 +225,7 @@ function AchievementCardSurface({
               fontWeight: 600,
               letterSpacing: "0.32em",
               textTransform: "uppercase",
-              color: "rgba(188,194,255,0.6)",
+              color: "var(--surface-violet-icon-hover)",
             }}
           >
             My wellbeing journey
@@ -273,7 +273,7 @@ function AchievementCardSurface({
                 fontWeight: 600,
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
-                color: "rgba(188,194,255,0.6)",
+                color: "var(--surface-violet-icon-hover)",
               }}
             >
               Progress to Level {level + 1}
@@ -296,7 +296,7 @@ function AchievementCardSurface({
               height: 18,
               width: "100%",
               borderRadius: 999,
-              background: "rgba(188,194,255,0.12)",
+              background: "var(--surface-violet-high)",
               overflow: "hidden",
             }}
           >
@@ -307,7 +307,7 @@ function AchievementCardSurface({
                 width: `${xpPct}%`,
                 background:
                   "linear-gradient(90deg, #bcc2ff 0%, #d4bbff 55%, #ffb954 100%)",
-                boxShadow: "0 10px 30px -10px rgba(188,194,255,0.6)",
+                boxShadow: "0 10px 30px -10px var(--surface-violet-icon-hover)",
               }}
             />
           </div>
@@ -320,10 +320,10 @@ function AchievementCardSurface({
               fontWeight: 500,
             }}
           >
-            <span style={{ color: "rgba(216,212,235,0.7)" }}>
+            <span style={{ color: "var(--text-on-surface-strong)" }}>
               {xpInto}/{XP_PER_LEVEL} XP
             </span>
-            <span style={{ color: "rgba(216,212,235,0.55)" }}>
+            <span style={{ color: "var(--text-on-surface-strong)" }}>
               {streak}🔥 streak · {journeysCompleted} journeys
             </span>
           </div>
@@ -335,9 +335,9 @@ function AchievementCardSurface({
             marginTop: "auto",
             padding: "30px 36px 32px",
             borderRadius: 32,
-            border: "1.5px solid rgba(188,194,255,0.20)",
+            border: "1.5px solid var(--surface-violet-icon-hover)",
             background:
-              "linear-gradient(140deg, rgba(188,194,255,0.10) 0%, rgba(212,187,255,0.08) 50%, rgba(255,185,84,0.10) 100%)",
+              "linear-gradient(140deg, var(--surface-violet-medium) 0%, var(--surface-fuchsia-low) 50%, rgba(255,185,84,0.10) 100%)",
             overflow: "hidden",
           }}
         >
@@ -349,7 +349,7 @@ function AchievementCardSurface({
               top: -18,
               width: 64,
               height: 64,
-              color: "rgba(188,194,255,0.5)",
+              color: "var(--surface-violet-icon-hover)",
               pointerEvents: "none",
             }}
             strokeWidth={1}
@@ -374,7 +374,7 @@ function AchievementCardSurface({
               fontSize: 16,
               fontWeight: 400,
               lineHeight: 1.5,
-              color: "rgba(216,212,235,0.7)",
+              color: "var(--text-on-surface-strong)",
             }}
           >
             {quoteSubtext}
@@ -389,8 +389,8 @@ function AchievementCardSurface({
             gap: 18,
             padding: "18px 22px",
             borderRadius: 24,
-            border: "1.5px solid rgba(188,194,255,0.16)",
-            background: "rgba(188,194,255,0.04)",
+            border: "1.5px solid var(--surface-violet-icon)",
+            background: "var(--surface-violet-low)",
           }}
         >
           <div
@@ -401,7 +401,7 @@ function AchievementCardSurface({
               borderRadius: "50%",
               display: "grid",
               placeItems: "center",
-              background: "rgba(188,194,255,0.10)",
+              background: "var(--surface-violet-medium)",
               flexShrink: 0,
             }}
           >
@@ -421,7 +421,10 @@ function AchievementCardSurface({
                 pointerEvents: "none",
               }}
             />
-            <Sprout aria-hidden style={{ width: 26, height: 26, color: "#bcc2ff" }} />
+            <Sprout
+              aria-hidden
+              style={{ width: 26, height: 26, color: "var(--primary)" }}
+            />
           </div>
           <div style={{ minWidth: 0, flex: 1 }}>
             <p
@@ -431,7 +434,7 @@ function AchievementCardSurface({
                 fontWeight: 600,
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
-                color: "rgba(188,194,255,0.6)",
+                color: "var(--surface-violet-icon-hover)",
               }}
             >
               Next step
@@ -464,7 +467,7 @@ function RankBadge({ level }: { level: number }) {
           inset: -16,
           borderRadius: "50%",
           background:
-            "radial-gradient(circle_at_center, rgba(188,194,255,0.22), transparent 70%)",
+            "radial-gradient(circle_at_center, var(--surface-violet-icon-hover), transparent 70%)",
           filter: "blur(16px)",
           pointerEvents: "none",
         }}
@@ -504,7 +507,7 @@ function RankBadge({ level }: { level: number }) {
               fontWeight: 600,
               letterSpacing: "0.32em",
               textTransform: "uppercase",
-              color: "#ffd99a",
+              color: "var(--tertiary)",
             }}
           >
             Rank
@@ -529,7 +532,7 @@ function RankBadge({ level }: { level: number }) {
               fontWeight: 500,
               letterSpacing: "0.28em",
               textTransform: "uppercase",
-              color: "rgba(216,212,235,0.6)",
+              color: "var(--text-on-surface-strong)",
             }}
           >
             of {MAX_LEVEL}
@@ -549,15 +552,15 @@ function TierPill({ label }: { label: string }) {
         gap: 12,
         padding: "12px 22px",
         borderRadius: 999,
-        border: "1.5px solid rgba(188,194,255,0.32)",
+        border: "1.5px solid var(--surface-violet-icon-hover)",
         background:
-          "linear-gradient(90deg, rgba(188,194,255,0.10) 0%, rgba(212,187,255,0.14) 100%)",
+          "linear-gradient(90deg, var(--surface-violet-medium) 0%, var(--surface-fuchsia-medium) 100%)",
       }}
     >
       <svg
         aria-hidden
         viewBox="0 0 24 24"
-        style={{ width: 18, height: 18, color: "rgba(188,194,255,0.95)" }}
+        style={{ width: 18, height: 18, color: "var(--surface-violet-icon-hover)" }}
         fill="currentColor"
       >
         <path d="M12 0l1.6 8.4L22 10l-8.4 1.6L12 20l-1.6-8.4L2 10l8.4-1.6L12 0z" />
@@ -567,7 +570,7 @@ function TierPill({ label }: { label: string }) {
           fontFamily: '"Newsreader", ui-serif, Georgia, serif',
           fontWeight: 500,
           fontSize: 22,
-          color: "#d8d4eb",
+          color: "var(--text-kicker)",
         }}
       >
         {label}
@@ -753,7 +756,7 @@ export function AchievementShareCard(props: AchievementShareCardProps) {
           fontWeight: 600,
           letterSpacing: "0.22em",
           textTransform: "uppercase",
-          color: "#d8d4eb",
+          color: "var(--text-kicker)",
         }}
       >
         <Sparkles style={{ width: 14, height: 14 }} aria-hidden />
@@ -798,7 +801,7 @@ export function AchievementShareCard(props: AchievementShareCardProps) {
             marginTop: 10,
             textAlign: "center",
             fontSize: 12,
-            color: "rgba(216,212,235,0.7)",
+            color: "var(--text-on-surface-strong)",
           }}
           role="status"
         >

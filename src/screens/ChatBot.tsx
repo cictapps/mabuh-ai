@@ -1308,7 +1308,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="flex flex-col gap-4"
+              className="flex flex-col gap-5"
             >
               <ChatBubble
                 isAi={msg.isAi}
@@ -1335,7 +1335,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="ml-0 flex flex-col gap-2 sm:ml-14"
+                  className="ml-0 flex flex-col gap-3 sm:ml-14"
                 >
                   <p className="ml-1 text-left text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                     {isMaskMode ? "Safe Actions" : "Nurturing Steps"}

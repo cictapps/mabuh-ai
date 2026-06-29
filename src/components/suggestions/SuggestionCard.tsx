@@ -12,19 +12,10 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion }) =>
         display: "flex",
         alignItems: "flex-start",
         gap: 14,
-        background: "rgba(188,194,255,0.04)",
-        borderRadius: 16,
-        padding: "16px 18px",
-        marginBottom: 10,
+        padding: "8px 2px",
         cursor: "pointer",
         transition: "background 0.2s ease",
         minHeight: 44,
-      }}
-      onTouchStart={(e) => {
-        (e.currentTarget as HTMLDivElement).style.background = "rgba(188,194,255,0.09)";
-      }}
-      onTouchEnd={(e) => {
-        (e.currentTarget as HTMLDivElement).style.background = "rgba(188,194,255,0.04)";
       }}
     >
       <div>
@@ -32,7 +23,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion }) =>
           style={{
             fontSize: 14,
             fontWeight: 500,
-            color: "#e8eaf0",
+            color: "var(--text-on-surface)",
             marginBottom: 3,
           }}
         >
@@ -41,7 +32,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion }) =>
         <p
           style={{
             fontSize: 12,
-            color: "rgba(220,224,255,0.72)",
+            color: "var(--text-on-surface-strong)",
             lineHeight: 1.55,
           }}
         >

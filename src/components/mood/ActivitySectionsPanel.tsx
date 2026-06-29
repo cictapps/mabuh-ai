@@ -14,7 +14,7 @@ const SECTION_CONFIG: {
     id: "work",
     label: "Work",
     options: ["deep focus", "meetings", "planning", "email", "creative"],
-    accent: "#bcc2ff",
+    accent: "var(--primary)",
   },
   {
     id: "health",
@@ -101,10 +101,7 @@ export const ActivitySectionsPanel: React.FC<ActivitySectionsPanelProps> = ({
       return (
         <div
           style={{
-            padding: "12px 14px",
-            borderRadius: 14,
-            background: "rgba(188,194,255,0.04)",
-            color: "rgba(220,224,255,0.7)",
+            color: "var(--text-on-surface-muted)",
             fontSize: 12,
             lineHeight: 1.55,
           }}
@@ -153,7 +150,7 @@ export const ActivitySectionsPanel: React.FC<ActivitySectionsPanelProps> = ({
                     border: "none",
                     cursor: "pointer",
                     background: `${section.accent}1f`,
-                    color: "rgba(220,224,255,0.85)",
+                    color: "var(--text-on-surface-strong)",
                     fontFamily: "Plus Jakarta Sans, sans-serif",
                     fontWeight: 500,
                   }}
@@ -178,9 +175,6 @@ export const ActivitySectionsPanel: React.FC<ActivitySectionsPanelProps> = ({
           <div
             key={section.id}
             style={{
-              padding: "14px 16px",
-              borderRadius: 16,
-              background: "rgba(188,194,255,0.04)",
               display: "flex",
               flexDirection: "column",
               gap: 10,
@@ -192,7 +186,7 @@ export const ActivitySectionsPanel: React.FC<ActivitySectionsPanelProps> = ({
                   fontSize: 12,
                   letterSpacing: "0.6px",
                   textTransform: "uppercase",
-                  color: "rgba(188,194,255,0.5)",
+                  color: "var(--text-on-surface-softer)",
                 }}
               >
                 {section.label}

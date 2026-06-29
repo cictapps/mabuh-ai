@@ -139,7 +139,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
         className="pointer-events-none absolute -left-20 top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.10),transparent_60%)] blur-3xl"
       />
 
-      <div className="relative space-y-4 px-4 pb-12">
+      <div className="relative space-y-5 px-4 pb-12">
         <JourneyHeader
           totalXp={totalXp}
           streak={streak}
@@ -157,7 +157,7 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
           {view === "main" ? (
             <motion.div
               key={`main-${mode}-${activeFlightPhase}-${modeLocked ? "locked" : "open"}`}
-              className="space-y-4"
+              className="space-y-5"
               initial={transitionInitial}
               animate={transitionAnimate}
               exit={transitionExit}

@@ -31,8 +31,12 @@ export const SectionLabel: React.FC<SectionLabelProps> = ({
             width: 22,
             height: 22,
             borderRadius: 7,
-            background: filled ? "rgba(188,194,255,0.14)" : "rgba(188,194,255,0.06)",
-            color: filled ? "rgba(232,236,255,0.98)" : "rgba(220,224,255,0.7)",
+            background: filled
+              ? "var(--surface-violet-high)"
+              : "var(--surface-violet-medium)",
+            color: filled
+              ? "var(--text-on-surface-strong)"
+              : "var(--text-on-surface-strong)",
             transition: "background 0.2s ease, color 0.2s ease",
             flexShrink: 0,
           }}
@@ -47,7 +51,9 @@ export const SectionLabel: React.FC<SectionLabelProps> = ({
           fontWeight: 600,
           letterSpacing: "1.1px",
           textTransform: "uppercase",
-          color: filled ? "rgba(232,236,255,0.92)" : "rgba(216,220,230,0.65)",
+          color: filled
+            ? "var(--text-on-surface-strong)"
+            : "var(--text-on-surface-strong)",
           transition: "color 0.2s ease",
           margin: 0,
           lineHeight: 1.2,
@@ -60,7 +66,7 @@ export const SectionLabel: React.FC<SectionLabelProps> = ({
       <span
         style={{
           fontSize: 11,
-          color: "rgba(216,220,230,0.6)",
+          color: "var(--text-on-surface-strong)",
           fontVariantNumeric: "tabular-nums",
         }}
       >

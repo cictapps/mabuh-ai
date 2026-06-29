@@ -148,7 +148,7 @@ const TAG_COLORS: Record<string, { bg: string; text: string }> = {
   teal: { bg: "rgba(109,186,132,0.15)", text: "#6dba84" },
   amber: { bg: "rgba(224,133,60,0.15)", text: "#e0853c" },
   red: { bg: "rgba(224,92,110,0.15)", text: "#e05c6e" },
-  blue: { bg: "rgba(188,194,255,0.12)", text: "#bcc2ff" },
+  blue: { bg: "var(--surface-violet-high)", text: "var(--primary)" },
 };
 function tagColor(tag: string) {
   if (
@@ -174,10 +174,10 @@ function typeGlyph(type: string) {
   return G.support;
 }
 function typeColor(type: string) {
-  if (type === "Psychiatrist") return "#bcc2ff";
+  if (type === "Psychiatrist") return "var(--primary)";
   if (type.includes("Campus")) return "#6dba84";
   if (type === "NGO" || type === "Clinic") return "#e0853c";
-  return "#bcc2ff";
+  return "var(--primary)";
 }
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -244,7 +244,7 @@ function createProviderPinIcon(leaflet: typeof L, color: string, letter: string)
         font-family="Arial, sans-serif"
         font-size="12"
         font-weight="700"
-        fill="#121416"
+        fill="var(--background)"
       >${letter}</text>
     </svg>
   `;
@@ -362,7 +362,7 @@ function LiveMap({
   }, [userLocation]);
 
   function pinColor(p: Provider) {
-    if (p.type === "Psychiatrist") return "#bcc2ff";
+    if (p.type === "Psychiatrist") return "var(--primary)";
     if (p.type === "Hotline") return "#e05c6e";
     if (p.type === "Hospital" || p.type === "Community Program") return "#6dba84";
     if (p.type.includes("Campus")) return "#6dba84";
@@ -431,9 +431,9 @@ function LiveMap({
                 height: 30,
                 padding: "0 10px",
                 borderRadius: 8,
-                background: "rgba(18,20,22,0.85)",
-                border: "1px solid rgba(188,194,255,0.18)",
-                color: "rgba(188,194,255,0.7)",
+                background: "var(--ring-node-bg-soft)",
+                border: "1px solid var(--border-violet-medium)",
+                color: "var(--surface-violet-icon-hover)",
                 fontFamily: "inherit",
                 fontSize: 11,
                 fontWeight: 600,
@@ -454,9 +454,9 @@ function LiveMap({
                 height: 30,
                 padding: "0 10px",
                 borderRadius: 8,
-                background: "rgba(18,20,22,0.85)",
-                border: "1px solid rgba(188,194,255,0.18)",
-                color: "#bcc2ff",
+                background: "var(--ring-node-bg-soft)",
+                border: "1px solid var(--border-violet-medium)",
+                color: "var(--primary)",
                 fontFamily: "inherit",
                 fontSize: 11,
                 fontWeight: 600,
@@ -481,9 +481,9 @@ function LiveMap({
           height: 30,
           padding: "0 10px",
           borderRadius: 8,
-          background: "rgba(18,20,22,0.85)",
-          border: "1px solid rgba(188,194,255,0.18)",
-          color: "rgba(188,194,255,0.7)",
+          background: "var(--ring-node-bg-soft)",
+          border: "1px solid var(--border-violet-medium)",
+          color: "var(--surface-violet-icon-hover)",
           fontSize: 11,
           fontWeight: 600,
           display: "inline-flex",
@@ -495,7 +495,7 @@ function LiveMap({
           maxWidth: "calc(100% - 20px)",
         }}
       >
-        <G.pin size={12} color="#bcc2ff" />
+        <G.pin size={12} color="var(--primary)" />
         <span
           style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
         >
@@ -555,11 +555,11 @@ function ProviderCard({
   return (
     <div
       style={{
-        background: isFocused ? "rgba(188,194,255,0.06)" : "#161820",
+        background: isFocused ? "var(--surface-violet-medium)" : "#161820",
         margin: "0 0 1px",
         padding: "13px 16px",
-        borderBottom: "1px solid rgba(188,194,255,0.06)",
-        borderLeft: isFocused ? "2px solid #bcc2ff" : "2px solid transparent",
+        borderBottom: "1px solid var(--surface-violet-medium)",
+        borderLeft: isFocused ? "2px solid var(--primary)" : "2px solid transparent",
         cursor: "pointer",
         transition: "all 0.2s",
       }}
@@ -579,14 +579,14 @@ function ProviderCard({
             background: isFocused
               ? `${tc}22`
               : e.type === "Psychiatrist"
-                ? "rgba(188,194,255,0.1)"
+                ? "var(--surface-violet-medium)"
                 : e.type.includes("Campus")
                   ? "rgba(109,186,132,0.1)"
                   : e.type === "Hospital"
                     ? "rgba(109,186,132,0.1)"
                     : e.type === "NGO" || e.type === "Clinic"
                       ? "rgba(224,133,60,0.1)"
-                      : "rgba(188,194,255,0.08)",
+                      : "var(--surface-violet-medium)",
             border: `1px solid ${tc}30`,
             display: "flex",
             alignItems: "center",
@@ -626,7 +626,7 @@ function ProviderCard({
             {distKm !== undefined && (
               <span
                 style={{
-                  color: "rgba(220,224,255,0.6)",
+                  color: "var(--text-on-surface-strong)",
                   fontWeight: 400,
                   fontSize: 10,
                   display: "inline-flex",
@@ -666,9 +666,11 @@ function ProviderCard({
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  background: isFocused ? "rgba(188,194,255,0.10)" : "transparent",
+                  background: isFocused ? "var(--surface-violet-medium)" : "transparent",
                   border: "none",
-                  color: isFocused ? "#bcc2ff" : "rgba(188,194,255,0.35)",
+                  color: isFocused
+                    ? "var(--primary)"
+                    : "var(--surface-violet-icon-hover)",
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
@@ -677,14 +679,14 @@ function ProviderCard({
                 }}
                 onMouseEnter={(ev) => {
                   if (!isFocused) {
-                    ev.currentTarget.style.background = "rgba(188,194,255,0.06)";
-                    ev.currentTarget.style.color = "rgba(188,194,255,0.7)";
+                    ev.currentTarget.style.background = "var(--surface-violet-medium)";
+                    ev.currentTarget.style.color = "var(--surface-violet-icon-hover)";
                   }
                 }}
                 onMouseLeave={(ev) => {
                   if (!isFocused) {
                     ev.currentTarget.style.background = "transparent";
-                    ev.currentTarget.style.color = "rgba(188,194,255,0.35)";
+                    ev.currentTarget.style.color = "var(--surface-violet-icon-hover)";
                   }
                 }}
               >
@@ -705,7 +707,7 @@ function ProviderCard({
                 borderRadius: 10,
                 background: "transparent",
                 border: "none",
-                color: saved ? "#bcc2ff" : "rgba(188,194,255,0.35)",
+                color: saved ? "var(--primary)" : "var(--surface-violet-icon-hover)",
                 cursor: "pointer",
                 display: "inline-flex",
                 alignItems: "center",
@@ -715,14 +717,14 @@ function ProviderCard({
               }}
               onMouseEnter={(ev) => {
                 if (!saved) {
-                  ev.currentTarget.style.background = "rgba(188,194,255,0.06)";
-                  ev.currentTarget.style.color = "rgba(188,194,255,0.7)";
+                  ev.currentTarget.style.background = "var(--surface-violet-medium)";
+                  ev.currentTarget.style.color = "var(--surface-violet-icon-hover)";
                 }
               }}
               onMouseLeave={(ev) => {
                 if (!saved) {
                   ev.currentTarget.style.background = "transparent";
-                  ev.currentTarget.style.color = "rgba(188,194,255,0.35)";
+                  ev.currentTarget.style.color = "var(--surface-violet-icon-hover)";
                 }
               }}
             >
@@ -752,7 +754,7 @@ function ProviderCard({
           style={{
             marginTop: 12,
             paddingTop: 12,
-            borderTop: "1px solid rgba(188,194,255,0.06)",
+            borderTop: "1px solid var(--surface-violet-medium)",
           }}
         >
           {/* Clinic info */}
@@ -760,7 +762,7 @@ function ProviderCard({
             <div
               style={{
                 fontSize: 11,
-                color: "rgba(220,224,255,0.7)",
+                color: "var(--text-on-surface-strong)",
                 marginBottom: 10,
                 display: "flex",
                 alignItems: "center",
@@ -773,7 +775,7 @@ function ProviderCard({
             <div
               style={{
                 fontSize: 11,
-                color: "rgba(220,224,255,0.6)",
+                color: "var(--text-on-surface-strong)",
                 marginBottom: 10,
                 fontStyle: "italic",
               }}
@@ -788,7 +790,7 @@ function ProviderCard({
                 <div
                   style={{
                     fontSize: 9,
-                    color: "rgba(220,224,255,0.6)",
+                    color: "var(--text-on-surface-strong)",
                     fontWeight: 700,
                     letterSpacing: "0.8px",
                     textTransform: "uppercase",
@@ -802,9 +804,9 @@ function ProviderCard({
                   style={{
                     height: 34,
                     borderRadius: 8,
-                    background: "rgba(188,194,255,0.08)",
-                    color: "#bcc2ff",
-                    border: "1px solid rgba(188,194,255,0.18)",
+                    background: "var(--surface-violet-medium)",
+                    color: "var(--primary)",
+                    border: "1px solid var(--border-violet-medium)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -822,9 +824,9 @@ function ProviderCard({
                   style={{
                     height: 34,
                     borderRadius: 8,
-                    background: "rgba(188,194,255,0.05)",
-                    color: "rgba(188,194,255,0.6)",
-                    border: "1px solid rgba(188,194,255,0.1)",
+                    background: "var(--surface-violet-low)",
+                    color: "var(--surface-violet-icon-hover)",
+                    border: "1px solid var(--border-violet-soft)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -846,9 +848,9 @@ function ProviderCard({
                   minWidth: 80,
                   height: 36,
                   borderRadius: 8,
-                  background: "rgba(188,194,255,0.08)",
-                  color: "#bcc2ff",
-                  border: "1px solid rgba(188,194,255,0.18)",
+                  background: "var(--surface-violet-medium)",
+                  color: "var(--primary)",
+                  border: "1px solid var(--border-violet-medium)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -867,13 +869,13 @@ function ProviderCard({
                   minWidth: 80,
                   height: 36,
                   borderRadius: 8,
-                  background: "rgba(188,194,255,0.03)",
-                  border: "1px solid rgba(188,194,255,0.08)",
+                  background: "var(--surface-violet-low)",
+                  border: "1px solid var(--border-violet-soft)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: 11,
-                  color: "rgba(220,224,255,0.6)",
+                  color: "var(--text-on-surface-strong)",
                 }}
               >
                 No number
@@ -903,9 +905,9 @@ function ProviderCard({
                 width: 36,
                 height: 36,
                 borderRadius: 8,
-                background: "rgba(188,194,255,0.06)",
-                color: "rgba(220,224,255,0.7)",
-                border: "1px solid rgba(188,194,255,0.12)",
+                background: "var(--surface-violet-medium)",
+                color: "var(--text-on-surface-strong)",
+                border: "1px solid var(--border-violet-medium)",
                 cursor: "pointer",
                 flexShrink: 0,
                 display: "inline-flex",
@@ -925,9 +927,9 @@ function ProviderCard({
                 minWidth: 80,
                 height: 36,
                 borderRadius: 8,
-                background: "rgba(188,194,255,0.12)",
-                color: "#bcc2ff",
-                border: "1px solid rgba(188,194,255,0.25)",
+                background: "var(--surface-violet-high)",
+                color: "var(--primary)",
+                border: "1px solid var(--border-violet-high)",
                 cursor: "pointer",
                 fontFamily: "inherit",
                 fontSize: 12,
@@ -976,7 +978,7 @@ function HotlineCard({ h }: { h: Provider }) {
         <div style={{ fontSize: 12, fontWeight: 600, color: "#e8eaff", marginBottom: 2 }}>
           {h.name}
         </div>
-        <div style={{ fontSize: 10, color: "rgba(220,224,255,0.65)" }}>
+        <div style={{ fontSize: 10, color: "var(--text-on-surface-strong)" }}>
           {h.phone} · {h.coverage} · {h.hours}
         </div>
       </div>
@@ -1170,12 +1172,12 @@ function DetailScreen({
   const [selectedLocIdx, setSelectedLocIdx] = useState(0);
   const tc = typeColor(e.type);
   const C = {
-    bg: "#121416",
+    bg: "var(--background)",
     surface: "#161820",
-    border: "rgba(188,194,255,0.06)",
+    border: "var(--border-violet-faint)",
     text: "#e8eaff",
-    muted: "rgba(188,194,255,0.4)",
-    accent: "#bcc2ff",
+    muted: "var(--surface-violet-icon-hover)",
+    accent: "var(--primary)",
   };
   const hasMultiLoc = !!(e.locations && e.locations.length > 1);
   const selectedLoc = hasMultiLoc ? e.locations![selectedLocIdx] : null;
@@ -1225,13 +1227,13 @@ function DetailScreen({
               width: 60,
               height: 60,
               borderRadius: 16,
-              background: "rgba(188,194,255,0.08)",
+              background: "var(--surface-violet-medium)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: tc,
               flexShrink: 0,
-              border: `1.5px solid rgba(188,194,255,0.1)`,
+              border: `1.5px solid var(--surface-violet-medium)`,
             }}
           >
             <TypeIcon size={26} />
@@ -1381,7 +1383,11 @@ function DetailScreen({
                 <div style={{ fontSize: 13, color: C.text }}>{e.phone}</div>
                 {e.phone2 && (
                   <div
-                    style={{ fontSize: 12, color: "rgba(188,194,255,0.5)", marginTop: 3 }}
+                    style={{
+                      fontSize: 12,
+                      color: "var(--surface-violet-icon-hover)",
+                      marginTop: 3,
+                    }}
                   >
                     {e.phone2}
                   </div>
@@ -1394,8 +1400,8 @@ function DetailScreen({
                   );
                 }}
                 style={{
-                  background: "rgba(188,194,255,0.08)",
-                  border: "1px solid rgba(188,194,255,0.15)",
+                  background: "var(--surface-violet-medium)",
+                  border: "1px solid var(--border-violet-medium)",
                   borderRadius: 6,
                   padding: "4px 10px",
                   cursor: "pointer",
@@ -1496,8 +1502,8 @@ function DetailScreen({
                   }}
                   style={{
                     background:
-                      selectedLocIdx === idx ? "rgba(188,194,255,0.12)" : C.surface,
-                    border: `1.5px solid ${selectedLocIdx === idx ? "rgba(188,194,255,0.4)" : C.border}`,
+                      selectedLocIdx === idx ? "var(--surface-violet-high)" : C.surface,
+                    border: `1.5px solid ${selectedLocIdx === idx ? "var(--surface-violet-icon-hover)" : C.border}`,
                     borderRadius: 10,
                     padding: "10px 14px",
                     cursor: "pointer",
@@ -1516,13 +1522,15 @@ function DetailScreen({
                       borderRadius: "50%",
                       flexShrink: 0,
                       background:
-                        selectedLocIdx === idx ? "#bcc2ff" : "rgba(188,194,255,0.15)",
+                        selectedLocIdx === idx
+                          ? "var(--primary)"
+                          : "var(--surface-violet-icon)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: 9,
                       fontWeight: 700,
-                      color: selectedLocIdx === idx ? "#121416" : C.muted,
+                      color: selectedLocIdx === idx ? "var(--background)" : C.muted,
                     }}
                   >
                     {idx + 1}
@@ -1559,7 +1567,9 @@ function DetailScreen({
                       </div>
                     )}
                   </div>
-                  {selectedLocIdx === idx && <G.verified size={13} color="#bcc2ff" />}
+                  {selectedLocIdx === idx && (
+                    <G.verified size={13} color="var(--primary)" />
+                  )}
                 </button>
               ))}
             </div>
@@ -1594,9 +1604,9 @@ function DetailScreen({
             style={{
               height: 40,
               borderRadius: 10,
-              background: "rgba(188,194,255,0.06)",
-              color: "rgba(188,194,255,0.5)",
-              border: "1px solid rgba(188,194,255,0.1)",
+              background: "var(--surface-violet-medium)",
+              color: "var(--surface-violet-icon-hover)",
+              border: "1px solid var(--border-violet-soft)",
               cursor: "pointer",
               fontFamily: "inherit",
               fontSize: 12,
@@ -1627,9 +1637,9 @@ function DetailScreen({
                 style={{
                   height: 48,
                   borderRadius: 12,
-                  background: "rgba(188,194,255,0.1)",
+                  background: "var(--surface-violet-medium)",
                   color: C.accent,
-                  border: "1px solid rgba(188,194,255,0.2)",
+                  border: "1px solid var(--border-violet-high)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -1646,9 +1656,9 @@ function DetailScreen({
                 style={{
                   height: 48,
                   borderRadius: 12,
-                  background: "rgba(188,194,255,0.06)",
-                  color: "rgba(188,194,255,0.6)",
-                  border: "1px solid rgba(188,194,255,0.12)",
+                  background: "var(--surface-violet-medium)",
+                  color: "var(--surface-violet-icon-hover)",
+                  border: "1px solid var(--border-violet-medium)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -1667,9 +1677,9 @@ function DetailScreen({
               style={{
                 height: 48,
                 borderRadius: 12,
-                background: "rgba(188,194,255,0.1)",
+                background: "var(--surface-violet-medium)",
                 color: C.accent,
-                border: "1px solid rgba(188,194,255,0.2)",
+                border: "1px solid var(--border-violet-high)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1686,13 +1696,13 @@ function DetailScreen({
               style={{
                 height: 48,
                 borderRadius: 12,
-                background: "rgba(188,194,255,0.03)",
-                border: "1px solid rgba(188,194,255,0.08)",
+                background: "var(--surface-violet-low)",
+                border: "1px solid var(--border-violet-soft)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: 13,
-                color: "rgba(220,224,255,0.6)",
+                color: "var(--text-on-surface-strong)",
               }}
             >
               No phone number — contact via walk-in or referral
@@ -1727,7 +1737,7 @@ function DetailScreen({
             </a>
           )}
           {activeLat && activeLng && !online && (
-            <div className="flex h-12 items-center justify-center gap-2 rounded-xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.04)] text-sm text-[#d8d4eb]">
+            <div className="flex h-12 items-center justify-center gap-2 rounded-xl border border-[var(--border-violet-soft)] bg-[var(--surface-violet-low)] text-sm text-[color:var(--text-kicker)]">
               <G.directions size={16} /> Directions need internet
             </div>
           )}
@@ -1760,9 +1770,9 @@ function DetailScreen({
               style={{
                 height: 48,
                 borderRadius: 12,
-                background: "rgba(188,194,255,0.06)",
+                background: "var(--surface-violet-medium)",
                 color: C.accent,
-                border: "1px solid rgba(188,194,255,0.12)",
+                border: "1px solid var(--border-violet-medium)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1794,9 +1804,9 @@ function RecentlyViewed({
   if (ids.length === 0) return null;
   const C = {
     surface: "#161820",
-    border: "rgba(188,194,255,0.06)",
-    muted: "rgba(188,194,255,0.4)",
-    accent: "#bcc2ff",
+    border: "var(--border-violet-faint)",
+    muted: "var(--surface-violet-icon-hover)",
+    accent: "var(--primary)",
   };
   const recent = ids
     .map((id) => allProviders.find((p) => p.id === id))
@@ -1893,12 +1903,12 @@ function SavedScreen({
   getDistance: (p: Provider) => number | undefined;
 }) {
   const C = {
-    bg: "#121416",
+    bg: "var(--background)",
     surface: "#161820",
-    border: "rgba(188,194,255,0.06)",
+    border: "var(--border-violet-faint)",
     text: "#e8eaff",
-    muted: "rgba(188,194,255,0.4)",
-    accent: "#bcc2ff",
+    muted: "var(--surface-violet-icon-hover)",
+    accent: "var(--primary)",
   };
   const saved = allProviders.filter((p) => savedIds.has(p.id));
 
@@ -1970,7 +1980,7 @@ function SavedScreen({
             <div style={{ fontSize: 14, color: C.muted, marginBottom: 6 }}>
               No saved resources yet
             </div>
-            <div style={{ fontSize: 12, color: "rgba(220,224,255,0.6)" }}>
+            <div style={{ fontSize: 12, color: "var(--text-on-surface-strong)" }}>
               Tap the bookmark on any provider to save them here
             </div>
           </div>
@@ -2004,7 +2014,7 @@ function SavedScreen({
                     flexShrink: 0,
                     background:
                       p.type === "Psychiatrist"
-                        ? "rgba(188,194,255,0.1)"
+                        ? "var(--surface-violet-medium)"
                         : p.type.includes("Campus") || p.type === "Hospital"
                           ? "rgba(109,186,132,0.1)"
                           : "rgba(224,133,60,0.1)",
@@ -2034,14 +2044,19 @@ function SavedScreen({
                   >
                     {p.type} · {p.city}
                     {dist !== undefined && (
-                      <span style={{ color: "rgba(220,224,255,0.65)", fontWeight: 400 }}>
+                      <span
+                        style={{
+                          color: "var(--text-on-surface-strong)",
+                          fontWeight: 400,
+                        }}
+                      >
                         {" "}
                         · {fmtDist(dist)}
                       </span>
                     )}
                   </div>
                   {p.phone && (
-                    <div style={{ fontSize: 11, color: "rgba(220,224,255,0.6)" }}>
+                    <div style={{ fontSize: 11, color: "var(--text-on-surface-strong)" }}>
                       {p.phone}
                     </div>
                   )}
@@ -2055,7 +2070,7 @@ function SavedScreen({
                   }}
                 >
                   {p.verified && <G.verified size={11} color="#6dba84" />}
-                  <ChevronRight size={14} color="rgba(188,194,255,0.25)" />
+                  <ChevronRight size={14} color="var(--surface-violet-icon-hover)" />
                 </div>
               </div>
             );
@@ -2090,7 +2105,7 @@ function SectionHeader({
         style={{
           fontSize: 11,
           fontWeight: 700,
-          color: "rgba(220,224,255,0.7)",
+          color: "var(--text-on-surface-strong)",
           letterSpacing: "1px",
           textTransform: "uppercase",
         }}
@@ -2223,12 +2238,12 @@ export function GISFeature() {
   ];
 
   const C = {
-    bg: "#121416",
+    bg: "var(--background)",
     surface: "#161820",
-    border: "rgba(188,194,255,0.06)",
+    border: "var(--border-violet-faint)",
     text: "#e8eaff",
-    muted: "rgba(188,194,255,0.4)",
-    accent: "#bcc2ff",
+    muted: "var(--surface-violet-icon-hover)",
+    accent: "var(--primary)",
   };
   const isNearMode = sortBy === "distance" && !!userLocation;
   const allProviders = [...DB_PSY, ...DB_COMM, ...DB_SUP];
@@ -2284,7 +2299,7 @@ export function GISFeature() {
             background: "rgba(16,18,24,0.78)",
             backdropFilter: "blur(14px)",
             WebkitBackdropFilter: "blur(14px)",
-            borderBottom: "1px solid rgba(188,194,255,0.06)",
+            borderBottom: "1px solid var(--surface-violet-medium)",
           }}
         >
           <div style={{ display: "flex", minWidth: 0, alignItems: "center", gap: 4 }}>
@@ -2305,7 +2320,7 @@ export function GISFeature() {
                   fontWeight: 600,
                   letterSpacing: "-0.01em",
                   lineHeight: 1.1,
-                  color: "#eef1f6",
+                  color: "var(--text-on-surface)",
                   margin: 0,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
@@ -2318,7 +2333,7 @@ export function GISFeature() {
                 style={{
                   fontSize: 11,
                   lineHeight: 1.2,
-                  color: "rgba(188,194,255,0.45)",
+                  color: "var(--surface-violet-icon-hover)",
                   margin: "3px 0 0",
                 }}
               >
@@ -2369,8 +2384,8 @@ export function GISFeature() {
                     height: 16,
                     padding: "0 4px",
                     borderRadius: 999,
-                    background: "#bcc2ff",
-                    color: "#121416",
+                    background: "var(--primary)",
+                    color: "var(--background)",
                     fontSize: 9,
                     fontWeight: 700,
                     display: "inline-flex",
@@ -2428,12 +2443,12 @@ export function GISFeature() {
             }}
           >
             {!online && tab !== "hotline" && (
-              <div className="max-w-xs rounded-[1.75rem] border border-[rgba(188,194,255,0.10)] bg-card p-5 text-center shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl">
+              <div className="max-w-xs rounded-[1.75rem] border border-[var(--border-violet-soft)] bg-card p-5 text-center shadow-[0_28px_80px_-40px_rgba(74, 60, 90, 0.28)] backdrop-blur-xl">
                 <MapIcon className="mx-auto mb-3 text-primary" size={24} />
                 <p className="m-0 font-serif text-xl text-foreground">
                   Map unavailable offline
                 </p>
-                <p className="mt-2 text-xs leading-relaxed text-[#d8d4eb]">
+                <p className="mt-2 text-xs leading-relaxed text-[color:var(--text-kicker)]">
                   Provider listings, phone numbers, and saved details are still available
                   below.
                 </p>
@@ -2471,7 +2486,7 @@ export function GISFeature() {
               }}
             >
               <Card
-                className="rounded-[1.25rem] border-white/10 bg-card/95 p-2 shadow-[0_18px_48px_-22px_rgba(8,10,18,0.95)] backdrop-blur-xl"
+                className="rounded-[1.25rem] border-white/10 bg-card/95 p-2 shadow-[0_18px_48px_-22px_rgba(74, 60, 90, 0.28)] backdrop-blur-xl"
                 style={{ pointerEvents: "auto" }}
               >
                 <div
@@ -2483,7 +2498,7 @@ export function GISFeature() {
                   }}
                 >
                   <div
-                    className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(188,194,255,0.16)] text-primary"
+                    className="grid size-9 shrink-0 place-items-center rounded-xl bg-[var(--surface-violet-icon)] text-primary"
                     aria-hidden
                   >
                     <G.search size={15} />
@@ -2566,8 +2581,8 @@ export function GISFeature() {
                   padding: 3,
                   gap: 2,
                   borderRadius: 999,
-                  background: "rgba(18,20,22,0.85)",
-                  border: "1px solid rgba(188,194,255,0.18)",
+                  background: "var(--ring-node-bg-soft)",
+                  border: "1px solid var(--border-violet-medium)",
                   backdropFilter: "blur(10px)",
                   WebkitBackdropFilter: "blur(10px)",
                   boxShadow: "0 18px 40px -22px rgba(0,0,0,0.7)",
@@ -2597,8 +2612,12 @@ export function GISFeature() {
                         fontFamily: "inherit",
                         fontSize: 11,
                         fontWeight: 600,
-                        background: isActive ? "rgba(188,194,255,0.95)" : "transparent",
-                        color: isActive ? "#121416" : "rgba(216,212,235,0.7)",
+                        background: isActive
+                          ? "var(--surface-violet-icon-hover)"
+                          : "transparent",
+                        color: isActive
+                          ? "var(--background)"
+                          : "var(--text-on-surface-strong)",
                         transition: "background 0.15s ease, color 0.15s ease",
                         whiteSpace: "nowrap",
                       }}
@@ -2636,9 +2655,9 @@ export function GISFeature() {
                   padding: "0 16px",
                   borderRadius: 999,
                   background:
-                    "linear-gradient(135deg, rgba(188,194,255,0.95), rgba(212,187,255,0.95))",
+                    "linear-gradient(135deg, var(--surface-violet-icon-hover), var(--surface-fuchsia-medium))",
                   border: "1px solid rgba(255,255,255,0.18)",
-                  color: "#121416",
+                  color: "var(--background)",
                   fontFamily: "inherit",
                   fontSize: 12,
                   fontWeight: 700,
@@ -2646,12 +2665,12 @@ export function GISFeature() {
                   backdropFilter: "blur(10px)",
                   WebkitBackdropFilter: "blur(10px)",
                   boxShadow:
-                    "0 18px 40px -14px rgba(188,194,255,0.55), 0 6px 20px -8px rgba(0,0,0,0.6)",
+                    "0 18px 40px -14px var(--surface-violet-icon-hover), 0 6px 20px -8px rgba(0,0,0,0.6)",
                   letterSpacing: "0.01em",
                 }}
                 aria-label="Show resource list"
               >
-                <G.map size={14} color="#121416" />
+                <G.map size={14} color="var(--background)" />
                 Show list
                 {(() => {
                   const count =
@@ -2672,8 +2691,8 @@ export function GISFeature() {
                         height: 20,
                         padding: "0 6px",
                         borderRadius: 999,
-                        background: "rgba(18,20,22,0.85)",
-                        color: "#eef1f6",
+                        background: "var(--ring-node-bg-soft)",
+                        color: "var(--text-on-surface)",
                         fontSize: 10,
                         fontWeight: 700,
                         display: "inline-flex",
@@ -2741,7 +2760,7 @@ export function GISFeature() {
               background: C.surface,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
-              border: "1px solid rgba(188,194,255,0.10)",
+              border: "1px solid var(--border-violet-soft)",
               borderBottom: "none",
               boxShadow: "0 -32px 80px -28px rgba(0,0,0,0.7)",
               overflow: "hidden",
@@ -2779,7 +2798,7 @@ export function GISFeature() {
                   width: 44,
                   height: 4,
                   borderRadius: 999,
-                  background: "rgba(188,194,255,0.22)",
+                  background: "var(--surface-violet-icon-hover)",
                 }}
               />
               <div
@@ -2790,7 +2809,7 @@ export function GISFeature() {
                   justifyContent: "space-between",
                   fontSize: 12,
                   fontWeight: 600,
-                  color: "#eef1f6",
+                  color: "var(--text-on-surface)",
                 }}
               >
                 <span>
@@ -2814,7 +2833,7 @@ export function GISFeature() {
                 </span>
                 <span
                   style={{
-                    color: "rgba(188,194,255,0.55)",
+                    color: "var(--surface-violet-icon-hover)",
                     fontSize: 11,
                     display: "inline-flex",
                     alignItems: "center",
@@ -2946,8 +2965,8 @@ export function GISFeature() {
                       color: C.muted,
                       fontSize: 13,
                       borderRadius: 16,
-                      background: "rgba(188,194,255,0.03)",
-                      border: "1px dashed rgba(188,194,255,0.10)",
+                      background: "var(--surface-violet-low)",
+                      border: "1px dashed var(--border-violet-soft)",
                     }}
                   >
                     <G.search
@@ -2959,7 +2978,7 @@ export function GISFeature() {
                       className="font-serif"
                       style={{
                         fontSize: 14,
-                        color: "rgba(188,194,255,0.65)",
+                        color: "var(--surface-violet-icon-hover)",
                         margin: 0,
                         lineHeight: 1.5,
                       }}
@@ -2969,7 +2988,7 @@ export function GISFeature() {
                     <p
                       style={{
                         fontSize: 11,
-                        color: "rgba(220,224,255,0.7)",
+                        color: "var(--text-on-surface-strong)",
                         margin: "6px 0 0",
                       }}
                     >

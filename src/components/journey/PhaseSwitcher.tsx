@@ -20,7 +20,7 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
 
   return (
     <div
-      className="relative flex items-center justify-between gap-1 rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] px-2 py-2"
+      className="relative flex items-center justify-between gap-1 rounded-2xl border border-[var(--border-violet-soft)] bg-[var(--surface-violet-low)] px-2 py-2"
       role="tablist"
       aria-label="Journey phases"
     >
@@ -48,8 +48,8 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
                   isActive
                     ? "border-tertiary/50 bg-tertiary/15 text-tertiary shadow-[0_8px_20px_-12px_rgba(255,185,84,0.6)]"
                     : isReached
-                      ? "border-[rgba(188,194,255,0.20)] bg-[rgba(188,194,255,0.06)] text-foreground"
-                      : "border-[rgba(188,194,255,0.10)] bg-transparent text-[#d8d4eb]/70",
+                      ? "border-[var(--border-violet-high)] bg-[var(--surface-violet-medium)] text-[color:var(--text-on-surface-soft)]"
+                      : "border-[var(--border-violet-soft)] bg-transparent text-[color:var(--text-on-surface-softest)]",
                 )}
               >
                 <Icon className="size-3.5" aria-hidden />
@@ -60,8 +60,8 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
                   isActive
                     ? "text-foreground"
                     : isReached
-                      ? "text-foreground/80"
-                      : "text-[#d8d4eb]/70",
+                      ? "text-[color:var(--text-on-surface-soft)]"
+                      : "text-[color:var(--text-on-surface-softest)]",
                 )}
               >
                 {phase.label}
@@ -73,8 +73,8 @@ export function PhaseSwitcher({ active, onSelect }: PhaseSwitcherProps) {
                 className={cn(
                   "mx-0.5 h-px w-2 shrink-0 transition-colors",
                   isReached && index < activeIndex
-                    ? "bg-[rgba(188,194,255,0.30)]"
-                    : "bg-[rgba(188,194,255,0.10)]",
+                    ? "bg-[var(--surface-violet-icon-hover)]"
+                    : "bg-[var(--surface-violet-medium)]",
                 )}
               />
             ) : null}

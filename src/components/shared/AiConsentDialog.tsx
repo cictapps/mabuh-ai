@@ -86,7 +86,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
         alignItems: "center",
         justifyContent: "center",
         padding: 16,
-        background: "rgba(8,10,18,0.78)",
+        background: "rgba(74, 60, 90, 0.28)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
       }}
@@ -100,7 +100,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
           padding: "22px 22px 20px",
           borderRadius: 28,
           background: "rgba(27,30,39,0.98)",
-          border: "1px solid rgba(188,194,255,0.10)",
+          border: "1px solid var(--border-violet-soft)",
           boxShadow: "0 32px 80px -24px rgba(0,0,0,0.7)",
           display: "flex",
           flexDirection: "column",
@@ -124,8 +124,8 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
                 width: 36,
                 height: 36,
                 borderRadius: 12,
-                background: "rgba(188,194,255,0.16)",
-                color: "#bcc2ff",
+                background: "var(--surface-violet-icon)",
+                color: "var(--primary)",
               }}
             >
               <ShieldCheck size={18} />
@@ -137,7 +137,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
                 style={{
                   fontSize: 20,
                   fontWeight: 500,
-                  color: "#eef1f6",
+                  color: "var(--text-on-surface)",
                   margin: 0,
                   letterSpacing: "-0.02em",
                 }}
@@ -147,7 +147,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
               <p
                 style={{
                   fontSize: 12,
-                  color: "rgba(216,212,235,0.55)",
+                  color: "var(--text-on-surface-strong)",
                   margin: 0,
                 }}
               >
@@ -163,7 +163,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
               style={{
                 background: "transparent",
                 border: "none",
-                color: "rgba(216,212,235,0.55)",
+                color: "var(--text-on-surface-strong)",
                 cursor: "pointer",
                 padding: 4,
                 borderRadius: 8,
@@ -187,7 +187,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
         >
           <AlertCircle
             size={16}
-            color="#ffd99a"
+            color="var(--tertiary)"
             style={{ marginTop: 2, flexShrink: 0 }}
             aria-hidden
           />
@@ -232,16 +232,16 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
                     gap: 12,
                     padding: "12px 14px",
                     background: checked
-                      ? "rgba(188,194,255,0.10)"
-                      : "rgba(188,194,255,0.04)",
+                      ? "var(--surface-violet-medium)"
+                      : "var(--surface-violet-low)",
                     border: checked
-                      ? "1px solid rgba(188,194,255,0.22)"
-                      : "1px solid rgba(188,194,255,0.08)",
+                      ? "1px solid var(--surface-violet-icon-hover)"
+                      : "1px solid var(--surface-violet-medium)",
                     borderRadius: 16,
                     cursor: "pointer",
                     textAlign: "left",
                     transition: "background 0.2s ease, border-color 0.2s ease",
-                    color: "#eef1f6",
+                    color: "var(--text-on-surface)",
                   }}
                 >
                   <span
@@ -252,8 +252,8 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
                       height: 22,
                       borderRadius: 999,
                       background: checked
-                        ? "rgba(188,194,255,0.55)"
-                        : "rgba(216,212,235,0.18)",
+                        ? "var(--surface-violet-icon-hover)"
+                        : "var(--text-on-surface-faint)",
                       transition: "background 0.2s ease",
                       flexShrink: 0,
                     }}
@@ -266,7 +266,9 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
                         width: 18,
                         height: 18,
                         borderRadius: "50%",
-                        background: checked ? "#121416" : "#eef1f6",
+                        background: checked
+                          ? "var(--background)"
+                          : "var(--text-on-surface)",
                         transition: "left 0.2s ease",
                       }}
                     />
@@ -277,7 +279,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
                         display: "block",
                         fontSize: 14,
                         fontWeight: 500,
-                        color: "#eef1f6",
+                        color: "var(--text-on-surface)",
                       }}
                     >
                       {title}
@@ -286,7 +288,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
                       style={{
                         display: "block",
                         fontSize: 12,
-                        color: "rgba(216,212,235,0.6)",
+                        color: "var(--text-on-surface-strong)",
                         marginTop: 2,
                         lineHeight: 1.45,
                       }}
@@ -303,7 +305,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
         <p
           style={{
             fontSize: 12,
-            color: "rgba(216,212,235,0.6)",
+            color: "var(--text-on-surface-strong)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -314,7 +316,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
         <p
           style={{
             fontSize: 11,
-            color: "rgba(216,212,235,0.5)",
+            color: "var(--text-on-surface-muted)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -339,9 +341,9 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
               style={{
                 padding: "10px 14px",
                 borderRadius: 12,
-                background: "rgba(188,194,255,0.06)",
-                border: "1px solid rgba(188,194,255,0.12)",
-                color: "#eef1f6",
+                background: "var(--surface-violet-medium)",
+                border: "1px solid var(--border-violet-medium)",
+                color: "var(--text-on-surface)",
                 fontSize: 13,
                 fontWeight: 500,
                 cursor: "pointer",
@@ -358,7 +360,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
               borderRadius: 12,
               background: "linear-gradient(135deg, #bcc2ff, #d4bbff)",
               border: "none",
-              color: "#121416",
+              color: "var(--background)",
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
@@ -378,7 +380,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
             alignSelf: "flex-start",
             background: "transparent",
             border: "none",
-            color: "rgba(216,212,235,0.55)",
+            color: "var(--text-on-surface-strong)",
             fontSize: 12,
             cursor: "pointer",
             padding: 0,

@@ -35,7 +35,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood }) => {
           <p
             style={{
               fontSize: 13,
-              color: "rgba(188,194,255,0.45)",
+              color: "var(--surface-violet-icon-hover)",
               marginTop: 4,
               lineHeight: 1.5,
               maxWidth: 260,
@@ -60,7 +60,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood }) => {
             style={{
               fontSize: 22,
               fontWeight: 400,
-              color: "rgba(220,224,255,0.78)",
+              color: "var(--text-on-surface-strong)",
               lineHeight: 1.3,
             }}
           >
@@ -69,7 +69,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood }) => {
           <p
             style={{
               fontSize: 12,
-              color: "rgba(188,194,255,0.42)",
+              color: "var(--surface-violet-icon-hover)",
               lineHeight: 1.5,
               maxWidth: 280,
             }}

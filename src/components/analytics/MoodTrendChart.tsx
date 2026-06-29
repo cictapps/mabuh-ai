@@ -81,8 +81,8 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
     >
       <defs>
         <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#bcc2ff" stopOpacity="0.14" />
-          <stop offset="100%" stopColor="#bcc2ff" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.14" />
+          <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
         </linearGradient>
       </defs>
 
@@ -95,7 +95,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
               y1={y}
               x2={W - PAD_X}
               y2={y}
-              stroke="rgba(188,194,255,0.07)"
+              stroke="var(--surface-violet-medium)"
               strokeWidth={1}
               strokeDasharray="4 4"
             />
@@ -103,7 +103,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
               x={PAD_X}
               y={y - 4}
               fontSize={9}
-              fill="rgba(188,194,255,0.25)"
+              fill="var(--surface-violet-icon-hover)"
               fontFamily="Plus Jakarta Sans, sans-serif"
             >
               {label}
@@ -138,7 +138,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
             r={3.5}
             fill={color}
             opacity={0.95}
-            stroke="rgba(18,20,22,0.6)"
+            stroke="var(--ring-node-bg-soft)"
             strokeWidth={1}
           />
         );
@@ -150,7 +150,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
             x={points[0].x}
             y={H + 14}
             fontSize={9}
-            fill="rgba(188,194,255,0.25)"
+            fill="var(--surface-violet-icon-hover)"
             fontFamily="Plus Jakarta Sans, sans-serif"
             textAnchor="middle"
           >
@@ -163,7 +163,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
             x={points[points.length - 1].x}
             y={H + 14}
             fontSize={9}
-            fill="rgba(188,194,255,0.25)"
+            fill="var(--surface-violet-icon-hover)"
             fontFamily="Plus Jakarta Sans, sans-serif"
             textAnchor="middle"
           >

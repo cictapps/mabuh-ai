@@ -84,7 +84,7 @@ export function ResetPassword() {
         <div className="absolute -right-16 bottom-0 h-56 w-56 rounded-full bg-secondary/20 blur-3xl" />
       </div>
 
-      <div className="relative w-full max-w-md rounded-[1.5rem] border border-white/10 bg-card/80 px-8 py-9 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl">
+      <div className="relative w-full max-w-md rounded-[1.5rem] border border-white/10 bg-card/80 px-8 py-9 shadow-[0_28px_80px_-40px_rgba(74, 60, 90, 0.28)] backdrop-blur-xl">
         <div className="mb-7 space-y-2">
           <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/15 px-3.5 py-1.5 text-sm font-medium text-primary">
             <KeyRound className="size-4" />

@@ -72,7 +72,7 @@ const ClockTicks: React.FC = React.memo(() => {
         y1={inner.y}
         x2={outer.x}
         y2={outer.y}
-        stroke={isHour ? "rgba(216,212,235,0.30)" : "rgba(216,212,235,0.14)"}
+        stroke={isHour ? "var(--ring-tick-strong)" : "var(--ring-tick-soft)"}
         strokeLinecap="round"
         strokeWidth={isHour ? 2 : 1.35}
       />
@@ -140,10 +140,10 @@ const MoodStopMarks: React.FC<MoodStopMarksProps> = React.memo(
               letterSpacing="0"
               fill={
                 isActive
-                  ? "#f8f3ff"
+                  ? "var(--text-on-surface)"
                   : isPreview
-                    ? "rgba(216,212,235,0.78)"
-                    : "rgba(216,212,235,0.50)"
+                    ? "var(--text-on-surface-muted)"
+                    : "var(--text-on-surface-softer)"
               }
               initial={false}
               animate={{
@@ -256,7 +256,7 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
           animate={{
             boxShadow: hasSelection
               ? `0 0 58px ${hexToRgba(activeMood.color, 0.3)}`
-              : "0 0 38px rgba(188,194,255,0.12)",
+              : "0 0 38px var(--surface-violet-icon)",
           }}
           transition={springTransition}
         />
@@ -268,9 +268,9 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
         >
           <defs>
             <radialGradient id="mood-clock-face" cx="50%" cy="47%" r="62%">
-              <stop offset="0%" stopColor="rgba(188,194,255,0.10)" />
-              <stop offset="58%" stopColor="rgba(188,194,255,0.035)" />
-              <stop offset="100%" stopColor="rgba(188,194,255,0)" />
+              <stop offset="0%" stopColor="var(--surface-violet-high)" />
+              <stop offset="58%" stopColor="var(--surface-violet-low)" />
+              <stop offset="100%" stopColor="transparent" />
             </radialGradient>
             <filter
               id="mood-clock-hand-glow"
@@ -295,7 +295,7 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
             cy={CENTER}
             r={TRACK_RADIUS}
             fill="none"
-            stroke="rgba(216,212,235,0.12)"
+            stroke="var(--ring-track)"
             strokeWidth="1.5"
           />
           <circle
@@ -303,7 +303,7 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
             cy={CENTER}
             r={82}
             fill="none"
-            stroke="rgba(216,212,235,0.055)"
+            stroke="var(--ring-track-inner)"
             strokeWidth="1"
           />
           <ClockTicks />
@@ -344,15 +344,15 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
             cx={CENTER}
             cy={CENTER}
             r={18}
-            fill="rgba(14,16,24,0.92)"
-            stroke={hasSelection ? activeMood.color : "rgba(216,212,235,0.20)"}
+            fill="var(--ring-center-fill)"
+            stroke={hasSelection ? activeMood.color : "var(--border-violet-medium)"}
             strokeWidth="2"
           />
           <circle
             cx={CENTER}
             cy={CENTER}
             r={5}
-            fill={hasSelection ? activeMood.color : "rgba(216,212,235,0.46)"}
+            fill={hasSelection ? activeMood.color : "var(--text-on-surface-softer)"}
           />
         </svg>
 
@@ -361,11 +361,11 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
         <motion.div
           className="pointer-events-none absolute left-1/2 top-1/2 flex w-28 -translate-x-1/2 translate-y-7 flex-col items-center text-center"
           animate={{
-            color: hasSelection ? activeMood.color : "rgba(216,212,235,0.62)",
+            color: hasSelection ? activeMood.color : "var(--text-on-surface-soft)",
           }}
           transition={springTransition}
         >
-          <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#d8d4eb]/50">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-kicker)]">
             {hasSelection ? "Selected" : "Start at"}
           </span>
           <span className="mt-1 font-serif text-[22px] font-medium leading-none tracking-[-0.03em]">

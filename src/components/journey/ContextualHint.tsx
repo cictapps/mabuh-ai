@@ -10,7 +10,7 @@ export function ContextualHint({ text, className }: ContextualHintProps) {
   return (
     <div
       className={cn(
-        "flex items-start gap-2 rounded-2xl border border-[rgba(255,185,84,0.18)] bg-[rgba(255,185,84,0.06)] px-3 py-2.5 text-xs leading-relaxed text-[#d8d4eb]",
+        "flex items-start gap-2 px-1 py-2 text-xs leading-relaxed text-[color:var(--text-kicker)]",
         className,
       )}
     >

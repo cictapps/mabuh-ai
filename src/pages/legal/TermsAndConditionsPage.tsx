@@ -121,8 +121,8 @@ export function TermsAndConditionsPage() {
         aria-label="Sections"
         className="rounded-2xl p-4"
         style={{
-          background: "rgba(188,194,255,0.04)",
-          border: "0.5px solid rgba(188,194,255,0.10)",
+          background: "var(--surface-violet-low)",
+          border: "0.5px solid var(--surface-violet-medium)",
         }}
       >
         <p
@@ -130,7 +130,7 @@ export function TermsAndConditionsPage() {
             fontSize: 11,
             letterSpacing: "0.18em",
             textTransform: "uppercase",
-            color: "rgba(216,212,235,0.55)",
+            color: "var(--text-on-surface-strong)",
             margin: 0,
             marginBottom: 8,
           }}
@@ -147,7 +147,7 @@ export function TermsAndConditionsPage() {
                 href={`#${s.id}`}
                 style={{
                   fontSize: 13,
-                  color: "rgba(188,194,255,0.85)",
+                  color: "var(--surface-violet-icon-hover)",
                   textDecoration: "none",
                 }}
               >
@@ -169,7 +169,7 @@ export function TermsAndConditionsPage() {
             style={{
               fontSize: 19,
               fontWeight: 500,
-              color: "#eef1f6",
+              color: "var(--text-on-surface)",
               letterSpacing: "-0.015em",
             }}
           >
@@ -181,7 +181,7 @@ export function TermsAndConditionsPage() {
               style={{
                 fontSize: 14,
                 lineHeight: 1.65,
-                color: "rgba(216,212,235,0.78)",
+                color: "var(--text-on-surface-strong)",
                 margin: 0,
               }}
             >
@@ -203,7 +203,7 @@ export function TermsAndConditionsPage() {
           style={{
             fontSize: 17,
             fontWeight: 500,
-            color: "#ffd99a",
+            color: "var(--tertiary)",
             letterSpacing: "-0.01em",
           }}
         >
@@ -213,7 +213,7 @@ export function TermsAndConditionsPage() {
           style={{
             fontSize: 13.5,
             lineHeight: 1.6,
-            color: "rgba(216,212,235,0.78)",
+            color: "var(--text-on-surface-strong)",
             margin: 0,
           }}
         >

@@ -40,7 +40,7 @@ export function ReflectWithAIPanel({
   }
 
   return (
-    <div className="flex flex-col gap-2" data-stagger style={{ position: "relative" }}>
+    <div className="flex flex-col gap-3" data-stagger style={{ position: "relative" }}>
       <Button
         type="button"
         variant="outline"
@@ -59,7 +59,7 @@ export function ReflectWithAIPanel({
       </Button>
 
       {open && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <Alert variant="info" className="border-white/10 bg-white/[0.04]">
             <Sparkles className="size-3.5" />
             <AlertTitle className="text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground">

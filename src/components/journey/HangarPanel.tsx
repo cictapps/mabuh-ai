@@ -154,7 +154,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
           A few optional settings. Open what you want to tweak — the rest can wait.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
         {mode === "garden" ? (
           <Section
             icon={<Leaf className="size-4" />}
@@ -298,7 +298,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
             open={openSection === "waypoints"}
             onToggle={() => toggleSection("waypoints")}
           >
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Input
                 value={label}
                 onChange={(event) => setLabel(event.target.value)}
@@ -321,7 +321,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
                 No waypoints yet. Add one above to plan a soft moment in your day.
               </p>
             ) : (
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {sortedCheckpoints.map((checkpoint) => (
                   <li
                     key={checkpoint.id}
@@ -365,7 +365,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
             Save a few people you can call from the Pause view. These are private to your
             device.
           </p>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {emergencyContacts.map((contact) => (
               <div
                 key={contact.id}
@@ -460,7 +460,7 @@ function Section({ icon, title, hint, open, onToggle, children }: SectionProps) 
           )}
         />
       </button>
-      {open ? <div className="space-y-4 px-3.5 pb-4">{children}</div> : null}
+      {open ? <div className="space-y-5 px-3.5 pb-4">{children}</div> : null}
     </div>
   );
 }

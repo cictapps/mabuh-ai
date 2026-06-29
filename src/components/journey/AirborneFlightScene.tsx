@@ -22,10 +22,10 @@ const THEME_STYLES: Record<
     label: "Dusk",
     skyTop: "#181b26",
     skyBottom: "#11141d",
-    bright: "#eef1f6",
+    bright: "var(--text-on-surface)",
     mid: "#9ca1b6",
     dim: "#555b70",
-    accent: "#bcc2ff",
+    accent: "var(--primary)",
   },
   dawn: {
     label: "Dawn",
@@ -173,7 +173,7 @@ export function AirborneFlightScene({ theme, plane }: AirborneFlightSceneProps) 
   return (
     <figure className="mb-2">
       <div
-        className="relative overflow-hidden rounded-[1.25rem] border border-[rgba(188,194,255,0.16)]"
+        className="relative overflow-hidden rounded-[1.25rem] border border-[var(--border-violet-medium)]"
         style={{
           background: colors.skyBottom,
           boxShadow: `inset 0 0 36px -22px ${colors.accent}, 0 18px 48px -36px ${colors.accent}`,
@@ -266,7 +266,7 @@ export function AirborneFlightScene({ theme, plane }: AirborneFlightSceneProps) 
           </g>
         </svg>
       </div>
-      <figcaption className="mt-2.5 text-center font-mono text-[10px] leading-relaxed tracking-[0.04em] text-[rgba(216,212,235,0.58)]">
+      <figcaption className="mt-2.5 text-center font-mono text-[10px] leading-relaxed tracking-[0.04em] text-[var(--text-on-surface-strong)]">
         Keep your own pace. The next waypoint will be here when you are ready.
       </figcaption>
     </figure>

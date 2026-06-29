@@ -522,7 +522,7 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
           background:
-            "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(188,194,255,0.06) 0%, transparent 60%)",
+            "radial-gradient(ellipse 80% 50% at 50% 0%, var(--surface-violet-medium) 0%, transparent 60%)",
         }}
       />
 
@@ -541,7 +541,7 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
               className="text-[0.625rem] font-semibold uppercase"
               style={{
                 letterSpacing: "0.24em",
-                color: "rgba(216,212,235,0.55)",
+                color: "var(--text-on-surface-strong)",
               }}
             >
               By students, for students
@@ -616,7 +616,7 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
           <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
             <Link
               to="/terms"
-              className="font-medium text-foreground/70 underline decoration-[rgba(188,194,255,0.35)] underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+              className="font-medium text-foreground/70 underline decoration-[var(--surface-violet-icon-hover)] underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
             >
               Terms & Conditions
             </Link>
@@ -625,7 +625,7 @@ export function AuthPage({ initialTab = "sign-in" }: AuthPageProps) {
             </span>
             <Link
               to="/privacy"
-              className="font-medium text-foreground/70 underline decoration-[rgba(188,194,255,0.35)] underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+              className="font-medium text-foreground/70 underline decoration-[var(--surface-violet-icon-hover)] underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
             >
               Privacy Policy
             </Link>

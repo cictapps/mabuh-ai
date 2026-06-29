@@ -177,7 +177,7 @@ export function GardenPanel({ onOpenSupport, locked }: GardenPanelProps) {
                 : "The next stage can wait for another Garden day.")}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="space-y-6">
           {phase === "prepare" ? (
             <>
               <MoodPicker value={mood} onChange={setMood} />

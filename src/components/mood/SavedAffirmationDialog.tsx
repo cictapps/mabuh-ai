@@ -94,7 +94,7 @@ export function SavedAffirmationDialog({
                 fontSize: 11,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
-                color: "rgba(188,194,255,0.45)",
+                color: "var(--text-on-surface-softer)",
               }}
             >
               When
@@ -102,7 +102,7 @@ export function SavedAffirmationDialog({
             <span
               style={{
                 fontSize: 12,
-                color: "rgba(238,241,246,0.85)",
+                color: "var(--text-on-surface-strong)",
                 fontVariantNumeric: "tabular-nums",
               }}
             >
@@ -116,7 +116,7 @@ export function SavedAffirmationDialog({
                   fontSize: 11,
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
-                  color: "rgba(188,194,255,0.45)",
+                  color: "var(--text-on-surface-softer)",
                 }}
               >
                 Today
@@ -124,7 +124,7 @@ export function SavedAffirmationDialog({
               <span
                 style={{
                   fontSize: 12,
-                  color: "rgba(238,241,246,0.85)",
+                  color: "var(--text-on-surface-strong)",
                 }}
               >
                 {checkInsToday} check-ins

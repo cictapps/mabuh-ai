@@ -30,11 +30,11 @@ export const MoodTagChip: React.FC<MoodTagChipProps> = ({
         fontFamily: "Plus Jakarta Sans, sans-serif",
         border: "none",
         outline: "none",
-        background: selected ? `${accentColor}26` : "rgba(188,194,255,0.05)",
-        color: selected ? accentColor : "rgba(220,224,255,0.75)",
+        background: selected ? `${accentColor}26` : "var(--surface-violet-low)",
+        color: selected ? accentColor : "var(--text-on-surface-muted)",
         boxShadow: selected
           ? `inset 0 0 0 1px ${accentColor}66, 0 6px 18px -10px ${accentColor}55`
-          : "inset 0 0 0 1px rgba(188,194,255,0.04)",
+          : "inset 0 0 0 1px var(--border-violet-faint)",
         minHeight: isCompact ? 30 : 38,
         cursor: "pointer",
         transition:

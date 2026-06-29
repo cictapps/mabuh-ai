@@ -18,7 +18,7 @@ type ViewTabsProps = {
 export function ViewTabs({ active, onChange, workshopLabel = "Hangar" }: ViewTabsProps) {
   return (
     <div
-      className="flex items-stretch gap-1 rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] p-1"
+      className="flex items-stretch gap-1 rounded-2xl border border-[var(--border-violet-soft)] bg-[var(--surface-violet-low)] p-1"
       role="tablist"
       aria-label="Journey views"
     >
@@ -39,14 +39,14 @@ export function ViewTabs({ active, onChange, workshopLabel = "Hangar" }: ViewTab
               "active:scale-[0.97]",
               isActive ? "flex-[2.6] gap-1.5 px-2.5" : "flex-1 gap-0 px-1",
               isActive
-                ? "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_14px_32px_-18px_rgba(188,194,255,0.85)]"
-                : "text-[#d8d4eb]",
+                ? "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_14px_32px_-18px_var(--surface-violet-icon-hover)]"
+                : "text-[color:var(--text-kicker)]",
             )}
           >
             <Icon
               className={cn(
                 "size-4 shrink-0 transition-colors",
-                isActive ? "text-current" : "text-[#d8d4eb]",
+                isActive ? "text-current" : "text-[color:var(--text-kicker)]",
               )}
             />
             <span

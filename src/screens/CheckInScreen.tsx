@@ -292,12 +292,14 @@ function Stepper({
   const clamp = (n: number) => Math.max(min, Math.min(max, n));
   const dec = () => onChange(clamp(value - step));
   const inc = () => onChange(clamp(value + step));
+  const decDisabled = disabled || value <= min;
+  const incDisabled = disabled || value >= max;
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 8,
+        gap: 10,
         padding: "6px 0",
         opacity: disabled ? 0.5 : 1,
       }}
@@ -322,63 +324,74 @@ function Stepper({
           </span>
         ) : null}
       </span>
-      <button
-        type="button"
+      <StepperButton
         onClick={dec}
-        disabled={disabled || value <= min}
-        aria-label="Decrease"
-        style={{
-          width: 28,
-          height: 28,
-          borderRadius: 8,
-          border: "none",
-          background: "rgba(188,194,255,0.10)",
-          color: "var(--text-on-surface)",
-          cursor: value <= min ? "not-allowed" : "pointer",
-          fontSize: 14,
-          fontWeight: 700,
-          display: "grid",
-          placeItems: "center",
-          transition: "background 0.15s ease",
-        }}
-        onMouseEnter={(e) => {
-          if (value > min) e.currentTarget.style.background = "rgba(188,194,255,0.18)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "rgba(188,194,255,0.10)";
-        }}
-      >
-        −
-      </button>
-      <button
-        type="button"
+        disabled={decDisabled}
+        ariaLabel="Decrease"
+        symbol="−"
+      />
+      <StepperButton
         onClick={inc}
-        disabled={disabled || value >= max}
-        aria-label="Increase"
-        style={{
-          width: 28,
-          height: 28,
-          borderRadius: 8,
-          border: "none",
-          background: "rgba(188,194,255,0.10)",
-          color: "var(--text-on-surface)",
-          cursor: value >= max ? "not-allowed" : "pointer",
-          fontSize: 14,
-          fontWeight: 700,
-          display: "grid",
-          placeItems: "center",
-          transition: "background 0.15s ease",
-        }}
-        onMouseEnter={(e) => {
-          if (value < max) e.currentTarget.style.background = "rgba(188,194,255,0.18)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "rgba(188,194,255,0.10)";
-        }}
-      >
-        +
-      </button>
+        disabled={incDisabled}
+        ariaLabel="Increase"
+        symbol="+"
+      />
     </div>
+  );
+}
+
+function StepperButton({
+  onClick,
+  disabled,
+  ariaLabel,
+  symbol,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+  ariaLabel: string;
+  symbol: string;
+}) {
+  const [pressed, setPressed] = useState(false);
+  const baseBg = "rgba(188,194,255,0.10)";
+  const hoverBg = "rgba(188,194,255,0.18)";
+  const activeBg = "rgba(188,194,255,0.28)";
+  const restingBg = disabled ? baseBg : pressed ? activeBg : baseBg;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      onPointerDown={() => !disabled && setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+      onPointerCancel={() => setPressed(false)}
+      onPointerLeave={() => setPressed(false)}
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        border: "none",
+        background: restingBg,
+        color: "var(--text-on-surface)",
+        cursor: disabled ? "not-allowed" : "pointer",
+        fontSize: 18,
+        fontWeight: 700,
+        display: "grid",
+        placeItems: "center",
+        transition: "background 0.15s ease, transform 0.15s ease",
+        transform: pressed ? "scale(0.92)" : "scale(1)",
+        touchAction: "manipulation",
+        WebkitTapHighlightColor: "transparent",
+      }}
+      onMouseEnter={(e) => {
+        if (!disabled && !pressed) e.currentTarget.style.background = hoverBg;
+      }}
+      onMouseLeave={(e) => {
+        if (!disabled) e.currentTarget.style.background = baseBg;
+      }}
+    >
+      {symbol}
+    </button>
   );
 }
 
@@ -1240,10 +1253,9 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 </p>
                 <div
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
+                    display: "flex",
+                    flexDirection: "column",
                     gap: 10,
-                    alignItems: "stretch",
                   }}
                 >
                   <div style={sectionCardStyle}>
@@ -1545,8 +1557,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
               marginTop: 16,
               paddingTop: 18,
               paddingBottom: 8,
-              background:
-                "linear-gradient(to top, rgba(18,20,22,0.98) 60%, rgba(18,20,22,0) 100%)",
+              background: "var(--sticky-save-fade)",
               zIndex: 5,
               display: "flex",
               flexDirection: "column",
@@ -1613,10 +1624,10 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                   borderRadius: 6,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "rgba(188,194,255,0.8)";
+                  e.currentTarget.style.color = "var(--primary)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "rgba(188,194,255,0.5)";
+                  e.currentTarget.style.color = "var(--text-on-surface-muted)";
                 }}
               >
                 {showAdvanced ? "Hide" : "A little tip"}
@@ -1667,8 +1678,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                 zIndex: 1,
                 padding: "12px 14px",
                 borderRadius: 14,
-                background: "rgba(188,194,255,0.04)",
-                border: "1px dashed rgba(188,194,255,0.10)",
+                background: "var(--surface-violet-low)",
+                border: "1px dashed var(--border-violet-faint)",
                 color: "var(--text-on-surface-muted)",
                 fontSize: 11.5,
                 lineHeight: 1.55,

@@ -174,6 +174,41 @@
   --ring-node-bg-strong: rgb(255 252 248 / 92%);
   --ring-node-bg-soft: rgb(255 252 248 / 78%);
 
+  /* Stat-card tokens — Journey's DAY RHYTHM / JOURNEYS / REWARDS row.
+     Each tone has a card surface, border, icon-tile, accent (for the
+     2px gradient rail), value text, and a decorative corner glow. Light
+     uses deep amber / lilac / sage that read on cream; dark mirrors the
+     existing tonal palette. */
+  --stat-warm-bg: rgba(140, 94, 31, 0.06);
+  --stat-warm-border: rgba(140, 94, 31, 0.22);
+  --stat-warm-icon-bg: rgba(255, 185, 84, 0.22);
+  --stat-warm-icon: #8c5e1f;
+  --stat-warm-value: #6b4514;
+  --stat-warm-accent: #b06a1c;
+  --stat-warm-glow: rgba(255, 185, 84, 0.22);
+  --stat-calm-bg: rgba(120, 110, 200, 0.05);
+  --stat-calm-border: rgba(120, 110, 200, 0.22);
+  --stat-calm-icon-bg: rgba(120, 110, 200, 0.18);
+  --stat-calm-icon: #5e5aa0;
+  --stat-calm-value: #3a3666;
+  --stat-calm-accent: #5e5aa0;
+  --stat-calm-glow: rgba(120, 110, 200, 0.18);
+  --stat-soft-bg: rgb(255 252 248 / 78%);
+  --stat-soft-border: rgba(74, 60, 90, 0.14);
+  --stat-soft-icon-bg: rgba(74, 60, 90, 0.1);
+  --stat-soft-icon: #4a3c63;
+  --stat-soft-value: #1f1a2c;
+  --stat-soft-accent: rgba(74, 60, 90, 0.5);
+  --stat-soft-glow: rgba(74, 60, 90, 0.06);
+  --stat-success-bg: rgba(53, 108, 72, 0.06);
+  --stat-success-border: rgba(53, 108, 72, 0.22);
+  --stat-success-icon-bg: rgba(141, 212, 164, 0.22);
+  --stat-success-icon: #2c5a3a;
+  --stat-success-value: #2c5a3a;
+  --stat-success-accent: #356c48;
+  --stat-success-glow: rgba(141, 212, 164, 0.22);
+  --stat-border-hover: rgba(74, 60, 90, 0.32);
+
   --shadow-card: 0 24px 60px -32px rgba(74, 60, 90, 0.28);
   --shadow-card-soft: 0 18px 50px -32px rgba(74, 60, 90, 0.22);
   --shadow-glow-active: 0 14px 32px -18px rgba(120, 110, 200, 0.55);
@@ -304,6 +339,37 @@
   --ring-tick-strong: rgba(216, 212, 235, 0.5);
   --ring-tick-soft: rgba(216, 212, 235, 0.25);
   --ring-center-fill: rgba(14, 16, 24, 0.92);
+
+  /* Stat-card tokens — dark mode (mirrors the light values above). */
+  --stat-warm-bg: rgba(255, 185, 84, 0.05);
+  --stat-warm-border: rgba(255, 185, 84, 0.22);
+  --stat-warm-icon-bg: rgba(255, 185, 84, 0.16);
+  --stat-warm-icon: #ffb954;
+  --stat-warm-value: #ffd99a;
+  --stat-warm-accent: #ffb954;
+  --stat-warm-glow: rgba(255, 185, 84, 0.18);
+  --stat-calm-bg: rgba(188, 194, 255, 0.04);
+  --stat-calm-border: rgba(188, 194, 255, 0.22);
+  --stat-calm-icon-bg: rgba(188, 194, 255, 0.12);
+  --stat-calm-icon: #bcc2ff;
+  --stat-calm-value: #bcc2ff;
+  --stat-calm-accent: #bcc2ff;
+  --stat-calm-glow: rgba(188, 194, 255, 0.16);
+  --stat-soft-bg: rgba(216, 212, 235, 0.05);
+  --stat-soft-border: rgba(216, 212, 235, 0.14);
+  --stat-soft-icon-bg: rgba(216, 212, 235, 0.08);
+  --stat-soft-icon: #d8d4eb;
+  --stat-soft-value: #eef1f6;
+  --stat-soft-accent: rgba(216, 212, 235, 0.5);
+  --stat-soft-glow: rgba(216, 212, 235, 0.08);
+  --stat-success-bg: rgba(141, 212, 164, 0.05);
+  --stat-success-border: rgba(141, 212, 164, 0.22);
+  --stat-success-icon-bg: rgba(141, 212, 164, 0.16);
+  --stat-success-icon: #8dd4a4;
+  --stat-success-value: #8dd4a4;
+  --stat-success-accent: #8dd4a4;
+  --stat-success-glow: rgba(141, 212, 164, 0.18);
+  --stat-border-hover: rgba(216, 212, 235, 0.3);
 
   --shadow-card: 0 28px 80px -40px rgba(8, 10, 18, 0.85);
   --shadow-card-soft: 0 18px 50px -32px rgba(8, 10, 18, 0.85);
@@ -1033,6 +1099,136 @@ input[type="password"]::-ms-clear {
 
 .find-help-screen {
   --find-help-bottom-clearance: env(safe-area-inset-bottom, 0px);
+
+  --find-help-screen-bg: var(--background);
+  --find-help-surface: var(--card);
+  --find-help-surface-strong: var(--surface-high);
+  --find-help-surface-low: var(--surface-low);
+  --find-help-text: var(--text-on-surface);
+  --find-help-text-strong: var(--text-on-surface-strong);
+  --find-help-text-muted: var(--text-kicker);
+  --find-help-border: var(--border-violet-soft);
+  --find-help-border-soft: var(--border-violet-faint);
+  --find-help-border-strong: var(--border-violet-medium);
+  --find-help-accent: var(--primary);
+  --find-help-pill-bg: var(--ring-node-bg-soft);
+  --find-help-pill-border: var(--border-violet-medium);
+  --find-help-pill-text: var(--primary);
+  --find-help-header-bg: var(--ring-node-bg-soft);
+  --find-help-header-border: var(--surface-violet-medium);
+  --find-help-shadow: 0 18px 50px -32px rgba(74, 60, 90, 0.28);
+  --find-help-sheet-shadow: 0 -32px 80px -28px rgba(74, 60, 90, 0.4);
+  --find-help-pin-pin-psychiatrist: #5e5aa0;
+  --find-help-pin-hospital: #356c48;
+  --find-help-pin-campus: #356c48;
+  --find-help-pin-hotline: #a04444;
+  --find-help-pin-community: #8c5e1f;
+  --find-help-pin-default: #5e5aa0;
+  --find-help-user-dot: #1a5fb4;
+  --find-help-user-dot-ring: rgba(26, 95, 180, 0.3);
+  --find-help-link-blue: #1a4fb4;
+  --find-help-link-blue-soft: rgba(26, 79, 180, 0.12);
+  --find-help-link-blue-border: rgba(26, 79, 180, 0.32);
+  --find-help-link-blue-text: #1a4fb4;
+  --find-help-fb-bg: rgba(59, 89, 152, 0.12);
+  --find-help-fb-border: rgba(59, 89, 152, 0.35);
+  --find-help-fb-text: #3b5998;
+  --find-help-hotline-bg: rgba(160, 68, 68, 0.06);
+  --find-help-hotline-border: rgba(160, 68, 68, 0.18);
+  --find-help-sos-bg: #fbf3f3;
+  --find-help-sos-text: #1f1a2c;
+  --find-help-sos-muted: rgba(74, 60, 90, 0.7);
+  --find-help-distance-bg: rgba(26, 79, 180, 0.08);
+  --find-help-distance-border: rgba(26, 79, 180, 0.28);
+  --find-help-distance-text: #1a4fb4;
+  --find-help-distance-meta: rgba(26, 79, 180, 0.7);
+  --find-help-tip-text: #2c5a3a;
+  --find-help-empty-bg: var(--surface-violet-low);
+  --find-help-empty-border: var(--border-violet-soft);
+  --find-help-empty-text: var(--surface-violet-icon-hover);
+  --find-help-empty-meta: var(--text-kicker);
+  --find-help-focus-bg: var(--surface-violet-medium);
+  --find-help-tab-border: var(--surface-violet-medium);
+  --find-help-soft-divider: rgba(74, 60, 90, 0.12);
+  --find-help-pill-text: #1f1a2c;
+  --find-help-fab-text: #1f1a2c;
+  --find-help-fab-shadow:
+    0 18px 40px -14px rgba(120, 110, 200, 0.55), 0 6px 20px -8px rgba(74, 60, 90, 0.45);
+  --find-help-fab-count-bg: rgb(255 252 248 / 78%);
+  --find-help-pill-counter-bg: var(--ring-node-bg-soft);
+  --find-help-icon-violet-tint-bg: rgba(120, 110, 200, 0.12);
+  --find-help-icon-violet-tint-border: rgba(120, 110, 200, 0.28);
+  --find-help-icon-hospital-tint-bg: rgba(53, 108, 72, 0.14);
+  --find-help-icon-ngo-tint-bg: rgba(140, 94, 31, 0.14);
+  --pin-letter: #ffffff;
+  --pin-stroke: #1f1a2c;
+  --pin-shine: rgba(255, 255, 255, 0.35);
+}
+
+html.dark .find-help-screen {
+  --find-help-screen-bg: var(--background);
+  --find-help-surface: #1b1e27;
+  --find-help-surface-strong: #232733;
+  --find-help-surface-low: #14161c;
+  --find-help-text: var(--text-on-surface);
+  --find-help-text-strong: var(--text-on-surface-strong);
+  --find-help-text-muted: var(--text-kicker);
+  --find-help-border: var(--border-violet-soft);
+  --find-help-border-soft: var(--border-violet-faint);
+  --find-help-border-strong: var(--border-violet-medium);
+  --find-help-accent: var(--primary);
+  --find-help-pill-bg: var(--ring-node-bg-soft);
+  --find-help-pill-border: var(--border-violet-medium);
+  --find-help-pill-text: var(--primary);
+  --find-help-header-bg: rgba(16, 18, 24, 0.78);
+  --find-help-header-border: var(--surface-violet-medium);
+  --find-help-shadow: 0 18px 50px -32px rgba(8, 10, 18, 0.85);
+  --find-help-sheet-shadow: 0 -32px 80px -28px rgba(0, 0, 0, 0.7);
+  --find-help-pin-pin-psychiatrist: var(--primary);
+  --find-help-pin-hospital: #6dba84;
+  --find-help-pin-campus: #6dba84;
+  --find-help-pin-hotline: #e05c6e;
+  --find-help-pin-community: #e0853c;
+  --find-help-pin-default: var(--primary);
+  --find-help-user-dot: #4a9eff;
+  --find-help-user-dot-ring: rgba(74, 158, 255, 0.3);
+  --find-help-link-blue: #1a73e8;
+  --find-help-link-blue-soft: rgba(26, 115, 232, 0.12);
+  --find-help-link-blue-border: rgba(26, 115, 232, 0.25);
+  --find-help-link-blue-text: #6aabff;
+  --find-help-fb-bg: rgba(59, 89, 152, 0.18);
+  --find-help-fb-border: rgba(59, 89, 152, 0.35);
+  --find-help-fb-text: #8b9dc3;
+  --find-help-hotline-bg: rgba(224, 92, 110, 0.05);
+  --find-help-hotline-border: rgba(224, 92, 110, 0.08);
+  --find-help-sos-bg: #1a0a0a;
+  --find-help-sos-text: #f5e5e5;
+  --find-help-sos-muted: rgba(255, 255, 255, 0.35);
+  --find-help-distance-bg: rgba(74, 158, 255, 0.08);
+  --find-help-distance-border: rgba(74, 158, 255, 0.2);
+  --find-help-distance-text: #4a9eff;
+  --find-help-distance-meta: rgba(74, 158, 255, 0.6);
+  --find-help-tip-text: #6dba84;
+  --find-help-empty-bg: var(--surface-violet-low);
+  --find-help-empty-border: var(--border-violet-soft);
+  --find-help-empty-text: var(--surface-violet-icon-hover);
+  --find-help-empty-meta: var(--text-kicker);
+  --find-help-focus-bg: var(--surface-violet-medium);
+  --find-help-tab-border: var(--surface-violet-medium);
+  --find-help-soft-divider: rgba(216, 212, 235, 0.08);
+  --find-help-pill-text: var(--primary);
+  --find-help-fab-text: var(--background);
+  --find-help-fab-shadow:
+    0 18px 40px -14px var(--surface-violet-icon-hover), 0 6px 20px -8px rgba(0, 0, 0, 0.6);
+  --find-help-fab-count-bg: var(--ring-node-bg-soft);
+  --find-help-pill-counter-bg: var(--ring-node-bg-soft);
+  --find-help-icon-violet-tint-bg: var(--surface-violet-medium);
+  --find-help-icon-violet-tint-border: var(--border-violet-medium);
+  --find-help-icon-hospital-tint-bg: rgba(109, 186, 132, 0.1);
+  --find-help-icon-ngo-tint-bg: rgba(224, 133, 60, 0.1);
+  --pin-letter: var(--background);
+  --pin-stroke: #ffffff;
+  --pin-shine: rgba(255, 255, 255, 0.2);
 }
 
 @media (pointer: coarse) {
@@ -1041,6 +1237,85 @@ input[type="password"]::-ms-clear {
        three-button navigation bar still overlays the viewport. */
     --find-help-bottom-clearance: max(env(safe-area-inset-bottom, 0px), 24px);
   }
+}
+
+/* Leaflet popup theming for the Find-Help map. The popup HTML is built
+   inline by GISFeature, so it relies on these classes for light/dark
+   theming. */
+.find-help-popup .leaflet-popup-content-wrapper {
+  background: var(--find-help-surface) !important;
+  color: var(--find-help-text) !important;
+  box-shadow: var(--find-help-shadow) !important;
+  border-radius: 14px !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.find-help-popup .leaflet-popup-tip {
+  background: var(--find-help-surface) !important;
+  box-shadow: var(--find-help-shadow) !important;
+}
+
+.find-help-popup .leaflet-popup-content {
+  margin: 12px 14px !important;
+  font-family: var(--font-sans) !important;
+}
+
+.find-help-popup .find-help-popup__title {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--find-help-text-strong);
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.find-help-popup .find-help-popup__meta {
+  font-size: 11px;
+  color: var(--find-help-text-muted);
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.find-help-popup .find-help-popup__clinic {
+  font-size: 11px;
+  color: var(--find-help-text-muted);
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.find-help-popup .find-help-popup__actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.find-help-popup .find-help-popup__action {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.find-help-popup .find-help-popup__action--call {
+  background: var(--surface-violet-medium);
+  color: var(--primary);
+  border: 1px solid var(--border-violet-medium);
+}
+
+.find-help-popup .find-help-popup__action--directions {
+  background: var(--find-help-link-blue-soft);
+  color: var(--find-help-link-blue-text);
+  border: 1px solid var(--find-help-link-blue-border);
+}
+
+.find-help-popup .leaflet-popup-close-button {
+  color: var(--find-help-text-muted) !important;
+  font-size: 20px !important;
+  padding: 6px 8px !important;
 }
 
 .bottom-nav-shell {

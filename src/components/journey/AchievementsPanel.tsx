@@ -1,5 +1,15 @@
 import { useMemo } from "react";
-import { Award, Gift, Lock, MapPin, Sparkles, Star } from "lucide-react";
+import {
+  Award,
+  Compass,
+  Flame,
+  Gift,
+  Lock,
+  MapPin,
+  Sparkles,
+  Star,
+  Trophy,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -7,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Pill } from "./Pill";
+import { StatBadge } from "./StatBadge";
 import { ProgressBar } from "./ProgressBar";
 import { ContextualHint } from "./ContextualHint";
 import { AchievementShareCard } from "./AchievementShareCard";
@@ -102,12 +112,26 @@ export function AchievementsPanel({ showHint }: AchievementsPanelProps) {
         ) : null}
 
         <div className="grid grid-cols-3 gap-2">
-          <Pill label="Streak" value={`${streak} 🔥`} tone="warm" />
-          <Pill label="Level" value={`Lv.${level}`} tone="calm" />
-          <Pill
-            label="Journeys"
+          <StatBadge
+            tone="warm"
+            layout="stacked"
+            icon={<Flame className="size-4" fill="currentColor" />}
+            value={streak}
+            label="Streak"
+          />
+          <StatBadge
+            tone="success"
+            layout="stacked"
+            icon={<Trophy className="size-4" />}
+            value={`Lv.${level}`}
+            label="Level"
+          />
+          <StatBadge
+            tone="calm"
+            layout="stacked"
+            icon={<Compass className="size-4" />}
             value={flightsCompleted + gardenDaysCompleted}
-            tone="soft"
+            label="Journeys"
           />
         </div>
 

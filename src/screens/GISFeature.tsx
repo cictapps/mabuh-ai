@@ -29,6 +29,7 @@ import {
   LayoutGrid,
   type LucideIcon,
 } from "lucide-react";
+import { useThemePreference } from "../hooks/useThemePreference";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 import {
@@ -195,6 +196,15 @@ function fmtDist(km: number) {
   return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // ── Database ───────────────────────────────────────────────────────────────────
 const DB_PSY: Provider[] = loadProviders()
   .filter((p) => p.category === "psychiatrist")
@@ -207,15 +217,20 @@ const DB_SUP: Provider[] = loadProviders()
   .map(toLegacy);
 const DB_HOT: Provider[] = loadHotlines().map(hotlineToLegacy);
 
-const TILES = {
-  street: {
+const TILES_STREET = {
+  light: {
+    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    attr: "© OpenStreetMap, © CARTO",
+  },
+  dark: {
     url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
     attr: "© OpenStreetMap, © CARTO",
   },
-  satellite: {
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attr: "© Esri",
-  },
+};
+
+const TILES_SATELLITE = {
+  url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  attr: "© Esri",
 };
 
 function estimateTime(km: number): string {
@@ -226,31 +241,39 @@ function estimateTime(km: number): string {
   return `~${driveMin} min drive`;
 }
 
-function createProviderPinIcon(leaflet: typeof L, color: string, letter: string) {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
-      <path
-        d="M18 1.5C9.16 1.5 2 8.66 2 17.5c0 11.45 13.34 23.88 14.86 25.26a1.7 1.7 0 0 0 2.28 0C20.66 41.38 34 28.95 34 17.5 34 8.66 26.84 1.5 18 1.5Z"
-        fill="${color}"
-        stroke="#ffffff"
-        stroke-opacity="0.9"
-        stroke-width="2"
-      />
-      <circle cx="18" cy="17.5" r="9.5" fill="#ffffff" fill-opacity="0.2" />
-      <text
-        x="18"
-        y="21.5"
-        text-anchor="middle"
-        font-family="Arial, sans-serif"
-        font-size="12"
-        font-weight="700"
-        fill="var(--background)"
-      >${letter}</text>
-    </svg>
+function createProviderPinIcon(color: string, letter: string) {
+  // Using a divIcon lets Leaflet render the pin as inline DOM, so the
+  // color is read from CSS custom properties set on the wrapper. This
+  // makes the pin theme-aware: the find-help-screen tokens above
+  // resolve --pin-color, --pin-stroke, --pin-letter, and --pin-shine
+  // for either the cream light theme or the dark twilight theme.
+  const html = `
+    <div class="find-help-pin" style="--pin-color:${color};">
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+        <path
+          d="M18 1.5C9.16 1.5 2 8.66 2 17.5c0 11.45 13.34 23.88 14.86 25.26a1.7 1.7 0 0 0 2.28 0C20.66 41.38 34 28.95 34 17.5 34 8.66 26.84 1.5 18 1.5Z"
+          fill="${color}"
+          stroke="var(--pin-stroke)"
+          stroke-opacity="0.85"
+          stroke-width="2"
+        />
+        <circle cx="18" cy="17.5" r="9.5" fill="var(--pin-shine)" />
+        <text
+          x="18"
+          y="21.5"
+          text-anchor="middle"
+          font-family="Arial, sans-serif"
+          font-size="12"
+          font-weight="700"
+          fill="var(--pin-letter)"
+        >${letter}</text>
+      </svg>
+    </div>
   `;
 
-  return leaflet.icon({
-    iconUrl: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+  return L.divIcon({
+    html,
+    className: "find-help-pin-wrap",
     iconSize: [36, 44],
     iconAnchor: [18, 42],
     popupAnchor: [0, -40],
@@ -263,6 +286,7 @@ function LiveMap({
   focusProvider,
   userLocation,
   mapLayer,
+  theme,
   onCollapse,
   onResetFocus,
 }: {
@@ -270,6 +294,7 @@ function LiveMap({
   focusProvider: Provider | null;
   userLocation: UserLocation | null;
   mapLayer: MapLayer;
+  theme: "light" | "dark";
   onCollapse?: () => void;
   onResetFocus?: (() => void) | null;
 }) {
@@ -291,8 +316,9 @@ function LiveMap({
       zoomControl: false,
     });
     L.control.zoom({ position: "bottomright" }).addTo(map);
-    tileLayerRef.current = L.tileLayer(TILES.street.url, {
-      attribution: TILES.street.attr,
+    const initialLayer = mapLayer === "satellite" ? TILES_SATELLITE : TILES_STREET[theme];
+    tileLayerRef.current = L.tileLayer(initialLayer.url, {
+      attribution: initialLayer.attr,
       maxZoom: 19,
     }).addTo(map);
     mapInstance.current = map;
@@ -338,11 +364,12 @@ function LiveMap({
     const map = mapInstance.current;
     if (!L || !map || !tileLayerRef.current) return;
     map.removeLayer(tileLayerRef.current);
-    tileLayerRef.current = L.tileLayer(TILES[mapLayer].url, {
-      attribution: TILES[mapLayer].attr,
+    const layer = mapLayer === "satellite" ? TILES_SATELLITE : TILES_STREET[theme];
+    tileLayerRef.current = L.tileLayer(layer.url, {
+      attribution: layer.attr,
       maxZoom: 19,
     }).addTo(map);
-  }, [mapLayer]);
+  }, [mapLayer, theme]);
 
   useEffect(() => {
     const L = leafletRef.current;
@@ -350,23 +377,26 @@ function LiveMap({
     if (!L || !map || !userLocation) return;
     if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
     const icon = L.divIcon({
-      html: `<div style="width:16px;height:16px;border-radius:50%;background:#4a9eff;border:3px solid #fff;box-shadow:0 0 0 4px rgba(74,158,255,0.3);"></div>`,
+      html: `<div style="width:16px;height:16px;border-radius:50%;background:var(--find-help-user-dot);border:3px solid var(--background);box-shadow:0 0 0 4px var(--find-help-user-dot-ring);"></div>`,
       className: "",
       iconSize: [16, 16],
       iconAnchor: [8, 8],
     });
     userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], { icon })
       .addTo(map)
-      .bindPopup("<b>You are here</b>");
+      .bindPopup(
+        `<div style="font-family:var(--font-sans);font-weight:600;font-size:12px;color:var(--find-help-text-strong);">You are here</div>`,
+      );
     map.flyTo([userLocation.lat, userLocation.lng], 13, { animate: true, duration: 1.5 });
   }, [userLocation]);
 
   function pinColor(p: Provider) {
-    if (p.type === "Psychiatrist") return "var(--primary)";
-    if (p.type === "Hotline") return "#e05c6e";
-    if (p.type === "Hospital" || p.type === "Community Program") return "#6dba84";
-    if (p.type.includes("Campus")) return "#6dba84";
-    return "#e0853c";
+    if (p.type === "Psychiatrist") return "var(--find-help-pin-psychiatrist)";
+    if (p.type === "Hotline") return "var(--find-help-pin-hotline)";
+    if (p.type === "Hospital" || p.type === "Community Program")
+      return "var(--find-help-pin-hospital)";
+    if (p.type.includes("Campus")) return "var(--find-help-pin-campus)";
+    return "var(--find-help-pin-community)";
   }
 
   function rebuildMarkers(L: any, map: any, list: Provider[]) {
@@ -387,20 +417,20 @@ function LiveMap({
                 : p.type === "Hotline"
                   ? "S"
                   : "•";
-        const icon = createProviderPinIcon(L, color, letter);
+        const icon = createProviderPinIcon(color, letter);
         const marker = L.marker([p.lat!, p.lng!], { icon }).addTo(map);
         marker.bindPopup(
           `
-        <div style="font-family:system-ui;min-width:190px;padding:2px 0;">
-          <div style="font-weight:700;font-size:13px;color:#121416;margin-bottom:3px;line-height:1.3;">${p.name}</div>
-          <div style="font-size:11px;color:#666;margin-bottom:2px;">${p.type}</div>
-          ${p.clinic ? `<div style="font-size:11px;color:#888;margin-bottom:8px;">${p.clinic}</div>` : ""}
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            ${p.phone ? `<a href="tel:${p.phone}" style="background:#121416;color:#bcc2ff;padding:5px 10px;border-radius:6px;font-size:11px;text-decoration:none;font-weight:600;">Call</a>` : ""}
-            ${p.lat && p.lng ? `<a href="https://maps.google.com/?saddr=Current+Location&daddr=${p.lat},${p.lng}&dirflg=d" target="_blank" style="background:#1a73e8;color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;text-decoration:none;font-weight:600;">Directions</a>` : ""}
+        <div style="font-family:var(--font-sans);min-width:190px;">
+          <div class="find-help-popup__title">${escapeHtml(p.name)}</div>
+          <div class="find-help-popup__meta">${escapeHtml(p.type)}</div>
+          ${p.clinic ? `<div class="find-help-popup__clinic">${escapeHtml(p.clinic)}</div>` : ""}
+          <div class="find-help-popup__actions">
+            ${p.phone ? `<a class="find-help-popup__action find-help-popup__action--call" href="tel:${p.phone}">Call</a>` : ""}
+            ${p.lat && p.lng ? `<a class="find-help-popup__action find-help-popup__action--directions" href="https://maps.google.com/?saddr=Current+Location&daddr=${p.lat},${p.lng}&dirflg=d" target="_blank" rel="noreferrer">Directions</a>` : ""}
           </div>
         </div>`,
-          { maxWidth: 220 },
+          { maxWidth: 220, className: "find-help-popup" },
         );
         markersRef.current.set(p.id, marker);
       });
@@ -410,7 +440,11 @@ function LiveMap({
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <div
         ref={mapRef}
-        style={{ width: "100%", height: "100%", background: "#1a1c22" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          background: "var(--find-help-surface-low)",
+        }}
       />
       {(onCollapse || onResetFocus) && (
         <div
@@ -431,9 +465,9 @@ function LiveMap({
                 height: 30,
                 padding: "0 10px",
                 borderRadius: 8,
-                background: "var(--ring-node-bg-soft)",
-                border: "1px solid var(--border-violet-medium)",
-                color: "var(--surface-violet-icon-hover)",
+                background: "var(--find-help-pill-bg)",
+                border: "1px solid var(--find-help-pill-border)",
+                color: "var(--text-on-surface-strong)",
                 fontFamily: "inherit",
                 fontSize: 11,
                 fontWeight: 600,
@@ -454,9 +488,9 @@ function LiveMap({
                 height: 30,
                 padding: "0 10px",
                 borderRadius: 8,
-                background: "var(--ring-node-bg-soft)",
-                border: "1px solid var(--border-violet-medium)",
-                color: "var(--primary)",
+                background: "var(--find-help-pill-bg)",
+                border: "1px solid var(--find-help-pill-border)",
+                color: "var(--find-help-pill-text)",
                 fontFamily: "inherit",
                 fontSize: 11,
                 fontWeight: 600,
@@ -481,9 +515,9 @@ function LiveMap({
           height: 30,
           padding: "0 10px",
           borderRadius: 8,
-          background: "var(--ring-node-bg-soft)",
-          border: "1px solid var(--border-violet-medium)",
-          color: "var(--surface-violet-icon-hover)",
+          background: "var(--find-help-pill-bg)",
+          border: "1px solid var(--find-help-pill-border)",
+          color: "var(--find-help-pill-text)",
           fontSize: 11,
           fontWeight: 600,
           display: "inline-flex",
@@ -555,10 +589,10 @@ function ProviderCard({
   return (
     <div
       style={{
-        background: isFocused ? "var(--surface-violet-medium)" : "#161820",
+        background: isFocused ? "var(--find-help-focus-bg)" : "var(--find-help-surface)",
         margin: "0 0 1px",
         padding: "13px 16px",
-        borderBottom: "1px solid var(--surface-violet-medium)",
+        borderBottom: "1px solid var(--find-help-soft-divider)",
         borderLeft: isFocused ? "2px solid var(--primary)" : "2px solid transparent",
         cursor: "pointer",
         transition: "all 0.2s",
@@ -579,14 +613,14 @@ function ProviderCard({
             background: isFocused
               ? `${tc}22`
               : e.type === "Psychiatrist"
-                ? "var(--surface-violet-medium)"
+                ? "var(--find-help-icon-violet-tint-bg)"
                 : e.type.includes("Campus")
-                  ? "rgba(109,186,132,0.1)"
+                  ? "var(--find-help-icon-hospital-tint-bg)"
                   : e.type === "Hospital"
-                    ? "rgba(109,186,132,0.1)"
+                    ? "var(--find-help-icon-hospital-tint-bg)"
                     : e.type === "NGO" || e.type === "Clinic"
-                      ? "rgba(224,133,60,0.1)"
-                      : "var(--surface-violet-medium)",
+                      ? "var(--find-help-icon-ngo-tint-bg)"
+                      : "var(--find-help-icon-violet-tint-bg)",
             border: `1px solid ${tc}30`,
             display: "flex",
             alignItems: "center",
@@ -602,7 +636,7 @@ function ProviderCard({
             style={{
               fontSize: 13,
               fontWeight: 600,
-              color: "#e8eaff",
+              color: "var(--find-help-text-strong)",
               lineHeight: 1.3,
               marginBottom: 2,
             }}
@@ -738,7 +772,7 @@ function ProviderCard({
                 alignItems: "center",
                 gap: 3,
                 fontSize: 9,
-                color: "#6dba84",
+                color: "var(--find-help-tip-text)",
                 fontWeight: 700,
                 letterSpacing: "0.5px",
               }}
@@ -950,10 +984,10 @@ function HotlineCard({ h }: { h: Provider }) {
   return (
     <div
       style={{
-        background: "rgba(224,92,110,0.05)",
+        background: "var(--find-help-hotline-bg)",
         margin: "0 0 1px",
         padding: "12px 16px",
-        borderBottom: "1px solid rgba(224,92,110,0.08)",
+        borderBottom: "1px solid var(--find-help-hotline-border)",
         display: "flex",
         alignItems: "center",
         gap: 12,
@@ -964,21 +998,28 @@ function HotlineCard({ h }: { h: Provider }) {
           width: 36,
           height: 36,
           borderRadius: 10,
-          background: "rgba(224,92,110,0.1)",
+          background: "rgba(160, 68, 68, 0.14)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "#e05c6e",
+          color: "var(--text-danger-strong)",
           flexShrink: 0,
         }}
       >
         <G.sos size={18} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#e8eaff", marginBottom: 2 }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: "var(--find-help-text-strong)",
+            marginBottom: 2,
+          }}
+        >
           {h.name}
         </div>
-        <div style={{ fontSize: 10, color: "var(--text-on-surface-strong)" }}>
+        <div style={{ fontSize: 10, color: "var(--find-help-text-muted)" }}>
           {h.phone} · {h.coverage} · {h.hours}
         </div>
       </div>
@@ -993,13 +1034,13 @@ function HotlineCard({ h }: { h: Provider }) {
               width: 32,
               height: 32,
               borderRadius: 8,
-              background: "rgba(59,89,152,0.18)",
+              background: "var(--find-help-fb-bg)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               textDecoration: "none",
               fontSize: 11,
-              color: "#8b9dc3",
+              color: "var(--find-help-fb-text)",
               fontWeight: 700,
             }}
           >
@@ -1014,12 +1055,12 @@ function HotlineCard({ h }: { h: Provider }) {
               width: 32,
               height: 32,
               borderRadius: 8,
-              background: "#e05c6e",
+              background: "var(--text-danger-strong)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               textDecoration: "none",
-              color: "#fff",
+              color: "var(--crisis-line-text)",
             }}
           >
             <G.phone size={14} />
@@ -1038,7 +1079,7 @@ function SOSModal({ onClose }: { onClose: () => void }) {
         position: "fixed",
         inset: 0,
         zIndex: 9999,
-        background: "rgba(0,0,0,0.85)",
+        background: "rgba(0,0,0,0.55)",
         display: "flex",
         alignItems: "flex-end",
       }}
@@ -1047,10 +1088,13 @@ function SOSModal({ onClose }: { onClose: () => void }) {
       <div
         style={{
           width: "100%",
-          background: "#1a0a0a",
+          background: "var(--find-help-sos-bg)",
           borderRadius: "20px 20px 0 0",
           padding: "24px 20px 44px",
-          border: "1px solid rgba(224,92,110,0.25)",
+          border: "1px solid rgba(160, 68, 68, 0.32)",
+          borderBottom: "none",
+          color: "var(--find-help-sos-text)",
+          boxShadow: "var(--shadow-card-soft)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -1059,7 +1103,7 @@ function SOSModal({ onClose }: { onClose: () => void }) {
             width: 36,
             height: 4,
             borderRadius: 2,
-            background: "rgba(255,255,255,0.15)",
+            background: "var(--border-violet-medium)",
             margin: "0 auto 20px",
           }}
         />
@@ -1069,20 +1113,28 @@ function SOSModal({ onClose }: { onClose: () => void }) {
               width: 40,
               height: 40,
               borderRadius: 12,
-              background: "rgba(224,92,110,0.15)",
+              background: "rgba(160, 68, 68, 0.14)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#e05c6e",
+              color: "var(--text-danger-strong)",
             }}
           >
             <G.sos size={20} />
           </div>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#e05c6e" }}>
+            <div
+              style={{
+                fontSize: 16,
+                fontWeight: 700,
+                color: "var(--text-danger-strong)",
+              }}
+            >
               Need immediate help?
             </div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
+            <div
+              style={{ fontSize: 12, color: "var(--find-help-sos-muted)", marginTop: 2 }}
+            >
               Call any crisis line now
             </div>
           </div>
@@ -1096,19 +1148,29 @@ function SOSModal({ onClose }: { onClose: () => void }) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                background: "rgba(224,92,110,0.08)",
-                border: "1px solid rgba(224,92,110,0.18)",
+                background: "var(--crisis-line-bg)",
+                border: "1px solid rgba(160, 68, 68, 0.22)",
                 borderRadius: 12,
                 padding: "12px 16px",
                 textDecoration: "none",
               }}
             >
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#e8eaff" }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "var(--find-help-text-strong)",
+                  }}
+                >
                   {h.name}
                 </div>
                 <div
-                  style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 2 }}
+                  style={{
+                    fontSize: 11,
+                    color: "var(--find-help-sos-muted)",
+                    marginTop: 2,
+                  }}
                 >
                   {h.phone} · {h.coverage}
                 </div>
@@ -1118,11 +1180,11 @@ function SOSModal({ onClose }: { onClose: () => void }) {
                   width: 34,
                   height: 34,
                   borderRadius: 10,
-                  background: "#e05c6e",
+                  background: "var(--text-danger-strong)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#fff",
+                  color: "var(--crisis-line-text)",
                   flexShrink: 0,
                 }}
               >
@@ -1138,11 +1200,12 @@ function SOSModal({ onClose }: { onClose: () => void }) {
             marginTop: 14,
             padding: "14px",
             borderRadius: 12,
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            color: "rgba(255,255,255,0.4)",
+            background: "var(--surface-violet-low)",
+            border: "1px solid var(--border-violet-soft)",
+            color: "var(--text-on-surface-strong)",
             fontFamily: "inherit",
             fontSize: 14,
+            fontWeight: 600,
             cursor: "pointer",
           }}
         >
@@ -1172,11 +1235,13 @@ function DetailScreen({
   const [selectedLocIdx, setSelectedLocIdx] = useState(0);
   const tc = typeColor(e.type);
   const C = {
-    bg: "var(--background)",
-    surface: "#161820",
-    border: "var(--border-violet-faint)",
-    text: "#e8eaff",
-    muted: "var(--surface-violet-icon-hover)",
+    bg: "var(--find-help-screen-bg)",
+    surface: "var(--find-help-surface)",
+    border: "var(--find-help-border-soft)",
+    borderStrong: "var(--find-help-border-strong)",
+    text: "var(--find-help-text)",
+    textStrong: "var(--find-help-text-strong)",
+    muted: "var(--find-help-text-muted)",
     accent: "var(--primary)",
   };
   const hasMultiLoc = !!(e.locations && e.locations.length > 1);
@@ -1270,8 +1335,8 @@ function DetailScreen({
         {distKm !== undefined && (
           <div
             style={{
-              background: "rgba(74,158,255,0.08)",
-              border: "1px solid rgba(74,158,255,0.2)",
+              background: "var(--find-help-distance-bg)",
+              border: "1px solid var(--find-help-distance-border)",
               borderRadius: 12,
               padding: "12px 16px",
               marginBottom: 12,
@@ -1280,12 +1345,24 @@ function DetailScreen({
               gap: 12,
             }}
           >
-            <G.pin size={20} color="#4a9eff" />
+            <G.pin size={20} color="var(--find-help-distance-text)" />
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#4a9eff" }}>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: "var(--find-help-distance-text)",
+                }}
+              >
                 {fmtDist(distKm)} away
               </div>
-              <div style={{ fontSize: 11, color: "rgba(74,158,255,0.6)", marginTop: 1 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--find-help-distance-meta)",
+                  marginTop: 1,
+                }}
+              >
                 {estimateTime(distKm)}
               </div>
             </div>
@@ -1326,7 +1403,7 @@ function DetailScreen({
                 >
                   Clinic / Location
                 </div>
-                <div style={{ fontSize: 13, color: C.text }}>{e.clinic}</div>
+                <div style={{ fontSize: 13, color: C.textStrong }}>{e.clinic}</div>
               </div>
             </div>
           )}
@@ -1353,7 +1430,7 @@ function DetailScreen({
               >
                 City
               </div>
-              <div style={{ fontSize: 13, color: C.text }}>{e.city}</div>
+              <div style={{ fontSize: 13, color: C.textStrong }}>{e.city}</div>
             </div>
           </div>
           {e.phone && (
@@ -1380,7 +1457,7 @@ function DetailScreen({
                 >
                   Phone
                 </div>
-                <div style={{ fontSize: 13, color: C.text }}>{e.phone}</div>
+                <div style={{ fontSize: 13, color: C.textStrong }}>{e.phone}</div>
                 {e.phone2 && (
                   <div
                     style={{
@@ -1439,7 +1516,7 @@ function DetailScreen({
                 >
                   Email
                 </div>
-                <div style={{ fontSize: 12, color: C.text }}>{e.email}</div>
+                <div style={{ fontSize: 12, color: C.textStrong }}>{e.email}</div>
               </div>
             </div>
           )}
@@ -1466,7 +1543,13 @@ function DetailScreen({
                 >
                   Verification
                 </div>
-                <div style={{ fontSize: 13, color: "#6dba84", fontWeight: 600 }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: "var(--find-help-tip-text)",
+                    fontWeight: 600,
+                  }}
+                >
                   Verified provider
                 </div>
               </div>
@@ -1550,7 +1633,7 @@ function DetailScreen({
                       <div
                         style={{
                           fontSize: 10,
-                          color: "rgba(74,158,255,0.7)",
+                          color: "var(--find-help-distance-meta)",
                           marginTop: 2,
                         }}
                       >
@@ -1716,9 +1799,9 @@ function DetailScreen({
               style={{
                 height: 48,
                 borderRadius: 12,
-                background: "rgba(26,115,232,0.12)",
-                color: "#6aabff",
-                border: "1px solid rgba(26,115,232,0.25)",
+                background: "var(--find-help-link-blue-soft)",
+                color: "var(--find-help-link-blue-text)",
+                border: "1px solid var(--find-help-link-blue-border)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1749,9 +1832,9 @@ function DetailScreen({
               style={{
                 height: 48,
                 borderRadius: 12,
-                background: "rgba(59,89,152,0.12)",
-                color: "#8b9dc3",
-                border: "1px solid rgba(59,89,152,0.25)",
+                background: "var(--find-help-fb-bg)",
+                color: "var(--find-help-fb-text)",
+                border: "1px solid var(--find-help-fb-border)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1803,9 +1886,9 @@ function RecentlyViewed({
 }) {
   if (ids.length === 0) return null;
   const C = {
-    surface: "#161820",
-    border: "var(--border-violet-faint)",
-    muted: "var(--surface-violet-icon-hover)",
+    surface: "var(--find-help-surface)",
+    border: "var(--find-help-border-soft)",
+    muted: "var(--find-help-text-muted)",
     accent: "var(--primary)",
   };
   const recent = ids
@@ -1870,7 +1953,7 @@ function RecentlyViewed({
                 style={{
                   fontSize: 11,
                   fontWeight: 600,
-                  color: "#e8eaff",
+                  color: "var(--find-help-text-strong)",
                   lineHeight: 1.3,
                   marginBottom: 2,
                 }}
@@ -1903,11 +1986,13 @@ function SavedScreen({
   getDistance: (p: Provider) => number | undefined;
 }) {
   const C = {
-    bg: "var(--background)",
-    surface: "#161820",
-    border: "var(--border-violet-faint)",
-    text: "#e8eaff",
-    muted: "var(--surface-violet-icon-hover)",
+    bg: "var(--find-help-screen-bg)",
+    surface: "var(--find-help-surface)",
+    border: "var(--find-help-border-soft)",
+    borderStrong: "var(--find-help-border-strong)",
+    text: "var(--find-help-text)",
+    textStrong: "var(--find-help-text-strong)",
+    muted: "var(--find-help-text-muted)",
     accent: "var(--primary)",
   };
   const saved = allProviders.filter((p) => savedIds.has(p.id));
@@ -1958,7 +2043,7 @@ function SavedScreen({
           }}
         >
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: C.text, margin: 0 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: C.textStrong, margin: 0 }}>
               Saved Resources
             </h2>
             <p style={{ fontSize: 12, color: C.muted, margin: "4px 0 0" }}>
@@ -2014,10 +2099,10 @@ function SavedScreen({
                     flexShrink: 0,
                     background:
                       p.type === "Psychiatrist"
-                        ? "var(--surface-violet-medium)"
+                        ? "var(--find-help-icon-violet-tint-bg)"
                         : p.type.includes("Campus") || p.type === "Hospital"
-                          ? "rgba(109,186,132,0.1)"
-                          : "rgba(224,133,60,0.1)",
+                          ? "var(--find-help-icon-hospital-tint-bg)"
+                          : "var(--find-help-icon-ngo-tint-bg)",
                     border: `1px solid ${tc}30`,
                     display: "flex",
                     alignItems: "center",
@@ -2032,7 +2117,7 @@ function SavedScreen({
                     style={{
                       fontSize: 13,
                       fontWeight: 600,
-                      color: C.text,
+                      color: C.textStrong,
                       marginBottom: 2,
                       lineHeight: 1.3,
                     }}
@@ -2069,7 +2154,9 @@ function SavedScreen({
                     alignItems: "flex-end",
                   }}
                 >
-                  {p.verified && <G.verified size={11} color="#6dba84" />}
+                  {p.verified && (
+                    <G.verified size={11} color="var(--find-help-tip-text)" />
+                  )}
                   <ChevronRight size={14} color="var(--surface-violet-icon-hover)" />
                 </div>
               </div>
@@ -2131,6 +2218,7 @@ const SHEET_HEIGHTS: Record<SheetState, string> = {
 export function GISFeature() {
   const navigate = useNavigate();
   const online = useConnectivity();
+  const { resolved: resolvedTheme } = useThemePreference();
   const [tab, setTab] = useState<TabType>("all");
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState<Set<string>>(new Set());
@@ -2238,11 +2326,13 @@ export function GISFeature() {
   ];
 
   const C = {
-    bg: "var(--background)",
-    surface: "#161820",
-    border: "var(--border-violet-faint)",
-    text: "#e8eaff",
-    muted: "var(--surface-violet-icon-hover)",
+    bg: "var(--find-help-screen-bg)",
+    surface: "var(--find-help-surface)",
+    border: "var(--find-help-border-soft)",
+    borderStrong: "var(--find-help-border-strong)",
+    text: "var(--find-help-text)",
+    textStrong: "var(--find-help-text-strong)",
+    muted: "var(--find-help-text-muted)",
     accent: "var(--primary)",
   };
   const isNearMode = sortBy === "distance" && !!userLocation;
@@ -2296,10 +2386,10 @@ export function GISFeature() {
             justifyContent: "space-between",
             gap: 12,
             padding: "var(--app-header-top) 16px 12px",
-            background: "rgba(16,18,24,0.78)",
+            background: "var(--find-help-header-bg)",
             backdropFilter: "blur(14px)",
             WebkitBackdropFilter: "blur(14px)",
-            borderBottom: "1px solid var(--surface-violet-medium)",
+            borderBottom: "1px solid var(--find-help-header-border)",
           }}
         >
           <div style={{ display: "flex", minWidth: 0, alignItems: "center", gap: 4 }}>
@@ -2358,7 +2448,7 @@ export function GISFeature() {
               className={cn(
                 "h-8 rounded-full px-3 text-xs font-semibold",
                 isNearMode
-                  ? "border-[rgba(74,158,255,0.45)] bg-[rgba(74,158,255,0.14)] text-[#4a9eff] hover:bg-[rgba(74,158,255,0.18)]"
+                  ? "border-[var(--find-help-link-blue-border)] bg-[var(--find-help-link-blue-soft)] text-[color:var(--find-help-distance-text)] hover:bg-[var(--find-help-link-blue-soft)]"
                   : "",
               )}
             >
@@ -2407,7 +2497,7 @@ export function GISFeature() {
           position: "relative",
           flex: 1,
           minHeight: 0,
-          background: "#1a1c22",
+          background: "var(--find-help-surface-low)",
         }}
       >
         {tab !== "hotline" && online ? (
@@ -2427,6 +2517,7 @@ export function GISFeature() {
               focusProvider={focusProvider}
               userLocation={userLocation}
               mapLayer={mapLayer}
+              theme={resolvedTheme}
               onResetFocus={focusProvider ? () => setFocusProvider(null) : null}
             />
           </div>
@@ -2443,7 +2534,7 @@ export function GISFeature() {
             }}
           >
             {!online && tab !== "hotline" && (
-              <div className="max-w-xs rounded-[1.75rem] border border-[var(--border-violet-soft)] bg-card p-5 text-center shadow-[0_28px_80px_-40px_rgba(74, 60, 90, 0.28)] backdrop-blur-xl">
+              <div className="max-w-xs rounded-[1.75rem] border border-[var(--border-violet-soft)] bg-card p-5 text-center shadow-[var(--shadow-card)] backdrop-blur-xl">
                 <MapIcon className="mx-auto mb-3 text-primary" size={24} />
                 <p className="m-0 font-serif text-xl text-foreground">
                   Map unavailable offline
@@ -2486,7 +2577,7 @@ export function GISFeature() {
               }}
             >
               <Card
-                className="rounded-[1.25rem] border-white/10 bg-card/95 p-2 shadow-[0_18px_48px_-22px_rgba(74, 60, 90, 0.28)] backdrop-blur-xl"
+                className="rounded-[1.25rem] border-[var(--find-help-border-soft)] bg-card/95 p-2 shadow-[var(--find-help-shadow)] backdrop-blur-xl"
                 style={{ pointerEvents: "auto" }}
               >
                 <div
@@ -2547,7 +2638,7 @@ export function GISFeature() {
                         className={cn(
                           "h-8 shrink-0 rounded-full px-3 text-xs font-semibold",
                           !isActive &&
-                            "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+                            "text-muted-foreground hover:bg-[var(--surface-violet-low)] hover:text-foreground",
                         )}
                       >
                         <TabIcon size={12} /> {t.label}
@@ -2581,11 +2672,11 @@ export function GISFeature() {
                   padding: 3,
                   gap: 2,
                   borderRadius: 999,
-                  background: "var(--ring-node-bg-soft)",
-                  border: "1px solid var(--border-violet-medium)",
+                  background: "var(--find-help-pill-bg)",
+                  border: "1px solid var(--find-help-pill-border)",
                   backdropFilter: "blur(10px)",
                   WebkitBackdropFilter: "blur(10px)",
-                  boxShadow: "0 18px 40px -22px rgba(0,0,0,0.7)",
+                  boxShadow: "var(--find-help-shadow)",
                   pointerEvents: "auto",
                 }}
               >
@@ -2616,7 +2707,7 @@ export function GISFeature() {
                           ? "var(--surface-violet-icon-hover)"
                           : "transparent",
                         color: isActive
-                          ? "var(--background)"
+                          ? "var(--find-help-fab-text)"
                           : "var(--text-on-surface-strong)",
                         transition: "background 0.15s ease, color 0.15s ease",
                         whiteSpace: "nowrap",
@@ -2656,21 +2747,20 @@ export function GISFeature() {
                   borderRadius: 999,
                   background:
                     "linear-gradient(135deg, var(--surface-violet-icon-hover), var(--surface-fuchsia-medium))",
-                  border: "1px solid rgba(255,255,255,0.18)",
-                  color: "var(--background)",
+                  border: "1px solid var(--border-violet-soft)",
+                  color: "var(--find-help-fab-text)",
                   fontFamily: "inherit",
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: "pointer",
                   backdropFilter: "blur(10px)",
                   WebkitBackdropFilter: "blur(10px)",
-                  boxShadow:
-                    "0 18px 40px -14px var(--surface-violet-icon-hover), 0 6px 20px -8px rgba(0,0,0,0.6)",
+                  boxShadow: "var(--find-help-fab-shadow)",
                   letterSpacing: "0.01em",
                 }}
                 aria-label="Show resource list"
               >
-                <G.map size={14} color="var(--background)" />
+                <G.map size={14} color="var(--find-help-fab-text)" />
                 Show list
                 {(() => {
                   const count =
@@ -2691,8 +2781,8 @@ export function GISFeature() {
                         height: 20,
                         padding: "0 6px",
                         borderRadius: 999,
-                        background: "var(--ring-node-bg-soft)",
-                        color: "var(--text-on-surface)",
+                        background: "var(--find-help-fab-count-bg)",
+                        color: "var(--find-help-fab-text)",
                         fontSize: 10,
                         fontWeight: 700,
                         display: "inline-flex",
@@ -2760,9 +2850,9 @@ export function GISFeature() {
               background: C.surface,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
-              border: "1px solid var(--border-violet-soft)",
+              border: "1px solid var(--find-help-border)",
               borderBottom: "none",
-              boxShadow: "0 -32px 80px -28px rgba(0,0,0,0.7)",
+              boxShadow: "var(--find-help-sheet-shadow)",
               overflow: "hidden",
               touchAction: sheet === "expanded" ? "pan-y" : "none",
             }}
@@ -3010,10 +3100,9 @@ export function GISFeature() {
                 right: 16,
                 zIndex: 5,
                 padding: "14px 16px",
-                background:
-                  "linear-gradient(160deg, rgba(255,123,123,0.10), rgba(255,185,84,0.05))",
+                background: "var(--crisis-imminent-bg)",
                 borderRadius: 16,
-                border: "1px solid rgba(255,123,123,0.22)",
+                border: "1px solid var(--crisis-imminent-border)",
               }}
             >
               <p
@@ -3022,7 +3111,7 @@ export function GISFeature() {
                   fontWeight: 500,
                   letterSpacing: "1.1px",
                   textTransform: "uppercase",
-                  color: "rgba(255,170,170,0.78)",
+                  color: "var(--crisis-imminent-title)",
                   marginBottom: 6,
                   display: "inline-flex",
                   alignItems: "center",
@@ -3033,7 +3122,12 @@ export function GISFeature() {
               </p>
               <p
                 className="font-serif"
-                style={{ fontSize: 14, color: "#f7e4e4", lineHeight: 1.5, margin: 0 }}
+                style={{
+                  fontSize: 14,
+                  color: "var(--find-help-text-strong)",
+                  lineHeight: 1.5,
+                  margin: 0,
+                }}
               >
                 If you're in crisis, tap any number below. These lines are free and
                 confidential.

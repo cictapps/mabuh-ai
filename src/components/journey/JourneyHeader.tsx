@@ -100,7 +100,7 @@ export function JourneyHeader({
           onPress={onOpenAchievements}
         />
         <StatBadge
-          tone="soft"
+          tone="success"
           layout="stacked"
           icon={<Gift className="size-4" />}
           value={rewardCount}

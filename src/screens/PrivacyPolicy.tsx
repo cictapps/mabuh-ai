@@ -113,6 +113,13 @@ const SECTIONS = [
   },
 ];
 
+const pillBase: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 500,
+  padding: "2px 10px",
+  borderRadius: 999,
+};
+
 export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
   isOpen,
   onClose,
@@ -183,52 +190,147 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+        background: "rgba(15, 14, 24, 0.55)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+      }}
       onClick={() => !required && scrolledToBottom && onClose()}
     >
       <div
-        className="relative flex flex-col w-full max-w-xl max-h-[88vh] bg-neutral-900 text-neutral-100 rounded-2xl shadow-2xl overflow-hidden"
-        style={{ border: "0.5px solid rgba(255,255,255,0.08)" }}
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          maxWidth: 576,
+          maxHeight: "88dvh",
+          background: "var(--card)",
+          color: "var(--text-on-surface)",
+          borderRadius: 20,
+          boxShadow: "var(--shadow-card)",
+          overflow: "hidden",
+          border: "1px solid var(--find-help-border-soft)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
-          className="shrink-0 px-7 pt-6 pb-5"
-          style={{ borderBottom: "0.5px solid rgba(255,255,255,0.08)" }}
+          style={{
+            flexShrink: 0,
+            padding: "24px 28px 20px",
+            borderBottom: "1px solid var(--find-help-border-soft)",
+          }}
         >
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <Shield size={18} className="text-neutral-400 mt-0.5" />
-              <span className="text-base font-medium text-neutral-100">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <Shield
+                size={18}
+                color="var(--text-on-surface-soft)"
+                style={{ marginTop: 2 }}
+              />
+              <span
+                style={{
+                  fontSize: 16,
+                  fontWeight: 500,
+                  color: "var(--text-on-surface-strong)",
+                }}
+              >
                 Privacy &amp; safety policy
               </span>
             </div>
             <button
+              type="button"
               onClick={onClose}
               aria-label="Close"
-              className={`p-1 rounded-md text-neutral-400 hover:text-neutral-100 hover:bg-white/5 transition-colors ${required ? "invisible pointer-events-none" : ""}`}
+              className={required ? "invisible pointer-events-none" : ""}
+              style={{
+                padding: 4,
+                borderRadius: 6,
+                border: "none",
+                background: "transparent",
+                color: "var(--text-on-surface-soft)",
+                cursor: required ? "default" : "pointer",
+                transition: "color 0.15s ease, background 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (required) return;
+                e.currentTarget.style.color = "var(--text-on-surface)";
+                e.currentTarget.style.background = "var(--surface-violet-low)";
+              }}
+              onMouseLeave={(e) => {
+                if (required) return;
+                e.currentTarget.style.color = "var(--text-on-surface-soft)";
+                e.currentTarget.style.background = "transparent";
+              }}
             >
               <X size={16} />
             </button>
           </div>
 
-          <p className="mt-1.5 ml-7 text-xs text-neutral-500">
+          <p
+            style={{
+              margin: "6px 0 0",
+              paddingLeft: 30,
+              fontSize: 12,
+              color: "var(--text-kicker)",
+            }}
+          >
             Last updated June 2026 · Version {CURRENT_VERSION}
           </p>
 
-          <div className="flex gap-2 mt-3 ml-7 flex-wrap">
-            {[
-              { label: "GDPR compliant", color: "bg-emerald-950/40 text-emerald-400" },
-              { label: "EU servers", color: "bg-blue-950/40 text-blue-400" },
-              { label: "Mistral AI · Free tier", color: "bg-white/5 text-neutral-300" },
-            ].map(({ label, color }) => (
-              <span
-                key={label}
-                className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${color}`}
-              >
-                {label}
-              </span>
-            ))}
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              marginTop: 12,
+              paddingLeft: 30,
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                ...pillBase,
+                background: "var(--success-soft)",
+                color: "var(--text-success-strong)",
+                border: "1px solid rgba(53, 108, 72, 0.25)",
+              }}
+            >
+              GDPR compliant
+            </span>
+            <span
+              style={{
+                ...pillBase,
+                background: "var(--surface-violet-medium)",
+                color: "var(--primary)",
+                border: "1px solid var(--border-violet-medium)",
+              }}
+            >
+              EU servers
+            </span>
+            <span
+              style={{
+                ...pillBase,
+                background: "var(--surface-violet-low)",
+                color: "var(--text-on-surface-strong)",
+                border: "1px solid var(--border-violet-soft)",
+              }}
+            >
+              Mistral AI · Free tier
+            </span>
           </div>
         </div>
 
@@ -236,31 +338,90 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-7 py-5 space-y-5"
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "20px 28px",
+            color: "var(--text-on-surface)",
+          }}
         >
           {/* Summary grid */}
-          <div className="grid grid-cols-2 gap-2 p-4 rounded-xl bg-white/[0.03] border border-white/5">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 10,
+              padding: 16,
+              borderRadius: 14,
+              background: "var(--surface-violet-low)",
+              border: "1px solid var(--border-violet-soft)",
+            }}
+          >
             {SUMMARY_ITEMS.map((item) => (
-              <div key={item} className="flex items-start gap-2">
-                <CheckCircle2 size={14} className="text-emerald-400 mt-0.5 shrink-0" />
-                <span className="text-xs text-neutral-300 leading-relaxed">{item}</span>
+              <div
+                key={item}
+                style={{ display: "flex", alignItems: "flex-start", gap: 8 }}
+              >
+                <CheckCircle2
+                  size={14}
+                  color="var(--icon-success)"
+                  style={{ marginTop: 2, flexShrink: 0 }}
+                />
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: "var(--text-on-surface-strong)",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {item}
+                </span>
               </div>
             ))}
           </div>
 
           {/* AI free-tier disclosure callout */}
-          <div className="rounded-xl p-4 bg-amber-950/20 border border-amber-500/20">
-            <h4 className="text-sm font-semibold text-amber-300 mb-1.5">
+          <div
+            style={{
+              marginTop: 20,
+              borderRadius: 14,
+              padding: 16,
+              background: "var(--surface-warm-low)",
+              border: "1px solid var(--border-warm)",
+            }}
+          >
+            <h4
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--text-on-warm-strong)",
+                margin: "0 0 6px",
+              }}
+            >
               About the AI behind Mabuh-ai
             </h4>
-            <p className="text-xs text-neutral-300 leading-relaxed">
+            <p
+              style={{
+                fontSize: 12,
+                color: "var(--text-on-surface-strong)",
+                lineHeight: 1.55,
+                margin: 0,
+              }}
+            >
               Mabuh-ai runs on the free tier of Mistral AI. Because of how the free tier
               works, the messages you send here may be used by Mistral to train and
               improve their models. Please keep this in mind — share only what feels safe
               to share, and avoid personal details like your full name, school, address,
               or contact info.
             </p>
-            <p className="text-[11px] text-amber-200/80 mt-2 leading-relaxed">
+            <p
+              style={{
+                fontSize: 11,
+                color: "var(--text-on-warm)",
+                marginTop: 8,
+                lineHeight: 1.55,
+              }}
+            >
               This feature is optional. If you prefer not to use the AI companion, you can
               close this dialog and continue using the rest of Mabuh-ai — check-ins,
               journal, and support resources will still be available to you.
@@ -268,36 +429,81 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
           </div>
 
           {/* Accordion sections */}
-          <div style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)" }}>
+          <div
+            style={{ marginTop: 20, borderTop: "1px solid var(--border-violet-soft)" }}
+          >
             {SECTIONS.map((section, idx) => {
               const Icon = section.icon;
               const isOpen = expandedSection === idx;
               return (
                 <div
                   key={idx}
-                  style={{ borderBottom: "0.5px solid rgba(255,255,255,0.08)" }}
+                  style={{ borderBottom: "1px solid var(--border-violet-soft)" }}
                 >
                   <button
+                    type="button"
                     onClick={() => setExpandedSection(isOpen ? null : idx)}
-                    className="w-full flex items-center justify-between py-3 text-left group"
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "12px 0",
+                      textAlign: "left",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "inherit",
+                      fontFamily: "inherit",
+                    }}
                   >
-                    <div className="flex items-center gap-3">
-                      <Icon size={15} className="text-neutral-400 shrink-0" />
-                      <span className="text-sm font-medium text-neutral-200">
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <Icon
+                        size={15}
+                        color="var(--text-on-surface-soft)"
+                        style={{ flexShrink: 0 }}
+                      />
+                      <span
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 500,
+                          color: "var(--text-on-surface-strong)",
+                        }}
+                      >
                         {section.title}
                       </span>
                     </div>
                     <ChevronRight
                       size={15}
-                      className="text-neutral-500 shrink-0 transition-transform duration-200"
-                      style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
+                      color="var(--text-kicker)"
+                      style={{
+                        flexShrink: 0,
+                        transition: "transform 0.2s ease",
+                        transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
+                      }}
                     />
                   </button>
 
                   {isOpen && (
-                    <div className="pb-4 pl-6 space-y-1.5">
+                    <div
+                      style={{
+                        paddingBottom: 16,
+                        paddingLeft: 27,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 6,
+                      }}
+                    >
                       {section.content.map((line, i) => (
-                        <p key={i} className="text-sm text-neutral-400 leading-relaxed">
+                        <p
+                          key={i}
+                          style={{
+                            fontSize: 13,
+                            color: "var(--text-on-surface-muted)",
+                            lineHeight: 1.55,
+                            margin: 0,
+                          }}
+                        >
                           {line}
                         </p>
                       ))}
@@ -308,62 +514,158 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
             })}
           </div>
 
-          <div className="bg-white/[0.03] border border-white/5 rounded-xl p-4 mt-4">
-            <h3 className="font-semibold text-neutral-100 mb-2">
+          <div
+            style={{
+              marginTop: 16,
+              padding: 16,
+              borderRadius: 14,
+              background: "var(--surface-violet-low)",
+              border: "1px solid var(--border-violet-soft)",
+            }}
+          >
+            <h3
+              style={{
+                fontWeight: 600,
+                color: "var(--text-on-surface-strong)",
+                margin: "0 0 8px",
+                fontSize: 13,
+              }}
+            >
               🇵🇭 Questions or Concerns?
             </h3>
-            <p className="text-sm text-neutral-400 mb-2">
+            <p
+              style={{
+                fontSize: 12,
+                color: "var(--text-on-surface-muted)",
+                margin: "0 0 8px",
+                lineHeight: 1.55,
+              }}
+            >
               For privacy inquiries, data deletion requests, or safety concerns:
             </p>
-            <div className="text-sm space-y-1 text-neutral-300">
-              <p>📧 Email: cictapps@wvsu.edu.ph</p>
+            <div
+              style={{
+                fontSize: 12,
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+                color: "var(--text-on-surface-strong)",
+              }}
+            >
+              <p style={{ margin: 0 }}>📧 Email: cictapps@wvsu.edu.ph</p>
             </div>
           </div>
         </div>
 
         {/* Footer */}
         <div
-          className="shrink-0 px-7 py-4 bg-neutral-900 flex flex-col gap-3"
-          style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)" }}
+          style={{
+            flexShrink: 0,
+            padding: "16px 28px 18px",
+            background: "var(--card)",
+            borderTop: "1px solid var(--find-help-border-soft)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+          }}
         >
-          <div className="flex flex-col gap-2.5">
-            <label className="flex items-start gap-2.5 cursor-pointer select-none">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+            >
               <input
                 type="checkbox"
                 checked={aiConsent}
                 onChange={(e) => setAiConsent(e.target.checked)}
-                className="mt-0.5 rounded border-neutral-600 bg-transparent accent-emerald-500 cursor-pointer"
+                style={{
+                  marginTop: 2,
+                  accentColor: "var(--success)",
+                  cursor: "pointer",
+                }}
               />
-              <span className="text-xs text-neutral-300 leading-relaxed">
+              <span
+                style={{
+                  fontSize: 12,
+                  color: "var(--text-on-surface-strong)",
+                  lineHeight: 1.55,
+                }}
+              >
                 I understand the AI companion runs on Mistral AI's free tier, and that my
                 messages may be used to train their models. I will avoid sharing personal
                 or sensitive details.
               </span>
             </label>
-            <label className="flex items-center gap-2.5 cursor-pointer select-none">
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+            >
               <input
                 type="checkbox"
                 checked={checked}
                 onChange={(e) => setChecked(e.target.checked)}
-                className="rounded border-neutral-600 bg-transparent accent-emerald-500 cursor-pointer"
+                style={{ accentColor: "var(--success)", cursor: "pointer" }}
               />
-              <span className="text-xs text-neutral-300">
+              <span style={{ fontSize: 12, color: "var(--text-on-surface-strong)" }}>
                 I have read and agree to the rest of this policy
               </span>
             </label>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <span className="text-[11px] text-neutral-500 text-center sm:text-left">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <span
+              style={{
+                fontSize: 11,
+                color: "var(--text-kicker)",
+                textAlign: "center",
+              }}
+            >
               The AI companion is optional — you can skip it.
             </span>
-            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column-reverse",
+                gap: 8,
+              }}
+            >
               {required ? (
                 <button
                   type="button"
                   onClick={handleDecline}
                   disabled={accepted}
-                  className="w-full shrink-0 rounded-lg px-3 py-2.5 text-xs text-neutral-300 transition-colors hover:bg-white/5 hover:text-neutral-100 disabled:opacity-50 sm:w-auto"
+                  style={{
+                    width: "100%",
+                    flexShrink: 0,
+                    borderRadius: 10,
+                    padding: "10px 14px",
+                    fontSize: 12,
+                    fontFamily: "inherit",
+                    color: "var(--text-on-surface-strong)",
+                    background: "transparent",
+                    border: "1px solid var(--border-violet-soft)",
+                    cursor: accepted ? "not-allowed" : "pointer",
+                    opacity: accepted ? 0.5 : 1,
+                    transition: "background 0.15s ease, color 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (accepted) return;
+                    e.currentTarget.style.background = "var(--surface-violet-low)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (accepted) return;
+                    e.currentTarget.style.background = "transparent";
+                  }}
                 >
                   Not now
                 </button>
@@ -372,16 +674,29 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
                 type="button"
                 onClick={handleAccept}
                 disabled={!canAccept}
-                className={`
-                  w-full shrink-0 rounded-lg px-5 py-2.5 text-xs font-medium transition-all duration-200 sm:w-auto
-                  ${
-                    accepted
-                      ? "bg-emerald-600 text-white cursor-default"
-                      : canAccept
-                        ? "bg-white text-neutral-900 hover:opacity-90 cursor-pointer"
-                        : "bg-white/5 text-neutral-500 cursor-not-allowed"
-                  }
-                `}
+                style={{
+                  width: "100%",
+                  flexShrink: 0,
+                  borderRadius: 10,
+                  padding: "10px 20px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: "inherit",
+                  border: "none",
+                  cursor: canAccept ? "pointer" : "not-allowed",
+                  background: accepted
+                    ? "var(--success)"
+                    : canAccept
+                      ? "var(--primary)"
+                      : "var(--surface-violet-low)",
+                  color: accepted
+                    ? "var(--success-foreground)"
+                    : canAccept
+                      ? "var(--primary-foreground)"
+                      : "var(--text-kicker)",
+                  transition: "background 0.2s ease, color 0.2s ease, opacity 0.2s ease",
+                  opacity: accepted ? 1 : canAccept ? 1 : 0.85,
+                }}
               >
                 {accepted ? "✓ Accepted" : "I understand & continue"}
               </button>
@@ -390,9 +705,19 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
         </div>
 
         {!scrolledToBottom && (
-          <p className="text-center text-xs text-neutral-500 pb-2">
-            Scroll to the bottom to enable acceptance
-          </p>
+          <div
+            style={{
+              flexShrink: 0,
+              padding: "8px 0 12px",
+              textAlign: "center",
+              background: "var(--card)",
+              borderTop: "1px solid var(--find-help-border-soft)",
+            }}
+          >
+            <p style={{ margin: 0, fontSize: 12, color: "var(--text-kicker)" }}>
+              Scroll to the bottom to enable acceptance
+            </p>
+          </div>
         )}
       </div>
     </div>

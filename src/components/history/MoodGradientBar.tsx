@@ -65,7 +65,7 @@ export function MoodGradientBar({ entries, period, onEntryClick }: MoodGradientB
           gradientStops.length > 1
             ? `linear-gradient(90deg, ${gradientStops.join(", ")})`
             : getMoodMeta(segments[0].entry.mood).color,
-        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.10), 0 8px 22px -16px rgba(0,0,0,0.6)",
+        boxShadow: "inset 0 0 0 1px var(--border-violet-soft)",
       }}
       role="list"
       aria-label={`Mood check-ins for this ${period}`}

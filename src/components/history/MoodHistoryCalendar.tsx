@@ -152,9 +152,10 @@ const EntryCard: React.FC<{
           minHeight: 52,
           flexDirection: "column",
           justifyContent: "center",
-          background: "rgb(27 30 39)",
+          background: "var(--surface-highest)",
           borderRadius: 16,
           padding: "16px 16px 16px 34px",
+          boxShadow: "inset 0 0 0 1px var(--border-violet-soft)",
         }}
       >
         <span
@@ -200,7 +201,7 @@ const EntryCard: React.FC<{
           <span
             style={{
               fontSize: 11,
-              color: "var(--surface-violet-icon-hover)",
+              color: "var(--text-on-surface-muted)",
               marginLeft: "auto",
               fontVariantNumeric: "tabular-nums",
             }}
@@ -219,7 +220,7 @@ const EntryCard: React.FC<{
                   borderRadius: 999,
                   fontSize: 11,
                   background: "var(--surface-violet-medium)",
-                  color: "var(--surface-violet-icon-hover)",
+                  color: "var(--text-on-surface-muted)",
                 }}
               >
                 {t}
@@ -232,7 +233,7 @@ const EntryCard: React.FC<{
           <p
             style={{
               fontSize: 13,
-              color: "var(--surface-violet-icon-hover)",
+              color: "var(--text-on-surface-muted)",
               lineHeight: 1.6,
               fontStyle: "italic",
               margin: 0,
@@ -247,11 +248,11 @@ const EntryCard: React.FC<{
             style={{
               marginTop: 8,
               fontSize: 12,
-              color: "var(--surface-violet-icon-hover)",
+              color: "var(--text-on-surface-muted)",
               lineHeight: 1.5,
             }}
           >
-            <span style={{ color: "var(--surface-violet-icon-hover)", fontWeight: 600 }}>
+            <span style={{ color: "var(--text-on-surface-strong)", fontWeight: 600 }}>
               Day note:
             </span>{" "}
             {entry.dayNote}
@@ -268,8 +269,8 @@ const EntryCard: React.FC<{
                 style={{
                   padding: "10px 12px",
                   borderRadius: 12,
-                  background: "var(--surface-violet-medium)",
-                  color: "var(--surface-violet-icon-hover)",
+                  background: "var(--surface-violet-low)",
+                  color: "var(--text-on-surface-muted)",
                   fontSize: 12,
                 }}
               >
@@ -395,7 +396,8 @@ const SwipeableEntry: React.FC<{
           borderRadius: 15,
           overflow: "hidden",
           background:
-            "linear-gradient(90deg, #aeb7ff 0%, #cbb2ff 42%, #ff8f8f 58%, #ff7373 100%)",
+            "linear-gradient(90deg, var(--stat-calm-accent) 0%, var(--stat-calm-accent) 42%, var(--icon-rose) 58%, var(--icon-rose) 100%)",
+          opacity: 0.85,
         }}
       >
         <motion.button
@@ -414,7 +416,7 @@ const SwipeableEntry: React.FC<{
             gap: 8,
             paddingLeft: 22,
             background: "transparent",
-            color: "#171925",
+            color: "var(--primary-foreground)",
             border: "none",
             cursor: "pointer",
             pointerEvents: revealed === "edit" ? "auto" : "none",
@@ -455,7 +457,7 @@ const SwipeableEntry: React.FC<{
             gap: 8,
             paddingRight: 22,
             background: "transparent",
-            color: "#260b0b",
+            color: "var(--destructive-foreground)",
             border: "none",
             cursor: "pointer",
             pointerEvents: revealed === "delete" ? "auto" : "none",
@@ -643,7 +645,7 @@ const WeekView: React.FC<{
                         position: "absolute",
                         top: -3,
                         right: -7,
-                        background: "var(--ring-node-bg-soft)",
+                        background: "var(--surface-highest)",
                         color: "var(--text-on-surface)",
                         fontSize: 9,
                         fontWeight: 600,
@@ -861,7 +863,7 @@ const MonthView: React.FC<{
                         position: "absolute",
                         top: -3,
                         right: -7,
-                        background: "var(--ring-node-bg-soft)",
+                        background: "var(--surface-highest)",
                         color: "var(--text-on-surface)",
                         fontSize: 9,
                         fontWeight: 600,
@@ -955,11 +957,11 @@ export const MoodHistoryCalendar: React.FC<MoodHistoryCalendarProps> = ({
       <div
         style={{
           display: "flex",
-          background: "rgba(255,255,255,0.03)",
+          background: "var(--surface-violet-low)",
           borderRadius: 999,
           padding: 3,
           gap: 4,
-          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.04)",
+          boxShadow: "inset 0 0 0 1px var(--border-violet-soft)",
         }}
       >
         {(["week", "month"] as const).map((v) => (
@@ -976,11 +978,13 @@ export const MoodHistoryCalendar: React.FC<MoodHistoryCalendarProps> = ({
               fontWeight: 600,
               fontFamily: "Plus Jakarta Sans, sans-serif",
               cursor: "pointer",
-              background: view === v ? "rgba(120,110,200,0.12)" : "transparent",
+              background: view === v ? "var(--surface-highest)" : "transparent",
               color:
                 view === v
                   ? "var(--text-on-surface-strong)"
                   : "var(--text-on-surface-muted)",
+              boxShadow:
+                view === v ? "0 6px 16px -10px var(--border-violet-medium)" : "none",
               transition: "all 0.2s ease",
             }}
           >

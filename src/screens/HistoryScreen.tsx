@@ -20,79 +20,57 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
 
   return (
     <div
-      className="screen-enter"
+      className="screen-enter relative flex w-full flex-col gap-4 pb-12 pt-5"
       style={{
-        padding: "30px 22px 52px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 32,
+        paddingTop: "var(--app-screen-top)",
+        minHeight: "100%",
       }}
     >
-      <div>
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "var(--text-kicker)",
-            marginBottom: 10,
-          }}
-        >
+      {/* Decorative blobs (amber top-right, lilac mid-left) — match every other screen. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-20 top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.10),transparent_60%)] blur-3xl"
+      />
+
+      <div className="relative px-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-kicker)]">
           Looking back, gently
         </p>
         <h2
-          className="font-serif"
-          style={{
-            fontSize: 26,
-            fontWeight: 500,
-            color: "var(--text-on-surface)",
-            marginBottom: 4,
-            letterSpacing: "-0.03em",
-          }}
+          className="mt-1.5 font-serif tracking-[-0.03em] text-foreground"
+          style={{ fontSize: 30, fontWeight: 500, lineHeight: 1.15 }}
         >
           Your days, in color
         </h2>
-        <p
-          style={{
-            fontSize: 13,
-            color: "var(--text-on-surface-muted)",
-            lineHeight: 1.55,
-          }}
-        >
+        <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--text-on-surface-muted)]">
           Tap any day to revisit how you felt
         </p>
       </div>
 
-      <MoodHistoryCalendar
-        history={history}
-        showDetail
-        onUpdateEntry={onUpdateEntry}
-        onDeleteEntry={onDeleteEntry}
-      />
+      <div className="relative">
+        <MoodHistoryCalendar
+          history={history}
+          showDetail
+          onUpdateEntry={onUpdateEntry}
+          onDeleteEntry={onDeleteEntry}
+        />
+      </div>
 
       {loading ? (
         <p
-          style={{
-            margin: 0,
-            padding: "16px 0",
-            color: "var(--text-on-surface-muted)",
-            fontSize: 12,
-            textAlign: "center",
-          }}
+          className="text-center text-xs text-[color:var(--text-on-surface-muted)]"
+          style={{ padding: "16px 0" }}
         >
           Gathering your days…
         </p>
       ) : isEmpty ? (
         <p
-          style={{
-            margin: "12px 0 0",
-            padding: "16px 0",
-            color: "var(--text-on-surface-muted)",
-            fontSize: 13,
-            lineHeight: 1.7,
-            textAlign: "center",
-          }}
+          className="text-center text-[13px] leading-relaxed text-[color:var(--text-on-surface-muted)]"
+          style={{ padding: "16px 0", lineHeight: 1.7 }}
         >
           Your story is just beginning. Whenever you're ready,
           <br />

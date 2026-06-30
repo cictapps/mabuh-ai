@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from "react";
+import { BookHeart, Heart } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { JournalInput } from "../components/mood/JournalInput";
 import { ReflectWithAIPanel } from "../components/journal/ReflectWithAIPanel";
 import { SectionLabel } from "../components/shared/SectionLabel";
-import { JournalEntry, MoodEntry, MoodType } from "../types";
+import type { JournalEntry, MoodEntry, MoodType } from "../types";
 import { getMoodMeta } from "../data";
 import type { ReflectContext } from "../services/reflect";
 
@@ -78,218 +79,107 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
 
   return (
     <div
-      className="screen-enter"
+      className="screen-enter relative flex w-full flex-col gap-4 pb-12 pt-5"
       style={{
-        padding: "30px 22px 52px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 32,
+        paddingTop: "var(--app-screen-top)",
+        minHeight: "100%",
       }}
     >
-      <div>
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 500,
-            letterSpacing: "1.3px",
-            textTransform: "uppercase",
-            color: "var(--surface-violet-icon-hover)",
-            marginBottom: 10,
-          }}
-        >
+      {/* Decorative blobs (amber top-right, lilac mid-left) — match every other screen. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-20 top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.10),transparent_60%)] blur-3xl"
+      />
+
+      <div className="relative px-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-kicker)]">
           Words just for you
         </p>
         <h2
-          className="font-serif"
-          style={{
-            fontSize: 26,
-            fontWeight: 400,
-            color: "var(--text-on-surface)",
-            marginBottom: 4,
-          }}
+          className="mt-1.5 font-serif tracking-[-0.03em] text-foreground"
+          style={{ fontSize: 30, fontWeight: 500, lineHeight: 1.15 }}
         >
           A page for your words
         </h2>
-        <p style={{ fontSize: 13, color: "var(--surface-violet-icon-hover)" }}>
+        <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--text-on-surface-muted)]">
           Your check-ins and your quiet little notes, held together
         </p>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 18,
-          padding: "4px 0",
-        }}
-      >
-        <div>
-          <p
-            style={{
-              fontSize: 11,
-              letterSpacing: "1.1px",
-              textTransform: "uppercase",
-              color: "var(--surface-violet-icon-hover)",
-              marginBottom: 10,
-            }}
-          >
-            Your gentle rhythm
-          </p>
-          <div
-            className="font-serif"
-            style={{ fontSize: 22, color: "var(--text-on-surface)", marginBottom: 8 }}
-          >
-            {stats.weekCount === 0
-              ? "A quiet week so far"
-              : stats.weekCount === 1
-                ? "1 little moment this week"
-                : `${stats.weekCount} little moments this week`}
-          </div>
-          <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
-            Your last words{" "}
-            {stats.latest ? formatDateTime(stats.latest) : "will live here soon"}
-          </p>
-        </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 18,
-          }}
-        >
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                color: "var(--text-on-surface)",
-              }}
-            >
-              {stats.checkins}
-            </div>
-            <div
-              style={{
-                fontSize: 10,
-                letterSpacing: "0.6px",
-                textTransform: "uppercase",
-                color: "var(--surface-violet-icon-hover)",
-                marginTop: 4,
-              }}
-            >
-              check-in moments
-            </div>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                color: "var(--text-on-surface)",
-              }}
-            >
-              {stats.manual}
-            </div>
-            <div
-              style={{
-                fontSize: 10,
-                letterSpacing: "0.6px",
-                textTransform: "uppercase",
-                color: "var(--surface-violet-icon-hover)",
-                marginTop: 4,
-              }}
-            >
-              heart notes
-            </div>
-          </div>
-        </div>
-      </div>
+      <RhythmCard
+        weekCount={stats.weekCount}
+        latest={stats.latest}
+        checkins={stats.checkins}
+        manual={stats.manual}
+      />
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <SectionLabel>Write a little something</SectionLabel>
-          <span style={{ fontSize: 11, color: "var(--surface-violet-icon-hover)" }}>
-            A heart note
-          </span>
-        </div>
-        <JournalInput
-          value={draft}
-          onChange={setDraft}
-          label="Just for you"
-          placeholder="A thought, a small win, a moment that mattered…"
-          rows={3}
-        />
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Button
-            type="button"
-            variant="default"
-            onClick={() => {
-              if (!canSave) return;
-              onAddEntry(draft.trim());
-              setDraft("");
-            }}
-            disabled={!canSave}
-          >
-            Keep this note
-          </Button>
-          <p style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
-            Check-ins already find their way here on their own.
-          </p>
-        </div>
+      <section className="relative" data-stagger>
+        <div className="relative flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <SectionLabel>Write a little something</SectionLabel>
+            <span className="text-[11px] text-[color:var(--text-on-surface-muted)]">
+              A heart note
+            </span>
+          </div>
+          <JournalInput
+            value={draft}
+            onChange={setDraft}
+            label="Just for you"
+            placeholder="A thought, a small win, a moment that mattered…"
+            rows={3}
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => {
+                if (!canSave) return;
+                onAddEntry(draft.trim());
+                setDraft("");
+              }}
+              disabled={!canSave}
+            >
+              Keep this note
+            </Button>
+            <p className="text-[12px] text-[color:var(--text-on-surface-muted)]">
+              Check-ins already find their way here on their own.
+            </p>
+          </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 10.5,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--surface-violet-icon-hover)",
-            }}
-          >
-            <span
+          <div className="flex flex-col gap-3">
+            <div
+              className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-kicker)]"
               aria-hidden
-              style={{ flex: 1, height: 1, background: "var(--surface-violet-medium)" }}
-            />
-            <span>Or sit with what you wrote</span>
-            <span
-              aria-hidden
-              style={{ flex: 1, height: 1, background: "var(--surface-violet-medium)" }}
-            />
+            >
+              <span
+                aria-hidden
+                className="h-px flex-1 bg-[color:var(--surface-violet-medium)]"
+              />
+              <span>Or sit with what you wrote</span>
+              <span
+                aria-hidden
+                className="h-px flex-1 bg-[color:var(--surface-violet-medium)]"
+              />
+            </div>
+            <ReflectWithAIPanel text={draft} buildContext={buildReflectionContext} />
           </div>
-          <ReflectWithAIPanel text={draft} buildContext={buildReflectionContext} />
         </div>
-      </div>
+      </section>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-        {sortedEntries.length === 0 && (
+      <div className="relative flex flex-col gap-3">
+        {sortedEntries.length === 0 ? (
           <p
-            style={{
-              margin: 0,
-              padding: "16px 0",
-              color: "var(--surface-violet-icon-hover)",
-              fontSize: 13,
-              lineHeight: 1.7,
-            }}
+            className="px-1 py-2 text-[13px] leading-relaxed text-[color:var(--text-on-surface-muted)]"
+            style={{ lineHeight: 1.7 }}
           >
             Your page is still blank — and that's okay. Your next check-in will rest here
             gently.
           </p>
-        )}
-        {sortedEntries.length > 0 && (
+        ) : (
           <div className="journal-timeline">
             {sortedEntries.map((entry) => (
               <div key={entry.id} className="journal-row">
@@ -308,6 +198,106 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
   );
 };
 
+function RhythmCard({
+  weekCount,
+  latest,
+  checkins,
+  manual,
+}: {
+  weekCount: number;
+  latest: number | null;
+  checkins: number;
+  manual: number;
+}) {
+  return (
+    <section className="relative" data-stagger>
+      <div className="relative flex flex-col gap-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-kicker)]">
+          Your gentle rhythm
+        </p>
+        <h3
+          className="font-serif tracking-[-0.03em] text-foreground"
+          style={{ fontSize: 22, fontWeight: 500, lineHeight: 1.2 }}
+        >
+          {weekCount === 0
+            ? "A quiet week so far"
+            : weekCount === 1
+              ? "1 little moment this week"
+              : `${weekCount} little moments this week`}
+        </h3>
+        <p className="text-[12px] text-[color:var(--text-on-surface-muted)]">
+          Your last words {latest ? formatDateTime(latest) : "will live here soon"}
+        </p>
+
+        <div className="grid grid-cols-2 gap-2">
+          <RhythmStat
+            tone="warm"
+            icon={<BookHeart className="size-4" />}
+            value={checkins}
+            label="Check-in moments"
+          />
+          <RhythmStat
+            tone="fuchsia"
+            icon={<Heart className="size-4" />}
+            value={manual}
+            label="Heart notes"
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RhythmStat({
+  icon,
+  value,
+  label,
+  tone,
+}: {
+  icon: React.ReactNode;
+  value: React.ReactNode;
+  label: string;
+  tone: "warm" | "fuchsia";
+}) {
+  const iconBg =
+    tone === "warm" ? "bg-[var(--stat-warm-icon-bg)]" : "bg-[var(--surface-fuchsia-low)]";
+  const iconColor =
+    tone === "warm"
+      ? "text-[color:var(--stat-warm-icon)]"
+      : "text-[color:var(--surface-fuchsia-text)]";
+  const valueColor =
+    tone === "warm"
+      ? "text-[color:var(--stat-warm-value)]"
+      : "text-[color:var(--surface-fuchsia-text)]";
+  const accent = tone === "warm" ? "var(--stat-warm-accent)" : "var(--stat-warm-accent)";
+
+  return (
+    <div className="relative isolate flex min-h-[88px] flex-col justify-between gap-2 overflow-hidden rounded-2xl p-3.5">
+      <span
+        aria-hidden
+        className="block h-[2px] w-10 rounded-full"
+        style={{ background: `linear-gradient(to right, transparent, ${accent})` }}
+      />
+      <span
+        className={`grid size-8 shrink-0 place-items-center rounded-xl ${iconBg} ${iconColor}`}
+        aria-hidden
+      >
+        {icon}
+      </span>
+      <span className="min-w-0">
+        <span
+          className={`block font-serif text-[22px] font-medium leading-none tracking-[-0.02em] ${valueColor}`}
+        >
+          {value}
+        </span>
+        <span className="mt-2 block text-[10px] font-semibold uppercase leading-tight tracking-[0.22em] text-[color:var(--text-kicker)]">
+          {label}
+        </span>
+      </span>
+    </div>
+  );
+}
+
 const JournalCard: React.FC<{
   entry: JournalEntry;
   recentMoods: MoodEntry[];
@@ -317,38 +307,24 @@ const JournalCard: React.FC<{
   const meta = entry.mood ? getMoodMeta(entry.mood as MoodType) : null;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-        padding: "4px 0",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div className="flex flex-col gap-2.5 py-1">
+      <div className="flex items-center gap-2.5">
         {meta && (
           <span
+            className="size-2 shrink-0 rounded-full"
             style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
               background: meta.color,
               boxShadow: `0 0 8px ${meta.color}55`,
             }}
           />
         )}
-        <span style={{ fontSize: 12, color: "var(--surface-violet-icon-hover)" }}>
+        <span className="text-[12px] text-[color:var(--text-on-surface-muted)]">
           {formatDateTime(entry.timestamp)}
         </span>
         <span
+          className="ml-auto text-[10px] font-semibold uppercase tracking-[0.18em]"
           style={{
-            marginLeft: "auto",
-            fontSize: 10,
-            letterSpacing: "0.6px",
-            textTransform: "uppercase",
-            color: isCheckIn
-              ? "rgba(255,185,84,0.7)"
-              : "var(--surface-violet-icon-hover)",
+            color: isCheckIn ? "var(--text-warn)" : "var(--text-on-surface-muted)",
           }}
         >
           {isCheckIn ? "From a check-in" : "Heart note"}
@@ -356,42 +332,31 @@ const JournalCard: React.FC<{
       </div>
 
       {meta && (
-        <div style={{ fontSize: 14, color: "var(--text-on-surface)" }}>{meta.label}</div>
+        <div
+          className="font-serif text-[14px] font-medium text-foreground"
+          style={{ letterSpacing: "-0.01em" }}
+        >
+          {meta.label}
+        </div>
       )}
 
       {entry.tags && entry.tags.length > 0 && (
-        <p
-          style={{
-            fontSize: 11,
-            color: "var(--surface-violet-icon-hover)",
-            margin: 0,
-          }}
-        >
+        <p className="m-0 text-[11px] text-[color:var(--text-on-surface-muted)]">
           {entry.tags.join(" · ")}
         </p>
       )}
 
-      {entry.content && (
+      {entry.content ? (
         <p
-          style={{
-            fontSize: 13,
-            color: "var(--surface-violet-icon-hover)",
-            lineHeight: 1.6,
-            margin: 0,
-          }}
+          className="m-0 text-[13px] leading-relaxed text-[color:var(--text-on-surface-muted)]"
+          style={{ lineHeight: 1.65 }}
         >
           {entry.content}
         </p>
-      )}
-
-      {!entry.content && (
+      ) : (
         <p
-          style={{
-            fontSize: 13,
-            color: "var(--surface-violet-icon-hover)",
-            lineHeight: 1.6,
-            margin: 0,
-          }}
+          className="m-0 text-[13px] italic text-[color:var(--text-on-surface-soft)]"
+          style={{ lineHeight: 1.65 }}
         >
           A quiet check-in with no words — that's perfectly okay too.
         </p>

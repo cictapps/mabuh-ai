@@ -6,6 +6,7 @@ import { InsightsScreen } from "./InsightsScreen";
 import { JournalScreen } from "./JournalScreen";
 import { History, TrendingUp, Lightbulb, PenTool } from "lucide-react";
 import type { MoodEntryInput } from "../lib/db/moodRepository";
+import { SegmentedTabs, type SegmentedTabsItem } from "@/components/shared/SegmentedTabs";
 
 interface DistItem {
   mood: MoodType;
@@ -57,30 +58,12 @@ interface ReviewHubProps {
   error?: string | null;
 }
 
-const tabs: Array<{ id: ReviewTabId; label: string; icon: string }> = [
-  { id: "history", label: "Days", icon: "history" },
-  { id: "analytics", label: "Patterns", icon: "analytics" },
-  { id: "insights", label: "Reflections", icon: "insights" },
-  { id: "journal", label: "Writing", icon: "journal" },
+const tabs: SegmentedTabsItem<ReviewTabId>[] = [
+  { key: "history", label: "Days", icon: () => <History size={16} /> },
+  { key: "analytics", label: "Patterns", icon: () => <TrendingUp size={16} /> },
+  { key: "insights", label: "Reflections", icon: () => <Lightbulb size={16} /> },
+  { key: "journal", label: "Writing", icon: () => <PenTool size={16} /> },
 ];
-
-const renderTabIcon = (iconName: string, isActive: boolean) => {
-  const size = 16;
-  const className = isActive ? "text-current" : "text-[color:var(--text-kicker)]";
-
-  switch (iconName) {
-    case "history":
-      return <History size={size} className={className} />;
-    case "analytics":
-      return <TrendingUp size={size} className={className} />;
-    case "insights":
-      return <Lightbulb size={size} className={className} />;
-    case "journal":
-      return <PenTool size={size} className={className} />;
-    default:
-      return null;
-  }
-};
 
 export const ReviewHub: React.FC<ReviewHubProps> = ({
   visitToken = 0,
@@ -156,48 +139,13 @@ export const ReviewHub: React.FC<ReviewHubProps> = ({
         </div>
       </div>
 
-      {/* Tab switcher (journey pill style — icon-only when inactive) */}
-      <div
-        className="flex items-stretch gap-1 rounded-2xl border border-[var(--border-violet-soft)] bg-[var(--surface-violet-low)] p-1"
-        role="tablist"
-        aria-label="Review views"
-      >
-        {tabs.map((tab) => {
-          const isActive = tab.id === activeTab;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => handleTabChange(tab.id)}
-              aria-label={tab.label}
-              className={`relative flex min-w-0 items-center justify-center rounded-xl py-2.5 transition-all duration-300 ease-out active:scale-[0.97] ${
-                isActive ? "flex-[2.6] gap-1.5 px-2.5" : "flex-1 gap-0 px-1"
-              }`}
-              style={{
-                background: isActive
-                  ? "linear-gradient(to right, var(--primary), var(--secondary), var(--primary))"
-                  : "transparent",
-                color: isActive ? "var(--primary-foreground)" : "var(--text-kicker)",
-                boxShadow: isActive
-                  ? "0 14px 32px -18px var(--surface-violet-icon-hover)"
-                  : "none",
-              }}
-            >
-              {renderTabIcon(tab.icon, isActive)}
-              <span
-                aria-hidden={!isActive}
-                className={`overflow-hidden whitespace-nowrap text-[11px] font-semibold transition-all duration-300 ease-out ${
-                  isActive ? "max-w-[160px] opacity-100" : "max-w-0 opacity-0"
-                }`}
-              >
-                {tab.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Tab switcher */}
+      <SegmentedTabs
+        items={tabs}
+        activeKey={activeTab}
+        onChange={handleTabChange}
+        ariaLabel="Review views"
+      />
 
       {/* Tab content */}
       <div className="relative">

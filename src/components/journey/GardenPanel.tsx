@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SegmentedTabs, type SegmentedTabsItem } from "@/components/shared/SegmentedTabs";
 import { cn } from "@/lib/utils";
 import { useJourneyStore } from "@/lib/journey/useJourneyStore";
 import type { GardenPhase, MoodType } from "@/types";
@@ -21,6 +22,33 @@ const PHASES: Array<{ id: GardenPhase; label: string; icon: GardenPhase }> = [
   { id: "reflect", label: "Reflect", icon: "reflect" },
   { id: "rest", label: "Rest", icon: "rest" },
 ];
+
+function buildPhaseItems(
+  locked: boolean,
+  activeIndex: number,
+): SegmentedTabsItem<GardenPhase>[] {
+  return PHASES.map((phase, index) => {
+    const reached = index <= activeIndex;
+    return {
+      key: phase.id,
+      label: phase.label,
+      icon: ({ active }) => (
+        <GardenTabIcon
+          phase={phase.icon}
+          className={cn(
+            "size-[18px] shrink-0 transition-colors duration-300",
+            active
+              ? "text-[#132019]"
+              : reached
+                ? "text-[color:var(--icon-success)]"
+                : "text-[color:var(--text-on-surface-softest)]",
+          )}
+        />
+      ),
+      disabled: !locked && phase.id !== "prepare",
+    };
+  });
+}
 
 const CARE: Record<
   MoodType,
@@ -92,59 +120,16 @@ export function GardenPanel({ onOpenSupport, locked }: GardenPanelProps) {
 
   return (
     <>
-      <div
-        className="flex items-stretch gap-1 rounded-2xl border border-[rgba(109,186,132,0.16)] bg-[rgba(109,186,132,0.04)] p-1"
-        role="tablist"
-        aria-label="Garden phases"
-      >
-        {PHASES.map((item) => {
-          const active = item.id === phase;
-          const disabled = !locked && item.id !== "prepare";
-          const activeIndex = PHASES.findIndex((entry) => entry.id === phase);
-          const itemIndex = PHASES.findIndex((entry) => entry.id === item.id);
-          const reached = itemIndex <= activeIndex;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              aria-label={item.label}
-              onClick={() => setPhase(item.id)}
-              disabled={disabled}
-              className={cn(
-                "relative flex min-w-0 items-center justify-center rounded-xl py-2 transition-all duration-300 ease-out active:scale-[0.97]",
-                active ? "flex-[2.8] gap-2 px-2.5" : "flex-1 gap-0 px-1",
-                active
-                  ? "bg-gradient-to-r from-[#8fcea3] via-[#a8dfb8] to-[#8fcea3] text-[#0f121a] shadow-[0_14px_32px_-18px_rgba(109,186,132,0.85)]"
-                  : "text-[color:var(--text-on-surface-muted)]",
-                disabled && "opacity-40",
-              )}
-            >
-              <GardenTabIcon
-                phase={item.icon}
-                className={cn(
-                  "size-[18px] shrink-0 transition-colors duration-300",
-                  active
-                    ? "text-[#132019]"
-                    : reached
-                      ? "text-[color:var(--icon-success)]"
-                      : "text-[color:var(--text-on-surface-softest)]",
-                )}
-              />
-              <span
-                aria-hidden={!active}
-                className={cn(
-                  "overflow-hidden whitespace-nowrap text-[11px] font-semibold transition-all duration-300 ease-out",
-                  active ? "max-w-[160px] opacity-100" : "max-w-0 opacity-0",
-                )}
-              >
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <SegmentedTabs
+        items={buildPhaseItems(
+          locked,
+          PHASES.findIndex((p) => p.id === phase),
+        )}
+        activeKey={phase}
+        onChange={setPhase}
+        ariaLabel="Garden phases"
+        tone="sage"
+      />
 
       <Card>
         <CardHeader>

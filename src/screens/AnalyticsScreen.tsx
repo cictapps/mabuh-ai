@@ -10,10 +10,11 @@ import {
   Sunrise,
   Users,
 } from "lucide-react";
-import { MoodEntry, MoodType } from "../types";
+import type { MoodEntry, MoodType } from "../types";
 import { getMoodMeta } from "../data";
 import { MoodTrendChart } from "../components/analytics/MoodTrendChart";
 import { MoodDistribution } from "../components/analytics/MoodDistribution";
+import { StatBadge } from "../components/journey/StatBadge";
 
 interface DistItem {
   mood: MoodType;
@@ -50,62 +51,36 @@ interface AnalyticsScreenProps {
   loading?: boolean;
 }
 
-type StatTone = "warm" | "calm" | "success" | "rose" | "fuchsia";
+type StatTone = "warm" | "calm" | "success" | "rose";
 
-const TONE_CLASSES: Record<StatTone, { bg: string; text: string }> = {
-  warm: { bg: "bg-[rgba(255,185,84,0.14)]", text: "text-tertiary" },
-  calm: { bg: "bg-[var(--surface-violet-icon)]", text: "text-primary" },
-  success: {
-    bg: "bg-[rgba(109,186,132,0.16)]",
-    text: "text-[color:var(--icon-success)]",
-  },
-  rose: {
-    bg: "bg-[rgba(255,123,123,0.14)]",
-    text: "text-[color:var(--icon-rose)]",
-  },
-  fuchsia: {
-    bg: "bg-[var(--surface-fuchsia-low)]",
-    text: "text-[color:var(--secondary)]",
-  },
+const TONE_ICON_BG: Record<StatTone, string> = {
+  warm: "bg-[var(--stat-warm-icon-bg)]",
+  calm: "bg-[var(--stat-calm-icon-bg)]",
+  success: "bg-[var(--stat-success-icon-bg)]",
+  rose: "bg-[var(--stat-warm-icon-bg)]",
 };
 
-type Accent = "amber" | "lilac" | "sage" | "fuchsia";
-
-const ACCENT_GLOWS: Record<Accent, string> = {
-  amber: "bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.16),transparent_60%)]",
-  lilac: "bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.16),transparent_60%)]",
-  sage: "bg-[radial-gradient(circle_at_center,rgba(109,186,132,0.16),transparent_60%)]",
-  fuchsia:
-    "bg-[radial-gradient(circle_at_center,rgba(212,187,255,0.16),transparent_60%)]",
+const TONE_ICON: Record<StatTone, string> = {
+  warm: "text-[color:var(--stat-warm-icon)]",
+  calm: "text-[color:var(--stat-calm-icon)]",
+  success: "text-[color:var(--stat-success-icon)]",
+  rose: "text-[color:var(--text-warn)]",
 };
 
 function Section({
   kicker,
   title,
   subtitle,
-  accent = "amber",
   children,
 }: {
   kicker?: string;
   title?: string;
   subtitle?: string;
-  accent?: Accent;
   children: React.ReactNode;
 }) {
   const hasHeader = Boolean(kicker || title || subtitle);
   return (
-    <section
-      className="relative overflow-hidden rounded-[1.75rem] border border-[color:var(--border-violet-soft)] bg-card p-5 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl"
-      data-stagger
-    >
-      <div
-        aria-hidden
-        className={`pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full ${ACCENT_GLOWS[accent]} blur-2xl`}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-20 -left-12 h-44 w-44 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.16),transparent_60%)] blur-2xl"
-      />
+    <section className="relative" data-stagger>
       <div className="relative">
         {hasHeader ? (
           <header className="mb-4">
@@ -116,7 +91,7 @@ function Section({
             ) : null}
             {title ? (
               <h3
-                className="mt-1 font-serif tracking-[-0.02em] text-foreground"
+                className="mt-1 font-serif tracking-[-0.03em] text-foreground"
                 style={{ fontSize: 22, fontWeight: 500, lineHeight: 1.15 }}
               >
                 {title}
@@ -135,38 +110,6 @@ function Section({
   );
 }
 
-function StatTile({
-  icon,
-  label,
-  value,
-  tone = "warm",
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-  tone?: StatTone;
-}) {
-  const t = TONE_CLASSES[tone];
-  return (
-    <div className="flex items-start gap-3 rounded-2xl border border-[color:var(--border-violet-faint)] bg-[var(--surface-violet-low)] p-3.5">
-      <span
-        className={`grid size-9 shrink-0 place-items-center rounded-xl ${t.bg} ${t.text}`}
-        aria-hidden
-      >
-        {icon}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block font-serif text-[26px] font-medium leading-none tracking-tight text-foreground">
-          {value}
-        </span>
-        <span className="mt-1.5 block text-[10px] font-semibold uppercase leading-tight tracking-[0.18em] text-[color:var(--text-kicker)]">
-          {label}
-        </span>
-      </span>
-    </div>
-  );
-}
-
 function SubStat({
   icon,
   label,
@@ -178,17 +121,16 @@ function SubStat({
   value: React.ReactNode;
   tone?: StatTone;
 }) {
-  const t = TONE_CLASSES[tone];
   return (
     <div className="flex items-start gap-2.5">
       <span
-        className={`grid size-7 shrink-0 place-items-center rounded-lg ${t.bg} ${t.text}`}
+        className={`grid size-7 shrink-0 place-items-center rounded-lg ${TONE_ICON_BG[tone]} ${TONE_ICON[tone]}`}
         aria-hidden
       >
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[10px] font-semibold uppercase leading-tight tracking-[0.18em] text-[color:var(--text-kicker)]">
+        <span className="block text-[10px] font-semibold uppercase leading-tight tracking-[0.22em] text-[color:var(--text-kicker)]">
           {label}
         </span>
         <span className="mt-1 block text-[13px] font-medium text-foreground">
@@ -223,75 +165,94 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
   return (
-    <div className="screen-enter flex flex-col gap-6 pb-12" style={{ paddingTop: 4 }}>
-      {/* Loading / empty state */}
-      {loading ? (
-        <p
-          className="px-1 py-4 text-center text-xs text-[color:var(--text-on-surface-muted)]"
-          role="status"
-        >
-          Gathering your patterns…
-        </p>
-      ) : isEmpty ? (
-        <p
-          className="px-1 py-4 text-center text-[13px] leading-relaxed text-[color:var(--text-on-surface-muted)]"
-          role="status"
-        >
-          Your patterns will begin to appear here once you share your first few check-ins.
-        </p>
-      ) : null}
+    <div
+      className="screen-enter relative flex w-full flex-col gap-4 pb-12 pt-5"
+      style={{
+        paddingTop: "var(--app-screen-top)",
+        minHeight: "100%",
+      }}
+    >
+      {/* Decorative blobs (amber top-right, lilac mid-left) — match every other screen. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.10),transparent_60%)] blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-20 top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.10),transparent_60%)] blur-3xl"
+      />
 
-      {/* Header */}
-      <header className="relative px-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-kicker)]">
-          A gentle look inward
-        </p>
-        <h2
-          className="mt-1.5 font-serif tracking-[-0.03em] text-foreground"
-          style={{ fontSize: 30, fontWeight: 500, lineHeight: 1.15 }}
-        >
-          Your patterns, in soft light
-        </h2>
-        <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--text-on-surface-muted)]">
-          A gentle look across the past 30 days
-        </p>
-      </header>
+      <div className="relative">
+        {/* Loading / empty state */}
+        {loading ? (
+          <p
+            className="px-1 py-4 text-center text-xs text-[color:var(--text-on-surface-muted)]"
+            role="status"
+          >
+            Gathering your patterns…
+          </p>
+        ) : isEmpty ? (
+          <p
+            className="px-1 py-4 text-center text-[13px] leading-relaxed text-[color:var(--text-on-surface-muted)]"
+            role="status"
+          >
+            Your patterns will begin to appear here once you share your first few
+            check-ins.
+          </p>
+        ) : null}
 
-      {/* Rhythms — three big tiles */}
-      <Section kicker="Your rhythms" accent="amber">
+        {/* Header */}
+        <header className="relative px-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-kicker)]">
+            A gentle look inward
+          </p>
+          <h2
+            className="mt-1.5 font-serif tracking-[-0.03em] text-foreground"
+            style={{ fontSize: 30, fontWeight: 500, lineHeight: 1.15 }}
+          >
+            Your patterns, in soft light
+          </h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--text-on-surface-muted)]">
+            A gentle look across the past 30 days
+          </p>
+        </header>
+      </div>
+
+      {/* Rhythms */}
+      <Section kicker="Your rhythms">
         <div className="grid grid-cols-3 gap-2">
-          <StatTile
-            icon={<Flame className="size-4" />}
-            label="Longest stretch"
+          <StatBadge
+            tone="warm"
+            layout="stacked"
+            icon={<Flame className="size-4" fill="currentColor" />}
             value={analyticsStats.longestStreak}
-            tone="warm"
+            label="Longest stretch"
           />
-          <StatTile
-            icon={<Sparkles className="size-4" />}
-            label="Days in a row"
-            value={analyticsStats.currentStreak}
-            tone="warm"
-          />
-          <StatTile
-            icon={<CalendarDays className="size-4" />}
-            label="Days with us"
-            value={analyticsStats.lifetimeDays}
+          <StatBadge
             tone="calm"
+            layout="stacked"
+            icon={<Sparkles className="size-4" />}
+            value={analyticsStats.currentStreak}
+            label="Days in a row"
+          />
+          <StatBadge
+            tone="success"
+            layout="stacked"
+            icon={<CalendarDays className="size-4" />}
+            value={analyticsStats.lifetimeDays}
+            label="Days with us"
           />
         </div>
       </Section>
 
       {/* Recent days */}
       {latestEntries.length > 0 ? (
-        <Section kicker="A few recent days" accent="lilac">
+        <Section kicker="A few recent days">
           <ul className="grid grid-cols-2 gap-2">
             {latestEntries.map((entry) => {
               const meta = getMoodMeta(entry.mood);
               return (
-                <li
-                  key={entry.id}
-                  className="flex flex-col gap-1.5 rounded-2xl border border-[color:var(--border-violet-faint)] bg-[var(--surface-violet-low)] p-3"
-                >
+                <li key={entry.id} className="flex flex-col gap-1.5 rounded-2xl p-3">
                   <span className="flex items-center gap-2">
                     <span
                       className="size-2.5 shrink-0 rounded-full"
@@ -308,7 +269,7 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
                   <span className="text-[11px] text-[color:var(--text-on-surface-muted)]">
                     {formatDate(entry.timestamp)}
                   </span>
-                  <span className="text-[11px] text-[color:var(--text-on-surface-faint)]">
+                  <span className="text-[11px] text-[color:var(--text-on-surface-soft)]">
                     {entry.tags.length} {entry.tags.length === 1 ? "word" : "words"} ·{" "}
                     {entry.socialInteractions?.length ?? 0} connection
                     {entry.socialInteractions?.length === 1 ? "" : "s"}
@@ -321,17 +282,17 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       ) : null}
 
       {/* Trend */}
-      <Section kicker="The last 14 days, gently traced" accent="fuchsia">
+      <Section kicker="The last 14 days, gently traced">
         <MoodTrendChart data={trendData} />
       </Section>
 
       {/* Distribution */}
-      <Section kicker="How your colors have been showing up" accent="lilac">
+      <Section kicker="How your colors have been showing up">
         <MoodDistribution data={distribution} />
       </Section>
 
       {/* A steady heart */}
-      <Section kicker="A steady heart" accent="sage">
+      <Section kicker="A steady heart">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[13px] leading-relaxed text-[color:var(--text-on-surface-muted)]">
             How settled your days have felt, gently scored.
@@ -391,20 +352,17 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
 
       {/* Moments that mattered */}
       {analyticsStats.activityHighlights.length > 0 ? (
-        <Section kicker="Moments that mattered" accent="fuchsia">
+        <Section kicker="Moments that mattered">
           <ul className="grid grid-cols-2 gap-2">
             {analyticsStats.activityHighlights.map((item) => (
-              <li
-                key={item.section}
-                className="flex flex-col gap-1 rounded-2xl border border-[color:var(--border-violet-faint)] bg-[var(--surface-violet-low)] p-3"
-              >
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
+              <li key={item.section} className="flex flex-col gap-1 rounded-2xl p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-kicker)]">
                   {item.section}
                 </p>
                 <p className="mt-1 truncate text-[13px] font-medium text-foreground">
                   {item.label ?? "—"}
                 </p>
-                <p className="text-[11px] text-[color:var(--text-on-surface-faint)]">
+                <p className="text-[11px] text-[color:var(--text-on-surface-soft)]">
                   {item.count === 1 ? "captured once" : `captured ${item.count} times`}
                 </p>
               </li>
@@ -422,25 +380,28 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       </p>
 
       {/* Connections */}
-      <Section kicker="Your kind connections (last 7 days)" accent="lilac">
+      <Section kicker="Your kind connections (last 7 days)">
         <div className="grid grid-cols-3 gap-2">
-          <StatTile
-            icon={<Users className="size-4" />}
-            label="Moments shared"
-            value={socialStats.totalInteractions}
+          <StatBadge
             tone="calm"
+            layout="stacked"
+            icon={<Users className="size-4" />}
+            value={socialStats.totalInteractions}
+            label="Moments shared"
           />
-          <StatTile
+          <StatBadge
+            tone="warm"
+            layout="stacked"
             icon={<MapPin className="size-4" />}
-            label="Warmest presence"
             value={socialStats.topPerson ?? "—"}
-            tone="fuchsia"
+            label="Warmest presence"
           />
-          <StatTile
-            icon={<Smile className="size-4" />}
-            label="Feeling that lingered"
-            value={socialStats.topFeeling ?? "—"}
+          <StatBadge
             tone="success"
+            layout="stacked"
+            icon={<Smile className="size-4" />}
+            value={socialStats.topFeeling ?? "—"}
+            label="Feeling that lingered"
           />
         </div>
       </Section>

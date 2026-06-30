@@ -100,7 +100,7 @@ export function StatBadge({
       <span className="min-w-0">
         <span
           className={cn(
-            "block font-serif text-[30px] font-medium leading-none tracking-[-0.02em]",
+            "block truncate font-serif text-[30px] font-medium leading-none tracking-[-0.02em]",
             TONE_VALUE[tone],
           )}
         >

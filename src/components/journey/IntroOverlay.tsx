@@ -45,7 +45,7 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
 
   return (
     <div
-      className="screen-enter fixed inset-0 z-50 flex items-end justify-center bg-black/55 px-4 backdrop-blur-md sm:items-center"
+      className="screen-enter fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
       aria-labelledby="journey-intro-title"
@@ -54,10 +54,7 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
-      <div
-        className="relative w-full max-w-md overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.12)] bg-card p-6 shadow-[0_40px_120px_-40px_rgba(8,10,18,0.95)] backdrop-blur-xl"
-        style={{ marginBottom: "1.5rem" }}
-      >
+      <div className="relative w-full max-w-md overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.12)] bg-card p-6 shadow-[0_40px_120px_-40px_rgba(8,10,18,0.95)] backdrop-blur-xl">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.18),transparent_60%)] blur-2xl"

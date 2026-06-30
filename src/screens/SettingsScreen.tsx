@@ -252,7 +252,7 @@ function StatusLine({ kind, message }: { kind: "success" | "error"; message: str
       role={isError ? "alert" : "status"}
       style={{
         fontSize: 12,
-        color: isError ? "rgba(255,123,123,0.9)" : "rgba(109,186,132,0.95)",
+        color: isError ? "var(--text-danger-strong)" : "var(--text-success-strong)",
         marginTop: 2,
       }}
     >
@@ -344,7 +344,7 @@ function ConfirmDialog({
           maxWidth: 360,
           padding: "22px 22px 18px",
           borderRadius: 20,
-          background: "rgba(27,30,39,0.98)",
+          background: "var(--popover)",
           border: "1px solid var(--border-violet-soft)",
           display: "flex",
           flexDirection: "column",
@@ -1396,8 +1396,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               fontSize: 11,
               color:
                 reminderStatus?.permission === "granted"
-                  ? "rgba(109,186,132,0.9)"
-                  : "rgba(255,185,84,0.9)",
+                  ? "var(--text-success-strong)"
+                  : "var(--text-warn-strong)",
               lineHeight: 1.5,
               margin: 0,
               marginTop: -4,
@@ -1542,7 +1542,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <span
               className={`grid size-10 shrink-0 place-items-center rounded-xl ${
                 syncStatus.error && online
-                  ? "bg-[rgba(255,123,123,0.12)] text-[rgba(255,170,170,0.95)]"
+                  ? "bg-[rgba(255,123,123,0.12)] text-[color:var(--icon-rose)]"
                   : !online
                     ? "bg-[rgba(255,185,84,0.12)] text-tertiary"
                     : "bg-[var(--surface-violet-high)] text-primary"

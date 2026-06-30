@@ -175,13 +175,15 @@ export function JourneyScreen({ onOpenSupport }: JourneyScreenProps) {
 
               {mode === "flight" && phase === "pause" && modeLocked ? (
                 <div
-                  className="flex items-center gap-2 rounded-2xl border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.06)] px-3.5 py-2.5 text-xs text-[#ffd99a]"
+                  className="flex items-center gap-2 rounded-2xl border border-[rgba(255,185,84,0.28)] bg-[rgba(255,185,84,0.06)] px-3.5 py-2.5 text-xs text-[color:var(--text-on-warm-strong)]"
                   role="status"
                   aria-live="polite"
                 >
                   <Compass className="size-3.5" aria-hidden />
                   <span className="font-semibold">Paused</span>
-                  <span className="text-[#d8d4eb]">· take all the time you need</span>
+                  <span className="text-[color:var(--text-on-surface-muted)]">
+                    · take all the time you need
+                  </span>
                 </div>
               ) : null}
 

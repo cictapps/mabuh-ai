@@ -66,7 +66,7 @@ export function AirbornePanel({
           <span className="grid size-9 place-items-center rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.04)] text-foreground">
             <Plane className="size-4" />
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
             Airborne
           </span>
         </div>
@@ -85,7 +85,7 @@ export function AirbornePanel({
 
         {hasCheckpoints ? (
           <div className="rounded-2xl border border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.03)] p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
               {status.currentCheckpoint ? "Where you are" : "Up next"}
             </p>
             <p className="mt-1 font-serif text-lg tracking-[-0.02em] text-foreground">
@@ -99,14 +99,14 @@ export function AirbornePanel({
             {status.nextCheckpoint ? (
               <div className="mt-4 flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
                     Next waypoint in
                   </p>
                   <p className="mt-0.5 font-mono text-xl tracking-tight text-foreground">
                     {formatDuration(status.msUntilNext)}
                   </p>
                 </div>
-                <p className="pb-1 font-mono text-[11px] text-[#d8d4eb]">
+                <p className="pb-1 font-mono text-[11px] text-[color:var(--text-on-surface-muted)]">
                   {status.progressPercent}% of stretch
                 </p>
               </div>
@@ -119,7 +119,7 @@ export function AirbornePanel({
         ) : (
           <div className="rounded-2xl border border-dashed border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.02)] p-4">
             <p className="text-sm text-foreground">No waypoints yet.</p>
-            <p className="mt-1 text-xs leading-relaxed text-[#d8d4eb]">
+            <p className="mt-1 text-xs leading-relaxed text-[color:var(--text-on-surface-muted)]">
               Add a few gentle moments in the Hangar — a morning pause, an evening
               reflection, anything that helps.
             </p>
@@ -140,7 +140,7 @@ export function AirbornePanel({
             <Button
               variant="ghost"
               onClick={onEnterFinal}
-              className="text-[#d8d4eb] hover:text-foreground"
+              className="text-[color:var(--text-on-surface-muted)] hover:text-foreground"
             >
               <Moon className="size-4" />
               Wind down
@@ -148,7 +148,7 @@ export function AirbornePanel({
             <Button
               variant="ghost"
               onClick={onEnterPause}
-              className="text-[#ffd99a] hover:bg-[rgba(255,185,84,0.08)] hover:text-[#ffd99a]"
+              className="text-[color:var(--text-on-warm-strong)] hover:bg-[rgba(255,185,84,0.08)] hover:text-[color:var(--text-on-warm-strong)]"
             >
               <Heart className="size-4" />
               Need a pause

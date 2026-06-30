@@ -142,7 +142,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
             <Settings2 className="size-4" />
           </span>
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d8d4eb]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--text-kicker)]">
               {mode === "garden" ? "Garden Shed" : "Hangar"}
             </p>
             <CardTitle className="font-serif text-2xl tracking-[-0.02em]">
@@ -203,7 +203,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
             onToggle={() => toggleSection("look")}
           >
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
                 Sky tone
               </p>
               <div className="grid grid-cols-3 gap-2">
@@ -246,7 +246,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
             </div>
 
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
                 Companion
               </p>
               <div className="grid grid-cols-3 gap-2">
@@ -281,7 +281,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
                 })}
               </div>
               {!isUnlocked("cruiser") || !isUnlocked("glider") ? (
-                <p className="mt-2 flex items-center gap-1 text-[10px] text-[#d8d4eb]/60">
+                <p className="mt-2 flex items-center gap-1 text-[10px] text-[color:var(--text-on-surface-softest)]">
                   <Gift className="size-3" />
                   More companions unlock as you level up
                 </p>
@@ -317,7 +317,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
             </div>
 
             {sortedCheckpoints.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.02)] p-3 text-xs leading-relaxed text-[#d8d4eb]">
+              <p className="rounded-2xl border border-dashed border-[rgba(188,194,255,0.10)] bg-[rgba(188,194,255,0.02)] p-3 text-xs leading-relaxed text-[color:var(--text-on-surface-muted)]">
                 No waypoints yet. Add one above to plan a soft moment in your day.
               </p>
             ) : (
@@ -331,7 +331,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
                       <span className="block truncate text-sm font-semibold text-foreground">
                         {checkpoint.label}
                       </span>
-                      <span className="block text-xs text-[#d8d4eb]">
+                      <span className="block text-xs text-[color:var(--text-on-surface-muted)]">
                         {checkpoint.time}
                       </span>
                     </span>
@@ -339,7 +339,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
                       type="button"
                       onClick={() => removeCheckpoint(checkpoint.id)}
                       aria-label={`Remove ${checkpoint.label}`}
-                      className="rounded-full p-1.5 text-[#d8d4eb] transition-colors hover:bg-[rgba(188,194,255,0.06)] hover:text-foreground"
+                      className="rounded-full p-1.5 text-[color:var(--text-on-surface-muted)] transition-colors hover:bg-[rgba(188,194,255,0.06)] hover:text-foreground"
                     >
                       <Trash2 className="size-3.5" />
                     </button>
@@ -361,7 +361,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
           open={openSection === "people"}
           onToggle={() => toggleSection("people")}
         >
-          <p className="text-xs leading-relaxed text-[#d8d4eb]">
+          <p className="text-xs leading-relaxed text-[color:var(--text-on-surface-muted)]">
             Save a few people you can call from the Pause view. These are private to your
             device.
           </p>
@@ -398,7 +398,7 @@ export function HangarPanel({ mode = "flight" }: { mode?: JourneyMode }) {
                   <button
                     type="button"
                     onClick={() => removeEmergencyContact(contact.id)}
-                    className="rounded-full px-2 py-1 text-[11px] font-semibold text-[#d8d4eb] transition-colors hover:bg-[rgba(188,194,255,0.06)] hover:text-foreground"
+                    className="rounded-full px-2 py-1 text-[11px] font-semibold text-[color:var(--text-on-surface-muted)] transition-colors hover:bg-[rgba(188,194,255,0.06)] hover:text-foreground"
                   >
                     Remove
                   </button>
@@ -451,11 +451,13 @@ function Section({ icon, title, hint, open, onToggle, children }: SectionProps) 
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold text-foreground">{title}</span>
-          <span className="block text-[11px] text-[#d8d4eb]">{hint}</span>
+          <span className="block text-[11px] text-[color:var(--text-on-surface-muted)]">
+            {hint}
+          </span>
         </span>
         <ChevronDown
           className={cn(
-            "size-4 text-[#d8d4eb] transition-transform",
+            "size-4 text-[color:var(--text-on-surface-muted)] transition-transform",
             open && "rotate-180",
           )}
         />

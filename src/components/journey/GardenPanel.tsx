@@ -117,7 +117,7 @@ export function GardenPanel({ onOpenSupport, locked }: GardenPanelProps) {
                 active ? "flex-[2.8] gap-2 px-2.5" : "flex-1 gap-0 px-1",
                 active
                   ? "bg-gradient-to-r from-[#8fcea3] via-[#a8dfb8] to-[#8fcea3] text-[#0f121a] shadow-[0_14px_32px_-18px_rgba(109,186,132,0.85)]"
-                  : "text-[rgba(216,212,235,0.55)]",
+                  : "text-[color:var(--text-on-surface-muted)]",
                 disabled && "opacity-40",
               )}
             >
@@ -128,8 +128,8 @@ export function GardenPanel({ onOpenSupport, locked }: GardenPanelProps) {
                   active
                     ? "text-[#132019]"
                     : reached
-                      ? "text-[#a8dfb8]"
-                      : "text-[rgba(216,212,235,0.42)]",
+                      ? "text-[color:var(--icon-success)]"
+                      : "text-[color:var(--text-on-surface-softest)]",
                 )}
               />
               <span
@@ -149,10 +149,10 @@ export function GardenPanel({ onOpenSupport, locked }: GardenPanelProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between gap-3">
-            <span className="grid size-9 place-items-center rounded-2xl border border-[rgba(109,186,132,0.22)] bg-[rgba(109,186,132,0.10)] text-[#a8dfb8]">
+            <span className="grid size-9 place-items-center rounded-2xl border border-[rgba(109,186,132,0.22)] bg-[rgba(109,186,132,0.10)] text-[color:var(--icon-success)]">
               <Leaf className="size-4" />
             </span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#a8dfb8]">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-success-strong)]">
               Garden · Stage {stage}/7
             </span>
           </div>
@@ -193,12 +193,12 @@ export function GardenPanel({ onOpenSupport, locked }: GardenPanelProps) {
               <GardenScene mood={mood} plant={plant} stage={stage} />
               <div className="rounded-2xl border border-[rgba(109,186,132,0.16)] bg-[rgba(109,186,132,0.06)] p-4">
                 <div className="flex items-start gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(109,186,132,0.14)] text-[#a8dfb8]">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(109,186,132,0.14)] text-[color:var(--icon-success)]">
                     <CareIcon className="size-4" />
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-foreground">{care.action}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-[#d8d4eb]">
+                    <p className="mt-1 text-xs leading-relaxed text-[color:var(--text-on-surface-muted)]">
                       {care.detail}
                     </p>
                   </div>
@@ -214,7 +214,7 @@ export function GardenPanel({ onOpenSupport, locked }: GardenPanelProps) {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="text-[#ffd99a]"
+                  className="text-[color:var(--text-on-warm-strong)]"
                   onClick={onOpenSupport}
                 >
                   <Heart className="size-4" />
@@ -228,7 +228,7 @@ export function GardenPanel({ onOpenSupport, locked }: GardenPanelProps) {
             <>
               <GardenScene mood={mood} plant={plant} stage={stage} />
               <div>
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8d4eb]">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-kicker)]">
                   Has the weather shifted?
                 </p>
                 <MoodPicker value={mood} onChange={setMood} />

@@ -34,7 +34,7 @@ const SLIDES: OnboardingSlide[] = [
     id: "welcome",
     eyebrow: "By students · for students",
     title: "A quiet space, made for students — by students.",
-    body: "Mabuh-ai is a soft place to land between classes, deadlines, and the rest of life. Built by BSIS students of WVSU — CICT as a Mobile App Development project, it's made for fellow students who needed the same kind of space. No scores, no streaks to lose — just a few minutes to notice how you're doing.",
+    body: "Mabuh-ai is a soft place to land between classes, deadlines, and the rest of life. Built by BSIS students of WVSU — CICT as a Mobile App Development project, it's made for fellow students who needed the same kind of space. The check-ins themselves are pressure-free — just a few minutes to notice how you're doing — and over time your Journey quietly reflects the rhythms you find.",
     bullets: [
       "Private by default — your entries stay yours",
       "Built for tired eyes and late nights",

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { MessageCircle, MapPin, Phone, ShieldAlert, ArrowUpRight } from "lucide-react";
 
 import { loadHotlines, summarizeDirectory, type HotlineRecord } from "../data/providers";
+import { useThemePreference } from "../hooks/useThemePreference";
+import { openExternal } from "../lib/openExternal";
 
 const ChatbotShell = lazy(async () => {
   const mod = await import("./ChatBot");
@@ -67,6 +69,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
   onCloseChat,
 }) => {
   const navigate = useNavigate();
+  const { resolved: resolvedTheme } = useThemePreference();
 
   if (view === "chat") {
     return (
@@ -147,7 +150,7 @@ export const SupportHub: React.FC<SupportHubProps> = ({
         }}
       >
         <img
-          src="/app-logo-light.svg"
+          src={resolvedTheme === "light" ? "/app-logo-dark.svg" : "/app-logo-light.svg"}
           alt=""
           aria-hidden="true"
           className="mt-0.5 size-4 shrink-0 object-contain"
@@ -283,14 +286,22 @@ export const SupportHub: React.FC<SupportHubProps> = ({
               <a
                 key={h.key}
                 href={h.tel}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={(e) => {
-                  if (h.tel === "#") e.preventDefault();
+                  if (h.tel === "#") {
+                    e.preventDefault();
+                    return;
+                  }
+                  e.preventDefault();
+                  void openExternal(h.tel);
                 }}
-                className="flex items-center gap-3 rounded-2xl px-2 py-2 text-[13px] transition-colors duration-200 hover:bg-[rgba(255,123,123,0.06)]"
+                className="flex items-center gap-3 rounded-2xl px-2 py-2 text-[13px] transition-colors duration-200 hover:bg-[rgba(255,123,123,0.06)] active:bg-[rgba(255,123,123,0.10)]"
                 style={{
                   color: "var(--text-on-surface)",
                   textDecoration: "none",
                   opacity: h.unverified ? 0.85 : 1,
+                  cursor: h.tel === "#" ? "default" : "pointer",
                 }}
               >
                 <Phone size={14} color="var(--icon-rose)" />

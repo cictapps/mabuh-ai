@@ -1256,7 +1256,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
             opacity: isRefreshing || refreshNotice ? 1 : Math.min(1, pullDistance / 40),
           }}
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(188,194,255,0.12)] bg-card/90 px-3 py-1.5 text-[11px] font-semibold text-[#d8d4eb] shadow-lg backdrop-blur-xl">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/90 px-3 py-1.5 text-[11px] font-semibold text-[color:var(--text-on-surface-muted)] shadow-lg backdrop-blur-xl">
             {isMaskMode ? (
               <LockKeyhole size={13} />
             ) : (
@@ -1403,7 +1403,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       </main>
 
       <footer
-        className={`relative z-20 shrink-0 border-t border-[rgba(188,194,255,0.08)] px-3 pt-3 transition-all duration-500 sm:px-6 ${
+        className={`relative z-20 shrink-0 border-t border-border px-3 pt-3 transition-all duration-500 sm:px-6 ${
           isMaskMode ? "bg-black/55 backdrop-blur-2xl" : "bg-card/70 backdrop-blur-2xl"
         }`}
         style={{
@@ -1421,7 +1421,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
           </AnimatePresence>
 
           <div
-            className={`relative flex flex-1 items-end overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.12)] bg-card px-2 py-1.5 shadow-[0_28px_80px_-40px_rgba(8,10,18,0.85)] backdrop-blur-xl transition-all focus-within:border-[rgba(188,194,255,0.28)] focus-within:shadow-[0_24px_70px_-36px_rgba(188,194,255,0.55)] ${
+            className={`relative flex flex-1 items-end overflow-hidden rounded-[1.75rem] border border-border bg-card px-2 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-xl transition-all focus-within:border-primary/50 focus-within:shadow-[var(--shadow-glow-active)] ${
               !hasAcceptedPolicy ? "opacity-60" : ""
             }`}
           >
@@ -1466,7 +1466,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
                   e.currentTarget.value.length,
                 );
               }}
-              className="relative max-h-32 min-h-10 flex-1 resize-none border-0 bg-transparent px-2 py-2.5 text-[15px] leading-snug text-foreground placeholder:text-[rgba(216,212,235,0.55)] outline-none focus:outline-none focus:ring-0 focus-visible:outline-none disabled:cursor-not-allowed"
+              className="relative max-h-32 min-h-10 flex-1 resize-none border-0 bg-transparent px-2 py-2.5 text-[15px] leading-snug text-foreground placeholder:text-[color:var(--text-on-surface-softest)] outline-none focus:outline-none focus:ring-0 focus-visible:outline-none disabled:cursor-not-allowed"
               placeholder={
                 hasAcceptedPolicy
                   ? online
@@ -1489,7 +1489,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
             whileTap={hasAcceptedPolicy ? { scale: 0.92 } : undefined}
             onClick={handleSendMessage}
             disabled={!inputText.trim() || isLoading || !hasAcceptedPolicy || !online}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[0_14px_32px_-18px_rgba(188,194,255,0.85)] transition-all disabled:cursor-not-allowed disabled:opacity-40 disabled:grayscale"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[var(--shadow-glow-active)] transition-all disabled:cursor-not-allowed disabled:opacity-40 disabled:grayscale"
             type="button"
             aria-label="Send message"
           >

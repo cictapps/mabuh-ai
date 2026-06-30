@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Ghost, Copy, Check } from "lucide-react";
+import { useThemePreference } from "../../hooks/useThemePreference";
 
 // ─── Rich Text Parser ────────────────────────────────────────────────────────
 
@@ -160,6 +161,20 @@ const TypingDots = ({ isMaskMode }: { isMaskMode: boolean }) => (
   </div>
 );
 
+function AvatarLogo({ isTyping }: { isTyping: boolean }) {
+  const { resolved } = useThemePreference();
+  const src = resolved === "light" ? "/app-logo-dark.svg" : "/app-logo-light.svg";
+  return (
+    <img
+      src={src}
+      alt=""
+      width={36}
+      height={36}
+      className={`h-9 w-9 ${isTyping ? "animate-pulse" : ""}`}
+    />
+  );
+}
+
 // ─── ChatBubble ───────────────────────────────────────────────────────────────
 
 interface ChatBubbleProps {
@@ -223,13 +238,7 @@ export const ChatBubble = ({
               className={`text-white/70 ${isTyping ? "animate-pulse" : ""}`}
             />
           ) : (
-            <img
-              src="/app-logo-light.svg"
-              alt=""
-              width={36}
-              height={36}
-              className={`h-9 w-9 ${isTyping ? "animate-pulse" : ""}`}
-            />
+            <AvatarLogo isTyping={isTyping} />
           )}
         </div>
       )}

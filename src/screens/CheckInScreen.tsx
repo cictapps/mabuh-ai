@@ -622,8 +622,8 @@ function IdlePrompts() {
             lineHeight: 1.55,
           }}
         >
-          No scores, no streaks. This is simply a quiet place to notice what is true right
-          now.
+          There's nothing to get right here. This is simply a quiet place to notice what
+          is true right now.
         </p>
       </div>
     </div>

@@ -9,6 +9,7 @@ type StatBadgeProps = {
   label: string;
   tone?: StatBadgeTone;
   layout?: "row" | "stacked";
+  iconShape?: "tile" | "circle";
   onPress?: () => void;
   className?: string;
 };
@@ -68,6 +69,7 @@ export function StatBadge({
   label,
   tone = "soft",
   layout = "stacked",
+  iconShape = "tile",
   onPress,
   className,
 }: StatBadgeProps) {
@@ -89,7 +91,8 @@ export function StatBadge({
       />
       <span
         className={cn(
-          "grid size-9 shrink-0 place-items-center rounded-xl",
+          "grid shrink-0 place-items-center",
+          iconShape === "circle" ? "size-11 rounded-full" : "size-9 rounded-xl",
           TONE_ICON_BG[tone],
           TONE_ICON[tone],
         )}
@@ -119,7 +122,7 @@ export function StatBadge({
     "transition-transform duration-200 ease-out",
     TONE_BG[tone],
     TONE_BORDER[tone],
-    layout === "row" ? "flex-row items-center" : "min-h-[100px] justify-between",
+    layout === "row" ? "flex-row items-center" : "min-h-[112px] justify-between",
     className,
   );
 

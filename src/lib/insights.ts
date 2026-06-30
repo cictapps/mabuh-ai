@@ -1,9 +1,19 @@
-import { InsightCard, MoodEntry, MoodType } from "../types";
+import { InsightCard, InsightTone, MoodEntry, MoodType } from "../types";
 import { getMoodMeta } from "../data";
 
 const MIN_ENTRIES_FOR_INSIGHTS = 5;
 const WEEKEND_INSIGHT_MIN = 3;
 const JOURNAL_INSIGHT_MIN = 4;
+
+const MOOD_TONE: Record<MoodType, InsightTone> = {
+  stressed: "danger",
+  sad: "danger",
+  worried: "warm",
+  tired: "warm",
+  okay: "calm",
+  calm: "calm",
+  happy: "success",
+};
 
 function isoDate(d: Date): string {
   const year = d.getFullYear();
@@ -17,7 +27,7 @@ function buildEmptyInsight(): InsightCard {
     id: "insight-empty",
     title: "We'd love a few more check-ins first",
     body: "Once you've shared a handful of moods, gentle little patterns will start to show themselves here.",
-    color: "#bcc2ff",
+    tone: "calm",
   };
 }
 
@@ -54,14 +64,14 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
         id: "insight-weekend",
         title: "Your weekends seem to soften you",
         body: "Your weekend check-ins sit a little higher than your weekdays. That little pause seems to be good for your heart.",
-        color: "#6dba84",
+        tone: "success",
       });
     } else if (avgWeekday - avgWeekend >= 0.5) {
       insights.push({
         id: "insight-weekday",
         title: "Your weekdays feel steadier",
         body: "Your weekday check-ins seem to sit a little higher than your weekends. There's something comforting in your routine.",
-        color: "#8c9bff",
+        tone: "calm",
       });
     }
   }
@@ -82,7 +92,7 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
         id: "insight-journal",
         title: "Writing seems to lift your days",
         body: "On days when you write a little, your moods tend to be a touch calmer and brighter. The words may be doing some quiet work for you.",
-        color: "#ffb954",
+        tone: "warm",
       });
     }
   }
@@ -103,7 +113,7 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
       id: "insight-dominant",
       title: `${meta.label.toLowerCase()} has been your most-visited color`,
       body: `About ${pct}% of your check-ins have rested in ${meta.label.toLowerCase()}. ${meta.definition} Whatever it means for you, it's been a real and valid place.`,
-      color: meta.color,
+      tone: MOOD_TONE[topMood],
     });
   }
 
@@ -121,7 +131,7 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
           id: "insight-load",
           title: "Lighter school days feel a little brighter",
           body: "On lower-load days, your check-ins tend to sit a touch higher. Tiny pauses between heavy days seem to be kind to you.",
-          color: "#e05c6e",
+          tone: "danger",
         });
       }
     }
@@ -140,14 +150,14 @@ export function deriveInsights(history: MoodEntry[]): InsightCard[] {
           id: "insight-trend-up",
           title: "Your days are softening this week",
           body: "Compared to the week before, your recent check-ins sit a little higher. Something gentle is working for you right now.",
-          color: "#6dba84",
+          tone: "success",
         });
       } else if (avgOlder - avgRecent >= 0.6) {
         insights.push({
           id: "insight-trend-down",
           title: "This week feels a little heavier",
           body: "Your recent check-ins have been sitting lower than the week before. A small ritual — a glass of water, a short walk, a single journal line — might be kind to try.",
-          color: "#e0853c",
+          tone: "warm",
         });
       }
     }

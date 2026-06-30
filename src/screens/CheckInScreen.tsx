@@ -487,7 +487,6 @@ const IDLE_PROMPTS: { icon: React.ReactNode; label: string; hint: string }[] = [
     hint: "There's no rush. Your mood is what matters.",
   },
 ];
-
 function IdlePrompts() {
   return (
     <div
@@ -500,14 +499,6 @@ function IdlePrompts() {
         gap: 12,
       }}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.12),transparent_60%)] blur-2xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(212,187,255,0.08),transparent_60%)] blur-2xl"
-      />
       <div className="relative">
         <div
           style={{
@@ -522,7 +513,7 @@ function IdlePrompts() {
             <span
               style={{
                 display: "block",
-                fontSize: 10.5,
+                fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
@@ -535,8 +526,8 @@ function IdlePrompts() {
               className="font-serif"
               style={{
                 display: "block",
-                marginTop: 4,
-                fontSize: 18,
+                marginTop: 6,
+                fontSize: 20,
                 lineHeight: 1.2,
                 fontWeight: 500,
                 letterSpacing: "-0.03em",
@@ -546,38 +537,13 @@ function IdlePrompts() {
               A tiny pause before you choose.
             </span>
           </div>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 10.5,
-              flexShrink: 0,
-              padding: "6px 8px",
-              borderRadius: 999,
-              border: "1px solid rgba(188,194,255,0.10)",
-              background: "rgba(188,194,255,0.05)",
-              color: "var(--text-on-surface-muted)",
-            }}
-          >
-            <span
-              aria-hidden
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: "#bcc2ff",
-                boxShadow: "0 0 8px rgba(188,194,255,0.5)",
-              }}
-            />
-            private
-          </span>
         </div>
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "1fr",
-            gap: 8,
+            gap: 4,
+            marginTop: 14,
           }}
         >
           {IDLE_PROMPTS.map((p, i) => (
@@ -587,9 +553,9 @@ function IdlePrompts() {
                 display: "grid",
                 gridTemplateColumns: "34px 1fr auto",
                 alignItems: "center",
-                gap: 10,
-                minHeight: 58,
-                padding: "10px 0",
+                gap: 12,
+                minHeight: 54,
+                padding: "8px 0",
               }}
             >
               <span
@@ -598,7 +564,7 @@ function IdlePrompts() {
                   placeItems: "center",
                   width: 34,
                   height: 34,
-                  color: i === 0 ? "var(--icon-warm)" : "var(--text-kicker)",
+                  color: "var(--icon-warm)",
                 }}
                 aria-hidden
               >
@@ -608,7 +574,7 @@ function IdlePrompts() {
                 <span
                   style={{
                     display: "block",
-                    fontSize: 12.5,
+                    fontSize: 13,
                     fontWeight: 600,
                     color: "var(--text-on-surface-strong)",
                     lineHeight: 1.25,
@@ -620,9 +586,10 @@ function IdlePrompts() {
                   style={{
                     display: "block",
                     marginTop: 2,
-                    fontSize: 11,
-                    color: "var(--text-on-surface-muted)",
-                    lineHeight: 1.35,
+                    fontSize: 11.5,
+                    color: "var(--text-on-surface-strong)",
+                    opacity: 0.78,
+                    lineHeight: 1.4,
                   }}
                 >
                   {p.hint}
@@ -635,8 +602,7 @@ function IdlePrompts() {
                   width: 24,
                   height: 24,
                   borderRadius: 10,
-                  border: "1px solid rgba(188,194,255,0.08)",
-                  color: "var(--text-on-surface-softest)",
+                  color: "var(--text-on-surface-soft)",
                   fontSize: 10,
                   fontWeight: 700,
                   fontVariantNumeric: "tabular-nums",
@@ -649,11 +615,11 @@ function IdlePrompts() {
         </div>
         <p
           style={{
-            fontSize: 11.5,
-            color: "var(--text-on-surface-muted)",
-            margin: "0",
-            lineHeight: 1.5,
-            padding: "2px 2px 0",
+            fontSize: 12,
+            color: "var(--text-on-surface)",
+            opacity: 0.78,
+            margin: "14px 0 0",
+            lineHeight: 1.55,
           }}
         >
           No scores, no streaks. This is simply a quiet place to notice what is true right
@@ -663,7 +629,6 @@ function IdlePrompts() {
     </div>
   );
 }
-
 function CheckInDetailCard({
   icon,
   title,

@@ -68,11 +68,13 @@ export interface MoodMeta {
   tags: string[];
 }
 
+export type InsightTone = "calm" | "success" | "warm" | "danger";
+
 export interface InsightCard {
   id: string;
   title: string;
   body: string;
-  color: string;
+  tone: InsightTone;
 }
 
 export interface Suggestion {

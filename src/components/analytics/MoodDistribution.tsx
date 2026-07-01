@@ -32,7 +32,7 @@ export const MoodDistribution: React.FC<MoodDistributionProps> = ({ data }) => {
             <span
               style={{
                 fontSize: 12,
-                color: "var(--surface-violet-icon-hover)",
+                color: "var(--text-on-surface-muted)",
                 width: 60,
                 flexShrink: 0,
               }}
@@ -61,7 +61,8 @@ export const MoodDistribution: React.FC<MoodDistributionProps> = ({ data }) => {
             <span
               style={{
                 fontSize: 11,
-                color: "var(--surface-violet-icon-hover)",
+                fontVariantNumeric: "tabular-nums",
+                color: "var(--text-on-surface-muted)",
                 width: 32,
                 textAlign: "right",
               }}

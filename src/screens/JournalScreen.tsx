@@ -4,6 +4,7 @@ import { Button } from "../components/ui/button";
 import { JournalInput } from "../components/mood/JournalInput";
 import { ReflectWithAIPanel } from "../components/journal/ReflectWithAIPanel";
 import { SectionLabel } from "../components/shared/SectionLabel";
+import { StatBadge } from "../components/journey/StatBadge";
 import type { JournalEntry, MoodEntry, MoodType } from "../types";
 import { getMoodMeta } from "../data";
 import type { ReflectContext } from "../services/reflect";
@@ -230,14 +231,18 @@ function RhythmCard({
         </p>
 
         <div className="grid grid-cols-2 gap-2">
-          <RhythmStat
+          <StatBadge
             tone="warm"
+            layout="stacked"
+            iconShape="circle"
             icon={<BookHeart className="size-4" />}
             value={checkins}
             label="Check-in moments"
           />
-          <RhythmStat
-            tone="fuchsia"
+          <StatBadge
+            tone="calm"
+            layout="stacked"
+            iconShape="circle"
             icon={<Heart className="size-4" />}
             value={manual}
             label="Heart notes"
@@ -245,56 +250,6 @@ function RhythmCard({
         </div>
       </div>
     </section>
-  );
-}
-
-function RhythmStat({
-  icon,
-  value,
-  label,
-  tone,
-}: {
-  icon: React.ReactNode;
-  value: React.ReactNode;
-  label: string;
-  tone: "warm" | "fuchsia";
-}) {
-  const iconBg =
-    tone === "warm" ? "bg-[var(--stat-warm-icon-bg)]" : "bg-[var(--surface-fuchsia-low)]";
-  const iconColor =
-    tone === "warm"
-      ? "text-[color:var(--stat-warm-icon)]"
-      : "text-[color:var(--surface-fuchsia-text)]";
-  const valueColor =
-    tone === "warm"
-      ? "text-[color:var(--stat-warm-value)]"
-      : "text-[color:var(--surface-fuchsia-text)]";
-  const accent = tone === "warm" ? "var(--stat-warm-accent)" : "var(--stat-warm-accent)";
-
-  return (
-    <div className="relative isolate flex min-h-[88px] flex-col justify-between gap-2 overflow-hidden rounded-2xl p-3.5">
-      <span
-        aria-hidden
-        className="block h-[2px] w-10 rounded-full"
-        style={{ background: `linear-gradient(to right, transparent, ${accent})` }}
-      />
-      <span
-        className={`grid size-8 shrink-0 place-items-center rounded-xl ${iconBg} ${iconColor}`}
-        aria-hidden
-      >
-        {icon}
-      </span>
-      <span className="min-w-0">
-        <span
-          className={`block font-serif text-[22px] font-medium leading-none tracking-[-0.02em] ${valueColor}`}
-        >
-          {value}
-        </span>
-        <span className="mt-2 block text-[10px] font-semibold uppercase leading-tight tracking-[0.22em] text-[color:var(--text-kicker)]">
-          {label}
-        </span>
-      </span>
-    </div>
   );
 }
 

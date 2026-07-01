@@ -727,8 +727,10 @@ export function useMoodStore() {
       worstEntry,
       activityCount: totalActivitySelections,
       activityHighlights,
+      checkInCount: history.length,
+      journalCount: manualJournalEntries.length,
     };
-  }, [history, dailySeries, dailyAggregate, moodScoreMap]);
+  }, [history, dailySeries, dailyAggregate, moodScoreMap, manualJournalEntries]);
 
   return {
     history,

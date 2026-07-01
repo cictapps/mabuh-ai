@@ -15,6 +15,7 @@ import { getMoodMeta } from "../data";
 import { MoodTrendChart } from "../components/analytics/MoodTrendChart";
 import { MoodDistribution } from "../components/analytics/MoodDistribution";
 import { StatBadge } from "../components/journey/StatBadge";
+import { cn } from "../lib/utils";
 
 interface DistItem {
   mood: MoodType;
@@ -53,6 +54,8 @@ interface AnalyticsScreenProps {
 
 type StatTone = "warm" | "calm" | "success" | "rose";
 
+type RhythmTone = "warm" | "calm" | "success";
+
 const TONE_ICON_BG: Record<StatTone, string> = {
   warm: "bg-[var(--stat-warm-icon-bg)]",
   calm: "bg-[var(--stat-calm-icon-bg)]",
@@ -66,6 +69,109 @@ const TONE_ICON: Record<StatTone, string> = {
   success: "text-[color:var(--stat-success-icon)]",
   rose: "text-[color:var(--text-warn)]",
 };
+
+const RHYTHM_BG: Record<RhythmTone, string> = {
+  warm: "bg-[var(--stat-warm-bg)]",
+  calm: "bg-[var(--stat-calm-bg)]",
+  success: "bg-[var(--stat-success-bg)]",
+};
+
+const RHYTHM_BORDER: Record<RhythmTone, string> = {
+  warm: "border-[var(--stat-warm-border)]",
+  calm: "border-[var(--stat-calm-border)]",
+  success: "border-[var(--stat-success-border)]",
+};
+
+const RHYTHM_ICON_BG: Record<RhythmTone, string> = {
+  warm: "bg-[var(--stat-warm-icon-bg)]",
+  calm: "bg-[var(--stat-calm-icon-bg)]",
+  success: "bg-[var(--stat-success-icon-bg)]",
+};
+
+const RHYTHM_ICON: Record<RhythmTone, string> = {
+  warm: "text-[color:var(--stat-warm-icon)]",
+  calm: "text-[color:var(--stat-calm-icon)]",
+  success: "text-[color:var(--stat-success-icon)]",
+};
+
+const RHYTHM_VALUE: Record<RhythmTone, string> = {
+  warm: "text-[color:var(--stat-warm-value)]",
+  calm: "text-[color:var(--stat-calm-value)]",
+  success: "text-[color:var(--stat-success-value)]",
+};
+
+const RHYTHM_ACCENT: Record<RhythmTone, string> = {
+  warm: "var(--stat-warm-accent)",
+  calm: "var(--stat-calm-accent)",
+  success: "var(--stat-success-accent)",
+};
+
+const RHYTHM_GLOW: Record<RhythmTone, string> = {
+  warm: "bg-[var(--stat-warm-glow)]",
+  calm: "bg-[var(--stat-calm-glow)]",
+  success: "bg-[var(--stat-success-glow)]",
+};
+
+function RhythmCard({
+  icon,
+  value,
+  label,
+  tone,
+}: {
+  icon: React.ReactNode;
+  value: React.ReactNode;
+  label: string;
+  tone: RhythmTone;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative isolate flex h-full min-w-0 flex-col gap-4 overflow-hidden rounded-[1.75rem] border px-3.5 pt-3.5 pb-4 text-left",
+        "shadow-[0_22px_60px_-38px_rgba(74,60,90,0.32)] dark:shadow-[0_28px_80px_-44px_rgba(8,10,18,0.85)]",
+        RHYTHM_BG[tone],
+        RHYTHM_BORDER[tone],
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full blur-2xl",
+          RHYTHM_GLOW[tone],
+        )}
+      />
+      <span
+        aria-hidden
+        className="block h-[2px] w-12 rounded-full"
+        style={{
+          background: `linear-gradient(to right, transparent, ${RHYTHM_ACCENT[tone]})`,
+        }}
+      />
+      <span
+        className={cn(
+          "grid h-12 w-9 shrink-0 place-items-center rounded-full",
+          RHYTHM_ICON_BG[tone],
+          RHYTHM_ICON[tone],
+        )}
+        aria-hidden
+      >
+        {icon}
+      </span>
+      <div className="mt-auto flex flex-col gap-1.5">
+        <span
+          className={cn(
+            "block font-serif text-[40px] font-medium leading-none tracking-[-0.03em]",
+            RHYTHM_VALUE[tone],
+          )}
+        >
+          {value}
+        </span>
+        <span className="block text-[10px] font-semibold uppercase leading-tight tracking-[0.22em] text-[color:var(--text-kicker)]">
+          {label}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function Section({
   kicker,
@@ -221,23 +327,20 @@ export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       {/* Rhythms */}
       <Section kicker="Your rhythms">
         <div className="grid grid-cols-3 gap-2">
-          <StatBadge
+          <RhythmCard
             tone="warm"
-            layout="stacked"
             icon={<Flame className="size-4" fill="currentColor" />}
             value={analyticsStats.longestStreak}
             label="Longest stretch"
           />
-          <StatBadge
+          <RhythmCard
             tone="calm"
-            layout="stacked"
             icon={<Sparkles className="size-4" />}
             value={analyticsStats.currentStreak}
             label="Days in a row"
           />
-          <StatBadge
+          <RhythmCard
             tone="success"
-            layout="stacked"
             icon={<CalendarDays className="size-4" />}
             value={analyticsStats.lifetimeDays}
             label="Days with us"

@@ -95,7 +95,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
               y1={y}
               x2={W - PAD_X}
               y2={y}
-              stroke="var(--surface-violet-medium)"
+              stroke="var(--border-violet-faint)"
               strokeWidth={1}
               strokeDasharray="4 4"
             />
@@ -103,7 +103,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
               x={PAD_X}
               y={y - 4}
               fontSize={9}
-              fill="var(--surface-violet-icon-hover)"
+              fill="var(--text-on-surface-muted)"
               fontFamily="Plus Jakarta Sans, sans-serif"
             >
               {label}
@@ -124,7 +124,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
-          opacity={0.85}
+          opacity={0.95}
         />
       ))}
 
@@ -137,9 +137,8 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
             cy={p.y}
             r={3.5}
             fill={color}
-            opacity={0.95}
-            stroke="var(--ring-node-bg-soft)"
-            strokeWidth={1}
+            stroke="var(--card)"
+            strokeWidth={1.5}
           />
         );
       })}
@@ -150,7 +149,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
             x={points[0].x}
             y={H + 14}
             fontSize={9}
-            fill="var(--surface-violet-icon-hover)"
+            fill="var(--text-on-surface-muted)"
             fontFamily="Plus Jakarta Sans, sans-serif"
             textAnchor="middle"
           >
@@ -163,7 +162,7 @@ export const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data }) => {
             x={points[points.length - 1].x}
             y={H + 14}
             fontSize={9}
-            fill="var(--surface-violet-icon-hover)"
+            fill="var(--text-on-surface-muted)"
             fontFamily="Plus Jakarta Sans, sans-serif"
             textAnchor="middle"
           >

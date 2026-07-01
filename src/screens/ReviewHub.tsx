@@ -40,6 +40,8 @@ interface ReviewHubProps {
     worstEntry: MoodEntry | null;
     activityCount: number;
     activityHighlights: Array<{ section: string; label: string | null; count: number }>;
+    checkInCount: number;
+    journalCount: number;
   };
   refreshToken?: number | null;
   journalEntries: Array<{

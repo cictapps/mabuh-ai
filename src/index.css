@@ -173,6 +173,18 @@
   --ring-center-fill: rgb(255 252 248 / 96%);
   --ring-node-bg-strong: rgb(255 252 248 / 92%);
   --ring-node-bg-soft: rgb(255 252 248 / 78%);
+  --ring-face-center: rgb(255 253 250 / 0.92);
+  --ring-face-mid: rgb(250 244 238 / 0.72);
+  --ring-face-edge: rgb(255 252 248 / 0.22);
+  --ring-inner-halo: rgba(120, 110, 200, 0.12);
+  --ring-outer-shadow: rgba(74, 60, 90, 0.1);
+  --ring-shell-highlight: rgba(255, 255, 255, 0.7);
+  --ring-shadow-color: #4a3c63;
+  --ring-idle-glow: rgba(120, 110, 200, 0.22);
+  --ring-logo-fill: rgba(0, 0, 0, 0.8);
+  --ring-logo-plate: rgba(255, 252, 248, 0.58);
+  --ring-dot-muted: rgb(255 252 248 / 0.96);
+  --ring-dot-stroke: rgb(255 252 248 / 0.9);
 
   /* Stat-card tokens — Journey's DAY RHYTHM / JOURNEYS / REWARDS row.
      Each tone has a card surface, border, icon-tile, accent (for the
@@ -339,6 +351,18 @@
   --ring-tick-strong: rgba(216, 212, 235, 0.5);
   --ring-tick-soft: rgba(216, 212, 235, 0.25);
   --ring-center-fill: rgba(14, 16, 24, 0.92);
+  --ring-face-center: rgba(238, 241, 246, 0.06);
+  --ring-face-mid: rgba(216, 212, 235, 0.045);
+  --ring-face-edge: rgba(216, 212, 235, 0.02);
+  --ring-inner-halo: rgba(188, 194, 255, 0.09);
+  --ring-outer-shadow: rgba(216, 212, 235, 0.06);
+  --ring-shell-highlight: rgba(216, 212, 235, 0.12);
+  --ring-shadow-color: #080a12;
+  --ring-idle-glow: rgba(188, 194, 255, 0.18);
+  --ring-logo-fill: rgba(255, 255, 255, 0.8);
+  --ring-logo-plate: rgba(14, 16, 24, 0.28);
+  --ring-dot-muted: rgba(27, 30, 39, 0.96);
+  --ring-dot-stroke: rgba(238, 241, 246, 0.78);
 
   /* Stat-card tokens — dark mode (mirrors the light values above). */
   --stat-warm-bg: rgba(255, 185, 84, 0.05);

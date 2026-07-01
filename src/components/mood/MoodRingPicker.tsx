@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useId, useMemo } from "react";
 import { motion, useReducedMotion, type Transition } from "framer-motion";
 import { MOODS } from "../../data";
 import type { MoodType } from "../../types";
@@ -17,10 +17,11 @@ const PICKER_SIZES = {
 
 const VIEWBOX_SIZE = 340;
 const CENTER = VIEWBOX_SIZE / 2;
-const TRACK_RADIUS = 114;
-const MOOD_DOT_RADIUS = 124;
-const LABEL_RADIUS = 142;
-const HAND_LENGTH = MOOD_DOT_RADIUS;
+const OUTER_RADIUS = 121;
+const TRACK_RADIUS = 104;
+const INNER_GLOW_RADIUS = 74;
+const MOOD_DOT_RADIUS = 122;
+const LABEL_RADIUS = 146;
 const START_DEG = -90;
 const STEP_DEG = 360 / MOODS.length;
 const DEFAULT_MOOD: MoodType = "okay";
@@ -61,9 +62,9 @@ function angleForIndex(index: number): number {
 const ClockTicks: React.FC = React.memo(() => {
   const ticks = Array.from({ length: 28 }, (_, i) => {
     const angle = START_DEG + i * (360 / 28);
-    const isHour = i % 4 === 0;
+    const isMajor = i % 4 === 0;
     const outer = pointAt(TRACK_RADIUS, angle);
-    const inner = pointAt(TRACK_RADIUS - (isHour ? 12 : 7), angle);
+    const inner = pointAt(TRACK_RADIUS - (isMajor ? 11 : 6), angle);
 
     return (
       <line
@@ -72,9 +73,9 @@ const ClockTicks: React.FC = React.memo(() => {
         y1={inner.y}
         x2={outer.x}
         y2={outer.y}
-        stroke={isHour ? "var(--ring-tick-strong)" : "var(--ring-tick-soft)"}
+        stroke={isMajor ? "var(--ring-tick-strong)" : "var(--ring-tick-soft)"}
         strokeLinecap="round"
-        strokeWidth={isHour ? 2 : 1.35}
+        strokeWidth={isMajor ? 1.7 : 1.05}
       />
     );
   });
@@ -106,15 +107,39 @@ const MoodStopMarks: React.FC<MoodStopMarksProps> = React.memo(
 
         return (
           <g key={mood.id}>
+            {isActive ? (
+              <motion.circle
+                cx={dot.x}
+                cy={dot.y}
+                r="13"
+                fill={mood.color}
+                initial={false}
+                animate={{
+                  opacity: reduceMotion ? 0.16 : [0.12, 0.24, 0.12],
+                  scale: reduceMotion ? 1 : [0.96, 1.12, 0.96],
+                }}
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : { duration: 2.2, repeat: Infinity, ease: "easeInOut" }
+                }
+                style={{
+                  transformBox: "fill-box",
+                  transformOrigin: "center",
+                }}
+              />
+            ) : null}
             <motion.circle
               cx={dot.x}
               cy={dot.y}
-              r={isActive ? 5.25 : 4.35}
-              fill={mood.color}
+              r={isActive ? 7 : 5.25}
+              fill={isActive || isPreview ? mood.color : "var(--ring-dot-muted)"}
+              stroke="var(--ring-dot-stroke)"
+              strokeWidth="3.5"
               initial={false}
               animate={{
-                opacity: isActive || isPreview ? 1 : 0.68,
-                scale: isActive ? [1, 1.22, 1] : 1,
+                opacity: isActive || isPreview ? 1 : 0.82,
+                scale: isActive && !reduceMotion ? [1, 1.08, 1] : 1,
               }}
               transition={
                 isActive && !reduceMotion
@@ -122,9 +147,9 @@ const MoodStopMarks: React.FC<MoodStopMarksProps> = React.memo(
                   : labelTransition
               }
               style={{
-                filter: `drop-shadow(0 0 ${isActive ? 12 : 7}px ${hexToRgba(
+                filter: `drop-shadow(0 0 ${isActive ? 16 : 8}px ${hexToRgba(
                   mood.color,
-                  isActive ? 0.82 : 0.32,
+                  isActive ? 0.9 : 0.34,
                 )})`,
                 transformBox: "fill-box",
                 transformOrigin: "center",
@@ -170,14 +195,16 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
   size = "md",
 }) => {
   const reduceMotion = Boolean(useReducedMotion());
+  const svgId = useId().replace(/:/g, "");
+  const faceGradientId = `mood-ring-face-${svgId}`;
+  const innerGradientId = `mood-ring-inner-${svgId}`;
+  const shadowFilterId = `mood-ring-shadow-${svgId}`;
   const activeMoodId = selectedMood ?? DEFAULT_MOOD;
   const activeIndex = Math.max(
     0,
     MOODS.findIndex((mood) => mood.id === activeMoodId),
   );
   const activeMood = MOODS[activeIndex];
-  const activeAngle = angleForIndex(activeIndex);
-  const handRotation = activeAngle + 90;
   const hasSelection = Boolean(selectedMood);
 
   const springTransition: Transition = useMemo(
@@ -255,8 +282,8 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
           className="pointer-events-none absolute inset-[12%] rounded-full"
           animate={{
             boxShadow: hasSelection
-              ? `0 0 58px ${hexToRgba(activeMood.color, 0.3)}`
-              : "0 0 38px var(--surface-violet-icon)",
+              ? `0 0 64px ${hexToRgba(activeMood.color, 0.34)}`
+              : "0 0 42px var(--ring-idle-glow)",
           }}
           transition={springTransition}
         />
@@ -267,44 +294,79 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
           viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
         >
           <defs>
-            <radialGradient id="mood-clock-face" cx="50%" cy="47%" r="62%">
-              <stop offset="0%" stopColor="var(--surface-violet-high)" />
-              <stop offset="58%" stopColor="var(--surface-violet-low)" />
-              <stop offset="100%" stopColor="transparent" />
+            <radialGradient id={faceGradientId} cx="50%" cy="49%" r="57%">
+              <stop
+                offset="0%"
+                stopColor={hexToRgba(activeMood.color, hasSelection ? 0.16 : 0.08)}
+              />
+              <stop offset="42%" stopColor="var(--ring-face-center)" />
+              <stop offset="76%" stopColor="var(--ring-face-mid)" />
+              <stop offset="100%" stopColor="var(--ring-face-edge)" />
             </radialGradient>
-            <filter
-              id="mood-clock-hand-glow"
-              x="-80%"
-              y="-80%"
-              width="260%"
-              height="260%"
-            >
+            <radialGradient id={innerGradientId} cx="50%" cy="48%" r="58%">
+              <stop offset="0%" stopColor="transparent" />
+              <stop
+                offset="52%"
+                stopColor={hexToRgba(activeMood.color, hasSelection ? 0.12 : 0.05)}
+              />
+              <stop offset="100%" stopColor="var(--ring-inner-halo)" />
+            </radialGradient>
+            <filter id={shadowFilterId} x="-35%" y="-35%" width="170%" height="170%">
               <feDropShadow
                 dx="0"
-                dy="0"
-                stdDeviation="7"
-                floodColor={activeMood.color}
-                floodOpacity={hasSelection ? "0.65" : "0.22"}
+                dy="14"
+                stdDeviation="14"
+                floodColor="var(--ring-shadow-color)"
+                floodOpacity="0.22"
               />
             </filter>
           </defs>
 
-          <circle cx={CENTER} cy={CENTER} r={122} fill="url(#mood-clock-face)" />
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={OUTER_RADIUS + 8}
+            fill="var(--ring-outer-shadow)"
+            opacity="0.58"
+            filter={`url(#${shadowFilterId})`}
+          />
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={OUTER_RADIUS + 3}
+            fill="none"
+            stroke="var(--ring-shell-highlight)"
+            strokeWidth="12"
+            opacity="0.9"
+          />
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={OUTER_RADIUS}
+            fill={`url(#${faceGradientId})`}
+          />
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={OUTER_RADIUS}
+            fill="none"
+            stroke="var(--ring-track)"
+            strokeWidth="1.2"
+          />
           <circle
             cx={CENTER}
             cy={CENTER}
             r={TRACK_RADIUS}
             fill="none"
-            stroke="var(--ring-track)"
-            strokeWidth="1.5"
+            stroke="var(--ring-track-inner)"
+            strokeWidth="1"
           />
           <circle
             cx={CENTER}
             cy={CENTER}
-            r={82}
-            fill="none"
-            stroke="var(--ring-track-inner)"
-            strokeWidth="1"
+            r={INNER_GLOW_RADIUS}
+            fill={`url(#${innerGradientId})`}
+            opacity="0.92"
           />
           <ClockTicks />
           <MoodStopMarks
@@ -312,65 +374,31 @@ export const MoodRingPicker: React.FC<MoodRingPickerProps> = ({
             labelTransition={labelTransition}
             reduceMotion={reduceMotion}
           />
-
-          <motion.g
-            style={{
-              transformBox: "view-box",
-              transformOrigin: `${CENTER}px ${CENTER}px`,
-            }}
-            animate={{ rotate: handRotation }}
-            transition={springTransition}
-          >
-            <line
-              x1={CENTER}
-              y1={CENTER + 14}
-              x2={CENTER}
-              y2={CENTER - HAND_LENGTH}
-              stroke={activeMood.color}
-              strokeLinecap="round"
-              strokeWidth={hasSelection ? 4.5 : 3.5}
-              filter="url(#mood-clock-hand-glow)"
-            />
-            <circle
-              cx={CENTER}
-              cy={CENTER - HAND_LENGTH}
-              r={hasSelection ? 7 : 5.5}
-              fill={activeMood.color}
-              opacity={hasSelection ? 0.95 : 0.55}
-            />
-          </motion.g>
-
-          <circle
-            cx={CENTER}
-            cy={CENTER}
-            r={18}
-            fill="var(--ring-center-fill)"
-            stroke={hasSelection ? activeMood.color : "var(--border-violet-medium)"}
-            strokeWidth="2"
-          />
-          <circle
-            cx={CENTER}
-            cy={CENTER}
-            r={5}
-            fill={hasSelection ? activeMood.color : "var(--text-on-surface-softer)"}
-          />
         </svg>
 
         {moodStops}
 
         <motion.div
-          className="pointer-events-none absolute left-1/2 top-1/2 flex w-28 -translate-x-1/2 translate-y-7 flex-col items-center text-center"
-          animate={{
-            color: hasSelection ? activeMood.color : "var(--text-on-surface-soft)",
-          }}
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 grid size-[108px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full"
+          animate={{ opacity: 1 }}
           transition={springTransition}
+          style={{
+            background:
+              "radial-gradient(circle, var(--ring-logo-plate), transparent 66%)",
+          }}
         >
-          <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-kicker)]">
-            {hasSelection ? "Selected" : "Start at"}
-          </span>
-          <span className="mt-1 font-serif text-[22px] font-medium leading-none tracking-[-0.03em]">
-            {activeMood.label}
-          </span>
+          <motion.span
+            className="block h-[84px] w-[84px]"
+            animate={{
+              backgroundColor: hasSelection ? activeMood.color : "var(--ring-logo-fill)",
+            }}
+            transition={springTransition}
+            style={{
+              WebkitMask: "url('/app-logo.svg') center / contain no-repeat",
+              mask: "url('/app-logo.svg') center / contain no-repeat",
+            }}
+          />
         </motion.div>
       </div>
     </div>

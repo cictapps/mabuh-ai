@@ -704,7 +704,7 @@ function ProviderCard({
                   border: "none",
                   color: isFocused
                     ? "var(--primary)"
-                    : "var(--surface-violet-icon-hover)",
+                    : "var(--find-help-icon-muted)",
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
@@ -714,13 +714,13 @@ function ProviderCard({
                 onMouseEnter={(ev) => {
                   if (!isFocused) {
                     ev.currentTarget.style.background = "var(--surface-violet-medium)";
-                    ev.currentTarget.style.color = "var(--surface-violet-icon-hover)";
+                    ev.currentTarget.style.color = "var(--find-help-icon-muted)";
                   }
                 }}
                 onMouseLeave={(ev) => {
                   if (!isFocused) {
                     ev.currentTarget.style.background = "transparent";
-                    ev.currentTarget.style.color = "var(--surface-violet-icon-hover)";
+                    ev.currentTarget.style.color = "var(--find-help-icon-muted)";
                   }
                 }}
               >
@@ -741,7 +741,7 @@ function ProviderCard({
                 borderRadius: 10,
                 background: "transparent",
                 border: "none",
-                color: saved ? "var(--primary)" : "var(--surface-violet-icon-hover)",
+                color: saved ? "var(--primary)" : "var(--find-help-icon-muted)",
                 cursor: "pointer",
                 display: "inline-flex",
                 alignItems: "center",
@@ -752,13 +752,13 @@ function ProviderCard({
               onMouseEnter={(ev) => {
                 if (!saved) {
                   ev.currentTarget.style.background = "var(--surface-violet-medium)";
-                  ev.currentTarget.style.color = "var(--surface-violet-icon-hover)";
+                  ev.currentTarget.style.color = "var(--find-help-icon-muted)";
                 }
               }}
               onMouseLeave={(ev) => {
                 if (!saved) {
                   ev.currentTarget.style.background = "transparent";
-                  ev.currentTarget.style.color = "var(--surface-violet-icon-hover)";
+                  ev.currentTarget.style.color = "var(--find-help-icon-muted)";
                 }
               }}
             >
@@ -859,7 +859,7 @@ function ProviderCard({
                     height: 34,
                     borderRadius: 8,
                     background: "var(--surface-violet-low)",
-                    color: "var(--surface-violet-icon-hover)",
+                    color: "var(--find-help-icon-muted)",
                     border: "1px solid var(--border-violet-soft)",
                     display: "flex",
                     alignItems: "center",
@@ -1462,7 +1462,7 @@ function DetailScreen({
                   <div
                     style={{
                       fontSize: 12,
-                      color: "var(--surface-violet-icon-hover)",
+                      color: "var(--find-help-icon-muted)",
                       marginTop: 3,
                     }}
                   >
@@ -1586,7 +1586,7 @@ function DetailScreen({
                   style={{
                     background:
                       selectedLocIdx === idx ? "var(--surface-violet-high)" : C.surface,
-                    border: `1.5px solid ${selectedLocIdx === idx ? "var(--surface-violet-icon-hover)" : C.border}`,
+                    border: `1.5px solid ${selectedLocIdx === idx ? "var(--find-help-icon-muted)" : C.border}`,
                     borderRadius: 10,
                     padding: "10px 14px",
                     cursor: "pointer",
@@ -1688,7 +1688,7 @@ function DetailScreen({
               height: 40,
               borderRadius: 10,
               background: "var(--surface-violet-medium)",
-              color: "var(--surface-violet-icon-hover)",
+              color: "var(--find-help-icon-muted)",
               border: "1px solid var(--border-violet-soft)",
               cursor: "pointer",
               fontFamily: "inherit",
@@ -1740,7 +1740,7 @@ function DetailScreen({
                   height: 48,
                   borderRadius: 12,
                   background: "var(--surface-violet-medium)",
-                  color: "var(--surface-violet-icon-hover)",
+                  color: "var(--find-help-icon-muted)",
                   border: "1px solid var(--border-violet-medium)",
                   display: "flex",
                   alignItems: "center",
@@ -2157,7 +2157,7 @@ function SavedScreen({
                   {p.verified && (
                     <G.verified size={11} color="var(--find-help-tip-text)" />
                   )}
-                  <ChevronRight size={14} color="var(--surface-violet-icon-hover)" />
+                  <ChevronRight size={14} color="var(--find-help-icon-muted)" />
                 </div>
               </div>
             );
@@ -2423,7 +2423,7 @@ export function GISFeature() {
                 style={{
                   fontSize: 11,
                   lineHeight: 1.2,
-                  color: "var(--surface-violet-icon-hover)",
+                  color: "var(--find-help-icon-muted)",
                   margin: "3px 0 0",
                 }}
               >
@@ -2704,10 +2704,10 @@ export function GISFeature() {
                         fontSize: 11,
                         fontWeight: 600,
                         background: isActive
-                          ? "var(--surface-violet-icon-hover)"
+                          ? "var(--find-help-toggle-active-bg)"
                           : "transparent",
                         color: isActive
-                          ? "var(--find-help-fab-text)"
+                          ? "var(--find-help-toggle-active-text)"
                           : "var(--text-on-surface-strong)",
                         transition: "background 0.15s ease, color 0.15s ease",
                         whiteSpace: "nowrap",
@@ -2887,7 +2887,7 @@ export function GISFeature() {
                   width: 44,
                   height: 4,
                   borderRadius: 999,
-                  background: "var(--surface-violet-icon-hover)",
+                  background: "var(--find-help-toggle-active-bg)",
                 }}
               />
               <div
@@ -2922,7 +2922,7 @@ export function GISFeature() {
                 </span>
                 <span
                   style={{
-                    color: "var(--surface-violet-icon-hover)",
+                    color: "var(--find-help-icon-muted)",
                     fontSize: 11,
                     display: "inline-flex",
                     alignItems: "center",
@@ -3067,7 +3067,7 @@ export function GISFeature() {
                       className="font-serif"
                       style={{
                         fontSize: 14,
-                        color: "var(--surface-violet-icon-hover)",
+                        color: "var(--find-help-icon-muted)",
                         margin: 0,
                         lineHeight: 1.5,
                       }}

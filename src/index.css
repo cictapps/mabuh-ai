@@ -1131,6 +1131,9 @@ input[type="password"]::-ms-clear {
   --find-help-text: var(--text-on-surface);
   --find-help-text-strong: var(--text-on-surface-strong);
   --find-help-text-muted: var(--text-kicker);
+  --find-help-icon-muted: var(--surface-violet-icon-hover);
+  --find-help-toggle-active-bg: var(--surface-violet-icon-hover);
+  --find-help-toggle-active-text: #1f1a2c;
   --find-help-border: var(--border-violet-soft);
   --find-help-border-soft: var(--border-violet-faint);
   --find-help-border-strong: var(--border-violet-medium);
@@ -1199,6 +1202,9 @@ html.dark .find-help-screen {
   --find-help-text: var(--text-on-surface);
   --find-help-text-strong: var(--text-on-surface-strong);
   --find-help-text-muted: var(--text-kicker);
+  --find-help-icon-muted: rgba(188, 194, 255, 0.55);
+  --find-help-toggle-active-bg: rgba(188, 194, 255, 0.18);
+  --find-help-toggle-active-text: #eef1f6;
   --find-help-border: var(--border-violet-soft);
   --find-help-border-soft: var(--border-violet-faint);
   --find-help-border-strong: var(--border-violet-medium);

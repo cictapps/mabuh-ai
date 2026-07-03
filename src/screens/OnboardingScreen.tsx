@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useThemePreference } from "@/hooks/useThemePreference";
 import {
   ArrowRight,
   BookOpen,
@@ -298,6 +299,8 @@ function AiControlsVisual() {
 }
 
 function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
+  const { resolved: resolvedTheme } = useThemePreference();
+  const logoSrc = resolvedTheme === "light" ? "/app-logo-dark.svg" : "/app-logo-light.svg";
   if (kind === "heart") {
     return (
       <div
@@ -342,7 +345,7 @@ function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
           }}
         >
           <img
-            src="/app-logo-light.svg"
+            src={logoSrc}
             alt=""
             aria-hidden
             style={{
@@ -760,6 +763,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const reducedMotion = usePrefersReducedMotion();
+  const { resolved: resolvedTheme } = useThemePreference();
+  const logoSrc = resolvedTheme === "light" ? "/app-logo-dark.svg" : "/app-logo-light.svg";
   const tight = useTightViewport();
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
@@ -900,7 +905,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             aria-hidden
           >
             <img
-              src="/app-logo-light.svg"
+              src={logoSrc}
               alt=""
               width={32}
               height={32}

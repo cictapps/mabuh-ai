@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 
 import { ChatBubble } from "../components/chatbot-components/ChatBubble";
-import { PrivacyPolicy } from "./PrivacyPolicy";
 import { useAuth } from "../lib/auth";
 import { useMoodStore } from "../hooks/useMoodStore";
 import { useJourneyStore } from "../lib/journey/useJourneyStore";
@@ -530,7 +529,10 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
 
   const { profile, user } = useAuth();
   const online = useConnectivity();
-  const hasAcceptedPolicyRef = useRef(false);
+  // The user agreed to the Privacy Policy at the login screen
+  // ("By continuing, you agree to our Terms & Conditions · Privacy Policy").
+  // The chat-specific gate is no longer needed.
+  const hasAcceptedPolicy = true;
   const {
     history: moodHistory,
     journalEntries,
@@ -618,8 +620,6 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
-  const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
   const [showAiConsent, setShowAiConsent] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [activeCrisis, setActiveCrisis] = useState<{
@@ -694,19 +694,6 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
         });
       }
     }
-  }, []);
-
-  useEffect(() => {
-    const accepted = localStorage.getItem("privacy_policy_accepted");
-    const acceptedVersion = localStorage.getItem("privacy_policy_version");
-
-    if (accepted === "true" && acceptedVersion === "2.3.0") {
-      hasAcceptedPolicyRef.current = true;
-      setHasAcceptedPolicy(true);
-      return;
-    }
-
-    setShowPrivacyPolicy(true);
   }, []);
 
   const getInitialMessage = (mask: boolean): Message => ({
@@ -800,7 +787,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       return;
     }
     if (!hasAcceptedPolicy) {
-      setShowPrivacyPolicy(true);
+      setShowAiConsent(true);
       return;
     }
 
@@ -1081,7 +1068,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setShowPrivacyPolicy(true)}
+            onClick={() => navigate("/privacy")}
             aria-label="Privacy and safety"
             className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 ${
               isMaskMode
@@ -1501,26 +1488,6 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
           <div className="h-1 w-28 rounded-full bg-slate-300" />
         </div>
       </footer>
-
-      <PrivacyPolicy
-        isOpen={showPrivacyPolicy}
-        onClose={() => {
-          if (!hasAcceptedPolicyRef.current) {
-            setShowPrivacyPolicy(true);
-            return;
-          }
-          setShowPrivacyPolicy(false);
-        }}
-        onAccept={() => {
-          hasAcceptedPolicyRef.current = true;
-          setHasAcceptedPolicy(true);
-          setShowPrivacyPolicy(false);
-        }}
-        onDecline={() => {
-          setShowPrivacyPolicy(false);
-        }}
-        required={!hasAcceptedPolicy}
-      />
 
       <AiConsentDialog
         open={showAiConsent}

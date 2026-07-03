@@ -844,13 +844,12 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       style={{
         position: "relative",
         minHeight: "100dvh",
-        height: "100dvh",
         width: "100%",
         display: "flex",
         flexDirection: "column",
         background:
           "radial-gradient(circle at 20% 0%, var(--surface-violet-icon), transparent 55%), radial-gradient(circle at 100% 100%, rgba(255,185,84,0.14), transparent 50%), var(--background)",
-        overflow: "hidden",
+        overflowX: "hidden",
         color: "var(--text-on-surface)",
         fontFamily: "var(--font-sans)",
       }}
@@ -969,7 +968,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           minHeight: 0,
           display: "flex",
           flexDirection: "column",
-          justifyContent: tight ? "flex-start" : "center",
+          justifyContent: "flex-start",
           padding: tight ? "4px 20px 0" : "8px 24px 0",
           zIndex: 1,
           ...slideStyle,
@@ -977,9 +976,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       >
         <div
           style={{
-            flex: tight ? "0 1 auto" : "0 1 auto",
+            flex: "1 1 auto",
             minHeight: 0,
-            overflowY: tight ? "auto" : "visible",
+            overflowY: "auto",
             overflowX: "hidden",
             overscrollBehavior: "contain",
             WebkitOverflowScrolling: "touch",
@@ -1118,8 +1117,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           position: "relative",
           zIndex: 2,
           padding: tight
-            ? "8px 16px calc(env(safe-area-inset-bottom, 0px) + 56px)"
-            : "10px 20px calc(env(safe-area-inset-bottom, 0px) + 68px)",
+            ? "8px 16px calc(env(safe-area-inset-bottom, 0px) + 24px)"
+            : "10px 20px calc(env(safe-area-inset-bottom, 0px) + 28px)",
           display: "flex",
           flexDirection: "column",
           gap: tight ? 8 : 14,

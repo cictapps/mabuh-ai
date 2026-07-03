@@ -1039,11 +1039,6 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
     setSavedPersonalization(null);
   }
 
-  // Animate the affirmation entrance + ripple.
-  // (Removed: the saved-with-care celebration now lives in the
-  // AlertDialog at the bottom of this file. The dialog animates in
-  // via Radix's data-state attributes, so no GSAP is required.)
-
   // Compute the personalization line from the *current* form state
   // (called right before the form resets in handleSave so the dialog
   // can show the line that was true at the moment of saving).

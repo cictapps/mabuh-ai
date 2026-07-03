@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { TopBarBackButton } from "./TopBarBackButton";
-import { TopBarSettingsButton } from "./TopBarSettingsButton";
 
 interface LegalShellProps {
   title: string;
@@ -9,7 +8,6 @@ interface LegalShellProps {
   lastUpdated: string;
   version: string;
   children: ReactNode;
-  onOpenSettings?: () => void;
   showAgreementNotice?: boolean;
   agreementHref?: string;
 }
@@ -20,7 +18,6 @@ export function LegalShell({
   lastUpdated,
   version,
   children,
-  onOpenSettings,
   showAgreementNotice = true,
   agreementHref,
 }: LegalShellProps) {
@@ -61,11 +58,7 @@ export function LegalShell({
         >
           {eyebrow}
         </span>
-        {onOpenSettings ? (
-          <TopBarSettingsButton onClick={onOpenSettings} />
-        ) : (
-          <span aria-hidden className="size-10 shrink-0" />
-        )}
+        <span aria-hidden className="size-10 shrink-0" />
       </header>
 
       <section className="relative z-10 mt-2 flex flex-col gap-3 text-left">

@@ -1037,8 +1037,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const navigate = useNavigate();
   const reducedMotion = usePrefersReducedMotion();
   const useIso = useIsoLayoutEffect();
-  const { preference: themePreference, setPreference: setThemePreference } =
-    useThemePreference();
+  const {
+    preference: themePreference,
+    resolved: resolvedTheme,
+    setPreference: setThemePreference,
+  } = useThemePreference();
 
   const [displayName, setDisplayName] = useState(profile?.display_name ?? "");
   const [nameStatus, setNameStatus] = useState<"idle" | "saving" | "saved" | "error">(
@@ -1376,7 +1379,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         title="Daily reminder"
         icon={
           <img
-            src="/app-logo-light.svg"
+            src={resolvedTheme === "light" ? "/app-logo-dark.svg" : "/app-logo-light.svg"}
             alt=""
             aria-hidden="true"
             className="size-4 object-contain"
@@ -1821,38 +1824,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           gap: 14,
         }}
       >
-        <header
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            marginBottom: 4,
-          }}
-        >
-          <span
-            style={{
-              display: "grid",
-              placeItems: "center",
-              width: 32,
-              height: 32,
-              borderRadius: 12,
-              color: "var(--icon-rose)",
-            }}
-          >
-            <LogOut size={16} />
-          </span>
-          <h2
-            className="font-serif"
-            style={{
-              fontSize: 18,
-              color: "var(--text-on-surface)",
-              fontWeight: 500,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            Sign out
-          </h2>
-        </header>
         <p
           style={{
             fontSize: 13,

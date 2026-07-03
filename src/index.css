@@ -1202,9 +1202,12 @@ html.dark .find-help-screen {
   --find-help-text: var(--text-on-surface);
   --find-help-text-strong: var(--text-on-surface-strong);
   --find-help-text-muted: var(--text-kicker);
-  --find-help-icon-muted: rgba(188, 194, 255, 0.55);
-  --find-help-toggle-active-bg: rgba(188, 194, 255, 0.18);
+  --find-help-icon-muted: rgba(188, 194, 255, 0.85);
+  --find-help-toggle-active-bg: rgba(188, 194, 255, 0.22);
   --find-help-toggle-active-text: #eef1f6;
+  --surface-violet-medium: rgba(188, 194, 255, 0.12);
+  --surface-violet-low: rgba(188, 194, 255, 0.08);
+  --surface-violet-icon: rgba(188, 194, 255, 0.14);
   --find-help-border: var(--border-violet-soft);
   --find-help-border-soft: var(--border-violet-faint);
   --find-help-border-strong: var(--border-violet-medium);

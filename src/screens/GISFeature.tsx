@@ -2745,8 +2745,7 @@ export function GISFeature() {
                   height: 40,
                   padding: "0 16px",
                   borderRadius: 999,
-                  background:
-                    "linear-gradient(135deg, var(--surface-violet-icon-hover), var(--surface-fuchsia-medium))",
+                  background: "var(--find-help-fab-bg)",
                   border: "1px solid var(--border-violet-soft)",
                   color: "var(--find-help-fab-text)",
                   fontFamily: "inherit",

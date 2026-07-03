@@ -99,7 +99,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
           overflowY: "auto",
           padding: "22px 22px 20px",
           borderRadius: 28,
-          background: "rgba(27,30,39,0.98)",
+          background: "var(--card)",
           border: "1px solid var(--border-violet-soft)",
           boxShadow: "0 32px 80px -24px rgba(0,0,0,0.7)",
           display: "flex",
@@ -178,8 +178,8 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
           style={{
             padding: "12px 14px",
             borderRadius: 16,
-            background: "rgba(255,185,84,0.08)",
-            border: "1px solid rgba(255,185,84,0.18)",
+            background: "var(--surface-warm-low)",
+            border: "1px solid var(--border-warm)",
             display: "flex",
             gap: 10,
             alignItems: "flex-start",
@@ -195,7 +195,7 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
             style={{
               fontSize: 12,
               lineHeight: 1.55,
-              color: "rgba(255,217,154,0.95)",
+              color: "var(--text-warn)",
               margin: 0,
             }}
           >
@@ -358,9 +358,9 @@ export const AiConsentDialog: React.FC<AiConsentDialogProps> = ({
             style={{
               padding: "10px 16px",
               borderRadius: 12,
-              background: "linear-gradient(135deg, #bcc2ff, #d4bbff)",
+              background: "linear-gradient(135deg, var(--primary), var(--secondary))",
               border: "none",
-              color: "var(--background)",
+              color: "var(--primary-foreground)",
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",

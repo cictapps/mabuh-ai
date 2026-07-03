@@ -236,7 +236,9 @@ function AiControlsVisual() {
             <span
               style={{
                 fontSize: 12,
-                color: enabled ? "rgba(238,241,246,0.94)" : "rgba(238,241,246,0.82)",
+                color: enabled
+                  ? "var(--text-on-surface)"
+                  : "var(--text-on-surface-muted)",
                 fontWeight: 500,
                 flex: 1,
                 transition: reducedMotion ? "none" : "color 0.55s ease",
@@ -1218,7 +1220,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               letterSpacing: "0.01em",
               color: "var(--primary-foreground)",
               background:
-                "linear-gradient(120deg, #bcc2ff 0%, #d4bbff 55%, #ffb954 130%)",
+                "linear-gradient(120deg, var(--primary) 0%, var(--secondary) 55%, var(--tertiary) 130%)",
               boxShadow:
                 "0 22px 50px -22px var(--surface-violet-icon-hover), inset 0 1px 0 rgba(255,255,255,0.25)",
               display: "inline-flex",

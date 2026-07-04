@@ -45,16 +45,16 @@ export function IntroOverlay({ open, onChoose }: IntroOverlayProps) {
 
   return (
     <div
-      className="screen-enter fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 backdrop-blur-md"
+      className="screen-enter fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/55 px-4 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
       aria-labelledby="journey-intro-title"
       style={{
-        paddingTop: "var(--app-top-inset)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        paddingTop: "calc(var(--app-top-inset) + 16px)",
+        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
       }}
     >
-      <div className="relative w-full max-w-md overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.12)] bg-card p-6 shadow-[0_40px_120px_-40px_rgba(8,10,18,0.95)] backdrop-blur-xl">
+      <div className="relative my-auto w-full max-w-md overflow-hidden rounded-[1.75rem] border border-[rgba(188,194,255,0.12)] bg-card p-6 shadow-[0_40px_120px_-40px_rgba(8,10,18,0.95)] backdrop-blur-xl">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.18),transparent_60%)] blur-2xl"

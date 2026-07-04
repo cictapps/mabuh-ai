@@ -32,10 +32,10 @@ fun signingValue(name: String): String? {
 
 android {
     compileSdk = 36
-    namespace = "com.user.mabuhai"
+    namespace = "com.wvsu.cict.mabuhai"
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
-        applicationId = "com.user.mabuhai"
+        applicationId = "com.wvsu.cict.mabuhai"
         minSdk = 24
         targetSdk = 36
         versionCode = tauriProperties.getProperty("tauri.android.versionCode", "1").toInt()

@@ -62,7 +62,7 @@ server**, never in the app.
 5. **Enable Google sign-in (optional)**:
    - **Native (Android):** uses `tauri-plugin-google-auth` (Credential
      Manager). Configure Google Cloud Console: 1. **APIs & Services → Credentials → Create OAuth client ID → Android**
-     with package name `com.user.mabuhai` and the SHA-1 of your release
+     with package name `com.wvsu.cict.mabuhai` and the SHA-1 of your release
      keystore (`keytool -list -v -keystore ~/keystores/cictappskey.keystore
 -alias cictappskey`). Add the debug SHA-1 too if you'll run dev
      builds. 2. **APIs & Services → Credentials → Create OAuth client ID → Web

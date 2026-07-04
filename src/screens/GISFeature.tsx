@@ -702,9 +702,7 @@ function ProviderCard({
                   borderRadius: 10,
                   background: isFocused ? "var(--surface-violet-medium)" : "transparent",
                   border: "none",
-                  color: isFocused
-                    ? "var(--primary)"
-                    : "var(--find-help-icon-muted)",
+                  color: isFocused ? "var(--primary)" : "var(--find-help-icon-muted)",
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
@@ -1055,7 +1053,6 @@ function HotlineCard({ h }: { h: Provider }) {
               width: 32,
               height: 32,
               borderRadius: 8,
-              background: "var(--text-danger-strong)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

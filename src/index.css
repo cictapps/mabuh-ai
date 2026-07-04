@@ -1179,8 +1179,11 @@ input[type="password"]::-ms-clear {
   --find-help-soft-divider: rgba(74, 60, 90, 0.12);
   --find-help-pill-text: #1f1a2c;
   --find-help-fab-text: #1f1a2c;
-  --find-help-fab-bg:
-    linear-gradient(135deg, var(--surface-violet-icon-hover), var(--surface-fuchsia-medium));
+  --find-help-fab-bg: linear-gradient(
+    135deg,
+    var(--surface-violet-icon-hover),
+    var(--surface-fuchsia-medium)
+  );
   --find-help-fab-shadow:
     0 18px 40px -14px rgba(120, 110, 200, 0.55), 0 6px 20px -8px rgba(74, 60, 90, 0.45);
   --find-help-fab-count-bg: rgb(255 252 248 / 78%);
@@ -1253,8 +1256,11 @@ html.dark .find-help-screen {
   --find-help-soft-divider: rgba(216, 212, 235, 0.08);
   --find-help-pill-text: var(--primary);
   --find-help-fab-text: #eef1f6;
-  --find-help-fab-bg:
-    linear-gradient(135deg, rgba(188, 194, 255, 0.85), rgba(212, 187, 255, 0.75));
+  --find-help-fab-bg: linear-gradient(
+    135deg,
+    rgba(188, 194, 255, 0.85),
+    rgba(212, 187, 255, 0.75)
+  );
   --find-help-fab-shadow:
     0 18px 40px -14px rgba(188, 194, 255, 0.4), 0 6px 20px -8px rgba(0, 0, 0, 0.6);
   --find-help-fab-count-bg: rgba(20, 22, 28, 0.55);

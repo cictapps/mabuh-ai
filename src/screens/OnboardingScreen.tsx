@@ -302,7 +302,8 @@ function AiControlsVisual() {
 
 function SlideVisual({ kind }: { kind: SlideVisual["kind"] }) {
   const { resolved: resolvedTheme } = useThemePreference();
-  const logoSrc = resolvedTheme === "light" ? "/app-logo-dark.svg" : "/app-logo-light.svg";
+  const logoSrc =
+    resolvedTheme === "light" ? "/app-logo-dark.svg" : "/app-logo-light.svg";
   if (kind === "heart") {
     return (
       <div
@@ -766,7 +767,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
   const [direction, setDirection] = useState<1 | -1>(1);
   const reducedMotion = usePrefersReducedMotion();
   const { resolved: resolvedTheme } = useThemePreference();
-  const logoSrc = resolvedTheme === "light" ? "/app-logo-dark.svg" : "/app-logo-light.svg";
+  const logoSrc =
+    resolvedTheme === "light" ? "/app-logo-dark.svg" : "/app-logo-light.svg";
   const tight = useTightViewport();
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);

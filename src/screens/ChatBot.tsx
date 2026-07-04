@@ -10,7 +10,6 @@ import {
   Sparkles,
   Ghost,
   MessageCircle,
-  Shield,
   X,
   Wrench,
   RefreshCw,
@@ -637,6 +636,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     | { state: "ok"; status: number; durationMs: number; body: string }
     | { state: "fail"; status: number; durationMs: number; body: string }
   >({ state: "idle" });
+  const [showSlowHint, setShowSlowHint] = useState(false);
 
   const runDevTest = useCallback(async () => {
     setDevTest({ state: "running" });
@@ -769,6 +769,18 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
   }, [inputText]);
 
   useEffect(() => {
+    if (!isLoading) {
+      setShowSlowHint(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setShowSlowHint(true), 6_000);
+    return () => window.clearTimeout(timer);
+  }, [isLoading]);
+
+  const canSend =
+    hasAcceptedPolicy && online && !isLoading && inputText.trim().length > 0;
+
+  useEffect(() => {
     if (!devPanelOpen) return;
     const onDocClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
@@ -779,16 +791,19 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [devPanelOpen]);
 
-  const sendMessage = async (text: string, intent: string = "general") => {
-    if (!text.trim() || isLoading) return;
+  const sendMessage = async (
+    text: string,
+    intent: string = "general",
+  ): Promise<boolean> => {
+    if (!text.trim() || isLoading) return false;
     if (!online) {
       setRefreshNotice("Chat needs an internet connection.");
       window.setTimeout(() => setRefreshNotice(null), 2400);
-      return;
+      return false;
     }
     if (!hasAcceptedPolicy) {
       setShowAiConsent(true);
-      return;
+      return false;
     }
 
     const offTopicCategory = detectOffTopicMessage(text);
@@ -818,7 +833,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
           status: "done",
         },
       ]);
-      return;
+      return true;
     }
 
     if (
@@ -827,6 +842,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       hasAnyConsentEnabled(consentToggles) === false
     ) {
       setShowAiConsent(true);
+      return false;
     }
 
     const aiMessageId = (Date.now() + 1).toString();
@@ -892,7 +908,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       }
       if (requiresLogin) {
         navigate("/login", { replace: true });
-        return;
+        return false;
       }
       const friendly = buildFriendlyError(kind, error as Error);
       setMessages((prev) =>
@@ -912,17 +928,23 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
     } finally {
       setIsLoading(false);
     }
+
+    return true;
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
+    const draft = inputText;
+    if (!draft.trim()) return;
     isNearBottomRef.current = true;
-    sendMessage(inputText, "general");
-    setInputText("");
-    setEmojiPickerOpen(false);
+    const ok = await sendMessage(draft, "general");
+    if (ok) {
+      setInputText("");
+      setEmojiPickerOpen(false);
+    }
   };
 
   const sendWithIntent = (text: string, intent: string) => {
-    sendMessage(text, intent);
+    void sendMessage(text, intent);
   };
 
   const handleBack = () => {
@@ -1045,40 +1067,26 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
         <div className="flex min-w-0 items-center gap-2">
           <button
             onClick={handleBack}
-            className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+            className={`shrink-0 rounded-full p-1.5 transition-colors ${
+              isMaskMode
+                ? "text-white/70 hover:bg-white/10 hover:text-white"
+                : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+            }`}
             aria-label="Back"
             type="button"
           >
             <ChevronLeft size={22} />
           </button>
-          <div className="min-w-0">
-            <h1 className="truncate text-base font-semibold tracking-tight leading-none text-foreground">
-              Chat
-            </h1>
-            <p
-              className={`mt-0.5 text-[11px] leading-none transition-colors ${
-                isMaskMode ? "text-white/50" : "text-muted-foreground"
-              }`}
-            >
-              {isMaskMode ? "Anonymous session" : "Companion chat"}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => navigate("/privacy")}
-            aria-label="Privacy and safety"
-            className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 ${
-              isMaskMode
-                ? "border-white/15 bg-white/5 text-white hover:bg-white/10"
-                : "border-border bg-surface-low text-foreground hover:border-primary/40 hover:text-primary"
+          <h1
+            className={`min-w-0 truncate text-base font-semibold tracking-tight leading-none ${
+              isMaskMode ? "text-white" : "text-foreground"
             }`}
           >
-            <Shield size={15} />
-          </button>
+            {isMaskMode ? "Anonymous" : "Mabuh-ai"}
+          </h1>
+        </div>
 
+        <div className="flex items-center gap-1.5">
           {IS_DEV && (
             <>
               <button
@@ -1188,36 +1196,20 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
             type="button"
             onClick={handleMaskToggle}
             aria-pressed={isMaskMode}
-            aria-label="Toggle mask mode"
-            className={`group inline-flex shrink-0 items-center gap-2 rounded-full border px-2 py-1.5 transition-all duration-300 sm:px-2.5 ${
+            aria-label="Toggle anonymous mode"
+            title={
+              isMaskMode
+                ? "Anonymous mode is on — chats stay only in this session"
+                : "Turn on anonymous mode"
+            }
+            className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold tracking-wide transition-all duration-300 ${
               isMaskMode
                 ? "border-white/15 bg-white/5 text-white"
                 : "border-border bg-surface-low text-foreground hover:border-primary/40"
             }`}
           >
-            <span
-              className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
-                isMaskMode ? "bg-white/10 text-white" : "bg-primary/10 text-primary"
-              }`}
-            >
-              {isMaskMode ? <Ghost size={14} /> : <Smile size={14} />}
-            </span>
-            <span className="hidden pr-1 text-xs font-semibold tracking-wide sm:inline">
-              {isMaskMode ? "Mask on" : "Mask off"}
-            </span>
-            <span
-              className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
-                isMaskMode ? "bg-white/40" : "bg-muted-foreground/30"
-              }`}
-            >
-              <motion.span
-                animate={{ x: isMaskMode ? 12 : 2 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className={`h-3 w-3 rounded-full shadow ${
-                  isMaskMode ? "bg-white" : "bg-foreground"
-                }`}
-              />
-            </span>
+            {isMaskMode ? <Ghost size={14} /> : <Smile size={14} />}
+            <span>{isMaskMode ? "Anonymous" : "Anonymous"}</span>
           </button>
         </div>
       </header>
@@ -1231,7 +1223,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
         onTouchCancel={handleTouchEnd}
         className={`relative flex min-h-0 flex-1 touch-pan-y flex-col gap-6 overflow-y-auto overscroll-y-contain p-4 transition-all duration-500 sm:p-6 ${
           isMaskMode
-            ? "bg-transparent"
+            ? "bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.04),transparent_60%),linear-gradient(to_bottom,#0b0f14,#050709)]"
             : "bg-gradient-to-b from-primary/5 via-transparent to-tertiary/10"
         }`}
       >
@@ -1243,7 +1235,13 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
             opacity: isRefreshing || refreshNotice ? 1 : Math.min(1, pullDistance / 40),
           }}
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/90 px-3 py-1.5 text-[11px] font-semibold text-[color:var(--text-on-surface-muted)] shadow-lg backdrop-blur-xl">
+          <div
+            className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-semibold shadow-lg backdrop-blur-xl ${
+              isMaskMode
+                ? "border border-white/10 bg-white/5 text-white/70"
+                : "border border-border bg-card/90 text-[color:var(--text-on-surface-muted)]"
+            }`}
+          >
             {isMaskMode ? (
               <LockKeyhole size={13} />
             ) : (
@@ -1267,7 +1265,13 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
         </div>
 
         <div className="flex justify-center">
-          <span className="rounded-full border border-border bg-card/70 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <span
+            className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${
+              isMaskMode
+                ? "border-white/10 bg-white/5 text-white/70"
+                : "border-border bg-card/70 text-muted-foreground"
+            }`}
+          >
             Today
           </span>
         </div>
@@ -1324,7 +1328,11 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
                   transition={{ delay: 0.4 }}
                   className="ml-0 flex flex-col gap-3 sm:ml-14"
                 >
-                  <p className="ml-1 text-left text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <p
+                    className={`ml-1 text-left text-[10px] font-bold uppercase tracking-wider ${
+                      isMaskMode ? "text-white/70" : "text-muted-foreground"
+                    }`}
+                  >
                     {isMaskMode ? "Safe Actions" : "Nurturing Steps"}
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -1355,29 +1363,35 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
                     ) : (
                       <>
                         <button
-                          onClick={() => sendWithIntent("I need to vent", "vent")}
+                          onClick={() => sendWithIntent("I feel overwhelmed", "support")}
                           className="flex items-center gap-2 rounded-full border border-secondary/20 bg-surface-high px-4 py-2 text-xs font-semibold text-secondary shadow-sm transition-all hover:bg-secondary hover:text-secondary-foreground"
+                          type="button"
+                        >
+                          <Heart size={16} /> I feel overwhelmed
+                        </button>
+                        <button
+                          onClick={() => sendWithIntent("I need to vent", "vent")}
+                          className="flex items-center gap-2 rounded-full border border-border bg-surface-high px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition-all hover:bg-accent"
                           type="button"
                         >
                           <Wind size={16} /> I need to vent
                         </button>
                         <button
-                          onClick={() =>
-                            sendWithIntent("Give me a daily affirmation", "affirmation")
-                          }
-                          className="flex items-center gap-2 rounded-full border border-border bg-surface-high px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition-all hover:bg-accent"
-                          type="button"
-                        >
-                          <Heart size={16} className="text-tertiary" /> Daily Affirmation
-                        </button>
-                        <button
-                          onClick={() =>
-                            sendWithIntent("Give me self-care tips", "self-care")
-                          }
+                          onClick={() => sendWithIntent("Help me calm down", "calm")}
                           className="flex items-center gap-2 rounded-full border border-primary/20 bg-surface-high px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition-all hover:bg-primary/10"
                           type="button"
                         >
-                          <Sparkles size={16} className="text-primary" /> Self-care tips
+                          <Sparkles size={16} className="text-primary" /> Help me calm
+                          down
+                        </button>
+                        <button
+                          onClick={() =>
+                            sendWithIntent("Encourage me today", "affirmation")
+                          }
+                          className="flex items-center gap-2 rounded-full border border-tertiary/25 bg-surface-high px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition-all hover:bg-tertiary/15"
+                          type="button"
+                        >
+                          <Heart size={16} className="text-tertiary" /> Encourage me
                         </button>
                       </>
                     )}
@@ -1390,14 +1404,29 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
       </main>
 
       <footer
-        className={`relative z-20 shrink-0 border-t border-border px-3 pt-3 transition-all duration-500 sm:px-6 ${
-          isMaskMode ? "bg-black/55 backdrop-blur-2xl" : "bg-card/70 backdrop-blur-2xl"
+        className={`relative z-20 shrink-0 border-t backdrop-blur-xl transition-all duration-500 ${
+          isMaskMode ? "border-white/10 bg-black/80" : "border-border/60 bg-background/85"
         }`}
         style={{
-          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        <div className="relative mx-auto flex max-w-4xl items-end gap-2">
+        <div
+          aria-live="polite"
+          className={`mx-auto flex h-4 max-w-4xl items-center justify-center text-[11px] font-medium leading-none tracking-wide ${
+            isMaskMode ? "text-white/55" : "text-[color:var(--text-on-surface-softest)]"
+          }`}
+        >
+          {showSlowHint
+            ? "Mabuh-ai is still thinking — give it a moment"
+            : isLoading
+              ? "Mabuh-ai is thinking…"
+              : !online
+                ? "You're offline. Reconnect to send."
+                : ""}
+        </div>
+
+        <div className="relative mx-auto flex max-w-4xl items-end gap-2 px-3 pb-2 pt-1 sm:px-6">
           <AnimatePresence>
             {emojiPickerOpen && hasAcceptedPolicy && (
               <EmojiPicker
@@ -1408,28 +1437,22 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
           </AnimatePresence>
 
           <div
-            className={`relative flex flex-1 items-end overflow-hidden rounded-[1.75rem] border border-border bg-card px-2 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-xl transition-all focus-within:border-primary/50 focus-within:shadow-[var(--shadow-glow-active)] ${
-              !hasAcceptedPolicy ? "opacity-60" : ""
-            }`}
+            className={`relative flex flex-1 items-end overflow-hidden rounded-[1.5rem] border px-2 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-xl transition-all focus-within:border-primary/50 focus-within:shadow-[var(--shadow-glow-active)] ${
+              isMaskMode ? "border-white/15 bg-white/5" : "border-border bg-card"
+            } ${!hasAcceptedPolicy ? "opacity-60" : ""}`}
           >
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,185,84,0.12),transparent_60%)] blur-2xl"
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[radial-gradient(circle_at_center,rgba(188,194,255,0.14),transparent_60%)] blur-2xl"
-            />
             <button
               type="button"
               onClick={handleToggleEmojiPicker}
               aria-label={emojiPickerOpen ? "Close emoji picker" : "Open emoji picker"}
               aria-expanded={emojiPickerOpen}
               disabled={!hasAcceptedPolicy}
-              className={`relative shrink-0 rounded-2xl p-2 transition-colors ${
+              className={`relative shrink-0 self-end rounded-2xl p-2 transition-colors ${
                 emojiPickerOpen
                   ? "bg-primary/15 text-primary"
-                  : "text-muted-foreground active:bg-white/5"
+                  : isMaskMode
+                    ? "text-white/60 active:bg-white/10"
+                    : "text-muted-foreground active:bg-white/5"
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               <Smile size={20} />
@@ -1441,19 +1464,28 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  handleSendMessage();
+                  void handleSendMessage();
                 }
                 if (e.key === "Escape" && emojiPickerOpen) {
                   setEmojiPickerOpen(false);
                 }
               }}
               onFocus={(e) => {
-                e.currentTarget.setSelectionRange(
-                  e.currentTarget.value.length,
-                  e.currentTarget.value.length,
-                );
+                if (
+                  e.currentTarget.selectionStart === 0 &&
+                  e.currentTarget.selectionEnd === 0
+                ) {
+                  e.currentTarget.setSelectionRange(
+                    e.currentTarget.value.length,
+                    e.currentTarget.value.length,
+                  );
+                }
               }}
-              className="relative max-h-32 min-h-10 flex-1 resize-none border-0 bg-transparent px-2 py-2.5 text-[15px] leading-snug text-foreground placeholder:text-[color:var(--text-on-surface-softest)] outline-none focus:outline-none focus:ring-0 focus-visible:outline-none disabled:cursor-not-allowed"
+              className={`relative max-h-32 min-h-[40px] flex-1 resize-none border-0 bg-transparent px-2.5 py-2 text-[15px] leading-snug outline-none focus:outline-none focus:ring-0 focus-visible:outline-none disabled:cursor-not-allowed ${
+                isMaskMode
+                  ? "text-white placeholder:text-white/40"
+                  : "text-foreground placeholder:text-[color:var(--text-on-surface-softest)]"
+              }`}
               placeholder={
                 hasAcceptedPolicy
                   ? online
@@ -1462,7 +1494,7 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
                   : "Read the privacy notice to start chatting"
               }
               rows={1}
-              disabled={isLoading || !hasAcceptedPolicy || !online}
+              disabled={!hasAcceptedPolicy}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="sentences"
@@ -1472,20 +1504,22 @@ export function ChatbotShell({ embedded = false, onBack }: ChatbotShellProps) {
           </div>
 
           <motion.button
-            whileHover={hasAcceptedPolicy ? { scale: 1.05 } : undefined}
-            whileTap={hasAcceptedPolicy ? { scale: 0.92 } : undefined}
-            onClick={handleSendMessage}
-            disabled={!inputText.trim() || isLoading || !hasAcceptedPolicy || !online}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[var(--shadow-glow-active)] transition-all disabled:cursor-not-allowed disabled:opacity-40 disabled:grayscale"
+            whileHover={hasAcceptedPolicy && canSend ? { scale: 1.05 } : undefined}
+            whileTap={hasAcceptedPolicy && canSend ? { scale: 0.92 } : undefined}
+            onClick={() => void handleSendMessage()}
+            disabled={!canSend}
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all disabled:cursor-not-allowed ${
+              canSend
+                ? "bg-gradient-to-r from-primary via-secondary to-primary text-primary-foreground shadow-[var(--shadow-glow-active)]"
+                : isMaskMode
+                  ? "border border-white/10 bg-white/5 text-white/30"
+                  : "border border-border bg-card text-muted-foreground/50"
+            }`}
             type="button"
             aria-label="Send message"
           >
             <Send size={18} />
           </motion.button>
-        </div>
-
-        <div className="mt-3 flex justify-center opacity-15">
-          <div className="h-1 w-28 rounded-full bg-slate-300" />
         </div>
       </footer>
 
